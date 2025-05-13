@@ -1,0 +1,103 @@
+name: rooster_app
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.0
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+  cupertino_icons: ^1.0.8
+#  html: ^0.15.5
+  responsive_builder: ^0.7.1
+  device_preview: ^1.2.0
+  dio: ^5.8.0+1
+  get: ^4.7.2
+#  cupertino_icons: ^1.0.2
+  dotted_border: ^2.1.0
+  flutter_svg: ^2.0.17
+#  image_picker_web: ^3.1.1
+  mime_type: ^1.0.0
+  country_currency_pickers: ^3.0.0
+  timeline_tile: ^2.0.0
+  shared_preferences: ^2.5.2
+  http:
+  number_to_words_english: ^2.0.2
+  time_machine: ^0.9.17
+  csc_picker: ^0.2.7
+  #  syncfusion_flutter_datagrid:
+  decimal: ^2.3.3
+  multiselect: ^0.1.1
+  country_picker:
+  url_launcher: ^6.3.1
+  flutter_fancy_tree_view:
+  printing: ^5.14.2
+  pdf: ^3.11.3
+  syncfusion_flutter_datagrid: ^27.2.5
+  syncfusion_flutter_xlsio: ^27.2.5
+  syncfusion_flutter_datagrid_export: ^27.2.5
+  excel: ^4.0.6 # For reading Excel files
+  web: ^1.1.0
+  file_picker: ^9.0.0
+  #  cached_network_image:
+  dropdown_search: ^6.0.1
+#  html: ^0.15.5
+  image_picker_web: ^4.0.0
+  file_saver: ^0.2.8
+  image_picker: ^1.1.2
+  path_provider: ^2.1.5
+  open_file: ^3.5.10
+  permission_handler:
+  google_fonts: ^6.2.1
+  google_ml_kit: ^0.19.0
+  camera: ^0.11.1
+  mobile_scanner: ^6.0.7
+
+#  flutter_barcode_scanner: ^2.0.0
+#  share_plus: ^10.1.4
+#  js: ^0.6.7
+#  js_interop: ^0.0.1
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+
+
+
+#flutter_launcher_icons:
+#  android: true
+#  ios: true
+#  image_path: "assets/appIcon/app_icon.png"
+##  adaptive_icon_foreground: "assets/adaptive_foreground.png" # Optional for Android adaptive icons
+#  adaptive_icon_background: "#FFFFFF" # Optional for Android adaptive icons (008080 for teal)
+#  web: true
+#  windows: true
+#  macos: true
+
+
+
+flutter:
+
+
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/appIcon/
+    - assets/fonts/
