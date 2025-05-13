@@ -870,10 +870,10 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                               itemsInfoPrint.add(quotationItemInfo);
                             }    else if ('${item['line_type_id']}' == '3') {
                               var qty = item['item_quantity'];
-                              var map =
-                              cont
-                                  .combosMap[item['combo_id']
-                                  .toString()];
+                              // var map =
+                              // cont
+                              //     .combosMap[item['combo_id']
+                              //     .toString()];
                               var ind=cont
                                   .combosIdsList.indexOf(item['combo_id']
                                   .toString());
@@ -5387,7 +5387,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
     '${widget.info['combo_price'] ?? ''}';
 
     selectedComboId = widget.info['combo_id'].toString();
-    var ind=quotationController.combosIdsList.indexOf(selectedComboId);
+    // var ind=quotationController.combosIdsList.indexOf(selectedComboId);
 
     // if (quotationController.combosPricesCurrencies[selectedComboId] ==
     //     quotationController.selectedCurrencyName) {

@@ -200,10 +200,10 @@ class _QuotationDataState extends State<QuotationData> {
                                 itemsInfoPrint.add(quotationItemInfo);
                               } else if ('${item['line_type_id']}' == '3') {
                                 var qty = item['item_quantity'];
-                                var map =
-                                quotationController
-                                    .combosMap[item['combo_id']
-                                    .toString()];
+                                // var map =
+                                // quotationController
+                                //     .combosMap[item['combo_id']
+                                //     .toString()];
                                 var ind=quotationController
                                     .combosIdsList.indexOf(item['combo_id']
                                     .toString());

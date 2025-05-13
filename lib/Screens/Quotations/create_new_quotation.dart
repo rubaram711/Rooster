@@ -307,10 +307,10 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         }
                                         else if ('${item['line_type_id']}' == '3') {
                                           var qty = item['item_quantity'];
-                                          var map =
-                                              quotationCont
-                                                  .combosMap[item['combo']
-                                                  .toString()];
+                                          // var map =
+                                          //     quotationCont
+                                          //         .combosMap[item['combo']
+                                          //         .toString()];
                                           var ind=quotationCont
                                               .combosIdsList.indexOf(item['combo']
                                               .toString());
@@ -641,10 +641,10 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                           }
                                           else if ('${item['line_type_id']}' == '3') {
                                             var qty = item['item_quantity'];
-                                            var map =
-                                            quotationCont
-                                                .combosMap[item['combo']
-                                                .toString()];
+                                            // var map =
+                                            // quotationCont
+                                            //     .combosMap[item['combo']
+                                            //     .toString()];
                                             var ind=quotationCont
                                                 .combosIdsList.indexOf(item['combo']
                                                 .toString());
