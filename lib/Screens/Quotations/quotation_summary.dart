@@ -5378,6 +5378,8 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
           (item) => item["currency"] == quotationController.selectedCurrencyName,
       orElse: () => null,
     );
+
+
     quotationController.exchangeRateForSelectedCurrency =
     result != null ? '${result["exchange_rate"]}' : '1';
 
