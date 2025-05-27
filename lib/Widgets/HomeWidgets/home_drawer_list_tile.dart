@@ -147,8 +147,36 @@ const List<Entry> data = <Entry>[
         ],
       ),
       Entry(
-        'docs_review',
+        'delivery',
         "",
+        <Entry>[
+          Entry(
+            'new_delivery',
+            "",
+          ),
+          Entry(
+            'deliveries_summary',
+            "",
+          ),
+        ]
+      ),
+      Entry(
+        'pending_docs',
+        "",
+        <Entry>[
+          Entry(
+            'to_sales_order',
+            "",
+          ),
+          Entry(
+            'to_invoice',
+            "",
+          ),
+          Entry(
+            'to_deliver',
+            "",
+          ),
+        ]
       ),
     ],
   ),
@@ -381,6 +409,10 @@ const List<Entry> data = <Entry>[
       ),
       Entry(
         'daily_qty_report',
+        "",
+      ),
+      Entry(
+        'cash_tray_report',
         "",
       ),
     ],

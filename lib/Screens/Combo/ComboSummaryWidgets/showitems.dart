@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/combo_controller.dart';
-import 'package:rooster_app/Screens/Combo/ComboSummaryWidgets/ItemsOptions/update_item.dart';
-import 'package:rooster_app/Screens/Transfers/Replenish/replenishment.dart';
-import 'package:rooster_app/Widgets/custom_snak_bar.dart';
+
 import 'package:rooster_app/Widgets/dialog_title.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
 import 'package:rooster_app/Widgets/table_title.dart';
@@ -79,29 +77,25 @@ class ShowItemsComboDialog extends StatelessWidget {
 
                       TableTitle(
                         isCentered: false,
-                        text: 'currency'.tr,
+                        text: 'discount'.tr,
                         width: MediaQuery.of(context).size.width * 0.07,
                       ),
-                      TableTitle(
-                        isCentered: false,
-                        text: 'more_options'.tr,
-                        width: MediaQuery.of(context).size.width * 0.07,
-                      ),
+
                       SizedBox(width: MediaQuery.of(context).size.width * 0.03),
                     ],
                   ),
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: info['items'].length, // data from back
+                    itemCount: info['comboItems'].length, // data from back
                     itemBuilder: (context, i) {
                       return ShowitemquantityAsRow(
                         isDesktop: true,
-                        itemName: info['items'][i]['item_name'],
-                        itemDescription: info['items'][i]['mainDescription'],
-                        itemquantity: '${info['items'][i]['quantity']}',
-                        itemPrice: '${info['items'][i]['unitPrice']}',
-                        itemCurrency: '${info['items'][i]['currency']['name']}',
+                        itemName: info['comboItems'][i]['item_name'],
+                        itemDescription: info['comboItems'][i]['description'],
+                        itemquantity: '${info['comboItems'][i]['quantity']}',
+                        itemPrice: '${info['comboItems'][i]['unit_price']}',
+                        itemCurrency: '${info['comboItems'][i]['discount']}',
                       );
                     },
                   ),
@@ -169,49 +163,49 @@ class ShowitemquantityAsRow extends StatelessWidget {
             width: isDesktop ? MediaQuery.of(context).size.width * 0.07 : 100,
           ),
           //****reusablo more *******************/
-          GetBuilder<ComboController>(
-            builder: (cont) {
-              return SizedBox(
-                width:
-                    isDesktop ? MediaQuery.of(context).size.width * 0.07 : 70,
-                child: ReusableMore(
-                  itemsList: [
-                    PopupMenuItem<String>(
-                      value: '1',
-                      onTap: () {
-                        //UpdateItem(quantity: itemquantity);
-                        showDialog<String>(
-                          context: context,
-                          builder:
-                              (BuildContext context) => AlertDialog(
-                                backgroundColor: Colors.white,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                                elevation: 0,
-                                content: UpdateItem(quantity: itemquantity),
-                              ),
-                        );
-                      },
-                      child: Text('updat_quantity'.tr),
-                    ),
-                    PopupMenuItem<String>(
-                      value: '2',
-                      onTap: () {
-                        CommonWidgets.snackBar(
-                          'Success',
-                          'Deleted Successfully',
-                        );
-                      },
-                      child: Text('delete'.tr),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+          // GetBuilder<ComboController>(
+          //   builder: (cont) {
+          //     return SizedBox(
+          //       width:
+          //           isDesktop ? MediaQuery.of(context).size.width * 0.07 : 70,
+          //       child: ReusableMore(
+          //         itemsList: [
+          //           PopupMenuItem<String>(
+          //             value: '1',
+          //             onTap: () {
+          //               //UpdateItem(quantity: itemquantity);
+          //               showDialog<String>(
+          //                 context: context,
+          //                 builder:
+          //                     (BuildContext context) => AlertDialog(
+          //                       backgroundColor: Colors.white,
+          //                       shape: const RoundedRectangleBorder(
+          //                         borderRadius: BorderRadius.all(
+          //                           Radius.circular(9),
+          //                         ),
+          //                       ),
+          //                       elevation: 0,
+          //                       content: UpdateItem(quantity: itemquantity),
+          //                     ),
+          //               );
+          //             },
+          //             child: Text('updat_quantity'.tr),
+          //           ),
+          //           PopupMenuItem<String>(
+          //             value: '2',
+          //             onTap: () {
+          //               CommonWidgets.snackBar(
+          //                 'Success',
+          //                 'Deleted Successfully',
+          //               );
+          //             },
+          //             child: Text('delete'.tr),
+          //           ),
+          //         ],
+          //       ),
+          //     );
+          //   },
+          // ),
 
           //***************** */
           SizedBox(width: MediaQuery.of(context).size.width * 0.03),

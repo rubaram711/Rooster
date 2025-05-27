@@ -1,12 +1,11 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Backend/ComboBackend/delete_combo.dart';
 import 'package:rooster_app/Backend/ComboBackend/get_combo_create_info.dart';
 import 'package:rooster_app/Backend/ComboBackend/get_combos.dart';
-import 'package:rooster_app/Models/Combo/creat_combo_model.dart';
+// import 'package:rooster_app/Models/Combo/creat_combo_model.dart';
 import 'package:rooster_app/Widgets/custom_snak_bar.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/Backend/ComboBackend/store_combo.dart';
@@ -52,11 +51,6 @@ abstract class ComboControllerAbstract extends GetxController {
   setSelectedCombo(Map map);
   setSelectedCombo2(Map map);
   setIsSubmitAndPreviewClicked(bool val);
-  Uint8List logoBytes = Uint8List(0);
-  setLogo(Uint8List val) {
-    logoBytes = val;
-    update();
-  }
 }
 
 class ComboController extends ComboControllerAbstract {
@@ -64,6 +58,7 @@ class ComboController extends ComboControllerAbstract {
   Map newRowMap = {};
 
   Map rowsInListViewInCombo = {};
+
   double listViewLengthInCombo = Sizes.deviceHeight * 0.08;
   double increment = Sizes.deviceHeight * 0.08;
 
@@ -152,7 +147,7 @@ class ComboController extends ComboControllerAbstract {
     update();
   }
 
-  late List<CreatComboModel> comboCreateInfo;
+  // late List<CreatComboModel> comboCreateInfo;
   String? code = '';
   late List items;
   List<String> itemsName = [];
@@ -187,25 +182,25 @@ class ComboController extends ComboControllerAbstract {
 
   @override
   setEnteredUnitPriceInCombo(int index, String val) {
-    rowsInListViewInCombo[index]['price'] = val;
+    rowsInListViewInCombo[index]['unit_price'] = val;
     update();
   }
 
   @override
   setItemIdInListViewLengthInCombo(int index, String val) {
-    rowsInListViewInCombo[index]['itemId'] = val;
+    rowsInListViewInCombo[index]['item_id'] = val;
     update();
   }
 
   @override
   setItemNameInListViewLengthInCombo(int index, String val) {
-    rowsInListViewInCombo[index]['itemName'] = val;
+    rowsInListViewInCombo[index]['item_name'] = val;
     update();
   }
 
   @override
   setItemDescriptionInListViewLengthInCombo(int index, String? val) {
-    rowsInListViewInCombo[index]['itemDescription'] = val;
+    rowsInListViewInCombo[index]['description'] = val;
     update();
   }
 
@@ -292,13 +287,6 @@ class ComboController extends ComboControllerAbstract {
   @override
   setIsSubmitAndPreviewClicked(bool val) {
     isSubmitAndPreviewClicked = val;
-    update();
-  }
-
-  Uint8List logoBytes = Uint8List(0);
-  @override
-  setLogo(Uint8List val) {
-    logoBytes = val;
     update();
   }
 

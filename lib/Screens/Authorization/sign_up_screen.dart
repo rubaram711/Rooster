@@ -364,9 +364,7 @@ class _SignFormState extends State<SignForm> {
                   if (_formKey.currentState!.validate()) {
                     var res = await login(email, password);
                     if (res['success'] == true) {
-                      if (res['data']['user']['roles'][0] == 'super-admin') {
-                        CommonWidgets.snackBar('error', 'error'.tr);
-                      } else {
+                      {
                         await saveUserInfoLocally(
                           res['data']['accessToken'],
                           '${res['data']['user']['id']}',
@@ -375,9 +373,10 @@ class _SignFormState extends State<SignForm> {
                           '${res['data']['user']['company']['id']}',
                           '${res['data']['user']['company']['name']}',
                         );
-                        // print('object ${res['data']['companySettings']}');
+                        print('objeXXct ${res['data']['companySettings']}');
                         if (res['data']['companySettings'].isNotEmpty) {
-                          // print('object');print(res['data']['companySettings']);
+                          print('object');
+                          print(res['data']['companySettings']);
                           await saveCompanySettingsLocally(
                             '${res['data']['companySettings']['costCalculationType'] ?? ''}',
                             '${res['data']['companySettings']['showQuantitiesOnPos'] ?? ''}',
@@ -386,23 +385,33 @@ class _SignFormState extends State<SignForm> {
                                 '',
                             res['data']['companySettings']['email'] ?? '',
                             res['data']['companySettings']['vat'] ?? '0',
-                            res['data']['companySettings']['mobileNumber'] ?? '',
+                            res['data']['companySettings']['mobileNumber'] ??
+                                '',
                             res['data']['companySettings']['phoneNumber'] ?? '',
                             res['data']['companySettings']['trn'] ?? '',
                             res['data']['companySettings']['bankInfo'] ?? '',
                             res['data']['companySettings']['address'] ?? '',
                             res['data']['companySettings']['phoneCode'] ?? '',
                             res['data']['companySettings']['mobileCode'] ?? '',
-                            res['data']['companySettings']['localPayments'] ?? '',
+                            res['data']['companySettings']['localPayments'] ??
+                                '',
                             res['data']['companySettings']['primaryCurrency']['name'] ??
                                 'USD',
                             '${res['data']['companySettings']['primaryCurrency']['id'] ?? ''}',
                             '${res['data']['companySettings']['primaryCurrency']['symbol'] ?? ''}',
                             '${res['data']['companySettings']['companySubjectToVat'] ?? '1'}',
-                            res['data']['companySettings']['posCurrency']['name'] ??
-                                'USD',
-                            '${res['data']['companySettings']['posCurrency']['id'] ?? ''}',
-                            '${res['data']['companySettings']['posCurrency']['symbol'] ?? ''}',
+                            res['data']['companySettings']['posCurrency'] ==
+                                    null
+                                ? ''
+                                : res['data']['companySettings']['posCurrency']['name'],
+                            res['data']['companySettings']['posCurrency'] ==
+                                    null
+                                ? ''
+                                : '${res['data']['companySettings']['posCurrency']['id'] ?? ''}',
+                            res['data']['companySettings']['posCurrency'] ==
+                                    null
+                                ? ''
+                                : '${res['data']['companySettings']['posCurrency']['symbol'] ?? ''}',
                             '${res['data']['companySettings']['showLogoOnPos'] ?? '0'}',
                           );
                         }
@@ -509,7 +518,7 @@ class _SignFormState extends State<SignForm> {
                         '${res['data']['user']['company']['id']}',
                         '${res['data']['user']['company']['name']}',
                       );
-                      // print('object ${res['data']['companySettings']}');
+                      print('object ${res['data']['companySettings']}');
                       if (res['data']['companySettings'].isNotEmpty) {
                         // print('object');print(res['data']['companySettings']);
                         await saveCompanySettingsLocally(
@@ -533,10 +542,16 @@ class _SignFormState extends State<SignForm> {
                           '${res['data']['companySettings']['primaryCurrency']['id'] ?? ''}',
                           '${res['data']['companySettings']['primaryCurrency']['symbol'] ?? ''}',
                           '${res['data']['companySettings']['companySubjectToVat'] ?? '1'}',
-                          res['data']['companySettings']['posCurrency']['name'] ??
-                              'USD',
-                          '${res['data']['companySettings']['posCurrency']['id'] ?? ''}',
-                          '${res['data']['companySettings']['posCurrency']['symbol'] ?? ''}',
+                          res['data']['companySettings']['posCurrency'] == null
+                              ? ''
+                              : res['data']['companySettings']['posCurrency']['name'] ??
+                                  'USD',
+                          res['data']['companySettings']['posCurrency'] == null
+                              ? ''
+                              : '${res['data']['companySettings']['posCurrency']['id'] ?? ''}',
+                          res['data']['companySettings']['posCurrency'] == null
+                              ? ''
+                              : '${res['data']['companySettings']['posCurrency']['symbol'] ?? ''}',
                           '${res['data']['companySettings']['showLogoOnPos'] ?? '0'}',
                         );
                       }

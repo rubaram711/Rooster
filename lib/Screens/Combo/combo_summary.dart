@@ -1,25 +1,21 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
-import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
-import 'package:rooster_app/Screens/Combo/ComboSummaryWidgets/print_combo.dart';
 import 'package:rooster_app/Screens/Combo/ComboSummaryWidgets/showitems.dart';
 import 'package:rooster_app/Screens/Combo/ComboSummaryWidgets/updateComboDialog.dart';
 import 'package:rooster_app/Screens/Combo/combo.dart';
-import 'package:rooster_app/Screens/Transfers/Replenish/replenishment.dart';
 import 'package:rooster_app/Widgets/page_title.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
 import 'package:rooster_app/Widgets/reusable_text_field.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
 import 'package:rooster_app/Widgets/table_title.dart';
 import 'package:rooster_app/const/colors.dart';
-import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
+
+import '../../Widgets/reusable_more.dart';
 
 class ComboSummary extends StatefulWidget {
   const ComboSummary({super.key});
@@ -67,28 +63,8 @@ class _ComboSummaryState extends State<ComboSummary> {
     await comboController.getAllCombosFromBackWithSeach(searchValue);
   }
 
-  Future<void> generatePdfFromImageUrl() async {
-    String companyLogo = await getCompanyLogoFromPref();
-
-    // 1. Download image
-    final response = await http.get(Uri.parse(companyLogo));
-    if (response.statusCode != 200) {
-      throw Exception('Failed to load image');
-    }
-
-    final Uint8List imageBytes = response.bodyBytes;
-    // String companyLogo = await getCompanyLogoFromPref();
-    // final Uint8List logoBytes = await fetchImage(
-    //   companyLogo,
-    // );
-    comboController.setLogo(imageBytes);
-  }
-
   @override
   void initState() {
-    generatePdfFromImageUrl();
-    // comboController.itemsMultiPartList = [];
-
     exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
     comboController.getComboCreatFieldFromBack();
     comboController.searchInComboController.text = '';
@@ -219,23 +195,22 @@ class _ComboSummaryState extends State<ComboSummary> {
                           height:
                               MediaQuery.of(context).size.height *
                               0.4, //listViewLength
-                          child: SingleChildScrollView(
-                            child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              itemCount: cont.combosList.length,
-                              itemBuilder:
-                                  (context, index) => Column(
-                                    children: [
-                                      ComboAsRowInTable(
-                                        info: cont.combosList[index],
-                                        index: index,
-                                        isDesktop: true,
-                                      ),
-                                      const Divider(),
-                                    ],
-                                  ),
-                            ),
+
+                          child: ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            itemCount: cont.combosList.length,
+                            itemBuilder:
+                                (context, index) => Column(
+                                  children: [
+                                    ComboAsRowInTable(
+                                      info: cont.combosList[index],
+                                      index: index,
+                                      isDesktop: true,
+                                    ),
+                                    const Divider(),
+                                  ],
+                                ),
                           ),
                         )
                         : const Padding(
@@ -508,6 +483,7 @@ class _ComboAsRowInTableState extends State<ComboAsRowInTable> {
   String itemName = '', description = '';
   double itemPrice = 0;
   double itemTotal = 0;
+  double itemdiscount = 0;
 
   double totalAllItems = 0;
   String itemBrand = '';
@@ -601,81 +577,6 @@ class _ComboAsRowInTableState extends State<ComboAsRowInTable> {
                       PopupMenuItem<String>(
                         value: '1',
                         onTap: () async {
-                          itemsInfoPrint = [];
-                          comboItemInfo = {};
-
-                          for (var item in widget.info['items']) {
-                            itemName = item['item_name'];
-                            itemDescription = item['mainDescription'];
-                            qty = '${item['quantity']}';
-
-                            itemPrice = double.parse(
-                              '${item['unitPrice'] ?? '0'}',
-                            );
-
-                            itemImage =
-                                '${item['images']}' != '[]'
-                                    ? item['images'][0]
-                                    : '';
-
-                            var firstBrandObject = item['itemGroups']
-                                .firstWhere(
-                                  (obj) =>
-                                      obj["root_name"]?.toLowerCase() ==
-                                      "brand".toLowerCase(),
-                                  orElse: () => null,
-                                );
-                            brand =
-                                firstBrandObject == null
-                                    ? ''
-                                    : firstBrandObject['name'] ?? '';
-
-                            comboItemInfo = {
-                              'item_name': itemName,
-                              'item_description': itemDescription,
-                              'item_quantity': qty,
-
-                              'item_unit_price': formatDoubleWithCommas(
-                                itemPrice,
-                              ),
-                              'item_image': itemImage,
-                              'item_brand': brand,
-                            };
-                            itemsInfoPrint.add(comboItemInfo);
-                          }
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (BuildContext context) {
-                                return PrintCombo(
-                                  comboName: widget.info['name'],
-                                  comboDescription: widget.info['description'],
-                                  comboPrice: widget.info['price'] as String,
-                                  creationDate: widget.info['created_at'] ?? '',
-
-                                  totalAllItems: formatDoubleWithCommas(
-                                    totalPriceAfterDiscount,
-                                  ),
-
-                                  currencyName:
-                                      widget.info['currency']['name'] ?? '',
-                                  currencySymbol:
-                                      widget.info['currency']['symbol'] ?? '',
-                                  comboCurrencyLatestRate:
-                                      widget.info['currency']['latest_rate'] ??
-                                      '',
-                                  itemsInfoPrint: itemsInfoPrint,
-                                );
-                              },
-                            ),
-                          );
-                        },
-                        child: Text('preview'.tr),
-                      ),
-                      PopupMenuItem<String>(
-                        value: '2',
-                        onTap: () async {
                           showDialog<String>(
                             context: context,
                             builder:
@@ -697,7 +598,7 @@ class _ComboAsRowInTableState extends State<ComboAsRowInTable> {
                         child: Text('Update'.tr),
                       ),
                       PopupMenuItem<String>(
-                        value: '3',
+                        value: '2',
                         onTap: () async {
                           showDialog<String>(
                             context: context,

@@ -5,6 +5,7 @@ import '../../Widgets/reusable_text_field.dart';
 import '../../Widgets/table_item.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 
 class Dashboard extends StatefulWidget {
@@ -16,114 +17,114 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   String selectedBtn = 'last24hour'.tr;
-  List quotationsList=[
+  List<Map<String, dynamic>> quotationsList=[
     {
       'number':'Q230000019',
-      'creation':'29/11/2023',
+      'creation':'29/1/2023',
       'customer':'QUASAR',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'66.50',
       'status':'Pending',
       'order':'00006'
     },  {
       'number':'Q230000017',
-      'creation':'27/11/2023',
+      'creation':'27/2/2023',
       'customer':'Nahhouli',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'66.50',
       'status':'Pending',
       'order':'00004'
     },
     {
       'number':'Q230000019',
-      'creation':'29/11/2023',
+      'creation':'29/3/2023',
       'customer':'QUASAR',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'66.50',
       'status':'Cancelled',
       'order':'00002'
     },  {
       'number':'Q230000017',
-      'creation':'27/11/2023',
+      'creation':'27/2/2023',
       'customer':'Nahhouli',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'66.50',
       'status':'Quotation Sent',
       'order':'00006'
     },
     {
       'number':'Q230000019',
-      'creation':'29/11/2023',
+      'creation':'29/2/2023',
       'customer':'QUASAR',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'6.50',
       'status':'Pending',
       'order':'00006'
     },  {
       'number':'Q230000017',
-      'creation':'27/11/2023',
+      'creation':'27/1/2023',
       'customer':'Nahhouli',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'6.50',
       'status':'Pending',
       'order':'00006'
     },
     {
       'number':'Q230000019',
-      'creation':'29/11/2023',
+      'creation':'29/1/2023',
       'customer':'QUASAR',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'75.50',
       'status':'Cancelled',
       'order':'00006'
     },  {
       'number':'Q230000017',
-      'creation':'27/11/2023',
+      'creation':'27/3/2023',
       'customer':'Nahhouli',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'66.50',
       'status':'Quotation Sent',
       'order':'00006'
     },
     {
       'number':'Q230000019',
-      'creation':'29/11/2023',
+      'creation':'29/2/2023',
       'customer':'QUASAR',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'16.50',
       'status':'Pending',
       'order':'00006'
     },  {
       'number':'Q230000017',
-      'creation':'27/11/2023',
+      'creation':'27/1/2023',
       'customer':'Nahhouli',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'66.50',
       'status':'Pending',
       'order':'00006'
     },
     {
       'number':'Q230000019',
-      'creation':'29/11/2023',
+      'creation':'29/1/2023',
       'customer':'QUASAR',
       'salesperson':'',
       'task':'No Records',
-      'total':'166.50',
+      'total':'6.50',
       'status':'Cancelled',
       'order':'00006'
     },  {
       'number':'Q230000017',
-      'creation':'27/11/2023',
+      'creation':'27/2/2023',
       'customer':'Nahhouli',
       'salesperson':'',
       'task':'No Records',
@@ -132,38 +133,14 @@ class _DashboardState extends State<Dashboard> {
     },
     {
       'number':'Q230000019',
-      'creation':'29/11/2023',
+      'creation':'29/3/2023',
       'customer':'QUASAR',
-      'salesperson':'',
-      'task':'No Records',
-      'total':'166.50',
-      'status':'Pending',
-    },  {
-      'number':'Q230000017',
-      'creation':'27/11/2023',
-      'customer':'Nahhouli',
       'salesperson':'',
       'task':'No Records',
       'total':'166.50',
       'status':'Pending',
     },
-    {
-      'number':'Q230000019',
-      'creation':'29/11/2023',
-      'customer':'QUASAR',
-      'salesperson':'',
-      'task':'No Records',
-      'total':'166.50',
-      'status':'Cancelled',
-    },  {
-      'number':'Q230000017',
-      'creation':'27/11/2023',
-      'customer':'Nahhouli',
-      'salesperson':'',
-      'task':'No Records',
-      'total':'166.50',
-      'status':'Quotation Sent',
-    }
+
 
 
   ];
@@ -253,12 +230,12 @@ class _DashboardState extends State<Dashboard> {
                           decoration: const BoxDecoration(
                               color: Colors.white,
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(9))),
+                              BorderRadius.all(Radius.circular(9))),
                           child: Column(
                             children: [
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'top_quotations'.tr,
@@ -379,7 +356,7 @@ class _DashboardState extends State<Dashboard> {
                                                       .titleTable,
                                                 ),
                                                 borderRadius:
-                                                    BorderRadius.circular(5),
+                                                BorderRadius.circular(5),
                                               ),
                                               child: Center(
                                                 child: Text(
@@ -419,7 +396,7 @@ class _DashboardState extends State<Dashboard> {
                           Text(
                             'overview'.tr,
                             style:
-                                TextStyle(fontSize: 17, color: Primary.primary),
+                            TextStyle(fontSize: 17, color: Primary.primary),
                           ),
                           gapH8,
                           const Text('Lorem ipsum dolor sit amet consectetur'),
@@ -429,14 +406,15 @@ class _DashboardState extends State<Dashboard> {
                             children: [
                               SizedBox(
                                   height: MediaQuery.of(context).size.height * 0.23,
-                                  child: Image.asset('assets/images/chart1.png')),
+                                  width: MediaQuery.of(context).size.width * 0.1,
+                                  child:OverviewChart(data: quotationsList,)),
                             ],
                           ),
                           gapH10,
                           Text(
                             'profit'.tr,
                             style:
-                                TextStyle(fontSize: 17, color: Primary.primary),
+                            TextStyle(fontSize: 17, color: Primary.primary),
                           ),
                           gapH8,
                           const Text('Lorem ipsum dolor sit amet consectetur')
@@ -458,27 +436,7 @@ class _DashboardState extends State<Dashboard> {
                       decoration: const BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.all(Radius.circular(9))),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'monthly_sales'.tr,
-                            style:
-                            TextStyle(fontSize: 17, color: Primary.primary),
-                          ),
-                          gapH10,
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.33,
-                                  height: MediaQuery.of(context).size.height * 0.25,
-                                  child: Image.asset('assets/images/chart2.png')),
-                            ],
-                          ),
-                          gapH10,
-                        ],
-                      ),
+                      child: OverviewChart2(data: quotationsList),
                     )),
                 gapW24,
                 Container(
@@ -488,12 +446,12 @@ class _DashboardState extends State<Dashboard> {
                   decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius:
-                          BorderRadius.all(Radius.circular(9))),
+                      BorderRadius.all(Radius.circular(9))),
                   child: Column(
                     children: [
                       Row(
                         mainAxisAlignment:
-                            MainAxisAlignment.start,
+                        MainAxisAlignment.start,
                         children: [
                           Text(
                             'top_sales_order'.tr,
@@ -862,10 +820,10 @@ class _DashboardState extends State<Dashboard> {
 class ReusableRatesCard extends StatelessWidget {
   const ReusableRatesCard(
       {super.key,
-      required this.image,
-      required this.text,
-      required this.number,
-      required this.extension,
+        required this.image,
+        required this.text,
+        required this.number,
+        required this.extension,
         this.isDesktop=true});
   final String image;
   final String text;
@@ -943,18 +901,18 @@ class TopQuotationAsRowInTable extends StatelessWidget {
           text: '${info['customer'] ?? ''}',
           width: isDesktop?  MediaQuery.of(context).size.width * 0.07: MediaQuery.of(context).size.width * 0.12,
         ),
-         TableItem(
-           isDesktop: isDesktop,
+        TableItem(
+          isDesktop: isDesktop,
           text: 'Jad al Deek', //'${info['salesperson'] ?? ''}',
           width: isDesktop?  MediaQuery.of(context).size.width * 0.07: MediaQuery.of(context).size.width * 0.15,
         ),
-         TableItem(
-           isDesktop: isDesktop,
+        TableItem(
+          isDesktop: isDesktop,
           text: '200.000',
           width: isDesktop?  MediaQuery.of(context).size.width * 0.07: MediaQuery.of(context).size.width * 0.12,
         ),
-         TableItem(
-           isDesktop: isDesktop,
+        TableItem(
+          isDesktop: isDesktop,
           text: '04.06.2023',
           width:  isDesktop?  MediaQuery.of(context).size.width * 0.07: MediaQuery.of(context).size.width * 0.13,
         ),
@@ -966,8 +924,8 @@ class TopQuotationAsRowInTable extends StatelessWidget {
               backgroundColor: info['status'] == 'Pending'
                   ? Others.orangeStatusColor
                   : info['status'] == 'Cancelled'
-                      ? Others.redStatusColor
-                      : Others.greenStatusColor,
+                  ? Others.redStatusColor
+                  : Others.greenStatusColor,
             ),
           ),
         ),
@@ -1011,8 +969,8 @@ class TopSalesOrderAsRowInTable extends StatelessWidget {
               backgroundColor: info['status'] == 'Pending'
                   ? Others.orangeStatusColor
                   : info['status'] == 'Cancelled'
-                      ? Others.redStatusColor
-                      : Others.greenStatusColor,
+                  ? Others.redStatusColor
+                  : Others.greenStatusColor,
             ),
           ),
         ),
@@ -1035,11 +993,11 @@ class TopSalesCountriesAsRowInTable extends StatelessWidget {
           text: index==0?'Lebanon':index==1?'France':'qatar',
           width:isDesktop?  MediaQuery.of(context).size.width * 0.07: MediaQuery.of(context).size.width * 0.25,
         ),
-         TableItem(
+        TableItem(
           text: 'Abed Nahouli',
           width: isDesktop?  MediaQuery.of(context).size.width * 0.07: MediaQuery.of(context).size.width * 0.25,
         ),
-         TableItem(
+        TableItem(
           text: '200.000\$',
           width: isDesktop?  MediaQuery.of(context).size.width * 0.07: MediaQuery.of(context).size.width * 0.25,
         ),
@@ -1060,7 +1018,7 @@ class MobileDashboard extends StatefulWidget {
 
 class _MobileDashboardState extends State<MobileDashboard> {
   String selectedBtn = 'last24hour'.tr;
-  List quotationsList=[
+  List<Map<String, dynamic>> quotationsList=[
     {
       'number':'Q230000019',
       'creation':'29/11/2023',
@@ -1325,7 +1283,7 @@ class _MobileDashboardState extends State<MobileDashboard> {
                           child: Text(
                             'quotation'.tr,
                             style: TextStyle(
-                              fontSize: 12,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: TypographyColor.titleTable),
                           ),
@@ -1504,7 +1462,7 @@ class _MobileDashboardState extends State<MobileDashboard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.asset('assets/images/chart2.png',width: MediaQuery.of(context).size.width * 0.5,height: 200,),
+                          SizedBox(width: MediaQuery.of(context).size.width * 0.5,height: 200,child: OverviewChart2(data: quotationsList),),
                         ],
                       ),
                       gapH10,
@@ -1545,7 +1503,7 @@ class _MobileDashboardState extends State<MobileDashboard> {
                           child: Text(
                             'order'.tr,
                             style: TextStyle(
-                              fontSize: 13,
+                                fontSize: 13,
                                 fontWeight: FontWeight.bold,
                                 color: TypographyColor.titleTable),
                           ),
@@ -1892,3 +1850,199 @@ class _MobileDashboardState extends State<MobileDashboard> {
     );
   }
 }
+
+
+
+
+class OverviewChart extends StatelessWidget {
+  final List<Map<String, dynamic>> data;
+
+  const OverviewChart({super.key, required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    final Map<String, double> totalPerDate = {};
+    for (var item in data) {
+      final date = item['creation'];
+      final total = double.tryParse(item['total']) ?? 0.0;
+      totalPerDate[date] = (totalPerDate[date] ?? 0) + total;
+    }
+
+    final List<String> dates = totalPerDate.keys.toList();
+    final List<double> totals = totalPerDate.values.toList();
+
+    return SizedBox(
+      height: 200,
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          barTouchData: BarTouchData(enabled: false),
+          titlesData: FlTitlesData(
+            show: false,
+          ),
+          borderData: FlBorderData(show: false),
+          gridData: FlGridData(show: false),
+          barGroups: List.generate(dates.length, (index) {
+            return BarChartGroupData(
+              x: index,
+              barRods: [
+                BarChartRodData(
+                  toY: 250, // background bar
+                  color: const Color(0xFFEAF0F0),
+                  width: 12,
+                  borderRadius: BorderRadius.circular(6),
+                  rodStackItems: [
+                    BarChartRodStackItem(
+                      0,
+                      totals[index],
+                      Primary.primary,
+                    )
+                  ],
+                ),
+              ],
+            );
+          }),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
+class OverviewChart2 extends StatelessWidget {
+  final List<Map<String, dynamic>> data;
+
+  const OverviewChart2({super.key, required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    final Map<String, double> totalPerDate = {};
+    for (var item in data) {
+      final date = item['creation'];
+      final total = double.tryParse(item['total']) ?? 0.0;
+      totalPerDate[date] = (totalPerDate[date] ?? 0) + total;
+    }
+
+    final List<String> dates = totalPerDate.keys.toList()..sort();
+    final List<double> totals = dates.map((d) => totalPerDate[d] ?? 0).toList();
+
+    double cumulative = 0;
+    final List<FlSpot> spots = [];
+    for (int i = 0; i < totals.length; i++) {
+      cumulative += totals[i];
+      spots.add(FlSpot(i.toDouble(), cumulative));
+    }
+    final double rawMax = cumulative;
+    final double interval = rawMax <= 100 ? 20 : (rawMax / 5).ceilToDouble();
+    final double maxY = (rawMax / interval).ceil() * interval;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+          Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                'Monthly sales',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Primary.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        gapH16,
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.26,
+          height: 170,
+          child: LineChart(
+            LineChartData(
+              minY:0 ,
+              maxY: maxY,
+              lineBarsData: [
+                LineChartBarData(
+                  spots: spots,
+                  isCurved: true,
+                  color: Primary.primary,
+                  barWidth: 4,
+                  isStrokeCapRound: true,
+                  belowBarData: BarAreaData(
+                    show: true,
+                    gradient: LinearGradient(
+                      colors: [
+                        Primary.primary.withAlpha((0.4 * 255).toInt()),
+                        Primary.primary.withAlpha((0.0* 255).toInt()),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                  dotData: FlDotData(
+                    show: true,
+                    checkToShowDot: (spot, _) => spot == spots.last,
+                    getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                      radius: 6,
+                      color: Colors.white,
+                      strokeColor:  Primary.primary,
+                      strokeWidth: 3,
+                    ),
+                  ),
+                ),
+              ],
+              extraLinesData: ExtraLinesData(
+                verticalLines: [
+                  VerticalLine(
+                    x: (spots.isNotEmpty) ? spots.last.x : 0,
+                    color: Colors.blue.shade900,
+                    strokeWidth: 1,
+                    dashArray: [5, 5],
+                  )
+                ],
+              ),
+              titlesData: FlTitlesData(
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 40,
+                    interval: interval,
+                    getTitlesWidget: (value, meta) {
+                      return Text(
+                        value.toInt().toString(),
+                        style:  TextStyle(
+                          color: Primary.primary,
+                          fontSize: 12,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              ),
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: 100,
+                getDrawingHorizontalLine: (value) => FlLine(
+                  color: Colors.grey.withAlpha((0.2 * 255).toInt()),
+                  strokeWidth: 1,
+                ),
+              ),
+              borderData: FlBorderData(show: false),
+              lineTouchData: LineTouchData(enabled: false),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+

@@ -4,21 +4,21 @@ import 'package:rooster_app/const/urls.dart';
 
 Future updateCombo(
   String id,
-  String companyId,
   String name,
   String code,
   String description,
-  String total,
+  String currencyId,
+  String price,
   String active,
   Map items,
 ) async {
   String token = await getAccessTokenFromPref();
   FormData formData = FormData.fromMap({
-    "company_id": companyId,
     "name": name,
     "code": code,
     "description": description,
-    "total": total,
+    "currencyId": currencyId,
+    "price": price,
     "active": active,
   });
 
@@ -27,9 +27,9 @@ Future updateCombo(
       //   MapEntry("back value",'front value')
       MapEntry("items[$i][id]", '${items[i]['item_id']}'),
 
-      MapEntry("items[$i][description]", '${items[i]['item_description']}'),
-      MapEntry("items[$i][quantity]", '${items[i]['item_quantity']}'),
-      MapEntry("items[$i][unitPrice]", '${items[i]['item_unitPrice']}'),
+      MapEntry("items[$i][description]", '${items[i]['description']}'),
+      MapEntry("items[$i][quantity]", '${items[i]['quantity']}'),
+      MapEntry("items[$i][unitPrice]", '${items[i]['unit_price']}'),
       MapEntry("items[$i][discount]", '${items[i]['discount']}'),
     ]);
   }

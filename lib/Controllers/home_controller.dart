@@ -15,8 +15,14 @@ class HomeController extends GetxController {
 
 
   String companyName = '';
+  var companyAddress = '';
+
   setCompanyName(String val){
      companyName = val;
+     update();
+  }
+  setCompanyAddress(String val){
+    companyAddress = val;
      update();
   }
   // toggleIsOpenedValue() {

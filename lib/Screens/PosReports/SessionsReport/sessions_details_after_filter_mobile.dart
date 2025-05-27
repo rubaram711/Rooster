@@ -445,10 +445,10 @@ class _MobileSessionDetailsAfterFilterState
                     ? sessionController
                                 .sessionsDetails[i]
                                 .paymentDetails![j]
-                                .usdAmount ==
+                                .primaryCurrencyAmount ==
                             0
-                        ? '${sessionController.sessionsDetails[i].paymentDetails![j].otherCurrencyAmount} ${'lbp'.tr}'
-                        : '${sessionController.sessionsDetails[i].paymentDetails![j].usdAmount} USD'
+                        ? '${sessionController.sessionsDetails[i].paymentDetails![j].posCurrencyAmount} ${'lbp'.tr}'
+                        : '${sessionController.sessionsDetails[i].paymentDetails![j].primaryCurrencyAmount} USD'
                     : '',
               );
           count += 2;
@@ -603,9 +603,9 @@ class _MobileSessionDetailsAfterFilterState
                     : '';
             row.cells[12 + count].value =
                 j < paymentDetails.length
-                    ? paymentDetails[j].usdAmount == 0
-                        ? '${paymentDetails[j].otherCurrencyAmount} ${'lbp'.tr}'
-                        : '${paymentDetails[j].usdAmount} USD'
+                    ? paymentDetails[j].primaryCurrencyAmount == 0
+                        ? '${paymentDetails[j].posCurrencyAmount} ${'lbp'.tr}'
+                        : '${paymentDetails[j].primaryCurrencyAmount} USD'
                     : '';
             count += 2;
           }
@@ -858,9 +858,9 @@ class MobileSessionOrderDataSource extends DataGridSource {
                   columnName: 'amount$i',
                   value:
                       i < e.paymentDetails!.length
-                          ? e.paymentDetails![i].usdAmount == 0
-                              ? '${e.paymentDetails![i].otherCurrencyAmount} ${'lbp'.tr}'
-                              : '${e.paymentDetails![i].usdAmount} USD'
+                          ? e.paymentDetails![i].primaryCurrencyAmount == 0
+                              ? '${e.paymentDetails![i].posCurrencyAmount} ${'lbp'.tr}'
+                              : '${e.paymentDetails![i].primaryCurrencyAmount} USD'
                           : '', // Empty if no department
                 ),
               );

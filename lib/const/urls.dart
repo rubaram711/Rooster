@@ -51,6 +51,7 @@ const kUpdateWarehouseUrl='$baseUrl/warehouses'; //id
 const kGetReplenishmentsDataForCreateUrl='$baseUrl/replenishments/create';
 const kGetQTyOfItemInWarehouseUrl='$baseUrl/items/warehouseQty';
 const kAddReplenishmentsUrl='$baseUrl/replenishments';
+const kUpdateReplenishmentsUrl='$baseUrl/replenishments/update';
 const kGetReplenishmentsUrl='$baseUrl/replenishments';
 const kCreateTransferOutUrl='$baseUrl/transfers/create';
 const kAddTransferOutUrl='$baseUrl/transfers';
@@ -84,7 +85,12 @@ const kPriceListUrl='$baseUrl/pricelists';
 const kGetPriceListItemsUrl='$baseUrl/pricelists/items';
 const kCreatePriceListUrl='$baseUrl/pricelists/create';
 const kUpdatePriceListUrl='$baseUrl/pricelists/update';
-
+const kCashTrayUrl='$baseUrl/trays';
+const kGetCurrentCashTrayUrl='$baseUrl/current-tray';
+const kCloseCashTrayUrl='$baseUrl/trays/close';//id
+const kReportCashTrayUrl='$baseUrl/tray-report';//id
+const kCreateCashTrayUrl='$baseUrl/trays/create';
+const kSelectRoleUrl='$baseUrl/users/selectRole';
 
 
 

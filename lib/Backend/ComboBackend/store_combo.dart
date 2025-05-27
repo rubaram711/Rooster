@@ -25,10 +25,10 @@ Future storeCombo(
   for (int i = 1; i < items.length + 1; i++) {
     formData.fields.addAll([
       //   MapEntry("back value",'front value')
-      MapEntry("items[$i][id]", '${items[i]['itemId']}'),
-      MapEntry("items[$i][description]", '${items[i]['itemDescription']}'),
+      MapEntry("items[$i][id]", '${items[i]['item_id']}'),
+      MapEntry("items[$i][description]", '${items[i]['description']}'),
       MapEntry("items[$i][quantity]", '${items[i]['quantity']}'),
-      MapEntry("items[$i][unitPrice]", '${items[i]['price']}'),
+      MapEntry("items[$i][unitPrice]", '${items[i]['unit_price']}'),
       MapEntry("items[$i][discount]", '${items[i]['discount']}'),
     ]);
   }

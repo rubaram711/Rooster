@@ -27,11 +27,13 @@ class _ComboDataState extends State<ComboData> {
   @override
   void initState() {
     super.initState();
+    print(comboController.selectedComboData);
   }
 
   @override
   Widget build(BuildContext context) {
     List info = comboController.selectedComboData['items'];
+    List info2 = comboController.selectedComboData['comboItems'];
 
     comboCodeController = TextEditingController(
       text: comboController.selectedComboData['code'],
@@ -148,7 +150,7 @@ class _ComboDataState extends State<ComboData> {
                   borderRadius: const BorderRadius.all(Radius.circular(6)),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     gapW16,
                     TableTitle(
@@ -166,17 +168,22 @@ class _ComboDataState extends State<ComboData> {
                     TableTitle(
                       text: 'quantity'.tr,
                       isCentered: false,
-                      width: MediaQuery.of(context).size.width * 0.10,
+                      width: MediaQuery.of(context).size.width * 0.07,
                     ),
                     TableTitle(
                       text: 'unit_price'.tr,
                       isCentered: false,
-                      width: MediaQuery.of(context).size.width * 0.10,
+                      width: MediaQuery.of(context).size.width * 0.07,
                     ),
                     TableTitle(
-                      text: 'currency'.tr,
+                      text: 'disc%'.tr,
                       isCentered: false,
-                      width: MediaQuery.of(context).size.width * 0.10,
+                      width: MediaQuery.of(context).size.width * 0.07,
+                    ),
+                    TableTitle(
+                      text: 'total'.tr,
+                      isCentered: false,
+                      width: MediaQuery.of(context).size.width * 0.07,
                     ),
                     SizedBox(width: MediaQuery.of(context).size.width * 0.03),
                   ],
@@ -209,11 +216,12 @@ class _ComboDataState extends State<ComboData> {
                             itemBuilder: (context, i) {
                               return ShowitemquantityAsRow(
                                 isDesktop: true,
-                                itemName: info[i]['item_name'],
-                                itemDescription: info[i]['mainDescription'],
-                                itemquantity: '${info[i]['quantity']}',
-                                itemPrice: '${info[i]['unitPrice']}',
-                                itemCurrency: '${info[i]['currency']['name']}',
+                                itemName: info2[i]['item_name'],
+                                itemDescription: info2[i]['description'],
+                                itemquantity: '${info2[i]['quantity']}',
+                                itemPrice: '${info2[i]['unit_price']}',
+                                itemdiscount: '${info2[i]['discount']}',
+                                itemtotal: '${info2[i]['total']}',
                               );
                             },
                           ),
@@ -243,14 +251,16 @@ class ShowitemquantityAsRow extends StatelessWidget {
     required this.itemquantity,
     required this.itemDescription,
     required this.itemPrice,
-    required this.itemCurrency,
+    required this.itemdiscount,
+    required this.itemtotal,
   });
   //final Map info;
   final String itemName;
   final String itemDescription;
   final String itemquantity;
   final String itemPrice;
-  final String itemCurrency;
+  final String itemdiscount;
+  final String itemtotal;
 
   final bool isDesktop;
 
@@ -279,7 +289,7 @@ class ShowitemquantityAsRow extends StatelessWidget {
           TableItem(
             isCentered: false,
             text: itemName,
-            width: isDesktop ? MediaQuery.of(context).size.width * 0.10 : 150,
+            width: isDesktop ? MediaQuery.of(context).size.width * 0.15 : 150,
           ),
           TableItem(
             isCentered: false,
@@ -289,20 +299,25 @@ class ShowitemquantityAsRow extends StatelessWidget {
           TableItem(
             isCentered: false,
             text: itemquantity,
-            width: isDesktop ? MediaQuery.of(context).size.width * 0.10 : 100,
+            width: isDesktop ? MediaQuery.of(context).size.width * 0.07 : 70,
           ),
           TableItem(
             isCentered: false,
             text: itemPrice,
-            width: isDesktop ? MediaQuery.of(context).size.width * 0.10 : 100,
+            width: isDesktop ? MediaQuery.of(context).size.width * 0.07 : 70,
           ),
           TableItem(
             isCentered: false,
-            text: itemCurrency,
-            width: isDesktop ? MediaQuery.of(context).size.width * 0.10 : 100,
+            text: itemdiscount,
+            width: isDesktop ? MediaQuery.of(context).size.width * 0.07 : 70,
+          ),
+          TableItem(
+            isCentered: false,
+            text: itemtotal,
+            width: isDesktop ? MediaQuery.of(context).size.width * 0.07 : 70,
           ),
 
-          SizedBox(width: MediaQuery.of(context).size.width * 0.07),
+          SizedBox(width: MediaQuery.of(context).size.width * 0.03),
         ],
       ),
     );

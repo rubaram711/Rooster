@@ -52,7 +52,7 @@ class _ReplenishState extends State<Replenish> {
   String? selectedDestWrhs = '';
   String? selectedItem = '';
   double listViewLength = Sizes.deviceHeight * 0.08;
-  double increment = Sizes.deviceHeight * 0.08;
+  double increment = Sizes.deviceHeight * 0.09;
   final TransferController transferController = Get.find();
   final HomeController homeController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
@@ -1280,6 +1280,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   @override
   void initState() {
     getInfo();
+    // qtyController.text='0';
     if (transferController.itemsListInReplenish['${widget.index}'] != null) {
       qtyController.text =
           transferController.itemsListInReplenish[widget.index
@@ -1373,8 +1374,8 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         ),
                       ),
                       validator: (String? value) {
-                        if (value!.isEmpty || double.parse(value) <= 0) {
-                          return 'must be >0';
+                        if (value!.isEmpty ) {
+                          return 'required field';
                         }
                         return null;
                       },
@@ -2400,7 +2401,7 @@ class _MobileReplenishState extends State<MobileReplenish> {
         'itemCode': '${transferController.productsList[i]['mainCode']}',
         'mainDescription':
             '${transferController.productsList[i]['mainDescription']}',
-        'replenishedQty': '',
+        'replenishedQty': '0',
         'replenishedQtyPackage': '',
         'cost': '${transferController.productsList[i]['id']}',
         'note': '',

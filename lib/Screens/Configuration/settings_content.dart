@@ -5,6 +5,7 @@ import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
 import 'package:rooster_app/Controllers/settings_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
+import 'package:rooster_app/Widgets/TransferWidgets/reusable_show_info_card.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
 import '../../Controllers/company_settings_controller.dart';
@@ -49,7 +50,6 @@ class _SettingsContentState extends State<SettingsContent> {
   HomeController homeController = Get.find();
   ExchangeRatesController exchangeRatesController = Get.find();
   QuotationController quotationController = Get.find();
-
   getInfoFromPref() async {
     var selectedCost = await getCostCalculationTypeFromPref();
     var showQuantitiesOnPos = await getShowQuantitiesOnPosFromPref();
@@ -115,6 +115,11 @@ class _SettingsContentState extends State<SettingsContent> {
     companySettingsController.selectedPosCurrencySymbol = posCurrencySymbol;
     companySettingsController.isCompanySubjectToVat =
         companySubjectToVat == '1' ? true : false;
+    print('posCurrency.isNotEmpty');
+    print(posCurrency);
+    if(posCurrency.isNotEmpty){
+      companySettingsController.isPosCurrencyFound=true;
+    }
   }
 
   @override
@@ -226,6 +231,7 @@ class _SettingsContentState extends State<SettingsContent> {
                             ),
                       );
                       var companyId = await getCompanyIdFromPref();
+                      print('selectedCurrencyId ${cont.selectedCurrencyId}');
                       var res = await updateSettings(
                         companyId: companyId,
                         costCalculationType:
@@ -251,6 +257,7 @@ class _SettingsContentState extends State<SettingsContent> {
                       );
                       Get.back();
                       if (res['success'] == true) {
+                        print('res $res');
                         Get.back();
                         CommonWidgets.snackBar('Success', res['message']);
                         await saveCompanySettingsLocally(
@@ -425,7 +432,8 @@ class _PosOptionsTabState extends State<PosOptionsTab> {
                         :MediaQuery.of(context).size.width * 0.1,
                     child: Text('pos_currency'.tr),
                   ),
-                  GetBuilder<ExchangeRatesController>(
+                  cont.isPosCurrencyFound? ReusableShowInfoCard(text: cont.posCurrency.text, width: MediaQuery.of(context).size.width * 0.4)
+                  :GetBuilder<ExchangeRatesController>(
                     builder: (exchangeRatesCont) {
                       return DropdownMenu<String>(
                         width:homeController.isMobile.value
@@ -438,11 +446,7 @@ class _PosOptionsTabState extends State<PosOptionsTab> {
                             fontStyle: FontStyle.italic,
                           ),
                           contentPadding: const EdgeInsets.fromLTRB(
-                            20,
-                            0,
-                            25,
-                            5,
-                          ),
+                            20, 0, 25, 5,),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
                               color: Primary.primary.withAlpha(
@@ -713,123 +717,124 @@ final ScrollController scrollController=ScrollController();
                           width: MediaQuery.of(context).size.width * 0.32,
                           child: Text('primary_currency'.tr),
                         ),
-                        GetBuilder<ExchangeRatesController>(
-                          builder: (exchangeRatesCont) {
-                            return DropdownMenu<String>(
-                              width: MediaQuery.of(context).size.width * 0.4,
-                              // requestFocusOnTap: false,
-                              enableSearch: true,
-                              controller: cont.primaryCurrency,
-                              hintText: '',
-                              inputDecorationTheme: InputDecorationTheme(
-                                // filled: true,
-                                hintStyle: const TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                ),
-                                contentPadding: const EdgeInsets.fromLTRB(
-                                  20,
-                                  0,
-                                  25,
-                                  5,
-                                ),
-                                // outlineBorder: BorderSide(color: Colors.black,),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Primary.primary.withAlpha(
-                                      (0.2 * 255).toInt(),
-                                    ),
-                                    width: 1,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Primary.primary.withAlpha(
-                                      (0.4 * 255).toInt(),
-                                    ),
-                                    width: 2,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                              ),
-                              // menuStyle: ,
-                              menuHeight: 250,
-                              dropdownMenuEntries:
-                                  exchangeRatesCont.currenciesNamesList
-                                      .map<DropdownMenuEntry<String>>((
-                                        String option,
-                                      ) {
-                                        return DropdownMenuEntry<String>(
-                                          value: option,
-                                          label: option,
-                                        );
-                                      })
-                                      .toList(),
-                              enableFilter: true,
-                              onSelected: (val) {
-                                var index = exchangeRatesCont
-                                    .currenciesNamesList
-                                    .indexOf(val!);
-                                cont.setSelectedCurrency(
-                                  exchangeRatesCont.currenciesIdsList[index],
-                                  val,
-                                  exchangeRatesCont
-                                      .currenciesSymbolsList[index],
-                                );
-                                var result = exchangeRatesCont.exchangeRatesList
-                                    .firstWhere(
-                                      (item) => item["currency"] == val,
-                                      orElse: () => null,
-                                    );
-                                cont.setExchangeRateForSelectedCurrency(
-                                  result != null
-                                      ? '${result["exchange_rate"]}'
-                                      : '1',
-                                );
-                              },
-                            );
-
-                            // ReusableDropDownMenuWithSearch(
-                            //   list: exchangeRatesCont.currenciesNamesList,
-                            //   text: 'primary_currency'.tr,
-                            //   hint: '',
-                            //   onSelected: (val){
-                            //     var index = exchangeRatesCont
-                            //         .currenciesNamesList
-                            //         .indexOf(val!);
-                            //     cont.setSelectedCurrency(
-                            //       exchangeRatesCont.currenciesIdsList[index],
-                            //       val,
-                            //     );
-                            //     var result = exchangeRatesCont
-                            //         .exchangeRatesList
-                            //         .firstWhere(
-                            //           (item) =>
-                            //       item["currency"] == val,
-                            //       orElse: () => null,
-                            //     );
-                            //     cont
-                            //         .setExchangeRateForSelectedCurrency(
-                            //       result != null
-                            //           ? '${result["exchange_rate"]}'
-                            //           : '1',
-                            //     );
-                            //   },
-                            //   controller: cont.primaryCurrency,
-                            //   validationFunc: (value) {
-                            //     return null;
-                            //   },
-                            //   rowWidth: MediaQuery.of(context).size.width * 0.35,
-                            //   textFieldWidth: MediaQuery.of(context).size.width * 0.25,
-                            //   clickableOptionText: '',
-                            //   isThereClickableOption: false,
-                            //   onTappedClickableOption: (){});
-                          },
-                        ),
+                        ReusableShowInfoCard(text: cont.primaryCurrency.text, width: MediaQuery.of(context).size.width * 0.4,)
+                        // GetBuilder<ExchangeRatesController>(
+                        //   builder: (exchangeRatesCont) {
+                        //     return DropdownMenu<String>(
+                        //       width: MediaQuery.of(context).size.width * 0.4,
+                        //       // requestFocusOnTap: false,
+                        //       enableSearch: true,
+                        //       controller: cont.primaryCurrency,
+                        //       hintText: '',
+                        //       inputDecorationTheme: InputDecorationTheme(
+                        //         // filled: true,
+                        //         hintStyle: const TextStyle(
+                        //           fontStyle: FontStyle.italic,
+                        //         ),
+                        //         contentPadding: const EdgeInsets.fromLTRB(
+                        //           20,
+                        //           0,
+                        //           25,
+                        //           5,
+                        //         ),
+                        //         // outlineBorder: BorderSide(color: Colors.black,),
+                        //         enabledBorder: OutlineInputBorder(
+                        //           borderSide: BorderSide(
+                        //             color: Primary.primary.withAlpha(
+                        //               (0.2 * 255).toInt(),
+                        //             ),
+                        //             width: 1,
+                        //           ),
+                        //           borderRadius: const BorderRadius.all(
+                        //             Radius.circular(9),
+                        //           ),
+                        //         ),
+                        //         focusedBorder: OutlineInputBorder(
+                        //           borderSide: BorderSide(
+                        //             color: Primary.primary.withAlpha(
+                        //               (0.4 * 255).toInt(),
+                        //             ),
+                        //             width: 2,
+                        //           ),
+                        //           borderRadius: const BorderRadius.all(
+                        //             Radius.circular(9),
+                        //           ),
+                        //         ),
+                        //       ),
+                        //       // menuStyle: ,
+                        //       menuHeight: 250,
+                        //       dropdownMenuEntries:
+                        //           exchangeRatesCont.currenciesNamesList
+                        //               .map<DropdownMenuEntry<String>>((
+                        //                 String option,
+                        //               ) {
+                        //                 return DropdownMenuEntry<String>(
+                        //                   value: option,
+                        //                   label: option,
+                        //                 );
+                        //               })
+                        //               .toList(),
+                        //       enableFilter: true,
+                        //       onSelected: (val) {
+                        //         var index = exchangeRatesCont
+                        //             .currenciesNamesList
+                        //             .indexOf(val!);
+                        //         cont.setSelectedCurrency(
+                        //           exchangeRatesCont.currenciesIdsList[index],
+                        //           val,
+                        //           exchangeRatesCont
+                        //               .currenciesSymbolsList[index],
+                        //         );
+                        //         var result = exchangeRatesCont.exchangeRatesList
+                        //             .firstWhere(
+                        //               (item) => item["currency"] == val,
+                        //               orElse: () => null,
+                        //             );
+                        //         cont.setExchangeRateForSelectedCurrency(
+                        //           result != null
+                        //               ? '${result["exchange_rate"]}'
+                        //               : '1',
+                        //         );
+                        //       },
+                        //     );
+                        //
+                        //     // ReusableDropDownMenuWithSearch(
+                        //     //   list: exchangeRatesCont.currenciesNamesList,
+                        //     //   text: 'primary_currency'.tr,
+                        //     //   hint: '',
+                        //     //   onSelected: (val){
+                        //     //     var index = exchangeRatesCont
+                        //     //         .currenciesNamesList
+                        //     //         .indexOf(val!);
+                        //     //     cont.setSelectedCurrency(
+                        //     //       exchangeRatesCont.currenciesIdsList[index],
+                        //     //       val,
+                        //     //     );
+                        //     //     var result = exchangeRatesCont
+                        //     //         .exchangeRatesList
+                        //     //         .firstWhere(
+                        //     //           (item) =>
+                        //     //       item["currency"] == val,
+                        //     //       orElse: () => null,
+                        //     //     );
+                        //     //     cont
+                        //     //         .setExchangeRateForSelectedCurrency(
+                        //     //       result != null
+                        //     //           ? '${result["exchange_rate"]}'
+                        //     //           : '1',
+                        //     //     );
+                        //     //   },
+                        //     //   controller: cont.primaryCurrency,
+                        //     //   validationFunc: (value) {
+                        //     //     return null;
+                        //     //   },
+                        //     //   rowWidth: MediaQuery.of(context).size.width * 0.35,
+                        //     //   textFieldWidth: MediaQuery.of(context).size.width * 0.25,
+                        //     //   clickableOptionText: '',
+                        //     //   isThereClickableOption: false,
+                        //     //   onTappedClickableOption: (){});
+                        //   },
+                        // ),
                       ],
                     ),
                     gapH6,
@@ -935,126 +940,127 @@ final ScrollController scrollController=ScrollController();
                                 width: MediaQuery.of(context).size.width * 0.10,
                                 child: Text('primary_currency'.tr),
                               ),
-                              GetBuilder<ExchangeRatesController>(
-                                builder: (exchangeRatesCont) {
-                                  return DropdownMenu<String>(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.25,
-                                    // requestFocusOnTap: false,
-                                    enableSearch: true,
-                                    controller: cont.primaryCurrency,
-                                    hintText: '',
-                                    inputDecorationTheme: InputDecorationTheme(
-                                      // filled: true,
-                                      hintStyle: const TextStyle(
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                      contentPadding: const EdgeInsets.fromLTRB(
-                                        20,
-                                        0,
-                                        25,
-                                        5,
-                                      ),
-                                      // outlineBorder: BorderSide(color: Colors.black,),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Primary.primary.withAlpha(
-                                            (0.2 * 255).toInt(),
-                                          ),
-                                          width: 1,
-                                        ),
-                                        borderRadius: const BorderRadius.all(
-                                          Radius.circular(9),
-                                        ),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Primary.primary.withAlpha(
-                                            (0.4 * 255).toInt(),
-                                          ),
-                                          width: 2,
-                                        ),
-                                        borderRadius: const BorderRadius.all(
-                                          Radius.circular(9),
-                                        ),
-                                      ),
-                                    ),
-                                    // menuStyle: ,
-                                    menuHeight: 250,
-                                    dropdownMenuEntries:
-                                        exchangeRatesCont.currenciesNamesList
-                                            .map<DropdownMenuEntry<String>>((
-                                              String option,
-                                            ) {
-                                              return DropdownMenuEntry<String>(
-                                                value: option,
-                                                label: option,
-                                              );
-                                            })
-                                            .toList(),
-                                    enableFilter: true,
-                                    onSelected: (val) {
-                                      var index = exchangeRatesCont
-                                          .currenciesNamesList
-                                          .indexOf(val!);
-                                      cont.setSelectedCurrency(
-                                        exchangeRatesCont
-                                            .currenciesIdsList[index],
-                                        val,
-                                        exchangeRatesCont
-                                            .currenciesSymbolsList[index],
-                                      );
-                                      var result = exchangeRatesCont
-                                          .exchangeRatesList
-                                          .firstWhere(
-                                            (item) => item["currency"] == val,
-                                            orElse: () => null,
-                                          );
-                                      cont.setExchangeRateForSelectedCurrency(
-                                        result != null
-                                            ? '${result["exchange_rate"]}'
-                                            : '1',
-                                      );
-                                    },
-                                  );
-
-                                  // ReusableDropDownMenuWithSearch(
-                                  //   list: exchangeRatesCont.currenciesNamesList,
-                                  //   text: 'primary_currency'.tr,
-                                  //   hint: '',
-                                  //   onSelected: (val){
-                                  //     var index = exchangeRatesCont
-                                  //         .currenciesNamesList
-                                  //         .indexOf(val!);
-                                  //     cont.setSelectedCurrency(
-                                  //       exchangeRatesCont.currenciesIdsList[index],
-                                  //       val,
-                                  //     );
-                                  //     var result = exchangeRatesCont
-                                  //         .exchangeRatesList
-                                  //         .firstWhere(
-                                  //           (item) =>
-                                  //       item["currency"] == val,
-                                  //       orElse: () => null,
-                                  //     );
-                                  //     cont
-                                  //         .setExchangeRateForSelectedCurrency(
-                                  //       result != null
-                                  //           ? '${result["exchange_rate"]}'
-                                  //           : '1',
-                                  //     );
-                                  //   },
-                                  //   controller: cont.primaryCurrency,
-                                  //   validationFunc: (value) {
-                                  //     return null;
-                                  //   },
-                                  //   rowWidth: MediaQuery.of(context).size.width * 0.35,
-                                  //   textFieldWidth: MediaQuery.of(context).size.width * 0.25,
-                                  //   clickableOptionText: '',
-                                  //   isThereClickableOption: false,
-                                  //   onTappedClickableOption: (){});
-                                },
-                              ),
+                              ReusableShowInfoCard(text: cont.primaryCurrency.text, width: MediaQuery.of(context).size.width * 0.25,isCentered: false,)
+                              // GetBuilder<ExchangeRatesController>(
+                              //   builder: (exchangeRatesCont) {
+                              //     return DropdownMenu<String>(
+                              //       width:
+                              //           MediaQuery.of(context).size.width * 0.25,
+                              //       // requestFocusOnTap: false,
+                              //       enableSearch: true,
+                              //       controller: cont.primaryCurrency,
+                              //       hintText: '',
+                              //       inputDecorationTheme: InputDecorationTheme(
+                              //         // filled: true,
+                              //         hintStyle: const TextStyle(
+                              //           fontStyle: FontStyle.italic,
+                              //         ),
+                              //         contentPadding: const EdgeInsets.fromLTRB(
+                              //           20,
+                              //           0,
+                              //           25,
+                              //           5,
+                              //         ),
+                              //         // outlineBorder: BorderSide(color: Colors.black,),
+                              //         enabledBorder: OutlineInputBorder(
+                              //           borderSide: BorderSide(
+                              //             color: Primary.primary.withAlpha(
+                              //               (0.2 * 255).toInt(),
+                              //             ),
+                              //             width: 1,
+                              //           ),
+                              //           borderRadius: const BorderRadius.all(
+                              //             Radius.circular(9),
+                              //           ),
+                              //         ),
+                              //         focusedBorder: OutlineInputBorder(
+                              //           borderSide: BorderSide(
+                              //             color: Primary.primary.withAlpha(
+                              //               (0.4 * 255).toInt(),
+                              //             ),
+                              //             width: 2,
+                              //           ),
+                              //           borderRadius: const BorderRadius.all(
+                              //             Radius.circular(9),
+                              //           ),
+                              //         ),
+                              //       ),
+                              //       // menuStyle: ,
+                              //       menuHeight: 250,
+                              //       dropdownMenuEntries:
+                              //           exchangeRatesCont.currenciesNamesList
+                              //               .map<DropdownMenuEntry<String>>((
+                              //                 String option,
+                              //               ) {
+                              //                 return DropdownMenuEntry<String>(
+                              //                   value: option,
+                              //                   label: option,
+                              //                 );
+                              //               })
+                              //               .toList(),
+                              //       enableFilter: true,
+                              //       onSelected: (val) {
+                              //         var index = exchangeRatesCont
+                              //             .currenciesNamesList
+                              //             .indexOf(val!);
+                              //         cont.setSelectedCurrency(
+                              //           exchangeRatesCont
+                              //               .currenciesIdsList[index],
+                              //           val,
+                              //           exchangeRatesCont
+                              //               .currenciesSymbolsList[index],
+                              //         );
+                              //         var result = exchangeRatesCont
+                              //             .exchangeRatesList
+                              //             .firstWhere(
+                              //               (item) => item["currency"] == val,
+                              //               orElse: () => null,
+                              //             );
+                              //         cont.setExchangeRateForSelectedCurrency(
+                              //           result != null
+                              //               ? '${result["exchange_rate"]}'
+                              //               : '1',
+                              //         );
+                              //       },
+                              //     );
+                              //
+                              //     // ReusableDropDownMenuWithSearch(
+                              //     //   list: exchangeRatesCont.currenciesNamesList,
+                              //     //   text: 'primary_currency'.tr,
+                              //     //   hint: '',
+                              //     //   onSelected: (val){
+                              //     //     var index = exchangeRatesCont
+                              //     //         .currenciesNamesList
+                              //     //         .indexOf(val!);
+                              //     //     cont.setSelectedCurrency(
+                              //     //       exchangeRatesCont.currenciesIdsList[index],
+                              //     //       val,
+                              //     //     );
+                              //     //     var result = exchangeRatesCont
+                              //     //         .exchangeRatesList
+                              //     //         .firstWhere(
+                              //     //           (item) =>
+                              //     //       item["currency"] == val,
+                              //     //       orElse: () => null,
+                              //     //     );
+                              //     //     cont
+                              //     //         .setExchangeRateForSelectedCurrency(
+                              //     //       result != null
+                              //     //           ? '${result["exchange_rate"]}'
+                              //     //           : '1',
+                              //     //     );
+                              //     //   },
+                              //     //   controller: cont.primaryCurrency,
+                              //     //   validationFunc: (value) {
+                              //     //     return null;
+                              //     //   },
+                              //     //   rowWidth: MediaQuery.of(context).size.width * 0.35,
+                              //     //   textFieldWidth: MediaQuery.of(context).size.width * 0.25,
+                              //     //   clickableOptionText: '',
+                              //     //   isThereClickableOption: false,
+                              //     //   onTappedClickableOption: (){});
+                              //   },
+                              // ),
                             ],
                           ),
                         ],

@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -166,8 +169,43 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
     quotationController.setLogo(imageBytes);
   }
 
+  late  QuillController _controller ;
+  String? _savedContent;
+
+  void _saveContent() {
+    final deltaJson = _controller.document.toDelta().toJson();
+    final jsonString = jsonEncode(deltaJson);
+
+    setState(() {
+      _savedContent = jsonString;
+    });
+
+    // You can now send `jsonString` to your backend
+    print('Saved content as JSON:\n$jsonString');
+    termsAndConditionsController.text=jsonString;
+  }
+
+  // Restore content from saved string (e.g., from API)
+  void _loadContent() {
+    if (_savedContent == null) return;
+
+    final delta = Delta.fromJson(jsonDecode(_savedContent!));
+    final doc = Document.fromDelta(delta);
+
+    setState(() {
+      _controller = QuillController(
+        document: doc,
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    });
+  }
+
   @override
   void initState() {
+    _controller = QuillController(
+      document: Document(),
+      selection: const TextSelection.collapsed(offset: 0),
+    );
     generatePdfFromImageUrl();
     checkVatExempt();
     quotationController.isVatExemptChecked = false;
@@ -504,6 +542,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                             UnderTitleBtn(
                               text: 'submit_and_preview'.tr,
                               onTap: () async {
+                                _saveContent();
+
                                 var oldKeys =
                                 quotationController
                                     .rowsInListViewInQuotation
@@ -2471,40 +2511,93 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'terms_conditions'.tr,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: TypographyColor.titleTable,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'terms_conditions'.tr,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: TypographyColor.titleTable,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.save_alt),
+                                            onPressed: _loadContent,
+                                          ),
+                                          gapW6,
+                                          IconButton(
+                                            icon: const Icon(Icons.restore),
+                                            onPressed: _loadContent,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                   gapH16,
-                                  ReusableTextField(
-                                    textEditingController:
-                                        termsAndConditionsController, //todo
-                                    isPasswordField: false,
-                                    hint: 'terms_conditions'.tr,
-                                    onChangedFunc: (val) {},
-                                    validationFunc: (val) {
-                                      setState(() {
-                                        termsAndConditions = val;
-                                      });
-                                    },
-                                  ),
-                                  gapH16,
-                                  Text(
-                                    'or_create_new_terms_conditions'.tr,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Primary.primary,
-                                      decoration: TextDecoration.underline,
-                                      fontStyle: FontStyle.italic,
+                                  // ReusableTextField(
+                                  //   textEditingController:
+                                  //       termsAndConditionsController, //todo
+                                  //   isPasswordField: false,
+                                  //   hint: 'terms_conditions'.tr,
+                                  //   onChangedFunc: (val) {},
+                                  //   validationFunc: (val) {
+                                  //     setState(() {
+                                  //       termsAndConditions = val;
+                                  //     });
+                                  //   },
+                                  // ),
+                                  SizedBox(
+                                    height: 300,
+                                    child: Column(
+                                      children: [
+                                        QuillSimpleToolbar(controller: _controller,
+                                          config: QuillSimpleToolbarConfig(
+                                              showFontFamily: false,
+                                            showColorButton: false,
+                                            showBackgroundColorButton: false,
+                                                  showSearchButton: false,
+                                            showDirection: false,
+                                            showLink: false,
+                                            showAlignmentButtons: false,
+                                            showLeftAlignment: false,
+                                            showRightAlignment: false,
+                                            showListCheck: false,
+                                            showIndent: false,
+                                            showQuote: false,
+                                            showCodeBlock: false
+                                          )),
+                                        Expanded(
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            color: Colors.grey[100],
+                                            child: QuillEditor.basic(
+                                              controller: _controller,
+
+                                              // readOnly: false, // اجعلها true إذا كنت تريد وضع القراءة فقط
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
+                                  // gapH16,
+                                  // Text(
+                                  //   'or_create_new_terms_conditions'.tr,
+                                  //   style: TextStyle(
+                                  //     fontSize: 16,
+                                  //     color: Primary.primary,
+                                  //     decoration: TextDecoration.underline,
+                                  //     fontStyle: FontStyle.italic,
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ),
+                            gapH16,
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 vertical: 20,
@@ -2743,6 +2836,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                       MediaQuery.of(context).size.width * 0.15,
                                   height: 45,
                                   onTapFunction: () async {
+                                    _saveContent();
                                     var oldKeys =
                                         quotationController
                                             .rowsInListViewInQuotation

@@ -230,7 +230,7 @@ Future<String> getCompanyPrimaryCurrencySymbolFromPref() async {
 
 Future<String> getCompanyPosCurrencyFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String posCurrency = prefs.getString('posCurrency') ?? 'USD';
+  String posCurrency = prefs.getString('posCurrency') ?? '';
   return posCurrency;
 }
 

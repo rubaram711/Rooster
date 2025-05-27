@@ -11,7 +11,7 @@ import 'Controllers/home_controller.dart';
 import 'Locale_Memory/save_user_info_locally.dart';
 import 'Screens/Authorization/sign_up_screen.dart';
 import 'Screens/welcome_screen.dart';
-
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 var id='';
 getInfoFromPref() async{
@@ -95,6 +95,14 @@ class _MyAppState extends State<MyApp> {
           ),//// Apply Open Sans to all text
         )
       ),
+      localizationsDelegates: const [
+        quill.FlutterQuillLocalizations.delegate, // مهم جدًا
+        // يمكنك إضافة Delegates أخرى هنا حسب الحاجة
+      ],
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('ar'), // Arabic (اختياري)
+      ],
       translations: AppLocalization(),
       locale: const Locale('en'),
       fallbackLocale: const Locale('en'),

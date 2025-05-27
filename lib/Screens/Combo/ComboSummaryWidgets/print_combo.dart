@@ -261,7 +261,7 @@ class _PrintComboState extends State<PrintCombo> {
         width: width,
         padding: const pw.EdgeInsets.symmetric(horizontal: 2),
         child: pw.Center(
-          child: pw.Text(text, style:  pw.TextStyle(fontSize: 7),),
+          child: pw.Text(text, style: const pw.TextStyle(fontSize: 7)),
         ),
       );
     }
@@ -322,7 +322,7 @@ class _PrintComboState extends State<PrintCombo> {
     }
 
     reusableText(String text) {
-      return pw.Text(text, style:  pw.TextStyle(fontSize: 7,),);
+      return pw.Text(text, style: const pw.TextStyle(fontSize: 7));
     }
 
     buildDividersRow(double width) {

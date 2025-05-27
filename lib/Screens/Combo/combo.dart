@@ -43,11 +43,11 @@ class _ComboState extends State<Combo> {
   addNewItem() {
     comboController.incrementlistViewLengthInCombo(comboController.increment);
     var pp = {
-      'itemId': '0',
-      'itemName': 'Item Name',
-      'itemDescription': 'Description',
+      'item_id': '0',
+      'item_name': 'Item Name',
+      'description': 'Description',
       'quantity': '0',
-      'price': '0',
+      'unit_price': '0',
       'discount': '0',
       'total': '0',
     };
@@ -84,7 +84,8 @@ class _ComboState extends State<Combo> {
   @override
   void initState() {
     super.initState();
-
+    comboController.orderLinesComboList = {};
+    comboController.rowsInListViewInCombo = {};
     comboController.getComboCreatFieldFromBack();
     getCurrency();
     comboController.listViewLengthInCombo = 50;
@@ -279,7 +280,7 @@ class _ComboState extends State<Combo> {
                                   i++
                                 ) {
                                   var selectedItemId =
-                                      '${comboController.rowsInListViewInCombo[keys[i]]['itemId']}';
+                                      '${comboController.rowsInListViewInCombo[keys[i]]['item_id']}';
                                   if (selectedItemId != '') {
                                     if (comboController
                                             .priceCurrency[selectedItemId] ==
@@ -387,6 +388,7 @@ class _ComboState extends State<Combo> {
                   ),
                 ],
               ),
+
               gapH20,
               Column(
                 children: [
@@ -620,7 +622,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
         combocont.rowsInListViewInCombo[widget.index]['discount'];
 
     descritipnComboController.text =
-        combocont.rowsInListViewInCombo[widget.index]['itemDescription'];
+        combocont.rowsInListViewInCombo[widget.index]['description'];
 
     totalLine = combocont.rowsInListViewInCombo[widget.index]['total'];
 
@@ -892,7 +894,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       setState(() {
                         quantity = val;
                         totalLine =
-                            '${(int.parse(quantity) * double.parse(cont.rowsInListViewInCombo[widget.index]['price'])) * (1 - double.parse(disc) / 100)}';
+                            '${(int.parse(quantity) * double.parse(cont.rowsInListViewInCombo[widget.index]['unit_price'])) * (1 - double.parse(disc) / 100)}';
                       });
 
                       _formKey.currentState!.validate();
@@ -1044,7 +1046,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         }
 
                         totalLine =
-                            '${(int.parse(quantity) * double.parse(cont.rowsInListViewInCombo[widget.index]['price'])) * (1 - double.parse(disc) / 100)}';
+                            '${(int.parse(quantity) * double.parse(cont.rowsInListViewInCombo[widget.index]['unit_price'])) * (1 - double.parse(disc) / 100)}';
                       });
                       _formKey.currentState!.validate();
 

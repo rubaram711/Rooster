@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:rooster_app/Controllers/cash_trays_controller.dart';
 import 'package:rooster_app/Controllers/company_settings_controller.dart';
 import 'package:rooster_app/Controllers/discounts_controller.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
@@ -26,6 +27,7 @@ import '../Controllers/combo_controller.dart';
 import '../Controllers/payment_terms_controller.dart';
 import '../Controllers/salesOrder_Controller.dart';
 import '../Controllers/taxation_controller.dart';
+import '../Screens/DocsReview/docs_review.dart';
 
 
 class MyBinding extends Bindings {
@@ -57,6 +59,8 @@ class MyBinding extends Bindings {
     Get.lazyPut<PaymentTermsController>(() => PaymentTermsController());
     Get.lazyPut<SalesOrderController>(() => SalesOrderController());
     Get.lazyPut<ComboController>(() => ComboController());
+    Get.lazyPut<CashTraysController>(() => CashTraysController());
+    Get.lazyPut<DocsReview>(() => DocsReview());
 
 
     // LanguagesController languagesController=Get.put(LanguagesController());

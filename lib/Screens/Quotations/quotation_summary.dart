@@ -39,6 +39,8 @@ import '../../const/functions.dart';
 import '../../const/urls.dart';
 import '../Combo/combo.dart';
 import 'create_new_quotation.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart';
 
 class QuotationSummary extends StatefulWidget {
   const QuotationSummary({super.key});
@@ -742,7 +744,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
             ),
 
             TableItem(
-              text: '${widget.info['total'] ?? ''}',
+              text: numberWithComma('${widget.info['total'] ?? ''}'),
               width:
                   widget.isDesktop
                       ? MediaQuery.of(context).size.width * 0.07
@@ -1017,6 +1019,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                             context,
                             MaterialPageRoute(
                               builder: (BuildContext context) {
+                                // print('widget.info[ ${widget.info['termsAndConditions']}');
                                 return PrintQuotationData(
                                   isPrintedAs0:
                                       '${widget.info['printedAsPercentage']}' ==
@@ -1936,6 +1939,37 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     '${widget.info['vatExempt'] ?? ''}' == '1' ? true : false;
   }
 
+  late  QuillController _controller ;
+  String? _savedContent;
+
+  void _saveContent() {
+    final deltaJson = _controller.document.toDelta().toJson();
+    final jsonString = jsonEncode(deltaJson);
+
+    setState(() {
+      _savedContent = jsonString;
+    });
+
+    // You can now send `jsonString` to your backend
+    print('Saved content as JSON:\n$jsonString');
+    termsAndConditionsController.text=jsonString;
+  }
+
+  // Restore content from saved string (e.g., from API)
+  void _loadContent() {
+    if (_savedContent == null) return;
+
+    final delta = Delta.fromJson(jsonDecode(_savedContent!));
+    final doc = Document.fromDelta(delta);
+
+    setState(() {
+      _controller = QuillController(
+        document: doc,
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    });
+  }
+
   @override
   void initState() {
     checkVatExempt();
@@ -1979,7 +2013,10 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     refController.text = widget.info['reference'] ?? '';
     validityController.text = widget.info['validity'] ?? '';
     currencyController.text = widget.info['currency']['name'] ?? '';
-    termsAndConditionsController.text = widget.info['termsAndConditions'] ?? '';
+    termsAndConditionsController.text = widget.info['termsAndConditions'] ?? '[{"insert":"\n"}]';
+    _savedContent=widget.info['termsAndConditions'] ?? '[{"insert":"\n"}]';
+    _loadContent();
+
     globalDiscPercentController.text =
         widget.info['globalDiscount'] ?? ''; // entered by user
     specialDiscPercentController.text =
@@ -3565,28 +3602,62 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                           ),
                         ),
                         gapH16,
-                        ReusableTextField(
-                          textEditingController:
-                              termsAndConditionsController, //todo
-                          isPasswordField: false,
-                          hint: 'terms_conditions'.tr,
-                          onChangedFunc: (val) {},
-                          validationFunc: (val) {
-                            // setState(() {
-                            //   termsAndConditions = val;
-                            // });
-                          },
-                        ),
-                        gapH16,
-                        Text(
-                          'or_create_new_terms_conditions'.tr,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Primary.primary,
-                            decoration: TextDecoration.underline,
-                            fontStyle: FontStyle.italic,
+                        SizedBox(
+                          height: 300,
+                          child: Column(
+                            children: [
+                              QuillSimpleToolbar(controller: _controller,
+                                  config: QuillSimpleToolbarConfig(
+                                      showFontFamily: false,
+                                      showColorButton: false,
+                                      showBackgroundColorButton: false,
+                                      showSearchButton: false,
+                                      showDirection: false,
+                                      showLink: false,
+                                      showAlignmentButtons: false,
+                                      showLeftAlignment: false,
+                                      showRightAlignment: false,
+                                      showListCheck: false,
+                                      showIndent: false,
+                                      showQuote: false,
+                                      showCodeBlock: false
+                                  )),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  color: Colors.grey[100],
+                                  child: QuillEditor.basic(
+                                    controller: _controller,
+
+                                    // readOnly: false, // اجعلها true إذا كنت تريد وضع القراءة فقط
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                        // ReusableTextField(
+                        //   textEditingController:
+                        //       termsAndConditionsController, //todo
+                        //   isPasswordField: false,
+                        //   hint: 'terms_conditions'.tr,
+                        //   onChangedFunc: (val) {},
+                        //   validationFunc: (val) {
+                        //     // setState(() {
+                        //     //   termsAndConditions = val;
+                        //     // });
+                        //   },
+                        // ),
+                        // gapH16,
+                        // Text(
+                        //   'or_create_new_terms_conditions'.tr,
+                        //   style: TextStyle(
+                        //     fontSize: 16,
+                        //     color: Primary.primary,
+                        //     decoration: TextDecoration.underline,
+                        //     fontStyle: FontStyle.italic,
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
@@ -3931,6 +4002,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     .rowsInListViewInQuotation[oldKeys[i]]!;
                           }
                           if (_formKey.currentState!.validate()) {
+                            _saveContent();
                             var res = await updateQuotation(
                               '${widget.info['id']}',
 

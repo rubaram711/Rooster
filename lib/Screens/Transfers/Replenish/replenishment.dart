@@ -4,10 +4,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/transfer_controller.dart';
+import 'package:rooster_app/Screens/Transfers/Replenish/update_replenishment.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
+import '../../../Controllers/exchange_rates_controller.dart';
 import '../../../Controllers/home_controller.dart';
+import '../../../Controllers/warehouse_controller.dart';
 import '../../../Widgets/page_title.dart';
 import '../../../Widgets/reusable_btn.dart';
+import '../../../Widgets/reusable_more.dart';
 import '../../../Widgets/reusable_text_field.dart';
 import '../../../Widgets/table_title.dart';
 import '../../../const/Sizes.dart';
@@ -53,11 +57,17 @@ class _ReplenishmentState extends State<Replenishment> {
     });
     await transferController.getAllReplenishmentFromBack();
   }
+
+  final ExchangeRatesController exchangeRatesController = Get.find();
+  final WarehouseController warehouseController = Get.find();
+
   @override
   void initState() {
     listViewLength = Sizes.deviceHeight * (0.09 * transferController.transfersList.length);
     transferController.searchInReplenishmentsController.clear();
     transferController.getAllReplenishmentFromBack();
+    exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
+    warehouseController.getWarehousesFromBack();
     super.initState();
   }
   @override
@@ -145,10 +155,10 @@ class _ReplenishmentState extends State<Replenishment> {
                               text: 'status'.tr,
                               width: MediaQuery.of(context).size.width * 0.1,
                             ),
-                            // TableTitle(
-                            //   text: 'more'.tr,
-                            //   width: MediaQuery.of(context).size.width * 0.03,
-                            // ),
+                            TableTitle(
+                              text: 'more'.tr,
+                              width: MediaQuery.of(context).size.width * 0.03,
+                            ),
                           ],
                         ),
                       ),
@@ -370,93 +380,108 @@ class ReplenishmentAsRowInTable extends StatelessWidget {
   final bool isDesktop;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric( vertical: 10),
-      decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(0))),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          TableItem(
-            text: '${info['replenishmentNumber'] ?? ''}',
-            width:isDesktop? MediaQuery.of(context).size.width * 0.1 :150,
-          ),
-          TableItem(
-            text: '${info['date'] ?? ''}'.substring(0,11),
-            width:isDesktop? MediaQuery.of(context).size.width * 0.1 :150,
-          ),
-          TableItem(
-            text: '${info['destWarehouse'] ?? ''}',
-            width: isDesktop? MediaQuery.of(context).size.width * 0.1 :150,
-          ),
-          TableItem(
-            text: '${info['task'] ?? 'No Records'}',
-            width:isDesktop? MediaQuery.of(context).size.width * 0.1 :150,
-          ),
-          SizedBox(
-            width:isDesktop? MediaQuery.of(context).size.width * 0.1 :150,
-            child: Center(
-              child: Container(
-                width: '${info['status']}'.length * 10.0,
-                padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
-                decoration: BoxDecoration(
-                    color: info['status'] == "pending"
-                        ? Others.orangeStatusColor
-                        : info['status'] == 'cancelled'
-                        ? Others.redStatusColor
-                        : Others.greenStatusColor,
-                    borderRadius: BorderRadius.circular(25)),
-                child: Center(
-                    child: Text(
-                      '${info['status'] ?? ''}',
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    )),
+    return InkWell(
+      onDoubleTap: () {
+        showDialog<String>(
+          context: context,
+          builder:
+              (BuildContext context) => AlertDialog(
+            backgroundColor: Colors.white,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(9),
               ),
             ),
+            elevation: 0,
+            content: UpdateReplenishmentDialog(
+              index: index,
+              info: info,
+            ),
           ),
-        ],
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric( vertical: 10),
+        decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(0))),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            TableItem(
+              text: '${info['replenishmentNumber'] ?? ''}',
+              width:isDesktop? MediaQuery.of(context).size.width * 0.1 :150,
+            ),
+            TableItem(
+              text: '${info['date'] ?? ''}'.substring(0,11),
+              width:isDesktop? MediaQuery.of(context).size.width * 0.1 :150,
+            ),
+            TableItem(
+              text: '${info['destWarehouse'] ?? ''}',
+              width: isDesktop? MediaQuery.of(context).size.width * 0.1 :150,
+            ),
+            TableItem(
+              text: '${info['task'] ?? 'No Records'}',
+              width:isDesktop? MediaQuery.of(context).size.width * 0.1 :150,
+            ),
+            SizedBox(
+              width:isDesktop? MediaQuery.of(context).size.width * 0.1 :150,
+              child: Center(
+                child: Container(
+                  width: '${info['status']}'.length * 10.0,
+                  padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
+                  decoration: BoxDecoration(
+                      color: info['status'] == "pending"
+                          ? Others.orangeStatusColor
+                          : info['status'] == 'cancelled'
+                          ? Others.redStatusColor
+                          : Others.greenStatusColor,
+                      borderRadius: BorderRadius.circular(25)),
+                  child: Center(
+                      child: Text(
+                        '${info['status'] ?? ''}',
+                        style: const TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      )),
+                ),
+              ),
+            ),
+            SizedBox(
+              width:isDesktop? MediaQuery.of(context).size.width * 0.03: 100,
+              child: ReusableMore(
+                itemsList: [
+                  PopupMenuItem<String>(
+                    value: '1',
+                    onTap: () async {
+                      showDialog<String>(
+                        context: context,
+                        builder:
+                            (BuildContext context) => AlertDialog(
+                          backgroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(9),
+                            ),
+                          ),
+                          elevation: 0,
+                          content: UpdateReplenishmentDialog(
+                            info:  info,
+                            index: index,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text('Update'.tr),
+                  ),
+                ],),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class ReusableMore extends StatelessWidget {
-  const ReusableMore({super.key, required this.itemsList});
-  final List<PopupMenuEntry> itemsList;
-  @override
-  Widget build(BuildContext context) {
-    GlobalKey accMoreKey = GlobalKey();
-    return InkWell(
-      key: accMoreKey,
-      onTap: () {
-        {
-          // if (val == true) {
-          final RenderBox renderBox =
-          accMoreKey.currentContext?.findRenderObject() as RenderBox;
-          final Size size = renderBox.size;
-          final Offset offset = renderBox.localToGlobal(Offset.zero);
-          showMenu(
-              context: context,
-              color: Colors.white, //TypographyColor.menuBg,
-              surfaceTintColor: Colors.white,
-              position: RelativeRect.fromLTRB(
-                  offset.dx,
-                  offset.dy + size.height + 15,
-                  offset.dx + size.width,
-                  offset.dy + size.height),
-              items: itemsList
-          );
-        }
-      },
-      child: Icon(
-        Icons.more_horiz,
-        color: TypographyColor.titleTable,
-      ),
-    );
-  }
-}
 
 
 class MobileReplenishmentSummary extends StatefulWidget {
@@ -596,45 +621,69 @@ class _MobileReplenishmentSummaryState extends State<MobileReplenishmentSummary>
                                                 index: index,
                                                 isDesktop: false,
                                               ),
-                                              SizedBox(
-                                                width: 100,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                                  children: [
-                                                    SizedBox(
-                                                      width: MediaQuery.of(context).size.width *
-                                                          0.03,
-                                                      child:  const ReusableMore(
-                                                        itemsList: [],),
-                                                    ),
-                                                    SizedBox(
-                                                      width: MediaQuery.of(context).size.width *
-                                                          0.03,
-                                                      child: InkWell(
-                                                        onTap: () async {
-                                                          // var res= await deleteTransfer('${transfersList[index]['id']}');
-                                                          // if(res.statusCode==200){
-                                                          //   CommonWidgets.snackBar('Success', res['message']);
-                                                          //   setState(() {
-                                                          //     selectedNumberOfRowsAsInt=selectedNumberOfRowsAsInt-1;
-                                                          //     transfersList.removeAt(index);
-                                                          //     listViewLength=listViewLength-0.09;
-                                                          //   });
-                                                          // }else{
-                                                          //   CommonWidgets.snackBar('error',
-                                                          //       res['message']);
-                                                          // }
-                                                        },
-                                                        child: Icon(
-                                                          Icons.delete_outline,
-                                                          color: Primary.primary,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
+                                              // SizedBox(
+                                              //   width: 100,
+                                              //   child: Row(
+                                              //     mainAxisAlignment:
+                                              //     MainAxisAlignment.spaceEvenly,
+                                              //     children: [
+                                              //       SizedBox(
+                                              //         width: MediaQuery.of(context).size.width *
+                                              //             0.03,
+                                              //         child:   ReusableMore(
+                                              //           itemsList: [
+                                              //             PopupMenuItem<String>(
+                                              //               value: '1',
+                                              //               onTap: () async {
+                                              //                 showDialog<String>(
+                                              //                   context: context,
+                                              //                   builder:
+                                              //                       (BuildContext context) => AlertDialog(
+                                              //                     backgroundColor: Colors.white,
+                                              //                     shape: const RoundedRectangleBorder(
+                                              //                       borderRadius: BorderRadius.all(
+                                              //                         Radius.circular(9),
+                                              //                       ),
+                                              //                     ),
+                                              //                     elevation: 0,
+                                              //                     content: UpdateReplenishmentDialog(
+                                              //                       info:  cont.replenishmentList[index],
+                                              //                       index: index,
+                                              //                     ),
+                                              //                   ),
+                                              //                 );
+                                              //               },
+                                              //               child: Text('Update'.tr),
+                                              //             ),
+                                              //           ],),
+                                              //       ),
+                                              //       SizedBox(
+                                              //         width: MediaQuery.of(context).size.width *
+                                              //             0.03,
+                                              //         child: InkWell(
+                                              //           onTap: () async {
+                                              //             // var res= await deleteTransfer('${transfersList[index]['id']}');
+                                              //             // if(res.statusCode==200){
+                                              //             //   CommonWidgets.snackBar('Success', res['message']);
+                                              //             //   setState(() {
+                                              //             //     selectedNumberOfRowsAsInt=selectedNumberOfRowsAsInt-1;
+                                              //             //     transfersList.removeAt(index);
+                                              //             //     listViewLength=listViewLength-0.09;
+                                              //             //   });
+                                              //             // }else{
+                                              //             //   CommonWidgets.snackBar('error',
+                                              //             //       res['message']);
+                                              //             // }
+                                              //           },
+                                              //           child: Icon(
+                                              //             Icons.delete_outline,
+                                              //             color: Primary.primary,
+                                              //           ),
+                                              //         ),
+                                              //       ),
+                                              //     ],
+                                              //   ),
+                                              // ),
                                             ],
                                           ),
                                           const Divider()

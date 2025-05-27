@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
@@ -15,6 +16,10 @@ import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/table_title.dart';
 import '../../const/urls.dart';
+
+
+import 'convert_from_delta_to_widget.dart';
+
 // import 'package:http/http.dart' as http;
 class QuotationData extends StatefulWidget {
   const QuotationData({super.key});
@@ -81,6 +86,8 @@ class _QuotationDataState extends State<QuotationData> {
       quotationController.setIsVatExemptChecked(true);
     }
   }
+
+
   @override
   void initState() {
     checkVatExempt();
@@ -92,6 +99,8 @@ class _QuotationDataState extends State<QuotationData> {
         quotationController.selectedQuotationData['vatExempt'] == 1
             ? true
             : false;
+
+
     super.initState();
   }
 
@@ -1090,15 +1099,21 @@ class _QuotationDataState extends State<QuotationData> {
                                 ),
                               ),
                               gapH16,
-                              ReusableShowInfoCard(
-                                text:
-                                    '${quotationController.selectedQuotationData['termsAndConditions'] ?? ''} ',
-                                width: MediaQuery.of(context).size.width * 0.9,
-                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  quillDeltaToWidget('${quotationController.selectedQuotationData['termsAndConditions'] ?? ''} '),
+                                ],
+                              )
+                              // ReusableShowInfoCard(v v
+                              //   text:
+                              //       '${quotationController.selectedQuotationData['termsAndConditions'] ?? ''} ',
+                              //   width: MediaQuery.of(context).size.width * 0.9,
+                              // ),
                             ],
                           ),
                         ),
-
+                        gapH16,
                         Container(
                           padding: const EdgeInsets.symmetric(
                             vertical: 20,

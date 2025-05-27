@@ -68,6 +68,8 @@ class TransferController extends GetxController{
   }
 
 //replinsh section
+  Map quantitiesForUpdate={};
+
   TextEditingController transferToInReplenishController = TextEditingController();
   String transferToIdInReplenish='';
   // List<Widget> orderLinesInReplenishList = [];
@@ -126,6 +128,10 @@ class TransferController extends GetxController{
   addToItemsListInReplenish(String index,Map orderItem){
     itemsListInReplenish[index]=orderItem;
     update();
+  }
+
+  addToItemsListInReplenishWithoutSetState(String index,Map orderItem){
+    itemsListInReplenish[index]=orderItem;
   }
   removeFromItemsListInReplenish(String index){
     itemsListInReplenish.remove(index);

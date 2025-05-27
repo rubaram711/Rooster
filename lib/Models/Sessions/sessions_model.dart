@@ -36,12 +36,12 @@ class SessionOrder {
 
   SessionOrder.fromJson(Map<String, dynamic> json) {
     orderNumber = json['order_number'];
-    primaryCurrencyTotal = json['primaryCurrencyTotal'];
-    posCurrencyTotal = json['posCurrencyTotal'];
-    primaryCurrencyTaxValue = json['primaryCurrencyTaxValue'];
-    posCurrencyTaxValue = json['posCurrencyTaxValue'];
-    primaryCurrencyDiscountValue = json['primaryCurrencyDiscountValue'];
-    posCurrencyDiscountValue = json['posCurrencyDiscountValue'];
+    primaryCurrencyTotal = json['primary_currency_total'];
+    posCurrencyTotal = json['pos_currency_total'];
+    primaryCurrencyTaxValue = json['primary_currency_tax_value'];
+    posCurrencyTaxValue = json['pos_currency_tax_value'];
+    primaryCurrencyDiscountValue = json['primary_currency_discount_value'];
+    posCurrencyDiscountValue = json['pos_currency_discount_value'];
     received = json['received'];
     receivedOtherCurrency = json['receivedOtherCurrency'];
     openedAt = json['opened_at'];
@@ -60,12 +60,12 @@ class SessionOrder {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['order_number'] = orderNumber;
-    data['primaryCurrencyTotal'] = primaryCurrencyTotal;
-    data['posCurrencyTotal'] = posCurrencyTotal;
-    data['primaryCurrencyTaxValue'] = primaryCurrencyTaxValue;
-    data['posCurrencyTaxValue'] = posCurrencyTaxValue;
-    data['primaryCurrencyDiscountValue'] = primaryCurrencyDiscountValue;
-    data['posCurrencyDiscountValue'] = posCurrencyDiscountValue;
+    data['primary_currency_total'] = primaryCurrencyTotal;
+    data['pos_currency_total'] = posCurrencyTotal;
+    data['primary_currency_tax_value'] = primaryCurrencyTaxValue;
+    data['pos_currency_tax_value'] = posCurrencyTaxValue;
+    data['primary_currency_discount_value'] = primaryCurrencyDiscountValue;
+    data['pos_currency_discount_value'] = posCurrencyDiscountValue;
     data['received'] = received;
     data['receivedOtherCurrency'] = receivedOtherCurrency;
     data['opened_at'] = openedAt;
@@ -84,23 +84,23 @@ class SessionOrder {
 
 class PaymentDetails {
   String? cashingMethod;
-  num? usdAmount;
-  num? otherCurrencyAmount;
+  num? primaryCurrencyAmount;
+  num? posCurrencyAmount;
 
   PaymentDetails(
-      {this.cashingMethod, this.usdAmount, this.otherCurrencyAmount});
+      {this.cashingMethod, this.primaryCurrencyAmount, this.posCurrencyAmount});
 
   PaymentDetails.fromJson(Map<String, dynamic> json) {
     cashingMethod = json['cashing_method'];
-    usdAmount = json['usd_amount'];
-    otherCurrencyAmount = json['other_currency_amount'];
+    primaryCurrencyAmount = json['primary_currency_amount'];
+    posCurrencyAmount = json['pos_currency_amount'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['cashing_method'] = cashingMethod;
-    data['usd_amount'] = usdAmount;
-    data['other_currency_amount'] = otherCurrencyAmount;
+    data['primary_currency_amount'] = primaryCurrencyAmount;
+    data['pos_currency_amount'] = posCurrencyAmount;
     return data;
   }
 }

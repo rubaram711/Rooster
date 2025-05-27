@@ -34,7 +34,7 @@ class CompanySettingsController extends GetxController {
   String selectedPosCurrencySymbol = '';
   String exchangeRateForSelectedCurrency = '';
   bool isCompanySubjectToVat = true;
-
+  bool isPosCurrencyFound=false;
   setSelectedCurrency(String id,String name,String symbol){
     selectedCurrencyId=id;
     selectedCurrencyName=name;

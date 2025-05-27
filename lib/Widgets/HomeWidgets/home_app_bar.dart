@@ -1,4 +1,3 @@
-import 'dart:ui' as html;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -242,11 +241,14 @@ class AdminSectionInHomeAppBar extends StatefulWidget {
 
 class _AdminSectionInHomeAppBarState extends State<AdminSectionInHomeAppBar> {
   var name = '';
+  // var address= '';
   HomeController homeController=Get.find();
   getInfoFromPref() async {
     name = await getNameFromPref();
-   var companyName = await getCompanyNameFromPref();
+    var companyName = await getCompanyNameFromPref();
+    var address = await getCompanyAddressFromPref();
     homeController.setCompanyName(companyName);
+    homeController.setCompanyAddress(address);
     homeController.setName(name);
   }
 

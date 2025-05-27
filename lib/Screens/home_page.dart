@@ -4,6 +4,8 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:rooster_app/Screens/AccountSettings/RolesAndPermissions/roles.dart';
 import 'package:rooster_app/Screens/AccountSettings/RolesAndPermissions/roles_and_permissions.dart';
 import 'package:rooster_app/Screens/POS/pos_screen_for_mobile.dart';
+import 'package:rooster_app/Screens/PendingDocs/pending_docs.dart';
+import 'package:rooster_app/Screens/PosReports/cash_trays/cash_tray_filter.dart';
 import 'package:rooster_app/Screens/SupplierOrder/new_supplier_order.dart';
 import 'package:rooster_app/Screens/SupplierOrder/supplier_order_summary.dart';
 import 'package:rooster_app/Screens/Transfers/transfer_details.dart';
@@ -13,7 +15,11 @@ import 'package:rooster_app/Screens/sales_invoice/sales_invoice_summary.dart';
 import 'package:rooster_app/const/colors.dart';
 import 'package:rooster_app/const/sizes.dart';
 import '../Controllers/home_controller.dart';
+import 'Combo/ComboSummaryWidgets/combo_data.dart' show ComboData;
 import 'Combo/combo_summary.dart';
+import 'DocsReview/docs_review.dart';
+import 'PendingDocs/to_deleiver.dart';
+import 'PendingDocs/to_sales_order.dart';
 import 'SupplierOrder/supliers.dart';
 import '../Widgets/HomeWidgets/home_app_bar.dart';
 import '../Widgets/HomeWidgets/home_drawer_list_tile.dart';
@@ -78,10 +84,16 @@ class HomeBody extends StatefulWidget {
 
 class _HomeBodyState extends State<HomeBody> {
   Map<String, Widget> contentList = {
+  'docs_review': DocsReview(),
+  'pending_docs':PendingDocs(),
+  'to_sales_order':ToSalesOrder(),
+  'to_deliver':ToDeleiver(),
+    'cash_tray_report': const CashTrayFilter(),
     'items': const ProductsPage(),
     'stock': const ProductsPage(),
     'combo': const ComboSummary(),
     'combo_summary': ComboSummary(),
+    "combo_data": ComboData(),
     'products': const ProductsPage(),
     'quotation': const CreateNewQuotation(),
     'new_quotation': const CreateNewQuotation(),
