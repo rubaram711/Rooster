@@ -555,12 +555,13 @@ class _SignFormState extends State<SignForm> {
                           '${res['data']['companySettings']['showLogoOnPos'] ?? '0'}',
                         );
                       }
+                      if(res['data']['defaultWarehouse']!=null){
                       await saveDefaultWarehouseInfoLocally(
                         '${res['data']['defaultWarehouse']['id']}',
                         res['data']['defaultWarehouse']['name'],
                         res['data']['defaultWarehouse']['warehouse_number'],
                         res['data']['defaultWarehouse']['address'] ?? '',
-                      );
+                      );}
                       // ignore: use_build_context_synchronously
                       Navigator.pushReplacement(
                         context,

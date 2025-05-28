@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rooster_app/Backend/Quotations/TermsAndConditions/get_terms_and_conditions.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Screens/Combo/combo.dart';
@@ -30,6 +31,7 @@ import '../../../Widgets/reusable_btn.dart';
 import '../../../Widgets/reusable_text_field.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
+import '../../Backend/Quotations/TermsAndConditions/save_terms_and_conditions.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/dialog_drop_menu.dart';
@@ -200,6 +202,43 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
     });
   }
 
+  void _saveTermsAndConditions() async{
+    final deltaJson = _controller.document.toDelta().toJson();
+    final jsonString = jsonEncode(deltaJson);
+
+    setState(() {
+      _savedContent = jsonString;
+    });
+    termsAndConditionsController.text=jsonString;
+
+    print('_savedContent $_savedContent');
+    var p=await storeTermsAndConditions(_savedContent!);
+    if(p['success']==true){
+      CommonWidgets.snackBar('Success', p['message']);
+    }else{
+      CommonWidgets.snackBar('error', p['message']);
+    }
+  }
+
+  List termsAndConditionsList=[];
+  int currentIndex=0;
+  getAllTermsAndConditions() async {
+    var res=await getTermsAndConditions();
+    if(res['success']==true){
+       termsAndConditionsList=res['data'];
+    }
+  }
+
+  showLastTermsAndConditionsList(){
+    setState(() {
+      if(currentIndex<termsAndConditionsList.length){
+        _savedContent=termsAndConditionsList[currentIndex];
+        currentIndex++;
+      }else{
+        CommonWidgets.snackBar('error', 'The list is over');
+      }
+    });
+  }
   @override
   void initState() {
     _controller = QuillController(
@@ -223,6 +262,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
     quotationController.listViewLengthInQuotation = 50;
     validityController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     priceListController.text='STANDARD';
+    getAllTermsAndConditions();
     super.initState();
   }
 
@@ -2526,12 +2566,15 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         children: [
                                           IconButton(
                                             icon: const Icon(Icons.save_alt),
-                                            onPressed: _loadContent,
+                                            onPressed: ()async{
+                                              print('ok');
+                                              _saveTermsAndConditions();
+                                              },
                                           ),
                                           gapW6,
                                           IconButton(
                                             icon: const Icon(Icons.restore),
-                                            onPressed: _loadContent,
+                                            onPressed: showLastTermsAndConditionsList,
                                           ),
                                         ],
                                       ),

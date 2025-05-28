@@ -92,6 +92,8 @@ const kReportCashTrayUrl='$baseUrl/tray-report';//id
 const kCreateCashTrayUrl='$baseUrl/trays/create';
 const kSelectRoleUrl='$baseUrl/users/selectRole';
 
+const kTermsAndConditionsUrl='$baseUrl/users/selectRole';//todo change
+
 
 
 const kGetCountriesUrl='https://countriesnow.space/api/v0.1/countries/population';
