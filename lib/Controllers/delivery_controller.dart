@@ -62,8 +62,8 @@ abstract class DeliveryControllerAbstract extends GetxController {
   getAllTaxationGroupsFromBack();
   resetDeliveries();
   clearList();
-  addTorowsInListViewInDelivery(int index, Map p);
-  removeFromrowsInListViewInDelivery(int index);
+  addToRowsInListViewInDelivery(int index, Map p);
+  removeFromRowsInListViewInDelivery(int index);
   setSearchInDeliveryController(String value);
   getAllDeliveryFromBack();
   getAllDeliveryFromBackWithoutExcept();
@@ -71,8 +71,8 @@ abstract class DeliveryControllerAbstract extends GetxController {
   setDeliveries(List value);
   setSelectedDelivery(Map map);
   resetDeliveriesData();
-  clearrowsInListViewInDeliveryData();
-  addTorowsInListViewInDeliveryData(List p);
+  clearRowsInListViewInDeliveryData();
+  addToRowsInListViewInDeliveryData(List p);
   setIsSubmitAndPreviewClicked(bool val);
   setSelectedDriverId(String val);
 }
@@ -537,7 +537,7 @@ class DeliveryController extends DeliveryControllerAbstract {
   Map itemUnitPrice = {};
   Map warehouseUnitPrice = {};
   Map itemsVats = {};
-  Map warehousessVats = {};
+  Map warehousesVats = {};
   Map itemsPricesCurrencies = {};
   Map warehousePricesCurrencies = {};
   List<String> combosCodesList = [];
@@ -573,7 +573,7 @@ class DeliveryController extends DeliveryControllerAbstract {
     itemUnitPrice = {};
     warehouseUnitPrice = {};
     itemsVats = {};
-    warehousessVats = {};
+    warehousesVats = {};
     itemsPricesCurrencies = {};
     warehousePricesCurrencies = {};
     deliveryNumber = '';
@@ -888,13 +888,13 @@ class DeliveryController extends DeliveryControllerAbstract {
   }
 
   @override
-  addTorowsInListViewInDelivery(int index, Map p) {
+  addToRowsInListViewInDelivery(int index, Map p) {
     rowsInListViewInDelivery[index] = p;
     update();
   }
 
   @override
-  removeFromrowsInListViewInDelivery(int index) {
+  removeFromRowsInListViewInDelivery(int index) {
     rowsInListViewInDelivery.remove(index);
 
     update();
@@ -944,7 +944,7 @@ class DeliveryController extends DeliveryControllerAbstract {
         var item = deliveryList[i];
 
         if (item['status'] == 'pending') {
-          // Check if this item already exists in deliveryListpending
+          // Check if this item already exists in deliveryListPending
           bool exists = deliveryListPending.any(
                 (element) => element['id'] == item['id'],
           );
@@ -990,7 +990,7 @@ class DeliveryController extends DeliveryControllerAbstract {
     //   isDeliveryFetched = true;
     //   update();
   }
-  // salesorder in document
+  // sales order in document
 
   Map selectedDeliveryData = {};
   List rowsInListViewInDeliveryData = [];
@@ -1008,13 +1008,13 @@ class DeliveryController extends DeliveryControllerAbstract {
   }
 
   @override
-  clearrowsInListViewInDeliveryData() {
+  clearRowsInListViewInDeliveryData() {
     rowsInListViewInDeliveryData = [];
     update();
   }
 
   @override
-  addTorowsInListViewInDeliveryData(List p) {
+  addToRowsInListViewInDeliveryData(List p) {
     rowsInListViewInDeliveryData = p;
     update();
   }

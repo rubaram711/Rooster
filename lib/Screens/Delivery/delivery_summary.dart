@@ -3403,7 +3403,7 @@ class _UpdateDeliveryDialogState extends State<UpdateDeliveryDialog> {
     deliveryController.incrementListViewLengthInDelivery(
       deliveryController.increment,
     );
-    deliveryController.addTorowsInListViewInDelivery(quotationCounter, {
+    deliveryController.addToRowsInListViewInDelivery(quotationCounter, {
       'line_type_id': '1',
       'item_id': '',
       'itemName': '',
@@ -3430,7 +3430,7 @@ class _UpdateDeliveryDialogState extends State<UpdateDeliveryDialog> {
     deliveryController.incrementListViewLengthInDelivery(
       deliveryController.increment,
     );
-    deliveryController.addTorowsInListViewInDelivery(quotationCounter, {
+    deliveryController.addToRowsInListViewInDelivery(quotationCounter, {
       'line_type_id': '2',
       'item_id': '',
       'itemName': '',
@@ -3457,7 +3457,7 @@ class _UpdateDeliveryDialogState extends State<UpdateDeliveryDialog> {
     deliveryController.incrementListViewLengthInDelivery(
       deliveryController.increment,
     );
-    deliveryController.addTorowsInListViewInDelivery(quotationCounter, {
+    deliveryController.addToRowsInListViewInDelivery(quotationCounter, {
       'line_type_id': '3',
       'item_id': '',
       'itemName': '',
@@ -3486,7 +3486,7 @@ class _UpdateDeliveryDialogState extends State<UpdateDeliveryDialog> {
       deliveryController.increment,
     );
 
-    deliveryController.addTorowsInListViewInDelivery(quotationCounter, {
+    deliveryController.addToRowsInListViewInDelivery(quotationCounter, {
       'line_type_id': '4',
       'item_id': '',
       'itemName': '',
@@ -3516,7 +3516,7 @@ class _UpdateDeliveryDialogState extends State<UpdateDeliveryDialog> {
       deliveryController.increment,
     );
 
-    deliveryController.addTorowsInListViewInDelivery(quotationCounter, {
+    deliveryController.addToRowsInListViewInDelivery(quotationCounter, {
       'line_type_id': '5',
       'item_id': '',
       'itemName': '',
@@ -3944,7 +3944,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       deliveryController.decrementListViewLengthInDelivery(
                         deliveryController.increment,
                       );
-                      deliveryController.removeFromrowsInListViewInDelivery(
+                      deliveryController.removeFromRowsInListViewInDelivery(
                         widget.index,
                       );
 
@@ -4066,7 +4066,7 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                       deliveryController.decrementListViewLengthInDelivery(
                         deliveryController.increment,
                       );
-                      deliveryController.removeFromrowsInListViewInDelivery(
+                      deliveryController.removeFromRowsInListViewInDelivery(
                         widget.index,
                       );
                       deliveryController.removeFromOrderLinesInDeliveryList(
@@ -4186,7 +4186,7 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                     deliveryController.decrementListViewLengthInDelivery(
                       deliveryController.increment,
                     );
-                    deliveryController.removeFromrowsInListViewInDelivery(
+                    deliveryController.removeFromRowsInListViewInDelivery(
                       widget.index,
                     );
                     deliveryController.removeFromOrderLinesInDeliveryList(
@@ -4391,7 +4391,7 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                         deliveryController.decrementListViewLengthInDelivery(
                           deliveryController.increment + 50,
                         );
-                        deliveryController.removeFromrowsInListViewInDelivery(
+                        deliveryController.removeFromRowsInListViewInDelivery(
                           widget.index,
                         );
                         deliveryController.removeFromOrderLinesInDeliveryList(
@@ -4855,7 +4855,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       deliveryController.decrementListViewLengthInDelivery(
                         deliveryController.increment,
                       );
-                      deliveryController.removeFromrowsInListViewInDelivery(
+                      deliveryController.removeFromRowsInListViewInDelivery(
                         widget.index,
                       );
 

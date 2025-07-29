@@ -1476,7 +1476,7 @@ class _CreateDeliveryState extends State<CreateDelivery> {
     deliveryController.incrementListViewLengthInDelivery(
       deliveryController.increment,
     );
-    deliveryController.addTorowsInListViewInDelivery(deliveryCounter, {
+    deliveryController.addToRowsInListViewInDelivery(deliveryCounter, {
       'line_type_id': '1',
       'item_id': '',
       'itemName': '',
@@ -1506,7 +1506,7 @@ class _CreateDeliveryState extends State<CreateDelivery> {
       deliveryController.increment,
     );
 
-    deliveryController.addTorowsInListViewInDelivery(deliveryCounter, {
+    deliveryController.addToRowsInListViewInDelivery(deliveryCounter, {
       'line_type_id': '2',
       'item_id': '',
       'itemName': '',
@@ -1536,7 +1536,7 @@ class _CreateDeliveryState extends State<CreateDelivery> {
       deliveryController.increment,
     );
 
-    deliveryController.addTorowsInListViewInDelivery(deliveryCounter, {
+    deliveryController.addToRowsInListViewInDelivery(deliveryCounter, {
       'line_type_id': '3',
       'item_id': '',
       'itemName': '',
@@ -1566,7 +1566,7 @@ class _CreateDeliveryState extends State<CreateDelivery> {
       deliveryController.increment + 50,
     );
 
-    deliveryController.addTorowsInListViewInDelivery(deliveryCounter, {
+    deliveryController.addToRowsInListViewInDelivery(deliveryCounter, {
       'line_type_id': '4',
       'item_id': '',
       'itemName': '',
@@ -1597,7 +1597,7 @@ class _CreateDeliveryState extends State<CreateDelivery> {
       deliveryController.increment,
     );
 
-    deliveryController.addTorowsInListViewInDelivery(deliveryCounter, {
+    deliveryController.addToRowsInListViewInDelivery(deliveryCounter, {
       'line_type_id': '5',
       'item_id': '',
       'itemName': '',
@@ -2046,7 +2046,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                                     deliveryController.increment,
                                   );
                               deliveryController
-                                  .removeFromrowsInListViewInDelivery(
+                                  .removeFromRowsInListViewInDelivery(
                                     widget.index,
                                   );
                               deliveryController
@@ -2178,7 +2178,7 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                                     deliveryController.increment,
                                   );
                               deliveryController
-                                  .removeFromrowsInListViewInDelivery(
+                                  .removeFromRowsInListViewInDelivery(
                                     widget.index,
                                   );
                               deliveryController
@@ -2309,7 +2309,7 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                           deliveryController.decrementListViewLengthInDelivery(
                             deliveryController.increment,
                           );
-                          deliveryController.removeFromrowsInListViewInDelivery(
+                          deliveryController.removeFromRowsInListViewInDelivery(
                             widget.index,
                           );
                           deliveryController.removeFromOrderLinesInDeliveryList(
@@ -2496,7 +2496,7 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                                 salesOrderController.increment + 50,
                               );
                           salesOrderController
-                              .removeFromrowsInListViewInDelivery(widget.index);
+                              .removeFromRowsInListViewInDelivery(widget.index);
                           salesOrderController
                               .removeFromOrderLinesInDeliveryList(
                                 widget.index.toString(),
@@ -3012,7 +3012,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                                     deliveryController.increment,
                                   );
                               deliveryController
-                                  .removeFromrowsInListViewInDelivery(
+                                  .removeFromRowsInListViewInDelivery(
                                     widget.index,
                                   );
                               deliveryController
