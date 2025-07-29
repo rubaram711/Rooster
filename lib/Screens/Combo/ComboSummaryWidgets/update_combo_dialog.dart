@@ -888,7 +888,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       );
                       cont.getTotalItems();
                     });
-                    //setstate
 
                     cont.setEnteredUnitPriceInCombo(
                       widget.index,

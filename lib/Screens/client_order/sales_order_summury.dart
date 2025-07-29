@@ -1340,7 +1340,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
                       //       print("-------orderLines1---------");
                       //       print(orderLines1);
-                      //       var res = await updateSalesOrdder(
+                      //       var res = await updateSalesOrder(
                       //         '${widget.info['id']}',
                       //         false,
                       //         '${widget.info['reference'] ?? ''}',
@@ -1381,7 +1381,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                       //       if (res['success'] == true) {
                       //         // pendingDocsController.getAllPendingDocs();
                       //         salesOrderController
-                      //             .getAllSalesOrderFromBackWithoutEcxcept();
+                      //             .getAllSalesOrderFromBackWithoutExcept();
                       //         CommonWidgets.snackBar('Success', res['message']);
                       //       } else {
                       //         print(res['message']);
@@ -4850,7 +4850,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
       // print(
       //   "--------------------------------------------------------------------widget.info['item_main_code']",
       // );
-      // print(widget.info['item_main_code'] ?? 'NULLSTRIMFG');
+      // print(widget.info['item_main_code'] ?? '');
       // mainCode = widget.info['item_main_code'] ?? '';
 
       descriptionController.text = widget.info['item_description'] ?? '';

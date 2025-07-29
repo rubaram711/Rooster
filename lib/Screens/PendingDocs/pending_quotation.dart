@@ -57,7 +57,7 @@ class _PendingQuotationState extends State<PendingQuotation> {
   String searchValue = '';
   Timer? searchOnStoppedTyping;
   List quotationsList = [];
-  List quotationsListpending = [];
+  List quotationsListPending = [];
   bool isPendingDocsFetched = false;
   onChangeHandler(value) {
     const duration = Duration(
@@ -166,13 +166,13 @@ class _PendingQuotationState extends State<PendingQuotation> {
         //   var item = quotationController.quotationsList[i];
 
         //   if (item['status'] == 'pending') {
-        //     // Check if this item already exists in quotationsListpending
-        //     bool exists = quotationsListpending.any(
+        //     // Check if this item already exists in quotationsList pending
+        //     bool exists = quotationsList pending.any(
         //       (element) => element['id'] == item['id'],
         //     );
 
         //     if (!exists) {
-        //       quotationsListpending.add(item);
+        //       quotationsListPending.add(item);
         //     }
         //   }
         // }

@@ -219,8 +219,8 @@ class _ComboDataState extends State<ComboData> {
                                 itemDescription: info2[i]['description'],
                                 itemquantity: '${info2[i]['quantity']}',
                                 itemPrice: '${info2[i]['unit_price']}',
-                                itemdiscount: '${info2[i]['discount']}',
-                                itemtotal: '${info2[i]['total']}',
+                                itemDiscount: '${info2[i]['discount']}',
+                                itemTotal: '${info2[i]['total']}',
                               );
                             },
                           ),
@@ -250,16 +250,16 @@ class ShowitemquantityAsRow extends StatelessWidget {
     required this.itemquantity,
     required this.itemDescription,
     required this.itemPrice,
-    required this.itemdiscount,
-    required this.itemtotal,
+    required this.itemDiscount,
+    required this.itemTotal,
   });
   //final Map info;
   final String itemName;
   final String itemDescription;
   final String itemquantity;
   final String itemPrice;
-  final String itemdiscount;
-  final String itemtotal;
+  final String itemDiscount;
+  final String itemTotal;
 
   final bool isDesktop;
 
@@ -307,12 +307,12 @@ class ShowitemquantityAsRow extends StatelessWidget {
           ),
           TableItem(
             isCentered: false,
-            text: itemdiscount,
+            text: itemDiscount,
             width: isDesktop ? MediaQuery.of(context).size.width * 0.07 : 70,
           ),
           TableItem(
             isCentered: false,
-            text: itemtotal,
+            text: itemTotal,
             width: isDesktop ? MediaQuery.of(context).size.width * 0.07 : 70,
           ),
 

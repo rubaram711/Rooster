@@ -262,7 +262,7 @@ class _PendingDocsState extends State<PendingDocs> {
                               ),
 
                               TableTitle(
-                                text: 'salesperscon'.tr,
+                                text: 'sales_person'.tr,
                                 width: MediaQuery.of(context).size.width * 0.07,
                               ),
 
@@ -2250,7 +2250,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           //           clientId =
                           //               widget.info['client']['id'].toString();
                           //         } else {
-                          //           print("EmptyclientID");
+                          //           print("Empty clientID");
                           //         }
                           //         if (widget.info['pricelist'] != null) {
                           //           pricelistId =
@@ -4177,7 +4177,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           //           clientId =
                           //               widget.info['client']['id'].toString();
                           //         } else {
-                          //           print("EmptyclientID");
+                          //
                           //         }
                           //         if (widget.info['pricelist'] != null) {
                           //           pricelistId =
@@ -4188,7 +4188,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           //               widget.info['salesperson']['id'].toString();
                           //         }
                           //
-                          //         var res = await updateSalesOrdder(
+                          //         var res = await updateSalesOrder(
                           //           '${widget.info['id']}',
                           //           false,
                           //           '${widget.info['reference'] ?? ''}',
@@ -4272,7 +4272,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           //           clientId =
                           //               widget.info['client']['id'].toString();
                           //         } else {
-                          //           print("EmptyclientID");
+                          //           print("Empty clientID");
                           //         }
                           //         if (widget.info['pricelist'] != null) {
                           //           pricelistId =
@@ -4283,7 +4283,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           //               widget.info['salesperson']['id'].toString();
                           //         }
                           //
-                          //         var res = await updateSalesOrdder(
+                          //         var res = await updateSalesOrder(
                           //           '${widget.info['id']}',
                           //           false,
                           //           '${widget.info['reference'] ?? ''}',
@@ -5753,7 +5753,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           //           clientId =
                           //               widget.info['client']['id'].toString();
                           //         } else {
-                          //           print("EmptyclientID");
+                          //           print("Empty clientID");
                           //         }
                           //         if (widget.info['pricelist'] != null) {
                           //           pricelistId =
@@ -5857,7 +5857,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           //           clientId =
                           //               widget.info['client']['id'].toString();
                           //         } else {
-                          //           print("EmptyclientID");
+                          //           print("Empty clientID");
                           //         }
                           //         if (widget.info['pricelist'] != null) {
                           //           pricelistId =

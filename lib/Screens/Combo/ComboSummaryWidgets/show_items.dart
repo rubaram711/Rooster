@@ -162,7 +162,7 @@ class ShowitemquantityAsRow extends StatelessWidget {
             text: itemCurrency,
             width: isDesktop ? MediaQuery.of(context).size.width * 0.07 : 100,
           ),
-          //****reusablo more *******************/
+          //****reusable more *******************/
           // GetBuilder<ComboController>(
           //   builder: (cont) {
           //     return SizedBox(

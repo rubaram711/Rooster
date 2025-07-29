@@ -68,7 +68,7 @@ class _CreateDeliveryState extends State<CreateDelivery> {
 
   bool isActiveVatChecked = false;
   bool isActiveDeliveredChecked = false;
-  final DeliveryController deliveryrController = Get.find();
+  // final DeliveryController deliveryController = Get.find();
   final HomeController homeController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
 
@@ -89,12 +89,12 @@ class _CreateDeliveryState extends State<CreateDelivery> {
     var companySubjectToVat = await getCompanySubjectToVatFromPref();
     if (companySubjectToVat == '1') {
       vatExemptController.clear();
-      deliveryrController.setIsVatExempted(false, false, false);
-      deliveryrController.setIsVatExemptCheckBoxShouldAppear(true);
+      deliveryController.setIsVatExempted(false, false, false);
+      deliveryController.setIsVatExemptCheckBoxShouldAppear(true);
     } else {
-      deliveryrController.setIsVatExemptCheckBoxShouldAppear(false);
-      deliveryrController.setIsVatExempted(false, false, true);
-      deliveryrController.setIsVatExemptChecked(true);
+      deliveryController.setIsVatExemptCheckBoxShouldAppear(false);
+      deliveryController.setIsVatExempted(false, false, true);
+      deliveryController.setIsVatExemptChecked(true);
     }
   }
 
@@ -115,18 +115,18 @@ class _CreateDeliveryState extends State<CreateDelivery> {
   void initState() {
     generatePdfFromImageUrl();
     checkVatExempt();
-    deliveryrController.isVatExemptChecked = false;
-    deliveryrController.itemsMultiPartList = [];
-    deliveryrController.salesPersonListNames = [];
-    deliveryrController.salesPersonListId = [];
-    deliveryrController.isBeforeVatPrices = true;
-    // deliveryrController.getAllUsersSalesPersonFromBack();
-    // deliveryrController.getAllTaxationGroupsFromBack();
+    deliveryController.isVatExemptChecked = false;
+    deliveryController.itemsMultiPartList = [];
+    deliveryController.salesPersonListNames = [];
+    deliveryController.salesPersonListId = [];
+    deliveryController.isBeforeVatPrices = true;
+    // deliveryController.getAllUsersSalesPersonFromBack();
+    // deliveryController.getAllTaxationGroupsFromBack();
     setVars();
-    deliveryrController.getFieldsForCreateDeliveryFromBack();
+    deliveryController.getFieldsForCreateDeliveryFromBack();
     // getCurrency();
-    deliveryrController.resetDeliveries();
-    deliveryrController.listViewLengthInDelivery = 50;
+    deliveryController.resetDeliveries();
+    deliveryController.listViewLengthInDelivery = 50;
     dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     expectedDateController.text = DateFormat(
       'yyyy-MM-dd',
@@ -342,7 +342,7 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                         deliveryNumber:
                                             deliveryCont.deliveryNumber,
                                         creationDate: dateController.text,
-                                        expecteddDate:
+                                        expectedDate:
                                             expectedDateController.text,
                                         receivedUser: '',
                                         senderUser: homeController.userName,

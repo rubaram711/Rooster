@@ -366,7 +366,7 @@ class _PrintComboState extends State<PrintCombo> {
                                   width: 180, // Set the desired width
                                   height: 70, // Set the desired height
                                   child: pw.Text(
-                                    '${widget.comboName} Infornation',
+                                    '${widget.comboName} Information',
                                   ),
                                   // pw.Image(image),
 
@@ -386,7 +386,7 @@ class _PrintComboState extends State<PrintCombo> {
                           ],
                         ),
                       ),
-                      //2inrow
+                      //2 in row
                       // pw.SizedBox(
                       //   width: width * 0.15,
                       //   child: pw.Row(
@@ -413,7 +413,7 @@ class _PrintComboState extends State<PrintCombo> {
                       //     ],
                       //   ),
                       // ),
-                      //3inrow
+                      //3 in row
                       // pw.SizedBox(
                       //   width: width * 0.1,
                       //   child: pw.Row(
@@ -447,7 +447,7 @@ class _PrintComboState extends State<PrintCombo> {
                   child: pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
-                      //    2inrow
+                      //    2 in row
                       pw.SizedBox(
                         width: width * 0.15,
                         child: pw.Row(
@@ -474,7 +474,7 @@ class _PrintComboState extends State<PrintCombo> {
                           ],
                         ),
                       ),
-                      //   3inrow
+                      //   3 in row
                       gapW20,
                       pw.SizedBox(
                         width: width * 0.15,
@@ -534,7 +534,7 @@ class _PrintComboState extends State<PrintCombo> {
                   child: pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
-                      //    2inrow
+                      //    2 in row
                       pw.SizedBox(
                         width: width * 0.15,
                         child: pw.Row(
@@ -568,7 +568,7 @@ class _PrintComboState extends State<PrintCombo> {
                           ],
                         ),
                       ),
-                      //   3inrow
+                      //   3 in row
                       gapW20,
                       pw.SizedBox(
                         width: width * 0.15,

@@ -13,7 +13,7 @@ class UpdateItem extends StatefulWidget {
 }
 
 class _UpdateItemState extends State<UpdateItem> {
-  TextEditingController qtycontroller = TextEditingController();
+  TextEditingController qtyController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ComboController>(
@@ -30,7 +30,7 @@ class _UpdateItemState extends State<UpdateItem> {
                   text: "Quantity",
                   rowWidth: MediaQuery.of(context).size.width * 0.3,
                   textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                  textEditingController: qtycontroller,
+                  textEditingController: qtyController,
                 ),
                 gapH28,
                 ReusableButtonWithColor(

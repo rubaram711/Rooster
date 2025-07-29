@@ -992,7 +992,7 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                                         widget.info['deliveryNumber'] ?? '',
 
                                     creationDate: widget.info['date'] ?? '',
-                                    expecteddDate:
+                                    expectedDate:
                                         widget.info['expectedDelivery'] ?? '',
                                     receivedUser: '',
                                     senderUser: homeController.userName,
@@ -2203,7 +2203,7 @@ class _UpdateDeliveryDialogState extends State<UpdateDeliveryDialog> {
                                           widget.info['deliveryNumber'] ?? '',
 
                                       creationDate: widget.info['date'] ?? '',
-                                      expecteddDate:
+                                      expectedDate:
                                           widget.info['expectedDelivery'] ?? '',
                                       receivedUser: '',
                                       senderUser: homeController.userName,

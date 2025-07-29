@@ -136,7 +136,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
   String salespersonId = ' ';
   String commissionMethodId = '';
   String currencyId = ' ';
-  bool isPendindDocsFetched = false;
+  bool isPendingDocsFetched = false;
   final PendingDocsReviewController pendingDocsController = Get.find();
   final HomeController homeController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
@@ -665,7 +665,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                           .selectedCurrencyId, //selectedCurrency
                                       termsAndConditionsController.text,
                                       selectedSalesPersonId.toString(),
-                                      '', // commession method id
+                                      '', // commission method id
                                       salesInvoiceCont.selectedCashingMethodId,
                                       commissionController.text,
                                       totalCommissionController.text,
@@ -687,7 +687,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
 
                                       salesInvoiceCont.isVatExemptChecked
                                           ? '1'
-                                          : '0', //vatExampt
+                                          : '0',
                                       salesInvoiceCont.isVatNoPrinted
                                           ? '1'
                                           : '0', //not printed
@@ -753,7 +753,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                           .selectedCurrencyId, //selectedCurrency
                                       termsAndConditionsController.text,
                                       selectedSalesPersonId.toString(),
-                                      '', // commession method id
+                                      '', // commission method id
                                       salesInvoiceCont.selectedCashingMethodId,
                                       commissionController.text,
                                       totalCommissionController.text,
@@ -775,7 +775,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
 
                                       salesInvoiceCont.isVatExemptChecked
                                           ? '1'
-                                          : '0', //vatExampt
+                                          : '0', //vat
                                       salesInvoiceCont.isVatNoPrinted
                                           ? '1'
                                           : '0', //not printed
@@ -841,7 +841,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                           .selectedCurrencyId, //selectedCurrency
                                       termsAndConditionsController.text,
                                       selectedSalesPersonId.toString(),
-                                      '', // commession method id
+                                      '', // commission method id
                                       salesInvoiceCont.selectedCashingMethodId,
                                       commissionController.text,
                                       totalCommissionController.text,
@@ -863,7 +863,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
 
                                       salesInvoiceCont.isVatExemptChecked
                                           ? '1'
-                                          : '0', //vatExampt
+                                          : '0',
                                       salesInvoiceCont.isVatNoPrinted
                                           ? '1'
                                           : '0', //not printed
@@ -3089,7 +3089,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             .selectedCurrencyId, //selectedCurrency
                                         termsAndConditionsController.text,
                                         selectedSalesPersonId.toString(),
-                                        '', // commession method id
+                                        '', // commission method id
                                         salesInvoiceCont
                                             .selectedCashingMethodId,
                                         commissionController.text,
@@ -3112,7 +3112,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
 
                                         salesInvoiceCont.isVatExemptChecked
                                             ? '1'
-                                            : '0', //vatExampt
+                                            : '0',
                                         salesInvoiceCont.isVatNoPrinted
                                             ? '1'
                                             : '0', //not printed

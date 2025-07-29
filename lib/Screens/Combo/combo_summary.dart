@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
-import 'package:rooster_app/Screens/Combo/ComboSummaryWidgets/showitems.dart';
+import 'package:rooster_app/Screens/Combo/ComboSummaryWidgets/show_items.dart';
 import 'package:rooster_app/Screens/Combo/ComboSummaryWidgets/update_combo_dialog.dart';
 import 'package:rooster_app/Screens/Combo/combo.dart';
 import 'package:rooster_app/Widgets/page_title.dart';
@@ -483,7 +483,7 @@ class _ComboAsRowInTableState extends State<ComboAsRowInTable> {
   String itemName = '', description = '';
   double itemPrice = 0;
   double itemTotal = 0;
-  double itemdiscount = 0;
+  double itemDiscount = 0;
 
   double totalAllItems = 0;
   String itemBrand = '';
@@ -564,7 +564,7 @@ class _ComboAsRowInTableState extends State<ComboAsRowInTable> {
                       : 150,
             ),
 
-            //*******************reusablemore preview and update */
+            //*******************reusable more preview and update */
             GetBuilder<ComboController>(
               builder: (cont) {
                 return SizedBox(

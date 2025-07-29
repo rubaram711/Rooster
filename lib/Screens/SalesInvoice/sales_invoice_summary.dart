@@ -2023,7 +2023,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
   String warehouseName = ' ';
   String commissionMethodId = '';
   String currencyId = ' ';
-  bool isPendindDocsFetched = false;
+  bool isPendingDocsFetched = false;
 
   String paymentTerm = '',
       priceListSelected = '',

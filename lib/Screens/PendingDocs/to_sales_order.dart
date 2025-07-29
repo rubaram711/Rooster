@@ -57,7 +57,7 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
   String searchValue = '';
   Timer? searchOnStoppedTyping;
   List quotationsList = [];
-  List quotationsListpending = [];
+  List quotationsListPending = [];
   bool isPendingDocsFetched = false;
   onChangeHandler(value) {
     const duration = Duration(
@@ -164,17 +164,17 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
       // return GetBuilder<PendingDocsReviewController>(
       builder: (cont) {
         // for (int i = 0; i < qu
-        //otationController.quotationsList.length; i++) {
+        //Controller.quotationsList.length; i++) {
         //   var item = quotationController.quotationsList[i];
 
         //   if (item['status'] == 'pending') {
-        //     // Check if this item already exists in quotationsListpending
-        //     bool exists = quotationsListpending.any(
+        //     // Check if this item already exists in quotationsListPending
+        //     bool exists = quotationsListPending.any(
         //       (element) => element['id'] == item['id'],
         //     );
 
         //     if (!exists) {
-        //       quotationsListpending.add(item);
+        //       quotationsListPending.add(item);
         //     }
         //   }
         // }
@@ -1267,7 +1267,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                       //                               .rowsInListViewInQuotation[oldKeys[i]]!;
                       //                     }
                       //                     print(quotationController.newRowMap);
-                      //                     print("NEWMAP-------------------");
+                      //                     print("NEW MAP-------------------");
                       //                     Map<int, dynamic> orderLinesMap = {
                       //                       for (
                       //                         int i = 0;

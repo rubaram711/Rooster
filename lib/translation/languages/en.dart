@@ -598,5 +598,6 @@ Map<String, String> en = {
   "add_items": "Add Items",
   "pending_quotation": "Pending Quotation",
   "price_conditions": "Price Conditions",
+
 };
 

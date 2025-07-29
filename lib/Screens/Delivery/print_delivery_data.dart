@@ -19,7 +19,7 @@ class PrintDeliveryData extends StatefulWidget {
     required this.deliveryNumber,
 
     required this.creationDate,
-    required this.expecteddDate,
+    required this.expectedDate,
     required this.receivedUser,
     required this.senderUser,
     required this.clientPhoneNumber,
@@ -31,7 +31,7 @@ class PrintDeliveryData extends StatefulWidget {
 
   final String deliveryNumber;
   final String creationDate;
-  final String expecteddDate;
+  final String expectedDate;
   final String receivedUser;
   final String senderUser;
   final String clientPhoneNumber;

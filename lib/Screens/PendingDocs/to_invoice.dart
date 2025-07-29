@@ -50,7 +50,7 @@ class _ToInvoiceState extends State<ToInvoice> {
   bool isSalespersonOrderedUp = true;
   String searchValue = '';
   Timer? searchOnStoppedTyping;
-  bool isPendindDocsFetched = false;
+  bool isPendingDocsFetched = false;
   onChangeHandler(value) {
     const duration = Duration(
       milliseconds: 800,
@@ -147,7 +147,7 @@ class _ToInvoiceState extends State<ToInvoice> {
     listViewLength =
         Sizes.deviceHeight *
         (0.09 * salesOrderController.salesOrdersList.length);
-    // salesOrderController.getAllSalesOrderFromBackWithoutEcxcept();
+    // salesOrderController.getAllSalesOrderFromBackWithoutExcept();
     salesOrderController.getFieldsForCreateSalesOrderFromBack();
     salesOrderController.getAllSalesOrderFromBackWithoutExcept();
     // pendingDocsController.getAllPendingDocs();
@@ -2065,7 +2065,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                           //     PopupMenuItem<String>(
                           //       value: '2',
                           //       onTap: () async {
-                          //         var res = await updateSalesOrdder(
+                          //         var res = await updateSalesOrder(
                           //           '${widget.info['id']}',
                           //           false,
                           //           '${widget.info['reference'] ?? ''}',
@@ -2118,7 +2118,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                           //     PopupMenuItem<String>(
                           //       value: '3',
                           //       onTap: () async {
-                          //         var res = await updateSalesOrdder(
+                          //         var res = await updateSalesOrder(
                           //           '${widget.info['id']}',
                           //           false,
                           //           '${widget.info['reference'] ?? ''}',
@@ -2127,7 +2127,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                           //           '${widget.info['validity'] ?? ''}',
                           //           '${widget.info['inputDate'] ?? ''}',
                           //
-                          //           '', //todo paymentTermsController.text,
+                          //           '',
                           //           pricelistId,
                           //           currencyId,
                           //           '${widget.info['termsAndConditions']}',
