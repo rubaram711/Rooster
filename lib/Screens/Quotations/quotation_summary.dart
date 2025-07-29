@@ -6,6 +6,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:rooster_app/Backend/Quotations/send_by_email.dart';
 import 'package:rooster_app/Backend/Quotations/update_quotation.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
@@ -24,6 +25,8 @@ import '../../Backend/Quotations/delete_quotation.dart';
 import '../../Backend/Quotations/get_quotations.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
+import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
+import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/page_title.dart';
 import '../../Widgets/reusable_btn.dart';
@@ -53,7 +56,6 @@ class _QuotationSummaryState extends State<QuotationSummary> {
   final TextEditingController filterController = TextEditingController();
   TextEditingController searchController = TextEditingController();
   final ExchangeRatesController exchangeRatesController = Get.find();
-
 
   double listViewLength = 100;
   String selectedNumberOfRows = '10';
@@ -87,6 +89,7 @@ class _QuotationSummaryState extends State<QuotationSummary> {
     setState(() {
       searchValue = value;
     });
+    // await quotationController.getAllQuotationsFromBack();
     await quotationController.getAllQuotationsFromBack();
   }
 
@@ -119,23 +122,44 @@ class _QuotationSummaryState extends State<QuotationSummary> {
     await taskController.getAllTasksFromBack(value);
   }
 
+  _quotationSearchHandler(value) {
+    const duration = Duration(
+      milliseconds: 800,
+    ); // set the duration that you want call search() after that.
+    if (searchOnStoppedTypingInTasks != null) {
+      setState(() => searchOnStoppedTypingInTasks!.cancel()); // clear timer
+    }
+    setState(
+      () =>
+          searchOnStoppedTypingInTasks = Timer(
+            duration,
+            () => searchOnQuotation(value),
+          ),
+    );
+  }
 
-    Future<void> generatePdfFromImageUrl() async {
-      String companyLogo = await getCompanyLogoFromPref();
+  searchOnQuotation(value) async {
+    quotationController.setSearchInQuotationsController(value);
+    await quotationController.getAllQuotationsFromBack();
+  }
 
-      // 1. Download image
-      final response = await http.get(Uri.parse(companyLogo));
-      if (response.statusCode != 200) {
-        throw Exception('Failed to load image');
-      }
+  Future<void> generatePdfFromImageUrl() async {
+    String companyLogo = await getCompanyLogoFromPref();
 
-      final Uint8List imageBytes = response.bodyBytes;
+    // 1. Download image
+    final response = await http.get(Uri.parse(companyLogo));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load image');
+    }
+
+    final Uint8List imageBytes = response.bodyBytes;
     // String companyLogo = await getCompanyLogoFromPref();
     // final Uint8List logoBytes = await fetchImage(
     //   companyLogo,
     // );
     quotationController.setLogo(imageBytes);
   }
+
   @override
   void initState() {
     generatePdfFromImageUrl();
@@ -189,6 +213,8 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                       if (selectedTabIndex == 1) {
                         // cont.searchInQuotationsController.text=value;
                         _onChangeTaskSearchHandler(value);
+                      } else {
+                        _quotationSearchHandler(value);
                       }
                     },
                     validationFunc: () {},
@@ -250,11 +276,11 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                   setState(() {
                                     isNumberOrderedUp = !isNumberOrderedUp;
                                     isNumberOrderedUp
-                                        ? cont.quotationsList.sort(
+                                        ? cont.quotationsListCC.sort(
                                           (a, b) => a['quotationNumber']
                                               .compareTo(b['quotationNumber']),
                                         )
-                                        : cont.quotationsList.sort(
+                                        : cont.quotationsListCC.sort(
                                           (a, b) => b['quotationNumber']
                                               .compareTo(a['quotationNumber']),
                                         );
@@ -268,11 +294,11 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                   setState(() {
                                     isCreationOrderedUp = !isCreationOrderedUp;
                                     isCreationOrderedUp
-                                        ? cont.quotationsList.sort(
+                                        ? cont.quotationsListCC.sort(
                                           (a, b) => a['createdAtDate']
                                               .compareTo(b['createdAtDate']),
                                         )
-                                        : cont.quotationsList.sort(
+                                        : cont.quotationsListCC.sort(
                                           (a, b) => b['createdAtDate']
                                               .compareTo(a['createdAtDate']),
                                         );
@@ -286,13 +312,13 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                   setState(() {
                                     isCustomerOrderedUp = !isCustomerOrderedUp;
                                     isCustomerOrderedUp
-                                        ? cont.quotationsList.sort(
+                                        ? cont.quotationsListCC.sort(
                                           (a, b) => '${a['client']['name']}'
                                               .compareTo(
                                                 '${b['client']['name']}',
                                               ),
                                         )
-                                        : cont.quotationsList.sort(
+                                        : cont.quotationsListCC.sort(
                                           (a, b) => '${b['client']['name']}'
                                               .compareTo(
                                                 '${a['client']['name']}',
@@ -309,12 +335,12 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                     isSalespersonOrderedUp =
                                         !isSalespersonOrderedUp;
                                     isSalespersonOrderedUp
-                                        ? cont.quotationsList.sort(
+                                        ? cont.quotationsListCC.sort(
                                           (a, b) => a['salesperson'].compareTo(
                                             b['salesperson'],
                                           ),
                                         )
-                                        : cont.quotationsList.sort(
+                                        : cont.quotationsListCC.sort(
                                           (a, b) => b['salesperson'].compareTo(
                                             a['salesperson'],
                                           ),
@@ -330,27 +356,46 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                               ),
                               TableTitle(
                                 text: 'total'.tr,
+                                // isCentered: false,
                                 width:
                                     MediaQuery.of(context).size.width *
-                                    0.07, //085
+                                    0.06, //085
                               ),
+                              // SizedBox(
+                              //     width:
+                              //     MediaQuery.of(context).size.width *
+                              //         0.06,
+                              //   child:Row(
+                              //     mainAxisAlignment: MainAxisAlignment.end,
+                              //     children: [
+                              //       Padding(
+                              //         padding: const EdgeInsets.only(right: 10.0),
+                              //         child: Text('total'.tr,
+                              //             style: const TextStyle(
+                              //                 color: Colors.white, fontWeight: FontWeight.bold)),
+                              //       ),
+                              //     ],
+                              //   ),
+                              // ),
                               TableTitle(
-                                text: 'currency'.tr,
+                                text: 'cur'.tr,
+                                isCentered: false,
                                 width:
-                                MediaQuery.of(context).size.width *
-                                    0.07, //085
+                                    MediaQuery.of(context).size.width *
+                                    0.04, //085
                               ),
                               TableTitle(
                                 text: 'status'.tr,
-                                width:
-                                    MediaQuery.of(context).size.width *
-                                    0.085, //085
+                                // isCentered: false,
+                                width: 90, //085
                               ),
                               TableTitle(
                                 text: 'more_options'.tr,
-                                width: MediaQuery.of(context).size.width * 0.07,
+                                width: MediaQuery.of(context).size.width * 0.11,
                               ),
-                              SizedBox(width: MediaQuery.of(context).size.width * 0.03,)
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.03,
+                              ),
                             ],
                           ),
                         ),
@@ -362,13 +407,13 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                   MediaQuery.of(context).size.height *
                                   0.4, //listViewLength
                               child: ListView.builder(
-                                itemCount: cont.quotationsList.length,
+                                itemCount: cont.quotationsListCC.length,
                                 // itemCount:  cont.quotationsList.length>9?selectedNumberOfRowsAsInt:cont.quotationsList.length,
                                 itemBuilder:
                                     (context, index) => Column(
                                       children: [
                                         QuotationAsRowInTable(
-                                          info: cont.quotationsList[index],
+                                          info: cont.quotationsListCC[index],
                                           index: index,
                                         ),
                                         const Divider(),
@@ -662,6 +707,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
       ],
     );
   }
+
   ExchangeRatesController exchangeRatesController = Get.find();
 
   @override
@@ -681,7 +727,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
         quotationController.setSelectedQuotation(widget.info);
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 5),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(0)),
@@ -742,52 +788,76 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                 ),
               ),
             ),
-
-            TableItem(
-              text: numberWithComma('${widget.info['total'] ?? ''}'),
-              width:
-                  widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.07
-                      : 150,
-            ),
-            TableItem(
-              text: '${widget.info['currency']['name'] ?? ''}',
-              width:
-              widget.isDesktop
-                  ? MediaQuery.of(context).size.width * 0.07
-                  : 150,
-            ),
+            //
+            // TableItem(
+            //   text: numberWithComma('${widget.info['total'] ?? ''}'),
+            //   width:
+            //       widget.isDesktop
+            //           ? MediaQuery.of(context).size.width * 0.07
+            //           : 150,
+            // ),
             SizedBox(
               width:
                   widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.085
+                      ? MediaQuery.of(context).size.width * 0.06
                       : 150,
-              child: Center(
-                child: Container(
-                  width: '${widget.info['status']}'.length * 10.0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 1,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color:
-                        widget.info['status'] == "pending"
-                            ? Others.orangeStatusColor
-                            : widget.info['status'] == 'cancelled'
-                            ? Others.redStatusColor
-                            : Others.greenStatusColor,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 5.0),
                     child: Text(
-                      '${widget.info['status'] ?? ''}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                      numberWithComma('${widget.info['total'] ?? ''}'),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: TypographyColor.textTable,
                       ),
                     ),
                   ),
-                ),
+                ],
+              ),
+            ),
+            TableItem(
+              text: ' ${widget.info['currency']['name'] ?? ''}',
+              isCentered: false,
+              width:
+                  widget.isDesktop
+                      ? MediaQuery.of(context).size.width * 0.04
+                      : 150,
+            ),
+            SizedBox(
+              width: widget.isDesktop ? 90 : 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 90,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 1,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          widget.info['status'] == "pending"
+                              ? Others.orangeStatusColor
+                              : widget.info['status'] == 'cancelled'
+                              ? Others.redStatusColor
+                              : widget.info['status'] == 'sent'
+                              ? Colors.blue
+                              : Others.greenStatusColor,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${widget.info['status'] ?? ''}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             GetBuilder<QuotationController>(
@@ -795,356 +865,707 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                 return SizedBox(
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.07
+                          ? MediaQuery.of(context).size.width * 0.11
                           : 150,
-                  child: ReusableMore(
-                    itemsList: [
-                      PopupMenuItem<String>(
-                        value: '1',
-                        onTap: () async {
-                          itemsInfoPrint = [];
-                          quotationItemInfo = {};
-                          totalAllItems = 0;
-                          cont.totalAllItems = 0;
-                          totalAllItems = 0;
-                          cont.totalAllItems = 0;
-                          totalPriceAfterDiscount = 0;
-                          additionalSpecialDiscount = 0;
-                          totalPriceAfterSpecialDiscount = 0;
-                          totalPriceAfterSpecialDiscountByQuotationCurrency = 0;
-                          vatByQuotationCurrency = 0;
-                          vatByQuotationCurrency = 0;
-                          finalPriceByQuotationCurrency = 0;
-
-                          for (var item in widget.info['orderLines']) {
-                            if ('${item['line_type_id']}' == '2') {
-                              qty = item['item_quantity'];
-                              var map =
-                                  cont.itemsMap[item['item_id'].toString()];
-                              itemName = map['item_name'];
-                              itemPrice = double.parse(
-                                '${item['item_unit_price'] ?? '0'}',
-                              );
-                              //     map['unitPrice'] ?? 0.0;
-                              // formatDoubleWithCommas(map['unitPrice']);
-
-                              itemDescription = item['item_description'];
-
-                              itemImage =
-                                  '${map['images']}' != '[]'
-                                      ? map['images'][0]
-                                      : '';
-                              // itemCurrencyName = map['currency']['name'];
-                              // itemCurrencySymbol = map['currency']['symbol'];
-                              // itemCurrencyLatestRate =
-                              //     map['currency']['latest_rate'];
-                              var firstBrandObject = map['itemGroups']
-                                  .firstWhere(
-                                    (obj) =>
-                                        obj["root_name"]?.toLowerCase() ==
-                                        "brand".toLowerCase(),
-                                    orElse: () => null,
-                                  );
-                              brand =
-                                  firstBrandObject == null
-                                      ? ''
-                                      : firstBrandObject['name'] ?? '';
-                              itemTotal = double.parse('${item['item_total']}');
-                              // itemTotal = double.parse(qty) * itemPrice;
-                              totalAllItems += itemTotal;
-                              quotationItemInfo = {
-                                'line_type_id':'2',
-                                'item_name': itemName,
-                                'item_description': itemDescription,
-                                'item_quantity': qty,
-                                'item_discount': item['item_discount'] ?? '0',
-                                'item_unit_price': formatDoubleWithCommas(
-                                  itemPrice,
-                                ),
-                                'item_total': formatDoubleWithCommas(itemTotal),
-                                'item_image': itemImage,
-                                'item_brand': brand,
-                                'title': '',
-                                'isImageList':false,
-                                'note': '',
-                                'image':''
-                              };
-                              itemsInfoPrint.add(quotationItemInfo);
-                            }    else if ('${item['line_type_id']}' == '3') {
-                              var qty = item['item_quantity'];
-                              // var map =
-                              // cont
-                              //     .combosMap[item['combo_id']
-                              //     .toString()];
-                              var ind=cont
-                                  .combosIdsList.indexOf(item['combo_id']
-                                  .toString());
-                              var itemName = cont.combosNamesList[ind];
-                              var itemPrice = double.parse(
-                                '${item['combo_price'] ?? 0.0}',
-                              );
-                              var itemDescription =
-                              item['combo_description'];
-
-
-                              var itemTotal = double.parse(
-                                '${item['combo_total']}',
-                              );
-                              // double.parse(qty) * itemPrice;
-                              var quotationItemInfo = {
-                                'line_type_id':'3',
-                                'item_name': itemName,
-                                'item_description': itemDescription,
-                                'item_quantity': qty,
-                                'item_unit_price':
-                                formatDoubleWithCommas(
-                                  itemPrice,
-                                ),
-                                'item_discount':
-                                item['combo_discount'] ?? '0',
-                                'item_total':
-                                formatDoubleWithCommas(
-                                  itemTotal,
-                                ),
-                                'note': '',
-                                'item_image': '',
-                                'item_brand': '',
-                                'isImageList':false,
-                                'title': '',
-                                'image':''
-                              };
-                              itemsInfoPrint.add(quotationItemInfo);
-                            }
-                            else if('${item['line_type_id']}' == '1'){
-
-                              var quotationItemInfo = {
-                                'line_type_id':'1',
-                                'item_name': '',
-                                'item_description': '',
-                                'item_quantity': '',
-                                'item_unit_price': '',
-                                'item_discount':'0',
-                                'item_total':'',
-                                'item_image': '',
-                                'item_brand': '',
-                                'note': '',
-                                'isImageList':false,
-                                'title':item['title'],
-                                'image':''
-                              };
-                              itemsInfoPrint.add(quotationItemInfo);
-                            }
-                            else if('${item['line_type_id']}' == '5'){
-                              var quotationItemInfo = {
-                                'line_type_id':'5',
-                                'item_name': '',
-                                'item_description': '',
-                                'item_quantity': '',
-                                'item_unit_price': '',
-                                'item_discount':'0',
-                                'item_total':'',
-                                'item_image': '',
-                                'item_brand': '',
-                                'title': '',
-                                'note':item['note'],
-                                'isImageList':false,
-                                'image':''
-                              };
-                              itemsInfoPrint.add(quotationItemInfo);
-                            }
-                            else if('${item['line_type_id']}' == '4'){
-
-                              var quotationItemInfo = {
-                                'line_type_id':'4',
-                                'item_name': '',
-                                'item_description': '',
-                                'item_quantity': '',
-                                'item_unit_price': '',
-                                'item_discount':'0',
-                                'item_total':'',
-                                'item_image': '',
-                                'item_brand': '',
-                                'title': '',
-                                'note': '',
-                                'image':'$baseImage${item['image']}',
-                                'isImageList':false,
-                              };
-                              itemsInfoPrint.add(quotationItemInfo);
-                            }
-                          }
-                          // var primaryCurrency = await getCompanyPrimaryCurrencyFromPref();
-                          // var result = exchangeRatesController
-                          //     .exchangeRatesList
-                          //     .firstWhere(
-                          //       (item) =>
-                          //   item["currency"] == primaryCurrency,
-                          //   orElse: () => null,
-                          // );
-                          // var primaryLatestRate=
-                          // result != null
-                          //     ? '${result["exchange_rate"]}'
-                          //     : '1';
-                          // discountOnAllItem =
-                          //     totalAllItems *
-                          //     double.parse(
-                          //       widget.info['globalDiscount'] ?? '0',
-                          //     ) /
-                          //     100;
-
-                          totalPriceAfterDiscount =
-                              totalAllItems - discountOnAllItem;
-                          additionalSpecialDiscount =
-                              totalPriceAfterDiscount *
-                              double.parse(
-                                widget.info['specialDiscount'] ?? '0',
-                              ) /
-                              100;
-                          totalPriceAfterSpecialDiscount =
-                              totalPriceAfterDiscount -
-                              additionalSpecialDiscount;
-                          totalPriceAfterSpecialDiscountByQuotationCurrency =
-                              totalPriceAfterSpecialDiscount ;
-                          vatByQuotationCurrency =
-                              '${widget.info['vatExempt']}' == '1'
-                                  ? 0
-                                  : (totalPriceAfterSpecialDiscountByQuotationCurrency *
-                                          double.parse(
-                                            await getCompanyVatFromPref(),
-                                          )) /
-                                      100;
-                          finalPriceByQuotationCurrency =
-                              totalPriceAfterSpecialDiscountByQuotationCurrency +
-                              vatByQuotationCurrency;
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (BuildContext context) {
-                                // print('widget.info[ ${widget.info['termsAndConditions']}');
-                                return PrintQuotationData(
-                                  isPrintedAs0:
-                                      '${widget.info['printedAsPercentage']}' ==
-                                              '1'
-                                          ? true
-                                          : false,
-                                  isVatNoPrinted:
-                                      '${widget.info['notPrinted']}' == '1'
-                                          ? true
-                                          : false,
-                                  isPrintedAsVatExempt:
-                                      '${widget.info['printedAsVatExempt']}' ==
-                                              '1'
-                                          ? true
-                                          : false,
-                                  isInQuotation: true,
-                                  quotationNumber:
-                                      widget.info['quotationNumber'] ?? '',
-                                  creationDate: widget.info['validity'] ?? '',
-                                  ref: widget.info['reference'] ?? '',
-                                  receivedUser: '',
-                                  senderUser: homeController.userName,
-                                  status: widget.info['status'] ?? '',
-                                  totalBeforeVat:
-                                      widget.info['totalBeforeVat'] ?? '',
-                                  discountOnAllItem:
-                                      discountOnAllItem.toString(),
-                                  totalAllItems:
-                                  // totalAllItems.toString()  ,
-                                  formatDoubleWithCommas(
-                                    totalPriceAfterDiscount,
-                                  ),
-
-                                  globalDiscount:
-                                      widget.info['globalDiscount'] ?? '0',
-
-                                  totalPriceAfterDiscount:
-                                      formatDoubleWithCommas(
-                                        totalPriceAfterDiscount,
-                                      ),
-                                  additionalSpecialDiscount:
-                                      additionalSpecialDiscount.toStringAsFixed(
-                                        2,
-                                      ),
-                                  totalPriceAfterSpecialDiscount:
-                                      formatDoubleWithCommas(
-                                        totalPriceAfterSpecialDiscount,
-                                      ),
-                                  // itemCurrencyName: itemCurrencyName,
-                                  // itemCurrencySymbol: itemCurrencySymbol,
-                                  // itemCurrencyLatestRate:
-                                  //     itemCurrencyLatestRate,
-                                  totalPriceAfterSpecialDiscountByQuotationCurrency:
-                                      formatDoubleWithCommas(
-                                        totalPriceAfterSpecialDiscountByQuotationCurrency,
-                                      ),
-
-                                  vatByQuotationCurrency:
-                                      formatDoubleWithCommas(
-                                        vatByQuotationCurrency,
-                                      ),
-                                  finalPriceByQuotationCurrency:
-                                      formatDoubleWithCommas(
-                                        finalPriceByQuotationCurrency,
-                                      ),
-                                  specialDisc: specialDisc.toString(),
-                                  specialDiscount:
-                                      widget.info['specialDiscount'] ?? '0',
-                                  specialDiscountAmount:
-                                      widget.info['specialDiscountAmount'] ??
-                                      '',
-                                  salesPerson:
-                                      widget.info['salesperson'] != null
-                                          ? widget.info['salesperson']['name']
-                                          : '---',
-                                  quotationCurrency:
-                                      widget.info['currency']['name'] ?? '',
-                                  quotationCurrencySymbol:
-                                      widget.info['currency']['symbol'] ?? '',
-                                  quotationCurrencyLatestRate:
-                                      widget.info['currency']['latest_rate'] ??
-                                      '',
-                                  clientPhoneNumber:
-                                  widget.info['client']!=null?  widget.info['client']['phoneNumber']??
-                                      '---':"---" ,
-                                  clientName:
-                                      widget.info['client']['name'] ?? '',
-                                  termsAndConditions:
-                                      widget.info['termsAndConditions'] ?? '',
-                                  itemsInfoPrint: itemsInfoPrint,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Tooltip(
+                        message: 'preview'.tr,
+                        child: InkWell(
+                          onTap: () async {
+                            itemsInfoPrint = [];
+                            quotationItemInfo = {};
+                            totalAllItems = 0;
+                            cont.totalAllItems = 0;
+                            totalAllItems = 0;
+                            cont.totalAllItems = 0;
+                            totalPriceAfterDiscount = 0;
+                            additionalSpecialDiscount = 0;
+                            totalPriceAfterSpecialDiscount = 0;
+                            totalPriceAfterSpecialDiscountByQuotationCurrency =
+                                0;
+                            vatByQuotationCurrency = 0;
+                            vatByQuotationCurrency = 0;
+                            finalPriceByQuotationCurrency = 0;
+                            for (var item in widget.info['orderLines']) {
+                              if ('${item['line_type_id']}' == '2') {
+                                qty = item['item_quantity'];
+                                var map =
+                                    cont.itemsMap[item['item_id'].toString()];
+                                itemName = map['item_name'];
+                                itemPrice = double.parse(
+                                  '${item['item_unit_price'] ?? '0'}',
                                 );
-                              },
-                            ),
-                          );
-                        },
-                        child: Text('preview'.tr),
+                                //     map['unitPrice'] ?? 0.0;
+                                // formatDoubleWithCommas(map['unitPrice']);
+                                itemDescription = item['item_description'];
+                                itemImage =
+                                    '${map['images']}' != '[]' &&
+                                            map['images'] != null
+                                        ? '$baseImage${map['images'][0]['img_url']}'
+                                        : '';
+                                // itemCurrencyName = map['currency']['name'];
+                                // itemCurrencySymbol = map['currency']['symbol'];
+                                // itemCurrencyLatestRate =
+                                //     map['currency']['latest_rate'];
+                                if (map['itemGroups'] != null) {
+                                  var firstBrandObject = map['itemGroups']
+                                      .firstWhere(
+                                        (obj) =>
+                                            obj["root_name"]?.toLowerCase() ==
+                                            "brand".toLowerCase(),
+                                        orElse: () => null,
+                                      );
+                                  brand =
+                                      firstBrandObject == null
+                                          ? ''
+                                          : firstBrandObject['name'] ?? '';
+                                }
+                                itemTotal = double.parse(
+                                  '${item['item_total']}',
+                                );
+                                // itemTotal = double.parse(qty) * itemPrice;
+                                totalAllItems += itemTotal;
+                                quotationItemInfo = {
+                                  'line_type_id': '2',
+                                  'item_name': itemName,
+                                  'item_description': itemDescription,
+                                  'item_quantity': qty,
+                                  'item_discount': item['item_discount'] ?? '0',
+                                  'item_unit_price': formatDoubleWithCommas(
+                                    itemPrice,
+                                  ),
+                                  'item_total': formatDoubleWithCommas(
+                                    itemTotal,
+                                  ),
+                                  'item_image': itemImage,
+                                  'item_brand': brand,
+                                  'title': '',
+                                  'isImageList': false,
+                                  'note': '',
+                                  'image': '',
+                                };
+                                itemsInfoPrint.add(quotationItemInfo);
+                              } else if ('${item['line_type_id']}' == '3') {
+                                var qty = item['combo_quantity'];
+                                // var map =
+                                // cont
+                                //     .combosMap[item['combo_id']
+                                //     .toString()];
+                                var ind = cont.combosIdsList.indexOf(
+                                  item['combo_id'].toString(),
+                                );
+                                var itemName = cont.combosNamesList[ind];
+                                var itemPrice = double.parse(
+                                  '${item['combo_price'] ?? 0.0}',
+                                );
+                                var itemDescription = item['combo_description'];
+
+                                var itemTotal = double.parse(
+                                  '${item['combo_total']}',
+                                );
+                                totalAllItems += itemTotal;
+                                var quotationItemInfo = {
+                                  'line_type_id': '3',
+                                  'item_name': itemName,
+                                  'item_description': itemDescription,
+                                  'item_quantity': qty,
+                                  'item_unit_price': formatDoubleWithCommas(
+                                    itemPrice,
+                                  ),
+                                  'item_discount':
+                                      item['combo_discount'] ?? '0',
+                                  'item_total': formatDoubleWithCommas(
+                                    itemTotal,
+                                  ),
+                                  'note': '',
+                                  'item_image': '',
+                                  'item_brand': '',
+                                  'isImageList': false,
+                                  'title': '',
+                                  'image': '',
+                                };
+                                itemsInfoPrint.add(quotationItemInfo);
+                              } else if ('${item['line_type_id']}' == '1') {
+                                var quotationItemInfo = {
+                                  'line_type_id': '1',
+                                  'item_name': '',
+                                  'item_description': '',
+                                  'item_quantity': '',
+                                  'item_unit_price': '',
+                                  'item_discount': '0',
+                                  'item_total': '',
+                                  'item_image': '',
+                                  'item_brand': '',
+                                  'note': '',
+                                  'isImageList': false,
+                                  'title': item['title'],
+                                  'image': '',
+                                };
+                                itemsInfoPrint.add(quotationItemInfo);
+                              } else if ('${item['line_type_id']}' == '5') {
+                                var quotationItemInfo = {
+                                  'line_type_id': '5',
+                                  'item_name': '',
+                                  'item_description': '',
+                                  'item_quantity': '',
+                                  'item_unit_price': '',
+                                  'item_discount': '0',
+                                  'item_total': '',
+                                  'item_image': '',
+                                  'item_brand': '',
+                                  'title': '',
+                                  'note': item['note'],
+                                  'isImageList': false,
+                                  'image': '',
+                                };
+                                itemsInfoPrint.add(quotationItemInfo);
+                              } else if ('${item['line_type_id']}' == '4') {
+                                var quotationItemInfo = {
+                                  'line_type_id': '4',
+                                  'item_name': '',
+                                  'item_description': '',
+                                  'item_quantity': '',
+                                  'item_unit_price': '',
+                                  'item_discount': '0',
+                                  'item_total': '',
+                                  'item_image': '',
+                                  'item_brand': '',
+                                  'title': '',
+                                  'note': '',
+                                  'image': '$baseImage${item['image']}',
+                                  'isImageList': false,
+                                };
+                                itemsInfoPrint.add(quotationItemInfo);
+                              }
+                            }
+                            // var primaryCurrency = await getCompanyPrimaryCurrencyFromPref();
+                            // var result = exchangeRatesController
+                            //     .exchangeRatesList
+                            //     .firstWhere(
+                            //       (item) =>
+                            //   item["currency"] == primaryCurrency,
+                            //   orElse: () => null,
+                            // );
+                            // var primaryLatestRate=
+                            // result != null
+                            //     ? '${result["exchange_rate"]}'
+                            //     : '1';
+                            // discountOnAllItem =
+                            //     totalAllItems *
+                            //     double.parse(
+                            //       widget.info['globalDiscount'] ?? '0',
+                            //     ) /
+                            //     100;
+
+                            totalPriceAfterDiscount =
+                                totalAllItems - discountOnAllItem;
+                            additionalSpecialDiscount =
+                                totalPriceAfterDiscount *
+                                double.parse(
+                                  widget.info['specialDiscount'] ?? '0',
+                                ) /
+                                100;
+                            totalPriceAfterSpecialDiscount =
+                                totalPriceAfterDiscount -
+                                additionalSpecialDiscount;
+                            totalPriceAfterSpecialDiscountByQuotationCurrency =
+                                totalPriceAfterSpecialDiscount;
+                            vatByQuotationCurrency =
+                                '${widget.info['vatExempt']}' == '1'
+                                    ? 0
+                                    : (totalPriceAfterSpecialDiscountByQuotationCurrency *
+                                            double.parse(
+                                              await getCompanyVatFromPref(),
+                                            )) /
+                                        100;
+                            finalPriceByQuotationCurrency =
+                                totalPriceAfterSpecialDiscountByQuotationCurrency +
+                                vatByQuotationCurrency;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (BuildContext context) {
+                                  // print('widget.info[ ${widget.info['termsAndConditions']}');
+                                  return PrintQuotationData(
+                                    isPrintedAs0:
+                                        '${widget.info['printedAsPercentage']}' ==
+                                                '1'
+                                            ? true
+                                            : false,
+                                    isVatNoPrinted:
+                                        '${widget.info['notPrinted']}' == '1'
+                                            ? true
+                                            : false,
+                                    isPrintedAsVatExempt:
+                                        '${widget.info['printedAsVatExempt']}' ==
+                                                '1'
+                                            ? true
+                                            : false,
+                                    isInQuotation: true,
+                                    quotationNumber:
+                                        widget.info['quotationNumber'] ?? '',
+                                    creationDate: widget.info['validity'] ?? '',
+                                    ref: widget.info['reference'] ?? '',
+                                    receivedUser: '',
+                                    senderUser: homeController.userName,
+                                    status: widget.info['status'] ?? '',
+                                    totalBeforeVat:
+                                        widget.info['totalBeforeVat'] ?? '',
+                                    discountOnAllItem:
+                                        discountOnAllItem.toString(),
+                                    totalAllItems:
+                                    // totalAllItems.toString()  ,
+                                    formatDoubleWithCommas(
+                                      totalPriceAfterDiscount,
+                                    ),
+
+                                    globalDiscount:
+                                        widget.info['globalDiscount'] ?? '0',
+
+                                    totalPriceAfterDiscount:
+                                        formatDoubleWithCommas(
+                                          totalPriceAfterDiscount,
+                                        ),
+                                    additionalSpecialDiscount:
+                                        additionalSpecialDiscount
+                                            .toStringAsFixed(2),
+                                    totalPriceAfterSpecialDiscount:
+                                        formatDoubleWithCommas(
+                                          totalPriceAfterSpecialDiscount,
+                                        ),
+                                    // itemCurrencyName: itemCurrencyName,
+                                    // itemCurrencySymbol: itemCurrencySymbol,
+                                    // itemCurrencyLatestRate:
+                                    //     itemCurrencyLatestRate,
+                                    totalPriceAfterSpecialDiscountByQuotationCurrency:
+                                        formatDoubleWithCommas(
+                                          totalPriceAfterSpecialDiscountByQuotationCurrency,
+                                        ),
+
+                                    vatByQuotationCurrency:
+                                        formatDoubleWithCommas(
+                                          vatByQuotationCurrency,
+                                        ),
+                                    finalPriceByQuotationCurrency:
+                                        formatDoubleWithCommas(
+                                          finalPriceByQuotationCurrency,
+                                        ),
+                                    specialDisc: specialDisc.toString(),
+                                    specialDiscount:
+                                        widget.info['specialDiscount'] ?? '0',
+                                    specialDiscountAmount:
+                                        widget.info['specialDiscountAmount'] ??
+                                        '',
+                                    salesPerson:
+                                        widget.info['salesperson'] != null
+                                            ? widget.info['salesperson']['name']
+                                            : '---',
+                                    quotationCurrency:
+                                        widget.info['currency']['name'] ?? '',
+                                    quotationCurrencySymbol:
+                                        widget.info['currency']['symbol'] ?? '',
+                                    quotationCurrencyLatestRate:
+                                        widget
+                                            .info['currency']['latest_rate'] ??
+                                        '',
+                                    clientPhoneNumber:
+                                        widget.info['client'] != null
+                                            ? widget.info['client']['phoneNumber'] ??
+                                                '---'
+                                            : "---",
+                                    clientName:
+                                        widget.info['client']['name'] ?? '',
+                                    termsAndConditions:
+                                        widget.info['termsAndConditions'] ?? '',
+                                    itemsInfoPrint: itemsInfoPrint,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          child: Icon(
+                            Icons.remove_red_eye_outlined,
+                            color: Primary.primary,
+                          ),
+                        ),
                       ),
-                      PopupMenuItem<String>(
-                        value: '2',
-                        onTap: () async {
-                          showDialog<String>(
-                            context: context,
-                            builder:
-                                (BuildContext context) => AlertDialog(
-                                  backgroundColor: Colors.white,
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(9),
+                      Tooltip(
+                        message: 'modify'.tr,
+                        child: InkWell(
+                          onTap: () async {
+                            showDialog<String>(
+                              context: context,
+                              builder:
+                                  (BuildContext context) => AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(9),
+                                      ),
+                                    ),
+                                    elevation: 0,
+                                    content: UpdateQuotationDialog(
+                                      index: widget.index,
+                                      info: widget.info,
                                     ),
                                   ),
-                                  elevation: 0,
-                                  content: UpdateQuotationDialog(
-                                    index: widget.index,
-                                    info: widget.info,
-                                  ),
-                                ),
-                          );
-                        },
-                        child: Text('Update'.tr),
+                            );
+                          },
+                          child: Icon(Icons.edit, color: Primary.primary),
+                        ),
                       ),
                     ],
                   ),
                 );
               },
             ),
+            // GetBuilder<QuotationController>(
+            //   builder: (cont) {
+            //     return SizedBox(
+            //       width:
+            //           widget.isDesktop
+            //               ? MediaQuery.of(context).size.width * 0.07
+            //               : 150,
+            //       child: ReusableMore(
+            //         itemsList: [
+            //           PopupMenuItem<String>(
+            //             value: '1',
+            //             onTap: () async {
+            //               itemsInfoPrint = [];
+            //               quotationItemInfo = {};
+            //               totalAllItems = 0;
+            //               cont.totalAllItems = 0;
+            //               totalAllItems = 0;
+            //               cont.totalAllItems = 0;
+            //               totalPriceAfterDiscount = 0;
+            //               additionalSpecialDiscount = 0;
+            //               totalPriceAfterSpecialDiscount = 0;
+            //               totalPriceAfterSpecialDiscountByQuotationCurrency = 0;
+            //               vatByQuotationCurrency = 0;
+            //               vatByQuotationCurrency = 0;
+            //               finalPriceByQuotationCurrency = 0;
+            //
+            //               for (var item in widget.info['orderLines']) {
+            //                 if ('${item['line_type_id']}' == '2') {
+            //                   qty = item['item_quantity'];
+            //                   var map =
+            //                       cont.itemsMap[item['item_id'].toString()];
+            //                   itemName = map['item_name'];
+            //                   itemPrice = double.parse(
+            //                     '${item['item_unit_price'] ?? '0'}',
+            //                   );
+            //                   //     map['unitPrice'] ?? 0.0;
+            //                   // formatDoubleWithCommas(map['unitPrice']);
+            //
+            //                   itemDescription = item['item_description'];
+            //
+            //                   itemImage =
+            //                       '${map['images']}' != '[]'
+            //                           ? map['images'][0]
+            //                           : '';
+            //                   // itemCurrencyName = map['currency']['name'];
+            //                   // itemCurrencySymbol = map['currency']['symbol'];
+            //                   // itemCurrencyLatestRate =
+            //                   //     map['currency']['latest_rate'];
+            //                   var firstBrandObject = map['itemGroups']
+            //                       .firstWhere(
+            //                         (obj) =>
+            //                             obj["root_name"]?.toLowerCase() ==
+            //                             "brand".toLowerCase(),
+            //                         orElse: () => null,
+            //                       );
+            //                   brand =
+            //                       firstBrandObject == null
+            //                           ? ''
+            //                           : firstBrandObject['name'] ?? '';
+            //                   itemTotal = double.parse('${item['item_total']}');
+            //                   // itemTotal = double.parse(qty) * itemPrice;
+            //                   totalAllItems += itemTotal;
+            //                   quotationItemInfo = {
+            //                     'line_type_id': '2',
+            //                     'item_name': itemName,
+            //                     'item_description': itemDescription,
+            //                     'item_quantity': qty,
+            //                     'item_discount': item['item_discount'] ?? '0',
+            //                     'item_unit_price': formatDoubleWithCommas(
+            //                       itemPrice,
+            //                     ),
+            //                     'item_total': formatDoubleWithCommas(itemTotal),
+            //                     'item_image': itemImage,
+            //                     'item_brand': brand,
+            //                     'title': '',
+            //                     'isImageList': false,
+            //                     'note': '',
+            //                     'image': '',
+            //                   };
+            //                   itemsInfoPrint.add(quotationItemInfo);
+            //                 } else if ('${item['line_type_id']}' == '3') {
+            //                   var qty = item['item_quantity'];
+            //                   // var map =
+            //                   // cont
+            //                   //     .combosMap[item['combo_id']
+            //                   //     .toString()];
+            //                   var ind = cont.combosIdsList.indexOf(
+            //                     item['combo_id'].toString(),
+            //                   );
+            //                   var itemName = cont.combosNamesList[ind];
+            //                   var itemPrice = double.parse(
+            //                     '${item['combo_price'] ?? 0.0}',
+            //                   );
+            //                   var itemDescription = item['combo_description'];
+            //
+            //                   var itemTotal = double.parse(
+            //                     '${item['combo_total']}',
+            //                   );
+            //                   // double.parse(qty) * itemPrice;
+            //                   var quotationItemInfo = {
+            //                     'line_type_id': '3',
+            //                     'item_name': itemName,
+            //                     'item_description': itemDescription,
+            //                     'item_quantity': qty,
+            //                     'item_unit_price': formatDoubleWithCommas(
+            //                       itemPrice,
+            //                     ),
+            //                     'item_discount': item['combo_discount'] ?? '0',
+            //                     'item_total': formatDoubleWithCommas(itemTotal),
+            //                     'note': '',
+            //                     'item_image': '',
+            //                     'item_brand': '',
+            //                     'isImageList': false,
+            //                     'title': '',
+            //                     'image': '',
+            //                   };
+            //                   itemsInfoPrint.add(quotationItemInfo);
+            //                 } else if ('${item['line_type_id']}' == '1') {
+            //                   var quotationItemInfo = {
+            //                     'line_type_id': '1',
+            //                     'item_name': '',
+            //                     'item_description': '',
+            //                     'item_quantity': '',
+            //                     'item_unit_price': '',
+            //                     'item_discount': '0',
+            //                     'item_total': '',
+            //                     'item_image': '',
+            //                     'item_brand': '',
+            //                     'note': '',
+            //                     'isImageList': false,
+            //                     'title': item['title'],
+            //                     'image': '',
+            //                   };
+            //                   itemsInfoPrint.add(quotationItemInfo);
+            //                 } else if ('${item['line_type_id']}' == '5') {
+            //                   var quotationItemInfo = {
+            //                     'line_type_id': '5',
+            //                     'item_name': '',
+            //                     'item_description': '',
+            //                     'item_quantity': '',
+            //                     'item_unit_price': '',
+            //                     'item_discount': '0',
+            //                     'item_total': '',
+            //                     'item_image': '',
+            //                     'item_brand': '',
+            //                     'title': '',
+            //                     'note': item['note'],
+            //                     'isImageList': false,
+            //                     'image': '',
+            //                   };
+            //                   itemsInfoPrint.add(quotationItemInfo);
+            //                 } else if ('${item['line_type_id']}' == '4') {
+            //                   var quotationItemInfo = {
+            //                     'line_type_id': '4',
+            //                     'item_name': '',
+            //                     'item_description': '',
+            //                     'item_quantity': '',
+            //                     'item_unit_price': '',
+            //                     'item_discount': '0',
+            //                     'item_total': '',
+            //                     'item_image': '',
+            //                     'item_brand': '',
+            //                     'title': '',
+            //                     'note': '',
+            //                     'image': '$baseImage${item['image']}',
+            //                     'isImageList': false,
+            //                   };
+            //                   itemsInfoPrint.add(quotationItemInfo);
+            //                 }
+            //               }
+            //               // var primaryCurrency = await getCompanyPrimaryCurrencyFromPref();
+            //               // var result = exchangeRatesController
+            //               //     .exchangeRatesList
+            //               //     .firstWhere(
+            //               //       (item) =>
+            //               //   item["currency"] == primaryCurrency,
+            //               //   orElse: () => null,
+            //               // );
+            //               // var primaryLatestRate=
+            //               // result != null
+            //               //     ? '${result["exchange_rate"]}'
+            //               //     : '1';
+            //               // discountOnAllItem =
+            //               //     totalAllItems *
+            //               //     double.parse(
+            //               //       widget.info['globalDiscount'] ?? '0',
+            //               //     ) /
+            //               //     100;
+            //
+            //               totalPriceAfterDiscount =
+            //                   totalAllItems - discountOnAllItem;
+            //               additionalSpecialDiscount =
+            //                   totalPriceAfterDiscount *
+            //                   double.parse(
+            //                     widget.info['specialDiscount'] ?? '0',
+            //                   ) /
+            //                   100;
+            //               totalPriceAfterSpecialDiscount =
+            //                   totalPriceAfterDiscount -
+            //                   additionalSpecialDiscount;
+            //               totalPriceAfterSpecialDiscountByQuotationCurrency =
+            //                   totalPriceAfterSpecialDiscount;
+            //               vatByQuotationCurrency =
+            //                   '${widget.info['vatExempt']}' == '1'
+            //                       ? 0
+            //                       : (totalPriceAfterSpecialDiscountByQuotationCurrency *
+            //                               double.parse(
+            //                                 await getCompanyVatFromPref(),
+            //                               )) /
+            //                           100;
+            //               finalPriceByQuotationCurrency =
+            //                   totalPriceAfterSpecialDiscountByQuotationCurrency +
+            //                   vatByQuotationCurrency;
+            //               Navigator.push(
+            //                 context,
+            //                 MaterialPageRoute(
+            //                   builder: (BuildContext context) {
+            //                     // print('widget.info[ ${widget.info['termsAndConditions']}');
+            //                     return PrintQuotationData(
+            //                       isPrintedAs0:
+            //                           '${widget.info['printedAsPercentage']}' ==
+            //                                   '1'
+            //                               ? true
+            //                               : false,
+            //                       isVatNoPrinted:
+            //                           '${widget.info['notPrinted']}' == '1'
+            //                               ? true
+            //                               : false,
+            //                       isPrintedAsVatExempt:
+            //                           '${widget.info['printedAsVatExempt']}' ==
+            //                                   '1'
+            //                               ? true
+            //                               : false,
+            //                       isInQuotation: true,
+            //                       quotationNumber:
+            //                           widget.info['quotationNumber'] ?? '',
+            //                       creationDate: widget.info['validity'] ?? '',
+            //                       ref: widget.info['reference'] ?? '',
+            //                       receivedUser: '',
+            //                       senderUser: homeController.userName,
+            //                       status: widget.info['status'] ?? '',
+            //                       totalBeforeVat:
+            //                           widget.info['totalBeforeVat'] ?? '',
+            //                       discountOnAllItem:
+            //                           discountOnAllItem.toString(),
+            //                       totalAllItems:
+            //                       // totalAllItems.toString()  ,
+            //                       formatDoubleWithCommas(
+            //                         totalPriceAfterDiscount,
+            //                       ),
+            //
+            //                       globalDiscount:
+            //                           widget.info['globalDiscount'] ?? '0',
+            //
+            //                       totalPriceAfterDiscount:
+            //                           formatDoubleWithCommas(
+            //                             totalPriceAfterDiscount,
+            //                           ),
+            //                       additionalSpecialDiscount:
+            //                           additionalSpecialDiscount.toStringAsFixed(
+            //                             2,
+            //                           ),
+            //                       totalPriceAfterSpecialDiscount:
+            //                           formatDoubleWithCommas(
+            //                             totalPriceAfterSpecialDiscount,
+            //                           ),
+            //                       // itemCurrencyName: itemCurrencyName,
+            //                       // itemCurrencySymbol: itemCurrencySymbol,
+            //                       // itemCurrencyLatestRate:
+            //                       //     itemCurrencyLatestRate,
+            //                       totalPriceAfterSpecialDiscountByQuotationCurrency:
+            //                           formatDoubleWithCommas(
+            //                             totalPriceAfterSpecialDiscountByQuotationCurrency,
+            //                           ),
+            //
+            //                       vatByQuotationCurrency:
+            //                           formatDoubleWithCommas(
+            //                             vatByQuotationCurrency,
+            //                           ),
+            //                       finalPriceByQuotationCurrency:
+            //                           formatDoubleWithCommas(
+            //                             finalPriceByQuotationCurrency,
+            //                           ),
+            //                       specialDisc: specialDisc.toString(),
+            //                       specialDiscount:
+            //                           widget.info['specialDiscount'] ?? '0',
+            //                       specialDiscountAmount:
+            //                           widget.info['specialDiscountAmount'] ??
+            //                           '',
+            //                       salesPerson:
+            //                           widget.info['salesperson'] != null
+            //                               ? widget.info['salesperson']['name']
+            //                               : '---',
+            //                       quotationCurrency:
+            //                           widget.info['currency']['name'] ?? '',
+            //                       quotationCurrencySymbol:
+            //                           widget.info['currency']['symbol'] ?? '',
+            //                       quotationCurrencyLatestRate:
+            //                           widget.info['currency']['latest_rate'] ??
+            //                           '',
+            //                       clientPhoneNumber:
+            //                           widget.info['client'] != null
+            //                               ? widget.info['client']['phoneNumber'] ??
+            //                                   '---'
+            //                               : "---",
+            //                       clientName:
+            //                           widget.info['client']['name'] ?? '',
+            //                       termsAndConditions:
+            //                           widget.info['termsAndConditions'] ?? '',
+            //                       itemsInfoPrint: itemsInfoPrint,
+            //                     );
+            //                   },
+            //                 ),
+            //               );
+            //             },
+            //             child: Text('preview'.tr),
+            //           ),
+            //           PopupMenuItem<String>(
+            //             value: '2',
+            //             onTap: () async {
+            //               showDialog<String>(
+            //                 context: context,
+            //                 builder:
+            //                     (BuildContext context) => AlertDialog(
+            //                       backgroundColor: Colors.white,
+            //                       shape: const RoundedRectangleBorder(
+            //                         borderRadius: BorderRadius.all(
+            //                           Radius.circular(9),
+            //                         ),
+            //                       ),
+            //                       elevation: 0,
+            //                       content: UpdateQuotationDialog(
+            //                         index: widget.index,
+            //                         info: widget.info,
+            //                       ),
+            //                     ),
+            //               );
+            //             },
+            //             child: Text('Update'.tr),
+            //           ),
+            //         ],
+            //       ),
+            //     );
+            //   },
+            // ),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.03,
               child: InkWell(
@@ -1155,7 +1576,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                   var p = json.decode(res.body);
                   if (res.statusCode == 200) {
                     CommonWidgets.snackBar('Success', p['message']);
-                    quotationController.getAllQuotationsFromBack();
+                    quotationController.getAllQuotationsWithoutPendingFromBack();
                   } else {
                     CommonWidgets.snackBar('error', p['message']);
                   }
@@ -1192,7 +1613,7 @@ class _MobileQuotationSummaryState extends State<MobileQuotationSummary> {
   bool isCustomerOrderedUp = true;
   bool isSalespersonOrderedUp = true;
   getAllQuotationsFromBack() async {
-    var p = await getAllQuotations();
+    var p = await getAllQuotationsWithoutPending('');
     setState(() {
       quotationsList.addAll(p);
       isQuotationsFetched = true;
@@ -1839,6 +2260,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   TextEditingController searchController = TextEditingController();
   TextEditingController refController = TextEditingController();
   TextEditingController validityController = TextEditingController();
+  TextEditingController inputDateController = TextEditingController();
   TextEditingController currencyController = TextEditingController();
   TextEditingController codeController = TextEditingController();
   TextEditingController vatExemptController = TextEditingController();
@@ -1884,7 +2306,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
       specialDisc = '',
       globalDisc = '';
   final ExchangeRatesController exchangeRatesController = Get.find();
-  int quotationCounter = 0;
+
   Map orderLine = {};
 
   getCurrency() async {
@@ -1914,13 +2336,13 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   // var isVatZero = false;
   checkVatExempt() async {
     var companySubjectToVat = await getCompanySubjectToVatFromPref();
-    if(companySubjectToVat=='1'){
+    if (companySubjectToVat == '1') {
       vatExemptController.clear();
-      quotationController.setIsVatExempted(false, false,false);
+      quotationController.setIsVatExempted(false, false, false);
       quotationController.setIsVatExemptCheckBoxShouldAppear(true);
-    }else{
+    } else {
       quotationController.setIsVatExemptCheckBoxShouldAppear(false);
-      quotationController.setIsVatExempted(false, false,true);
+      quotationController.setIsVatExempted(false, false, true);
       quotationController.setIsVatExemptChecked(true);
     }
     if ('${widget.info['printedAsPercentage'] ?? ''}' == '1') {
@@ -1936,10 +2358,10 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
       vatExemptController.text = 'No printed ';
     }
     quotationController.isVatExemptChecked =
-    '${widget.info['vatExempt'] ?? ''}' == '1' ? true : false;
+        '${widget.info['vatExempt'] ?? ''}' == '1' ? true : false;
   }
 
-  late  QuillController _controller ;
+  late QuillController _controller;
   String? _savedContent;
 
   void _saveContent() {
@@ -1951,14 +2373,16 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     });
 
     // You can now send `jsonString` to your backend
-    print('Saved content as JSON:\n$jsonString');
-    termsAndConditionsController.text=jsonString;
+    termsAndConditionsController.text = jsonString;
   }
 
   // Restore content from saved string (e.g., from API)
   void _loadContent() {
     if (_savedContent == null) return;
-
+    if (_savedContent == '[{"insert":"\n"}]') {
+      _controller = QuillController.basic();
+      return;
+    }
     final delta = Delta.fromJson(jsonDecode(_savedContent!));
     final doc = Document.fromDelta(delta);
 
@@ -1970,40 +2394,63 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     });
   }
 
+  int progressVar = 0;
+
+  setProgressVar() {
+    quotationController.status = widget.info['status'];
+    progressVar =
+        widget.info['status'] == "pending"
+            ? 0
+            : widget.info['status'] == 'sent'
+            ? 1
+            : widget.info['status'] == 'confirmed'
+            ? 2
+            : 0;
+  }
+
+  String oldTermsAndConditionsString = '';
   @override
   void initState() {
+    // print('widget.info');
+    // print(widget.info);
+    quotationController.quotationCounter = 0;
     checkVatExempt();
     getCurrency();
     quotationController.orderLinesQuotationList = {};
     quotationController.rowsInListViewInQuotation = {};
-    // print(widget.info);
+    setProgressVar();
+
     if (widget.info['cashingMethod'] != null) {
-      cashingMethodsController.text = '${widget.info['cashingMethod']['title'] ?? ''}';
-      quotationController.selectedCashingMethodId = '${widget.info['cashingMethod']['id']}';
+      cashingMethodsController.text =
+          '${widget.info['cashingMethod']['title'] ?? ''}';
+      quotationController.selectedCashingMethodId =
+          '${widget.info['cashingMethod']['id']}';
     }
+
     if (widget.info['pricelist'] != null) {
       priceListController.text = '${widget.info['pricelist']['code'] ?? ''}';
-      quotationController.selectedPriceListId = '${widget.info['pricelist']['id']}';
-    }else{
-      priceListController.text='STANDARD';
+      quotationController.selectedPriceListId =
+          '${widget.info['pricelist']['id']}';
+    } else {
+      priceListController.text = 'STANDARD';
     }
+
     if (widget.info['salesperson'] != null) {
       selectedSalesPerson = '${widget.info['salesperson']['name'] ?? ''}';
       salesPersonController.text =
           '${widget.info['salesperson']['name'] ?? ''}';
       selectedSalesPersonId = widget.info['salesperson']['id'] ?? 0;
     }
+
     if ('${widget.info['beforeVatPrices'] ?? ''}' == '1') {
       priceConditionController.text = 'Prices are before vat';
       quotationController.isBeforeVatPrices = true;
     }
+
     if ('${widget.info['vatInclusivePrices'] ?? ''}' == '1') {
       priceConditionController.text = 'Prices are vat inclusive';
       quotationController.isBeforeVatPrices = false;
     }
-
-
-
 
     searchController.text = widget.info['client']['name'] ?? '';
     selectedItem = widget.info['client']['name'] ?? '';
@@ -2012,25 +2459,45 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     selectedCustomerIds = widget.info['client']['id'].toString();
     refController.text = widget.info['reference'] ?? '';
     validityController.text = widget.info['validity'] ?? '';
+    inputDateController.text = widget.info['inputDate'] ?? '';
     currencyController.text = widget.info['currency']['name'] ?? '';
-    termsAndConditionsController.text = widget.info['termsAndConditions'] ?? '[{"insert":"\n"}]';
-    _savedContent=widget.info['termsAndConditions'] ?? '[{"insert":"\n"}]';
+    // oldTermsAndConditionsString =
+    //     widget.info['termsAndConditions'] ?? '[{"insert":"\n"}]';
+    // termsAndConditionsController.text =
+    //     widget.info['termsAndConditions'] ?? '[{"insert":"\n"}]';
+    if (widget.info['termsAndConditions'] == null ||
+        '${widget.info['termsAndConditions']}' == 'null') {
+      oldTermsAndConditionsString = '[{"insert":"\n"}]';
+      termsAndConditionsController.text = '[{"insert":"\n"}]';
+      _savedContent = '[{"insert":"\n"}]';
+    } else {
+      oldTermsAndConditionsString = widget.info['termsAndConditions'];
+      termsAndConditionsController.text = widget.info['termsAndConditions'];
+      _savedContent = widget.info['termsAndConditions'];
+    }
+
     _loadContent();
 
     globalDiscPercentController.text =
-        widget.info['globalDiscount'] ?? ''; // entered by user
+        widget.info['globalDiscount'] ?? '0.0'; // entered by user
     specialDiscPercentController.text =
-        widget.info['specialDiscount'] ?? ''; //entered by user
-    quotationController.globalDisc = widget.info['globalDiscountAmount'] ?? '';
+        widget.info['specialDiscount'] ?? '0.0'; //entered by user
+    quotationController.globalDisc =
+        widget.info['globalDiscountAmount'] ?? '0.0';
     quotationController.specialDisc =
-        widget.info['specialDiscountAmount'] ?? '';
+        widget.info['specialDiscountAmount'] ?? '0.0';
     quotationController.totalItems = double.parse(
       '${widget.info['totalBeforeVat'] ?? '0.0'}',
     );
     // print('isVatZero $isVatZero');
-    quotationController.vat11 = quotationController.isVatExemptChecked ? '0' : '${widget.info['vat'] ?? ''}';
+    quotationController.vat11 =
+        quotationController.isVatExemptChecked
+            ? '0'
+            : '${widget.info['vat'] ?? ''}';
     quotationController.vatInPrimaryCurrency =
-    quotationController.isVatExemptChecked ? '0' : '${widget.info['vatLebanese'] ?? ''}';
+        quotationController.isVatExemptChecked
+            ? '0'
+            : '${widget.info['vatLebanese'] ?? ''}';
 
     // quotationController.totalQuotation = '${widget.info['total'] ?? ''}';
     quotationController.totalQuotation = ((quotationController.totalItems -
@@ -2086,7 +2553,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
           info: quotationController.rowsInListViewInQuotation[keys[i]],
         );
         quotationController.orderLinesQuotationList['${i + 1}'] = p;
-      } else if (widget.info['orderLines'][i]['line_type_id'] == 3){
+      } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
         quotationController.combosPriceControllers[i + 1] =
             TextEditingController();
         Widget p = ReusableComboRow(
@@ -2096,7 +2563,8 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
         quotationController.orderLinesQuotationList['${i + 1}'] = p;
       }
     }
-    quotationCounter = quotationController.rowsInListViewInQuotation.length;
+    quotationController.quotationCounter =
+        quotationController.rowsInListViewInQuotation.length;
     quotationController.listViewLengthInQuotation =
         quotationController.orderLinesQuotationList.length * 60;
 
@@ -2140,6 +2608,550 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                     ],
                   ),
                   gapH32,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          UnderTitleBtn(
+                            text: 'send_by_email'.tr,
+                            onTap: () async {
+                              var oldKeys =
+                                  quotationController
+                                      .rowsInListViewInQuotation
+                                      .keys
+                                      .toList()
+                                    ..sort();
+                              for (int i = 0; i < oldKeys.length; i++) {
+                                quotationController.newRowMap[i + 1] =
+                                    quotationController
+                                        .rowsInListViewInQuotation[oldKeys[i]]!;
+                              }
+                              bool hasType1WithEmptyTitle = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '1' &&
+                                        (map['title']?.isEmpty ?? true);
+                                  });
+                              bool hasType2WithEmptyId = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '2' &&
+                                        (map['item_id']?.isEmpty ?? true);
+                                  });
+                              bool hasType3WithEmptyId = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '3' &&
+                                        (map['combo']?.isEmpty ?? true);
+                                  });
+                              bool hasType4WithEmptyImage = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '4' &&
+                                        (map['image'] == Uint8List(0) ||
+                                            map['image']?.isEmpty);
+                                  });
+                              bool hasType5WithEmptyNote = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '5' &&
+                                        (map['note']?.isEmpty ?? true);
+                                  });
+                              if (quotationController.newRowMap.isEmpty) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'Order lines is Empty',
+                                );
+                              } else if (hasType2WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty item',
+                                );
+                              } else if (hasType3WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty combo',
+                                );
+                              } else if (hasType1WithEmptyTitle) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty title',
+                                );
+                              } else if (hasType4WithEmptyImage) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty image',
+                                );
+                              } else if (hasType5WithEmptyNote) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty note',
+                                );
+                              } else {
+                                setState(() {
+                                  progressVar = 1;
+                                });
+                                var res = await sendByEmail(
+                                  '${widget.info['id']}',
+                                );
+                                if ('${res['success']}' == 'true') {
+                                  Get.back();
+                                  quotationController
+                                      .getAllQuotationsWithoutPendingFromBack();
+                                  // homeController.selectedTab.value = 'new_quotation';
+                                  homeController.selectedTab.value =
+                                      'quotation_summary';
+                                  CommonWidgets.snackBar(
+                                    'Success',
+                                    res['message'],
+                                  );
+                                } else {
+                                  CommonWidgets.snackBar(
+                                    'error',
+                                    res['message'],
+                                  );
+                                }
+                                // quotationCont.setStatus('sent');
+                                // var oldKeys =
+                                //     quotationController
+                                //         .rowsInListViewInQuotation
+                                //         .keys
+                                //         .toList()
+                                //       ..sort();
+                                // for (int i = 0; i < oldKeys.length; i++) {
+                                //   quotationController.newRowMap[i + 1] =
+                                //       quotationController
+                                //           .rowsInListViewInQuotation[oldKeys[i]]!;
+                                // }
+                                // if (_formKey.currentState!.validate()) {
+                                //   _saveContent();
+                                //   var res = await updateQuotation(
+                                //     '${widget.info['id']}',
+                                //     // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                //     refController.text,
+                                //     selectedCustomerIds,
+                                //     validityController.text,
+                                //     inputDateController.text,
+                                //     '', //todo paymentTermsController.text,
+                                //     quotationCont.selectedPriceListId,
+                                //     quotationCont
+                                //         .selectedCurrencyId, //selectedCurrency
+                                //     termsAndConditionsController.text,
+                                //     selectedSalesPersonId.toString(),
+                                //     '',
+                                //     quotationCont.selectedCashingMethodId,
+                                //     commissionController.text,
+                                //     totalCommissionController.text,
+                                //     quotationController.totalItems
+                                //         .toString(), //total before vat
+                                //     specialDiscPercentController
+                                //         .text, // inserted by user
+                                //     quotationController.specialDisc, // calculated
+                                //     globalDiscPercentController.text,
+                                //     quotationController.globalDisc,
+                                //     quotationController.vat11.toString(), //vat
+                                //     quotationController.vatInPrimaryCurrency
+                                //         .toString(),
+                                //     quotationController
+                                //         .totalQuotation, // quotationController.totalQuotation
+                                //
+                                //     quotationCont.isVatExemptChecked ? '1' : '0',
+                                //     quotationCont.isVatNoPrinted ? '1' : '0',
+                                //     quotationCont.isPrintedAsVatExempt
+                                //         ? '1'
+                                //         : '0',
+                                //     quotationCont.isPrintedAs0 ? '1' : '0',
+                                //     quotationCont.isBeforeVatPrices ? '0' : '1',
+                                //
+                                //     quotationCont.isBeforeVatPrices ? '1' : '0',
+                                //     codeController.text,
+                                //     quotationCont.status, // status,
+                                //     // quotationController.rowsInListViewInQuotation,
+                                //     quotationController.newRowMap,
+                                //   );
+                                //   if (res['success'] == true) {
+                                //     Get.back();
+                                //     quotationController
+                                //         .getAllQuotationsFromBack();
+                                //     // homeController.selectedTab.value = 'new_quotation';
+                                //     homeController.selectedTab.value =
+                                //         'quotation_summary';
+                                //     CommonWidgets.snackBar(
+                                //       'Success',
+                                //       res['message'],
+                                //     );
+                                //   } else {
+                                //     CommonWidgets.snackBar(
+                                //       'error',
+                                //       res['message'],
+                                //     );
+                                //   }
+                                // }
+                              }
+                            },
+                          ),
+                          UnderTitleBtn(
+                            text: 'confirm'.tr,
+                            onTap: ()
+                            // {
+                            //     setState(() {
+                            //       progressVar = 2;
+                            //     });
+                            //     quotationCont.setStatus('confirmed');
+                            //
+                            // },
+                            async {
+                              quotationCont.setStatus('confirmed');
+                              var oldKeys =
+                                  quotationController
+                                      .rowsInListViewInQuotation
+                                      .keys
+                                      .toList()
+                                    ..sort();
+                              for (int i = 0; i < oldKeys.length; i++) {
+                                quotationController.newRowMap[i + 1] =
+                                    quotationController
+                                        .rowsInListViewInQuotation[oldKeys[i]]!;
+                              }
+                              bool hasType1WithEmptyTitle = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '1' &&
+                                        (map['title']?.isEmpty ?? true);
+                                  });
+                              bool hasType2WithEmptyId = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '2' &&
+                                        (map['item_id']?.isEmpty ?? true);
+                                  });
+                              bool hasType3WithEmptyId = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '3' &&
+                                        (map['combo']?.isEmpty ?? true);
+                                  });
+                              bool hasType4WithEmptyImage = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '4' &&
+                                        (map['image'] == Uint8List(0) ||
+                                            map['image']?.isEmpty);
+                                  });
+                              bool hasType5WithEmptyNote = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '5' &&
+                                        (map['note']?.isEmpty ?? true);
+                                  });
+                              if (quotationController.newRowMap.isEmpty) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'Order lines is Empty',
+                                );
+                              } else if (hasType2WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty item',
+                                );
+                              } else if (hasType3WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty combo',
+                                );
+                              } else if (hasType1WithEmptyTitle) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty title',
+                                );
+                              } else if (hasType4WithEmptyImage) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty image',
+                                );
+                              } else if (hasType5WithEmptyNote) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty note',
+                                );
+                              } else {
+                                if (_formKey.currentState!.validate()) {
+                                  _saveContent();
+                                  var res = await updateQuotation(
+                                    '${widget.info['id']}',
+                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                    refController.text,
+                                    selectedCustomerIds,
+                                    validityController.text,
+                                    inputDateController.text,
+                                    '', //todo paymentTermsController.text,
+                                    quotationCont.selectedPriceListId,
+                                    quotationCont
+                                        .selectedCurrencyId, //selectedCurrency
+                                    termsAndConditionsController.text,
+                                    selectedSalesPersonId.toString(),
+                                    '',
+                                    quotationCont.selectedCashingMethodId,
+                                    commissionController.text,
+                                    totalCommissionController.text,
+                                    quotationController.totalItems
+                                        .toString(), //total before vat
+                                    specialDiscPercentController
+                                        .text, // inserted by user
+                                    quotationController
+                                        .specialDisc, // calculated
+                                    globalDiscPercentController.text,
+                                    quotationController.globalDisc,
+                                    quotationController.vat11.toString(), //vat
+                                    quotationController.vatInPrimaryCurrency
+                                        .toString(),
+                                    quotationController
+                                        .totalQuotation, // quotationController.totalQuotation
+
+                                    quotationCont.isVatExemptChecked
+                                        ? '1'
+                                        : '0',
+                                    quotationCont.isVatNoPrinted ? '1' : '0',
+                                    quotationCont.isPrintedAsVatExempt
+                                        ? '1'
+                                        : '0',
+                                    quotationCont.isPrintedAs0 ? '1' : '0',
+                                    quotationCont.isBeforeVatPrices ? '0' : '1',
+
+                                    quotationCont.isBeforeVatPrices ? '1' : '0',
+                                    codeController.text,
+                                    quotationCont.status, // status,
+                                    // quotationController.rowsInListViewInQuotation,
+                                    quotationController.newRowMap,
+                                  );
+                                  if (res['success'] == true) {
+                                    setState(() {
+                                      progressVar = 2;
+                                    });
+                                    Get.back();
+                                    quotationController
+                                        .getAllQuotationsWithoutPendingFromBack();
+                                    // homeController.selectedTab.value = 'new_quotation';
+                                    homeController.selectedTab.value =
+                                        'quotation_summary';
+                                    CommonWidgets.snackBar(
+                                      'Success',
+                                      res['message'],
+                                    );
+                                  } else {
+                                    CommonWidgets.snackBar(
+                                      'error',
+                                      res['message'],
+                                    );
+                                  }
+                                }
+                              }
+                            },
+                          ),
+                          UnderTitleBtn(
+                            text: 'cancel'.tr,
+                            onTap: ()
+                            // {
+                            //   setState(() {
+                            //     progressVar = 0;
+                            //   });
+                            //   quotationCont.setStatus('cancelled');
+                            // },
+                            async {
+                              quotationCont.setStatus('cancelled');
+                              var oldKeys =
+                                  quotationController
+                                      .rowsInListViewInQuotation
+                                      .keys
+                                      .toList()
+                                    ..sort();
+                              for (int i = 0; i < oldKeys.length; i++) {
+                                quotationController.newRowMap[i + 1] =
+                                    quotationController
+                                        .rowsInListViewInQuotation[oldKeys[i]]!;
+                              }
+
+                              bool hasType1WithEmptyTitle = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '1' &&
+                                        (map['title']?.isEmpty ?? true);
+                                  });
+                              bool hasType2WithEmptyId = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '2' &&
+                                        (map['item_id']?.isEmpty ?? true);
+                                  });
+                              bool hasType3WithEmptyId = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '3' &&
+                                        (map['combo']?.isEmpty ?? true);
+                                  });
+                              bool hasType4WithEmptyImage = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '4' &&
+                                        (map['image'] == Uint8List(0) ||
+                                            map['image']?.isEmpty);
+                                  });
+                              bool hasType5WithEmptyNote = quotationController
+                                  .newRowMap
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '5' &&
+                                        (map['note']?.isEmpty ?? true);
+                                  });
+                              if (quotationController.newRowMap.isEmpty) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'Order lines is Empty',
+                                );
+                              } else if (hasType2WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty item',
+                                );
+                              } else if (hasType3WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty combo',
+                                );
+                              } else if (hasType1WithEmptyTitle) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty title',
+                                );
+                              } else if (hasType4WithEmptyImage) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty image',
+                                );
+                              } else if (hasType5WithEmptyNote) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty note',
+                                );
+                              } else {
+                                if (_formKey.currentState!.validate()) {
+                                  _saveContent();
+                                  var res = await updateQuotation(
+                                    '${widget.info['id']}',
+                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                    refController.text,
+                                    selectedCustomerIds,
+                                    validityController.text,
+                                    inputDateController.text,
+                                    '', //todo paymentTermsController.text,
+                                    quotationCont.selectedPriceListId,
+                                    quotationCont
+                                        .selectedCurrencyId, //selectedCurrency
+                                    termsAndConditionsController.text,
+                                    selectedSalesPersonId.toString(),
+                                    '',
+                                    quotationCont.selectedCashingMethodId,
+                                    commissionController.text,
+                                    totalCommissionController.text,
+                                    quotationController.totalItems
+                                        .toString(), //total before vat
+                                    specialDiscPercentController
+                                        .text, // inserted by user
+                                    quotationController
+                                        .specialDisc, // calculated
+                                    globalDiscPercentController.text,
+                                    quotationController.globalDisc,
+                                    quotationController.vat11.toString(), //vat
+                                    quotationController.vatInPrimaryCurrency
+                                        .toString(),
+                                    quotationController
+                                        .totalQuotation, // quotationController.totalQuotation
+
+                                    quotationCont.isVatExemptChecked
+                                        ? '1'
+                                        : '0',
+                                    quotationCont.isVatNoPrinted ? '1' : '0',
+                                    quotationCont.isPrintedAsVatExempt
+                                        ? '1'
+                                        : '0',
+                                    quotationCont.isPrintedAs0 ? '1' : '0',
+                                    quotationCont.isBeforeVatPrices ? '0' : '1',
+
+                                    quotationCont.isBeforeVatPrices ? '1' : '0',
+                                    codeController.text,
+                                    quotationCont.status, // status,
+                                    // quotationController.rowsInListViewInQuotation,
+                                    quotationController.newRowMap,
+                                  );
+                                  if (res['success'] == true) {
+                                    Get.back();
+                                    quotationController
+                                        .getAllQuotationsWithoutPendingFromBack();
+                                    // homeController.selectedTab.value = 'new_quotation';
+                                    homeController.selectedTab.value =
+                                        'quotation_summary';
+                                    CommonWidgets.snackBar(
+                                      'Success',
+                                      res['message'],
+                                    );
+                                  } else {
+                                    CommonWidgets.snackBar(
+                                      'error',
+                                      res['message'],
+                                    );
+                                  }
+                                }
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          ReusableTimeLineTile(
+                            id: 0,
+                            progressVar: progressVar,
+                            isFirst: true,
+                            isLast: false,
+                            isPast: true,
+                            text: 'processing'.tr,
+                          ),
+                          ReusableTimeLineTile(
+                            id: 1,
+                            progressVar: progressVar,
+                            isFirst: false,
+                            isLast: false,
+                            isPast: false,
+                            text: 'quotation_sent'.tr,
+                          ),
+                          ReusableTimeLineTile(
+                            id: 2,
+                            progressVar: progressVar,
+                            isFirst: false,
+                            isLast: true,
+                            isPast: false,
+                            text: 'confirmed'.tr,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  gapH16,
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
@@ -2397,6 +3409,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 ],
                               ),
                             ),
+
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.14,
                               child: Row(
@@ -2437,9 +3450,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                   Text('Pricelist'.tr),
                                   DropdownMenu<String>(
                                     width:
-                                    MediaQuery.of(
-                                      context,
-                                    ).size.width *
+                                        MediaQuery.of(context).size.width *
                                         0.10,
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
@@ -2450,8 +3461,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                       hintStyle: const TextStyle(
                                         fontStyle: FontStyle.italic,
                                       ),
-                                      contentPadding:
-                                      const EdgeInsets.fromLTRB(
+                                      contentPadding: const EdgeInsets.fromLTRB(
                                         20,
                                         0,
                                         25,
@@ -2460,27 +3470,23 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                       // outlineBorder: BorderSide(color: Colors.black,),
                                       enabledBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Primary.primary
-                                              .withAlpha(
+                                          color: Primary.primary.withAlpha(
                                             (0.2 * 255).toInt(),
                                           ),
                                           width: 1,
                                         ),
-                                        borderRadius:
-                                        const BorderRadius.all(
+                                        borderRadius: const BorderRadius.all(
                                           Radius.circular(9),
                                         ),
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Primary.primary
-                                              .withAlpha(
+                                          color: Primary.primary.withAlpha(
                                             (0.4 * 255).toInt(),
                                           ),
                                           width: 2,
                                         ),
-                                        borderRadius:
-                                        const BorderRadius.all(
+                                        borderRadius: const BorderRadius.all(
                                           Radius.circular(9),
                                         ),
                                       ),
@@ -2488,23 +3494,29 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     // menuStyle: ,
                                     menuHeight: 250,
                                     dropdownMenuEntries:
-                                    quotationCont.priceListsCodes.map<
-                                        DropdownMenuEntry<String>
-                                    >((String option) {
-                                      return DropdownMenuEntry<
-                                          String
-                                      >(value: option, label: option);
-                                    }).toList(),
+                                        quotationCont.priceListsCodes
+                                            .map<DropdownMenuEntry<String>>((
+                                              String option,
+                                            ) {
+                                              return DropdownMenuEntry<String>(
+                                                value: option,
+                                                label: option,
+                                              );
+                                            })
+                                            .toList(),
                                     enableFilter: true,
                                     onSelected: (String? val) {
                                       var index = quotationCont.priceListsCodes
                                           .indexOf(val!);
-                                      quotationCont.setSelectedPriceListId(quotationCont.priceListsIds[index]);
+                                      quotationCont.setSelectedPriceListId(
+                                        quotationCont.priceListsIds[index],
+                                      );
                                       setState(() {
-                                        quotationCont.resetItemsAfterChangePriceList();
+                                        quotationCont
+                                            .resetItemsAfterChangePriceList();
                                       });
                                     },
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
@@ -2514,6 +3526,37 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.15,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('input_date'.tr),
+                                  DialogDateTextField(
+                                    textEditingController: inputDateController,
+                                    text: '',
+                                    textFieldWidth:
+                                        MediaQuery.of(context).size.width *
+                                        0.09,
+                                    // MediaQuery.of(context).size.width * 0.25,
+                                    validationFunc: (val) {},
+                                    onChangedFunc: (val) {
+                                      inputDateController.text = val;
+                                    },
+                                    onDateSelected: (value) {
+                                      inputDateController.text = value;
+                                      setState(() {
+                                        // LocalDate a=LocalDate.today();
+                                        // LocalDate b = LocalDate.dateTime(value);
+                                        // Period diff = b.periodSince(a);
+                                        // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
                             //code
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.37,
@@ -2651,9 +3694,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               text: 'payment_terms'.tr,
                               hint: '',
                               rowWidth:
-                              MediaQuery.of(context).size.width * 0.24,
+                                  MediaQuery.of(context).size.width * 0.24,
                               textFieldWidth:
-                              MediaQuery.of(context).size.width * 0.15,
+                                  MediaQuery.of(context).size.width * 0.15,
                               validationFunc: (val) {},
                             ),
                             // SizedBox(
@@ -2803,13 +3846,18 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('price'.tr,style:quotationCont.isVatExemptChecked ? TextStyle(
-                                      color:Others.divider
-                                  ):TextStyle(),),
+                                  Text(
+                                    'price'.tr,
+                                    style:
+                                        quotationCont.isVatExemptChecked
+                                            ? TextStyle(color: Others.divider)
+                                            : TextStyle(),
+                                  ),
                                   GetBuilder<ExchangeRatesController>(
                                     builder: (cont) {
                                       return DropdownMenu<String>(
-                                        enabled: !quotationCont.isVatExemptChecked,
+                                        enabled:
+                                            !quotationCont.isVatExemptChecked,
                                         width:
                                             MediaQuery.of(context).size.width *
                                             0.15,
@@ -2836,13 +3884,14 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                           // outlineBorder: BorderSide(color: Colors.black,),
                                           disabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
-                                              color:Others.divider,
+                                              color: Others.divider,
                                               width: 1,
                                             ),
                                             borderRadius:
-                                            const BorderRadius.all(
-                                              Radius.circular(9),
-                                            ),),
+                                                const BorderRadius.all(
+                                                  Radius.circular(9),
+                                                ),
+                                          ),
                                           enabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
                                               color: Primary.primary.withAlpha(
@@ -3102,8 +4151,10 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                     value!,
                                                   );
                                               if (value) {
-                                                priceConditionController.text='Prices are before vat';
-                                                quotationCont.setIsBeforeVatPrices(true);
+                                                priceConditionController.text =
+                                                    'Prices are before vat';
+                                                quotationCont
+                                                    .setIsBeforeVatPrices(true);
                                                 vatExemptController.text =
                                                     vatExemptList[0];
                                                 quotationCont.setIsVatExempted(
@@ -3529,7 +4580,8 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                   gapH16,
                                   DialogDropMenu(
                                     controller: cashingMethodsController,
-                                    optionsList: quotationCont.cashingMethodsNamesList,
+                                    optionsList:
+                                        quotationCont.cashingMethodsNamesList,
                                     text: 'cashing_method'.tr,
                                     hint: '',
                                     rowWidth:
@@ -3538,8 +4590,13 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                         MediaQuery.of(context).size.width *
                                         0.15,
                                     onSelected: (value) {
-                                      var index=quotationCont.cashingMethodsNamesList.indexOf(value);
-                                      quotationCont.setSelectedCashingMethodId(quotationCont.cashingMethodsIdsList[index]);
+                                      var index = quotationCont
+                                          .cashingMethodsNamesList
+                                          .indexOf(value);
+                                      quotationCont.setSelectedCashingMethodId(
+                                        quotationCont
+                                            .cashingMethodsIdsList[index],
+                                      );
                                     },
                                   ),
                                 ],
@@ -3606,22 +4663,24 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                           height: 300,
                           child: Column(
                             children: [
-                              QuillSimpleToolbar(controller: _controller,
-                                  config: QuillSimpleToolbarConfig(
-                                      showFontFamily: false,
-                                      showColorButton: false,
-                                      showBackgroundColorButton: false,
-                                      showSearchButton: false,
-                                      showDirection: false,
-                                      showLink: false,
-                                      showAlignmentButtons: false,
-                                      showLeftAlignment: false,
-                                      showRightAlignment: false,
-                                      showListCheck: false,
-                                      showIndent: false,
-                                      showQuote: false,
-                                      showCodeBlock: false
-                                  )),
+                              QuillSimpleToolbar(
+                                controller: _controller,
+                                config: QuillSimpleToolbarConfig(
+                                  showFontFamily: false,
+                                  showColorButton: false,
+                                  showBackgroundColorButton: false,
+                                  showSearchButton: false,
+                                  showDirection: false,
+                                  showLink: false,
+                                  showAlignmentButtons: false,
+                                  showLeftAlignment: false,
+                                  showRightAlignment: false,
+                                  showListCheck: false,
+                                  showIndent: false,
+                                  showQuote: false,
+                                  showCodeBlock: false,
+                                ),
+                              ),
                               Expanded(
                                 child: Container(
                                   padding: const EdgeInsets.all(8),
@@ -4001,58 +5060,130 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 quotationController
                                     .rowsInListViewInQuotation[oldKeys[i]]!;
                           }
-                          if (_formKey.currentState!.validate()) {
-                            _saveContent();
-                            var res = await updateQuotation(
-                              '${widget.info['id']}',
-
-                              refController.text,
-                              selectedCustomerIds,
-                              validityController.text,
-                              '',//todo paymentTermsController.text,
-                              quotationCont.selectedPriceListId,
-                              quotationCont
-                                  .selectedCurrencyId, //selectedCurrency
-                              termsAndConditionsController.text,
-                              selectedSalesPersonId.toString(),
-                              '',
-                             quotationCont.selectedCashingMethodId,
-                              commissionController.text,
-                              totalCommissionController.text,
-                              quotationController.totalItems
-                                  .toString(), //total before vat
-                              specialDiscPercentController
-                                  .text, // inserted by user
-                              quotationController.specialDisc, // calculated
-                              globalDiscPercentController.text,
-                              quotationController.globalDisc,
-                              quotationController.vat11.toString(), //vat
-                              quotationController.vatInPrimaryCurrency
-                                  .toString(),
-                              quotationController
-                                  .totalQuotation, // quotationController.totalQuotation
-
-                              quotationCont.isVatExemptChecked ? '1' : '0',
-                              quotationCont.isVatNoPrinted ? '1' : '0',
-                              quotationCont.isPrintedAsVatExempt ? '1' : '0',
-                              quotationCont.isPrintedAs0 ? '1' : '0',
-                              quotationCont.isBeforeVatPrices ? '0' : '1',
-
-                              quotationCont.isBeforeVatPrices ? '1' : '0',
-                              codeController.text,
-                              'pending', // status,
-                              // quotationController.rowsInListViewInQuotation,
-                              quotationController.newRowMap,
+                          bool hasType1WithEmptyTitle = quotationController
+                              .newRowMap
+                              .values
+                              .any((map) {
+                                return map['line_type_id'] == '1' &&
+                                    (map['title']?.isEmpty ?? true);
+                              });
+                          bool hasType2WithEmptyId = quotationController
+                              .newRowMap
+                              .values
+                              .any((map) {
+                                return map['line_type_id'] == '2' &&
+                                    (map['item_id']?.isEmpty ?? true);
+                              });
+                          bool hasType3WithEmptyId = quotationController
+                              .newRowMap
+                              .values
+                              .any((map) {
+                                return map['line_type_id'] == '3' &&
+                                    (map['combo']?.isEmpty ?? true);
+                              });
+                          bool hasType4WithEmptyImage = quotationController
+                              .newRowMap
+                              .values
+                              .any((map) {
+                                return map['line_type_id'] == '4' &&
+                                    (map['image'] == Uint8List(0) ||
+                                        map['image']?.isEmpty);
+                              });
+                          bool hasType5WithEmptyNote = quotationController
+                              .newRowMap
+                              .values
+                              .any((map) {
+                                return map['line_type_id'] == '5' &&
+                                    (map['note']?.isEmpty ?? true);
+                              });
+                          if (quotationController.newRowMap.isEmpty) {
+                            CommonWidgets.snackBar(
+                              'error',
+                              'Order lines is Empty',
                             );
-                            if (res['success'] == true) {
-                              Get.back();
-                              quotationController.getAllQuotationsFromBack();
-                              // homeController.selectedTab.value = 'new_quotation';
-                              homeController.selectedTab.value =
-                                  'quotation_summary';
-                              CommonWidgets.snackBar('Success', res['message']);
-                            } else {
-                              CommonWidgets.snackBar('error', res['message']);
+                          } else if (hasType2WithEmptyId) {
+                            CommonWidgets.snackBar(
+                              'error',
+                              'You have an empty item',
+                            );
+                          } else if (hasType3WithEmptyId) {
+                            CommonWidgets.snackBar(
+                              'error',
+                              'You have an empty combo',
+                            );
+                          } else if (hasType1WithEmptyTitle) {
+                            CommonWidgets.snackBar(
+                              'error',
+                              'You have an empty title',
+                            );
+                          } else if (hasType4WithEmptyImage) {
+                            CommonWidgets.snackBar(
+                              'error',
+                              'You have an empty image',
+                            );
+                          } else if (hasType5WithEmptyNote) {
+                            CommonWidgets.snackBar(
+                              'error',
+                              'You have an empty note',
+                            );
+                          } else {
+                            if (_formKey.currentState!.validate()) {
+                              _saveContent();
+                              var res = await updateQuotation(
+                                '${widget.info['id']}',
+                                // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                refController.text,
+                                selectedCustomerIds,
+                                validityController.text,
+                                inputDateController.text,
+                                '', //todo paymentTermsController.text,
+                                quotationCont.selectedPriceListId,
+                                quotationCont
+                                    .selectedCurrencyId, //selectedCurrency
+                                termsAndConditionsController.text,
+                                selectedSalesPersonId.toString(),
+                                '',
+                                quotationCont.selectedCashingMethodId,
+                                commissionController.text,
+                                totalCommissionController.text,
+                                quotationController.totalItems
+                                    .toString(), //total before vat
+                                specialDiscPercentController
+                                    .text, // inserted by user
+                                quotationController.specialDisc, // calculated
+                                globalDiscPercentController.text,
+                                quotationController.globalDisc,
+                                quotationController.vat11.toString(), //vat
+                                quotationController.vatInPrimaryCurrency
+                                    .toString(),
+                                quotationController
+                                    .totalQuotation, // quotationController.totalQuotation
+
+                                quotationCont.isVatExemptChecked ? '1' : '0',
+                                quotationCont.isVatNoPrinted ? '1' : '0',
+                                quotationCont.isPrintedAsVatExempt ? '1' : '0',
+                                quotationCont.isPrintedAs0 ? '1' : '0',
+                                quotationCont.isBeforeVatPrices ? '0' : '1',
+
+                                quotationCont.isBeforeVatPrices ? '1' : '0',
+                                codeController.text,
+                                quotationCont.status, // status,
+                                // quotationController.rowsInListViewInQuotation,
+                                quotationController.newRowMap,
+                              );
+                              if (res['success'] == true) {
+                                Get.back();
+                                quotationController.getAllQuotationsWithoutPendingFromBack();
+                                // homeController.selectedTab.value = 'new_quotation';
+                                homeController.selectedTab.value =
+                                    'quotation_summary';
+                                CommonWidgets.snackBar(
+                                  'Success',
+                                  res['message'],
+                                );
+                              } else {
+                                CommonWidgets.snackBar('error', res['message']);
+                              }
                             }
                           }
                         },
@@ -4125,133 +5256,172 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
 
   addNewTitle() {
     setState(() {
-      quotationCounter += 1;
+      quotationController.quotationCounter += 1;
     });
     quotationController.incrementListViewLengthInQuotation(
       quotationController.increment,
     );
-    quotationController.addToRowsInListViewInQuotation(quotationCounter, {
-      'line_type_id': '1',
-      'item_id': '',
-      'itemName': '',
-      'item_main_code': '',
-      'item_discount': '0',
-      'item_description': '',
-      'item_quantity': '0',
-      'item_unit_price': '0',
-      'item_total': '0',
-      'title': '',
-      'note': '',
-    });
-    Widget p = ReusableTitleRow(index: quotationCounter, info: {});
-    quotationController.addToOrderLinesInQuotationList('$quotationCounter', p);
+    quotationController
+        .addToRowsInListViewInQuotation(quotationController.quotationCounter, {
+          'line_type_id': '1',
+          'item_id': '',
+          'itemName': '',
+          'item_main_code': '',
+          'item_discount': '0',
+          'item_description': '',
+          'item_quantity': '0',
+          'item_unit_price': '0',
+          'item_total': '0',
+          'title': '',
+          'note': '',
+        });
+    Widget p = ReusableTitleRow(
+      index: quotationController.quotationCounter,
+      info: {},
+    );
+    quotationController.addToOrderLinesInQuotationList(
+      '${quotationController.quotationCounter}',
+      p,
+    );
   }
   // int quotationCounter = 0;
 
   addNewItem() {
     setState(() {
-      quotationCounter += 1;
+      quotationController.quotationCounter += 1;
     });
     quotationController.incrementListViewLengthInQuotation(
       quotationController.increment,
     );
-    quotationController.addToRowsInListViewInQuotation(quotationCounter, {
-      'line_type_id': '2',
-      'item_id': '',
-      'itemName': '',
-      'item_main_code': '',
-      'item_discount': '0',
-      'item_description': '',
-      'item_quantity': '1',
-      'item_unit_price': '0',
-      'item_total': '0',
-      'title': '',
-      'note': '',
-    });
-    quotationController.addToUnitPriceControllers(quotationCounter);
-    Widget p = ReusableItemRow(index: quotationCounter, info: {});
-    quotationController.addToOrderLinesInQuotationList('$quotationCounter', p);
+    quotationController
+        .addToRowsInListViewInQuotation(quotationController.quotationCounter, {
+          'line_type_id': '2',
+          'item_id': '',
+          'itemName': '',
+          'item_main_code': '',
+          'item_discount': '0',
+          'item_description': '',
+          'item_quantity': '1',
+          'item_unit_price': '0',
+          'item_total': '0',
+          'title': '',
+          'note': '',
+        });
+    quotationController.addToUnitPriceControllers(
+      quotationController.quotationCounter,
+    );
+    Widget p = ReusableItemRow(
+      index: quotationController.quotationCounter,
+      info: {},
+    );
+    quotationController.addToOrderLinesInQuotationList(
+      '${quotationController.quotationCounter}',
+      p,
+    );
   }
 
   addNewCombo() {
     setState(() {
-      quotationCounter += 1;
+      quotationController.quotationCounter += 1;
     });
     quotationController.incrementListViewLengthInQuotation(
       quotationController.increment,
     );
-    quotationController.addToRowsInListViewInQuotation(quotationCounter, {
-      'line_type_id': '3',
-      'item_id': '',
-      'itemName': '',
-      'item_main_code': '',
-      'item_discount': '0',
-      'item_description': '',
-      'item_quantity': '1',
-      'item_unit_price': '0',
-      'item_total': '0',
-      'title': '',
-      'note': '',
-      'combo': '',
-    });
-    quotationController.addToCombosPricesControllers(quotationCounter);
-    Widget p =  ReusableComboRow(index: quotationCounter, info: {});
-    quotationController.addToOrderLinesInQuotationList('$quotationCounter', p);
+    quotationController
+        .addToRowsInListViewInQuotation(quotationController.quotationCounter, {
+          'line_type_id': '3',
+          'item_id': '',
+          'itemName': '',
+          'item_main_code': '',
+          'item_discount': '0',
+          'item_description': '',
+          'item_quantity': '1',
+          'item_unit_price': '0',
+          'item_total': '0',
+          'title': '',
+          'note': '',
+          'combo': '',
+        });
+    quotationController.addToCombosPricesControllers(
+      quotationController.quotationCounter,
+    );
+    Widget p = ReusableComboRow(
+      index: quotationController.quotationCounter,
+      info: {},
+    );
+    quotationController.addToOrderLinesInQuotationList(
+      '${quotationController.quotationCounter}',
+      p,
+    );
   }
 
   addNewImage() {
     setState(() {
-      quotationCounter += 1;
+      quotationController.quotationCounter += 1;
     });
     quotationController.incrementListViewLengthInQuotation(
       quotationController.increment,
     );
 
-    quotationController.addToRowsInListViewInQuotation(quotationCounter, {
-      'line_type_id': '4',
-      'item_id': '',
-      'itemName': '',
-      'item_main_code': '',
-      'item_discount': '0',
-      'item_description': '',
-      'item_quantity': '0',
-      'item_unit_price': '0',
-      'item_total': '0',
-      'title': '',
-      'note': '',
-      'image': Uint8List(0),
-    });
+    quotationController
+        .addToRowsInListViewInQuotation(quotationController.quotationCounter, {
+          'line_type_id': '4',
+          'item_id': '',
+          'itemName': '',
+          'item_main_code': '',
+          'item_discount': '0',
+          'item_description': '',
+          'item_quantity': '0',
+          'item_unit_price': '0',
+          'item_total': '0',
+          'title': '',
+          'note': '',
+          'image': Uint8List(0),
+        });
 
-    Widget p = ReusableImageRow(index: quotationCounter, info: {});
+    Widget p = ReusableImageRow(
+      index: quotationController.quotationCounter,
+      info: {},
+    );
 
-    quotationController.addToOrderLinesInQuotationList('$quotationCounter', p);
+    quotationController.addToOrderLinesInQuotationList(
+      '${quotationController.quotationCounter}',
+      p,
+    );
   }
 
   addNewNote() {
     setState(() {
-      quotationCounter += 1;
+      quotationController.quotationCounter += 1;
     });
     quotationController.incrementListViewLengthInQuotation(
       quotationController.increment,
     );
 
-    quotationController.addToRowsInListViewInQuotation(quotationCounter, {
-      'line_type_id': '5',
-      'item_id': '',
-      'itemName': '',
-      'item_main_code': '',
-      'item_discount': '0',
-      'item_description': '',
-      'item_quantity': '0',
-      'item_unit_price': '0',
-      'item_total': '0',
-      'title': '',
-      'note': '',
-    });
+    quotationController
+        .addToRowsInListViewInQuotation(quotationController.quotationCounter, {
+          'line_type_id': '5',
+          'item_id': '',
+          'itemName': '',
+          'item_main_code': '',
+          'item_discount': '0',
+          'item_description': '',
+          'item_quantity': '0',
+          'item_unit_price': '0',
+          'item_total': '0',
+          'title': '',
+          'note': '',
+        });
 
-    Widget p = ReusableNoteRow(index: quotationCounter, info: {});
+    Widget p = ReusableNoteRow(
+      index: quotationController.quotationCounter,
+      info: {},
+    );
 
-    quotationController.addToOrderLinesInQuotationList('$quotationCounter', p);
+    quotationController.addToOrderLinesInQuotationList(
+      '${quotationController.quotationCounter}',
+      p,
+    );
 
     // quotationController.addToOrderLinesList(p);
   }
@@ -4321,59 +5491,59 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
     quotationController.exchangeRateForSelectedCurrency =
         result != null ? '${result["exchange_rate"]}' : '1';
     quotationController.unitPriceControllers[widget.index]!.text =
-        '${widget.info['item_unit_price'] ?? ''}';
+        '${widget.info['item_unit_price'] ?? '1'}';
     selectedItemId = widget.info['item_id'].toString();
-    if (quotationController.itemsPricesCurrencies[selectedItemId] ==
-        quotationController.selectedCurrencyName) {
-      quotationController.unitPriceControllers[widget.index]!.text =
-          quotationController.itemUnitPrice[selectedItemId].toString();
-    } else if (quotationController.selectedCurrencyName == 'USD' &&
-        quotationController.itemsPricesCurrencies[selectedItemId] !=
-            quotationController.selectedCurrencyName) {
-      var result = exchangeRatesController.exchangeRatesList.firstWhere(
-        (item) =>
-            item["currency"] ==
-            quotationController.itemsPricesCurrencies[selectedItemId],
-        orElse: () => null,
-      );
-      var divider = '1';
-      if (result != null) {
-        divider = result["exchange_rate"].toString();
-      }
-      quotationController.unitPriceControllers[widget.index]!.text =
-          '${double.parse('${(double.parse(quotationController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-    } else if (quotationController.selectedCurrencyName != 'USD' &&
-        quotationController.itemsPricesCurrencies[selectedItemId] == 'USD') {
-      quotationController.unitPriceControllers[widget.index]!.text =
-          '${double.parse('${(double.parse(quotationController.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationController.exchangeRateForSelectedCurrency))}')}';
-    } else {
-      var result = exchangeRatesController.exchangeRatesList.firstWhere(
-        (item) =>
-            item["currency"] ==
-            quotationController.itemsPricesCurrencies[selectedItemId],
-        orElse: () => null,
-      );
-      var divider = '1';
-      if (result != null) {
-        divider = result["exchange_rate"].toString();
-      }
-      var usdPrice =
-          '${double.parse('${(double.parse(quotationController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-      quotationController.unitPriceControllers[widget.index]!.text =
-          '${double.parse('${(double.parse(usdPrice) * double.parse(quotationController.exchangeRateForSelectedCurrency))}')}';
-    }
-    if (quotationController.isBeforeVatPrices) {
-      taxRate = 1;
-      taxValue = 0;
-    } else {
-      taxRate =
-          double.parse(quotationController.itemsVats[selectedItemId]) / 100.0;
-      taxValue =
-          taxRate *
-          double.parse(
-            quotationController.unitPriceControllers[widget.index]!.text,
-          );
-    }
+    // if (quotationController.itemsPricesCurrencies[selectedItemId] ==
+    //     quotationController.selectedCurrencyName) {
+    //   quotationController.unitPriceControllers[widget.index]!.text =
+    //       quotationController.itemUnitPrice[selectedItemId].toString();
+    // } else if (quotationController.selectedCurrencyName == 'USD' &&
+    //     quotationController.itemsPricesCurrencies[selectedItemId] !=
+    //         quotationController.selectedCurrencyName) {
+    //   var result = exchangeRatesController.exchangeRatesList.firstWhere(
+    //     (item) =>
+    //         item["currency"] ==
+    //         quotationController.itemsPricesCurrencies[selectedItemId],
+    //     orElse: () => null,
+    //   );
+    //   var divider = '1';
+    //   if (result != null) {
+    //     divider = result["exchange_rate"].toString();
+    //   }
+    //   quotationController.unitPriceControllers[widget.index]!.text =
+    //       '${double.parse('${(double.parse(quotationController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+    // } else if (quotationController.selectedCurrencyName != 'USD' &&
+    //     quotationController.itemsPricesCurrencies[selectedItemId] == 'USD') {
+    //   quotationController.unitPriceControllers[widget.index]!.text =
+    //       '${double.parse('${(double.parse(quotationController.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationController.exchangeRateForSelectedCurrency))}')}';
+    // } else {
+    //   var result = exchangeRatesController.exchangeRatesList.firstWhere(
+    //     (item) =>
+    //         item["currency"] ==
+    //         quotationController.itemsPricesCurrencies[selectedItemId],
+    //     orElse: () => null,
+    //   );
+    //   var divider = '1';
+    //   if (result != null) {
+    //     divider = result["exchange_rate"].toString();
+    //   }
+    //   var usdPrice =
+    //       '${double.parse('${(double.parse(quotationController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+    //   quotationController.unitPriceControllers[widget.index]!.text =
+    //       '${double.parse('${(double.parse(usdPrice) * double.parse(quotationController.exchangeRateForSelectedCurrency))}')}';
+    // }
+    // if (quotationController.isBeforeVatPrices) {
+    //   taxRate = 1;
+    //   taxValue = 0;
+    // } else {
+    //   taxRate =
+    //       double.parse(quotationController.itemsVats[selectedItemId]) / 100.0;
+    //   taxValue =
+    //       taxRate *
+    //       double.parse(
+    //         quotationController.unitPriceControllers[widget.index]!.text,
+    //       );
+    // }
     quotationController.unitPriceControllers[widget.index]!.text =
         '${double.parse(quotationController.unitPriceControllers[widget.index]!.text) + taxValue}';
     quotationController.unitPriceControllers[widget.index]!.text = double.parse(
@@ -4384,18 +5554,20 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
     quotationController.rowsInListViewInQuotation[widget
             .index]['item_unit_price'] =
         quotationController.unitPriceControllers[widget.index]!.text;
+    quotationController.rowsInListViewInQuotation[widget.index]['itemName'] =
+        quotationController.itemsNames[selectedItemId];
   }
 
   @override
   void initState() {
     if (widget.info.isNotEmpty) {
-      qtyController.text = '${widget.info['item_quantity'] ?? ''}';
-      quantity = '${widget.info['item_quantity'] ?? '0.0'}';
+      qtyController.text = '${widget.info['item_quantity'] ?? '1'}';
+      quantity = '${widget.info['item_quantity'] ?? '1'}';
 
-      discountController.text = widget.info['item_discount'] ?? '';
+      discountController.text = widget.info['item_discount'] ?? '0.0';
       discount = widget.info['item_discount'] ?? '0.0';
 
-      totalLine = widget.info['item_total'] ?? '';
+      totalLine = widget.info['item_total'] ?? '0';
       mainDescriptionVar = widget.info['item_description'] ?? '';
       mainCode = widget.info['item_main_code'] ?? '';
       descriptionController.text = widget.info['item_description'] ?? '';
@@ -4405,11 +5577,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
       setPrice();
     } else {
-      // discountController.text = '0';
-      // discount = '0';
-      // qtyController.text = '0';
-      // quantity = '0';
-      // quotationController.unitPriceControllers[widget.index]!.text = '0';
       itemCodeController.text =
           quotationController.rowsInListViewInQuotation[widget
               .index]['item_main_code'];
@@ -4609,7 +5776,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     onFieldSubmitted: (value) {
                       FocusScope.of(context).requestFocus(focus);
                     },
-                    textAlign: TextAlign.center,
                     controller: descriptionController,
                     cursorColor: Colors.black,
                     decoration: InputDecoration(
@@ -4818,6 +5984,42 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus1,
+                    onFieldSubmitted: (value) {
+                      setState(() {
+                        quotationController.quotationCounter += 1;
+                      });
+                      quotationController.incrementListViewLengthInQuotation(
+                        quotationController.increment,
+                      );
+                      var info = {
+                        'line_type_id': '2',
+                        'item_id': '',
+                        'itemName': '',
+                        'item_main_code': '',
+                        'item_discount': '0',
+                        'item_description': '',
+                        'item_quantity': '1',
+                        'item_unit_price': '0',
+                        'item_total': '0',
+                        'title': '',
+                        'note': '',
+                      };
+                      quotationController.addToRowsInListViewInQuotation(
+                        quotationController.quotationCounter,
+                        info,
+                      );
+                      quotationController.addToUnitPriceControllers(
+                        quotationController.quotationCounter,
+                      );
+                      Widget p = ReusableItemRow(
+                        index: quotationController.quotationCounter,
+                        info: info,
+                      );
+                      quotationController.addToOrderLinesInQuotationList(
+                        '${quotationController.quotationCounter}',
+                        p,
+                      );
+                    },
                     controller: discountController,
                     cursorColor: Colors.black,
                     textAlign: TextAlign.center,
@@ -5231,9 +6433,8 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
     if (widget.info['image'] != null && widget.info['image'].isNotEmpty) {
       try {
         final response = await http.get(
-          Uri.parse('https://theravenstyle.com/public/${widget.info['image']}'),
+          Uri.parse('$baseImage${widget.info['image']}'),
         );
-
         if (response.statusCode == 200) {
           imageFile = response.bodyBytes;
         } else {
@@ -5407,8 +6608,6 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
   }
 }
 
-
-
 class ReusableComboRow extends StatefulWidget {
   const ReusableComboRow({super.key, required this.index, required this.info});
   final int index;
@@ -5445,18 +6644,16 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
   final _formKey = GlobalKey<FormState>();
 
   setPrice() {
-
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
-          (item) => item["currency"] == quotationController.selectedCurrencyName,
+      (item) => item["currency"] == quotationController.selectedCurrencyName,
       orElse: () => null,
     );
 
-
     quotationController.exchangeRateForSelectedCurrency =
-    result != null ? '${result["exchange_rate"]}' : '1';
+        result != null ? '${result["exchange_rate"]}' : '1';
 
     quotationController.combosPriceControllers[widget.index]!.text =
-    '${widget.info['combo_price'] ?? ''}';
+        '${widget.info['combo_price'] ?? ''}';
 
     selectedComboId = widget.info['combo_id'].toString();
     // var ind=quotationController.combosIdsList.indexOf(selectedComboId);
@@ -5518,13 +6715,12 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
     // qtyController.text = '1';
     quotationController.rowsInListViewInQuotation[widget
-        .index]['item_unit_price'] =
+            .index]['item_unit_price'] =
         quotationController.combosPriceControllers[widget.index]!.text;
-    quotationController.rowsInListViewInQuotation[widget
-        .index]['item_total'] ='${widget.info['combo_total']}';
-    quotationController.rowsInListViewInQuotation[widget
-        .index]['combo'] =widget.info['combo_id'].toString();
-
+    quotationController.rowsInListViewInQuotation[widget.index]['item_total'] =
+        '${widget.info['combo_total']}';
+    quotationController.rowsInListViewInQuotation[widget.index]['combo'] =
+        widget.info['combo_id'].toString();
   }
 
   @override
@@ -5533,22 +6729,24 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
       qtyController.text = '${widget.info['combo_quantity'] ?? ''}';
       quantity = '${widget.info['combo_quantity'] ?? '0.0'}';
       quotationController.rowsInListViewInQuotation[widget
-          .index]['item_quantity'] ='${widget.info['combo_quantity'] ?? '0.0'}';
+              .index]['item_quantity'] =
+          '${widget.info['combo_quantity'] ?? '0.0'}';
 
       discountController.text = widget.info['combo_discount'] ?? '';
       discount = widget.info['combo_discount'] ?? '0.0';
       quotationController.rowsInListViewInQuotation[widget
-          .index]['item_discount'] =widget.info['combo_discount'] ?? '0.0';
+              .index]['item_discount'] =
+          widget.info['combo_discount'] ?? '0.0';
 
       totalLine = widget.info['combo_total'] ?? '';
       mainDescriptionVar = widget.info['combo_description'] ?? '';
-
 
       mainCode = widget.info['combo_code'] ?? '';
       descriptionController.text = widget.info['combo_description'] ?? '';
 
       quotationController.rowsInListViewInQuotation[widget
-          .index]['item_description'] = widget.info['combo_description'] ?? '';
+              .index]['item_description'] =
+          widget.info['combo_description'] ?? '';
 
       comboCodeController.text = widget.info['combo_code'].toString();
       selectedComboId = widget.info['combo_id'].toString();
@@ -5560,24 +6758,46 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
       // qtyController.text = '0';
       // quantity = '0';
       // quotationController.combosPriceControllers[widget.index]!.text = '0';
+      if (quotationController.rowsInListViewInQuotation[widget
+              .index]['combo'] !=
+          '') {
+        quotationController.combosPriceControllers[widget.index]!.text =
+            quotationController.rowsInListViewInQuotation[widget
+                .index]['item_unit_price'];
+        selectedComboId =
+            quotationController.rowsInListViewInQuotation[widget
+                .index]['combo'];
+      }
       comboCodeController.text =
-      quotationController.rowsInListViewInQuotation[widget
-          .index]['item_main_code'];
+          quotationController.rowsInListViewInQuotation[widget
+              .index]['item_main_code'];
+      mainCode =
+          quotationController.rowsInListViewInQuotation[widget
+              .index]['item_main_code'];
       qtyController.text =
-      quotationController.rowsInListViewInQuotation[widget
-          .index]['item_quantity'];
+          quotationController.rowsInListViewInQuotation[widget
+              .index]['item_quantity'];
+      quantity =
+          quotationController.rowsInListViewInQuotation[widget
+              .index]['item_quantity'];
       discountController.text =
-      quotationController.rowsInListViewInQuotation[widget
-          .index]['item_discount'];
+          quotationController.rowsInListViewInQuotation[widget
+              .index]['item_discount'];
+      discount =
+          quotationController.rowsInListViewInQuotation[widget
+              .index]['item_discount'];
       descriptionController.text =
-      quotationController.rowsInListViewInQuotation[widget
-          .index]['item_description'];
+          quotationController.rowsInListViewInQuotation[widget
+              .index]['item_description'];
+      mainDescriptionVar =
+          quotationController.rowsInListViewInQuotation[widget
+              .index]['item_description'];
       totalLine =
-      quotationController.rowsInListViewInQuotation[widget
-          .index]['item_total'];
+          quotationController.rowsInListViewInQuotation[widget
+              .index]['item_total'];
       comboCodeController.text =
-      quotationController.rowsInListViewInQuotation[widget
-          .index]['item_main_code'];
+          quotationController.rowsInListViewInQuotation[widget
+              .index]['item_main_code'];
     }
 
     super.initState();
@@ -5609,20 +6829,23 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                 ),
                 ReusableDropDownMenusWithSearch(
                   list:
-                  quotationController
-                      .combosMultiPartList, // Assuming multiList is List<List<String>>
+                      quotationController
+                          .combosMultiPartList, // Assuming multiList is List<List<String>>
                   text: ''.tr,
                   hint: 'combo'.tr,
                   controller: comboCodeController,
                   onSelected: (String? value) async {
                     comboCodeController.text = value!;
                     setState(() {
-                      var ind=cont.combosCodesList.indexOf(value.split(" | ")[0]);
+                      var ind = cont.combosCodesList.indexOf(
+                        value.split(" | ")[0],
+                      );
                       selectedComboId = cont.combosIdsList[ind];
                       mainDescriptionVar = cont.combosDescriptionList[ind];
                       mainCode = cont.combosCodesList[ind];
                       comboName = cont.combosNamesList[ind];
-                      descriptionController.text = cont.combosDescriptionList[ind];
+                      descriptionController.text =
+                          cont.combosDescriptionList[ind];
                       if (cont.combosPricesCurrencies[selectedComboId] ==
                           cont.selectedCurrencyName) {
                         cont.combosPriceControllers[widget.index]!.text =
@@ -5633,28 +6856,29 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
-                          item["currency"] ==
-                              cont.combosPricesCurrencies[selectedComboId],
-                          orElse: () => null,
-                        );
+                                  item["currency"] ==
+                                  cont.combosPricesCurrencies[selectedComboId],
+                              orElse: () => null,
+                            );
                         var divider = '1';
                         if (result != null) {
                           divider = result["exchange_rate"].toString();
                         }
                         cont.combosPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
                       } else if (cont.selectedCurrencyName != 'USD' &&
-                          cont.combosPricesCurrencies[selectedComboId] == 'USD') {
+                          cont.combosPricesCurrencies[selectedComboId] ==
+                              'USD') {
                         cont.combosPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       } else {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
-                          item["currency"] ==
-                              cont.combosPricesCurrencies[selectedComboId],
-                          orElse: () => null,
-                        );
+                                  item["currency"] ==
+                                  cont.combosPricesCurrencies[selectedComboId],
+                              orElse: () => null,
+                            );
                         var divider = '1';
                         if (result != null) {
                           divider = result["exchange_rate"].toString();
@@ -5662,17 +6886,17 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         var usdPrice =
                             '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
                         cont.combosPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                            '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       }
 
                       cont.combosPriceControllers[widget.index]!.text =
-                      '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
+                          '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
                       qtyController.text = '1';
                       quantity = '1';
                       discountController.text = '0';
                       discount = '0';
                       totalLine =
-                      '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                          '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       cont.setEnteredQtyInQuotation(widget.index, quantity);
                       cont.setMainTotalInQuotation(widget.index, totalLine);
                       cont.getTotalItems();
@@ -5693,7 +6917,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       widget.index,
                       mainDescriptionVar,
                     );
-
                   },
                   validationFunc: (value) {
                     // if ((value == null || value.isEmpty)&& selectedComboId.isEmpty ) {
@@ -5710,18 +6933,18 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       context: context,
                       builder:
                           (BuildContext context) => const AlertDialog(
-                        backgroundColor: Colors.white,
-                        contentPadding: EdgeInsets.all(0),
-                        titlePadding: EdgeInsets.all(0),
-                        actionsPadding: EdgeInsets.all(0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(9),
+                            backgroundColor: Colors.white,
+                            contentPadding: EdgeInsets.all(0),
+                            titlePadding: EdgeInsets.all(0),
+                            actionsPadding: EdgeInsets.all(0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(9),
+                              ),
+                            ),
+                            elevation: 0,
+                            content: Combo(),
                           ),
-                        ),
-                        elevation: 0,
-                        content: Combo(),
-                      ),
                     );
                   },
                   columnWidths: [
@@ -5743,7 +6966,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                     onFieldSubmitted: (value) {
                       FocusScope.of(context).requestFocus(focus);
                     },
-                    textAlign: TextAlign.center,
                     controller: descriptionController,
                     cursorColor: Colors.black,
                     decoration: InputDecoration(
@@ -5854,7 +7076,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       setState(() {
                         quantity = val;
                         totalLine =
-                        '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                            '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
 
                       _formKey.currentState!.validate();
@@ -5932,7 +7154,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         }
                         // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
                         totalLine =
-                        '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                            '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
@@ -5952,6 +7174,51 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus1,
+                    onFieldSubmitted: (value) {
+                      setState(() {
+                        quotationController.quotationCounter += 1;
+                      });
+                      quotationController.incrementListViewLengthInQuotation(
+                        quotationController.increment,
+                      );
+                      quotationController.addToRowsInListViewInQuotation(
+                        quotationController.quotationCounter,
+                          {
+                            'line_type_id': '3',
+                            'item_id': '',
+                            'itemName': '',
+                            'item_main_code': '',
+                            'item_discount': '0',
+                            'item_description': '',
+                            'item_quantity': '1',
+                            'item_unit_price': '0',
+                            'item_total': '0',
+                            'title': '',
+                            'note': '',
+                            'combo': '',
+                          }
+                      );
+                      quotationController.addToCombosPricesControllers(
+                        quotationController.quotationCounter,
+                      );
+                      Widget p = ReusableComboRow(
+                        index: quotationController.quotationCounter,
+                        info: {},
+                      );
+                      quotationController.addToOrderLinesInQuotationList(
+                        '${quotationController.quotationCounter}',
+                        p,
+                      );
+                      // cont.setEnteredQtyInQuotation(
+                      //   quotationController.quotationCounter,
+                      //   quantity,
+                      // );
+                      // cont.setMainTotalInQuotation(
+                      //   quotationController.quotationCounter,
+                      //   totalLine,
+                      // );
+                      // cont.getTotalItems();
+                    },
                     controller: discountController,
                     cursorColor: Colors.black,
                     textAlign: TextAlign.center,
@@ -6007,7 +7274,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                           discount = val;
                         }
                         totalLine =
-                        '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                            '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
 
@@ -6037,32 +7304,32 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   width: MediaQuery.of(context).size.width * 0.02,
                   child: ReusableMore(
                     itemsList:
-                    selectedComboId.isEmpty
-                        ? []
-                        : [
-                      // PopupMenuItem<String>(
-                      //   value: '1',
-                      //   onTap: () async {
-                      //     showDialog<String>(
-                      //       context: context,
-                      //       builder:
-                      //           (BuildContext context) => AlertDialog(
-                      //         backgroundColor: Colors.white,
-                      //         shape: const RoundedRectangleBorder(
-                      //           borderRadius: BorderRadius.all(
-                      //             Radius.circular(9),
-                      //           ),
-                      //         ),
-                      //         elevation: 0,
-                      //         content: ShowItemQuantitiesDialog(
-                      //           selectedItemId: selectedComboId,
-                      //         ),
-                      //       ),
-                      //     );
-                      //   },
-                      //   child: Text('Show Quantity'),
-                      // ),
-                    ],
+                        selectedComboId.isEmpty
+                            ? []
+                            : [
+                              // PopupMenuItem<String>(
+                              //   value: '1',
+                              //   onTap: () async {
+                              //     showDialog<String>(
+                              //       context: context,
+                              //       builder:
+                              //           (BuildContext context) => AlertDialog(
+                              //         backgroundColor: Colors.white,
+                              //         shape: const RoundedRectangleBorder(
+                              //           borderRadius: BorderRadius.all(
+                              //             Radius.circular(9),
+                              //           ),
+                              //         ),
+                              //         elevation: 0,
+                              //         content: ShowItemQuantitiesDialog(
+                              //           selectedItemId: selectedComboId,
+                              //         ),
+                              //       ),
+                              //     );
+                              //   },
+                              //   child: Text('Show Quantity'),
+                              // ),
+                            ],
                   ),
                 ),
 

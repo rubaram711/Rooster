@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rooster_app/Backend/PosBackend/delete_pos.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
@@ -162,6 +165,9 @@ class _PosScreenState extends State<PosScreen> {
                 ),
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.05,
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.05,
                 )
               ],
             ),
@@ -276,7 +282,10 @@ class _PosScreenState extends State<PosScreen> {
                             }),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.05,
-                            )
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.05,
+                            ),
                           ],
                         ),
                       ),
@@ -413,6 +422,29 @@ class _PosAsRowInTableState extends State<PosAsRowInTable> {
                         // }
                       },
                     )),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.05,
+                  child: InkWell(
+                    onTap: () async{
+                      var res = await deletePos(
+                          '${widget.info['id']}');
+                      var p = json.decode(res.body);
+                      if (res.statusCode == 200) {
+                        CommonWidgets.snackBar('Success',
+                            p['message']);
+                        // warehouseController.resetValues();
+                        cont.getPossFromBack();
+                      } else {
+                        CommonWidgets.snackBar(
+                            'error',  p['message']);
+                      }
+                    },
+                    child: Icon(
+                      Icons.delete_outline,
+                      color: Primary.primary,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

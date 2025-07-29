@@ -13,7 +13,7 @@ import '../../Widgets/page_title.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../../const/Sizes.dart';
 import '../../const/functions.dart';
-import 'convet_from_delta_to_pw_widget.dart';
+import '../../const/Delta/convert_from_delta_to_pw_widget.dart';
 
 class PrintQuotationData extends StatefulWidget {
   const PrintQuotationData({
@@ -181,7 +181,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                     InkWell(
                       onTap: () {
                         if (quotationController.isSubmitAndPreviewClicked) {
-                          quotationController.getAllQuotationsFromBack();
+                          quotationController.getAllQuotationsWithoutPendingFromBack();
                           Get.back();
                           homeController.selectedTab.value = 'quotations';
                         } else {
@@ -246,10 +246,9 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
     PdfPageFormat format,
     BuildContext context,
   ) async {
-
     Map<String, pw.ImageProvider?> imageProviders = {};
     for (var item in widget.itemsInfoPrint) {
-      if(item['line_type_id']=='2'){
+      if (item['line_type_id'] == '2') {
         if (item['item_image'] != null) {
           try {
             final response = await http.get(Uri.parse(item['item_image']));
@@ -259,7 +258,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
               );
             } else {
               imageProviders[item['item_image']] =
-              null; // Store null if image fails to load
+                  null; // Store null if image fails to load
             }
           } catch (e) {
             imageProviders[item['item_image']] = null;
@@ -267,7 +266,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
         } else {
           imageProviders[item['item_image']] = null;
         }
-      }else if(!item['isImageList']){
+      } else if (!item['isImageList']) {
         if (item['image'] != null) {
           try {
             final response = await http.get(Uri.parse(item['image']));
@@ -277,7 +276,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
               );
             } else {
               imageProviders[item['image']] =
-              null; // Store null if image fails to load
+                  null; // Store null if image fails to load
             }
           } catch (e) {
             imageProviders[item['image']] = null;
@@ -317,7 +316,10 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
         width: width,
         padding: const pw.EdgeInsets.symmetric(horizontal: 2),
         child: pw.Center(
-          child: pw.Text(text, style:  pw.TextStyle(fontSize: 7,font: arabicFont)),
+          child: pw.Text(
+            text,
+            style: pw.TextStyle(fontSize: 7, font: arabicFont),
+          ),
         ),
       );
     }
@@ -458,7 +460,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                       width: width * 0.35,
                       child: pw.Text(
                         '${quotationItemInfo['title'] ?? ''}',
-                        style:  pw.TextStyle(fontSize: 7,font: arabicFont),
+                        style: pw.TextStyle(fontSize: 7, font: arabicFont),
                       ),
                     ),
                   ],
@@ -472,7 +474,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                       width: width * 0.35,
                       child: pw.Text(
                         '${quotationItemInfo['note'] ?? ''}',
-                        style:  pw.TextStyle(fontSize: 7,font: arabicFont),
+                        style: pw.TextStyle(fontSize: 7, font: arabicFont),
                       ),
                     ),
                   ],
@@ -485,13 +487,17 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
       required Map quotationItemInfo,
       required int index,
       required pw.ImageProvider? imageProvider,
-    })
-     {
+    }) {
       return pw.Container(
         margin: const pw.EdgeInsets.symmetric(vertical: 8),
-        child: pw.Center(child: pw.Image(imageProvider!,fit: pw.BoxFit.contain,
-          // width: 50,
-          height: 150,)),
+        child: pw.Center(
+          child: pw.Image(
+            imageProvider!,
+            fit: pw.BoxFit.contain,
+            // width: 50,
+            height: 150,
+          ),
+        ),
       );
     }
 
@@ -499,19 +505,30 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
       required Map quotationItemInfo,
       required int index,
     }) {
-      final pdf = pw.Document();
       final image = pw.MemoryImage(quotationItemInfo['image']);
 
       return pw.Container(
         margin: const pw.EdgeInsets.symmetric(vertical: 8),
-        child: pw.Center(child: pw.Image(image,fit: pw.BoxFit.contain,
-          // width: 50,
-          height: 150,)),
+        child: pw.Center(
+          child: pw.Image(
+            image,
+            fit: pw.BoxFit.contain,
+            // width: 50,
+            height: 150,
+          ),
+        ),
       );
     }
 
     reusableText(String text) {
-      return pw.Text(text, style:  pw.TextStyle(fontSize: 7),);
+      return pw.Text(text, style: pw.TextStyle(fontSize: 7));
+    }
+
+    reusableNumber(String text) {
+      return pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.end,
+        children: [pw.Text(text, style: pw.TextStyle(fontSize: 7))],
+      );
     }
 
     buildDividersRow(double width) {
@@ -531,9 +548,39 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
 
     final image = pw.MemoryImage(quotationController.logoBytes);
 
+    final myTheme = pw.PageTheme(
+      margin: const pw.EdgeInsets.all(10),
+      buildBackground:
+          (context) => pw.FullPage(
+            ignoreMargins: false,
+            child:
+            // pw.Column(
+            //   children: [
+            //     pw.SizedBox(height: 30);
+            pw.Transform.rotate(
+              angle: -0.4, // radians ~ -23°
+              child: pw.Opacity(
+                opacity: 0.1, // transparent watermark
+                child: pw.Text(
+                  widget.status == 'cancelled' ? 'CANCELLED' : '',
+                  style: pw.TextStyle(
+                    fontSize: 68,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.grey,
+                  ),
+                ),
+              ),
+            ),
+            //   ]
+            // )
+            // ),
+          ),
+    );
+
     pdf.addPage(
       pw.MultiPage(
-        margin: const pw.EdgeInsets.all(10),
+        // margin: const pw.EdgeInsets.all(10),
+        pageTheme: myTheme,
         build: (context) {
           return [
             pw.Column(
@@ -557,24 +604,12 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                   width: 180, // Set the desired width
                                   height: 70, // Set the desired height
                                   child: pw.Image(image),
-
-                                  // pw.Image(
-                                  //   pw.MemoryImage(
-                                  //     (quotationController.logoBytes).buffer.asUint8List(),
-                                  //   ),
-                                  //   fit:
-                                  //       pw
-                                  //           .BoxFit
-                                  //           .contain, // Display the image at its original size
-                                  // ),
-                                  // alignment: pw.Alignment.topLeft, // Align the image to the top-left (optional, but recommended)
                                 ),
                               ],
                             ),
                           ],
                         ),
                       ),
-
                       pw.SizedBox(
                         width: width * 0.15,
                         child: pw.Row(
@@ -625,11 +660,12 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 pw.SizedBox(
                                   width: width * 0.1,
                                   child: pw.Row(
-                                    mainAxisAlignment: pw.MainAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        pw.MainAxisAlignment.start,
 
                                     children: [reusableText(companyEmail)],
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           ],
@@ -638,39 +674,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                     ],
                   ),
                 ),
-                // pw.Padding(
-                //   padding: pw.EdgeInsets.fromLTRB(0, 4, 0, 0),
-                //   child: pw.Row(
-                //     crossAxisAlignment: pw.CrossAxisAlignment.end,
-                //     children: [
-                //       pw.SizedBox(
-                //         width: width * 0.15,
-                //         child: pw.Row(
-                //           mainAxisAlignment: pw.MainAxisAlignment.start,
-                //           children: [reusableText(' ')],
-                //         ),
-                //       ),
-                //       pw.SizedBox(
-                //         width: width * 0.15,
-                //         child: pw.Row(
-                //           mainAxisAlignment: pw.MainAxisAlignment.start,
-                //           children: [reusableText('')],
-                //         ),
-                //       ),
-                //
-                //       pw.SizedBox(
-                //         width: width * 0.1,
-                //         child: pw.Row(
-                //           mainAxisAlignment: pw.MainAxisAlignment.start,
-                //
-                //           children: [reusableText(companyEmail)],
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                //////////////////////////////////////////////////////////////
-                // info quotation
                 pw.Padding(
                   padding: pw.EdgeInsets.fromLTRB(10, 20, 0, 0),
                   child: pw.Row(
@@ -694,8 +697,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                     color: PdfColors.black,
                                   ),
                                 ),
-
-
                               ],
                             ),
                           ],
@@ -790,16 +791,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                   ),
                                 ),
                                 gapH4,
-                                // primaryCurrency != widget.quotationCurrency
-                                //     ? pw.Text(
-                                //       '${'$primaryCurrency/${widget.quotationCurrency} rate'.tr}:',
-                                //       style: pw.TextStyle(
-                                //         fontSize: 7,
-                                //         fontWeight: pw.FontWeight.bold,
-                                //         color: PdfColors.black,
-                                //       ),
-                                //     )
-                                //     : pw.SizedBox(),
                               ],
                             ),
                             gapW20,
@@ -818,11 +809,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 gapH5,
                                 reusableText(widget.quotationCurrency),
                                 gapH5,
-                                // primaryCurrency != widget.quotationCurrency
-                                //     ? reusableText(
-                                //       '1 $primaryCurrencySymbol = ${numberWithComma(finallyRate)} ${widget.quotationCurrencySymbol}',
-                                //     )
-                                //     : pw.SizedBox(),
                               ],
                             ),
                           ],
@@ -831,8 +817,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                     ],
                   ),
                 ),
-                //////////////////////////////////////////////////////////////
-                // orderLine quotation table
                 pw.Padding(
                   padding: pw.EdgeInsets.fromLTRB(0, 25, 0, 0),
                   child:
@@ -859,7 +843,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             width: width * 0.04,
                           ),
                           tableTitle(
-                            text: 'Total ($primaryCurrency)'.tr,
+                            text: 'Total (${widget.quotationCurrency})',
                             width: width * 0.04,
                           ),
                         ],
@@ -884,57 +868,28 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                     imageProviders[item['item_image']], // Pass the pre-fetched ImageProvider
                                 // width: width,
                               )
-                              : item['line_type_id'] == '4' && item['isImageList']
-                              ?reusableImageRowInQuotations(
-                            quotationItemInfo: item,
-                            index: index,
-                          ):item['line_type_id'] == '4' && !item['isImageList']?reusableUrlImageRowInQuotations(
-                            quotationItemInfo: item,
-                            index: index,
-                              imageProvider:
-                              imageProviders[item['image']]
-                          )
-
+                              : item['line_type_id'] == '4' &&
+                                  item['isImageList']
+                              ? reusableImageRowInQuotations(
+                                quotationItemInfo: item,
+                                index: index,
+                              )
+                              : item['line_type_id'] == '4' &&
+                                  !item['isImageList']
+                              ? reusableUrlImageRowInQuotations(
+                                quotationItemInfo: item,
+                                index: index,
+                                imageProvider: imageProviders[item['image']],
+                              )
                               : reusableRowInQuotations(
                                 quotationItemInfo: item,
                                 index: index,
                               );
                         },
                       ),
-                      // pw.ListView.builder(
-                      //   padding: const pw.EdgeInsets.symmetric(vertical: 10),
-                      //   itemCount:
-                      //
-                      //       quotationController
-                      //           .itemList
-                      //           .length, //products is data from back res
-                      //   itemBuilder:
-                      //       (context, index) =>
-                      //       // buildQuotationListView(),
-                      //           reusableItemRowInQuotations  (
-                      //         quotationItemInfo:
-                      //             quotationController.itemList[index],
-                      //         index: index,
-                      //         // img:  await fetchImage( quotationController.itemList[index]['images'][0]??[]),
-                      //
-                      //       ),
-                      //
-                      //   // itemBuilder: (context, index) {
-                      //   //   var keys = quotationItemInfo.keys.toList();
-                      //   //   return reusableItemRowInQuotations(
-                      //   //     quotationItemInfo:
-                      //   //     quotationItemInfo[keys[index]],
-                      //   //     index: index,
-                      //   //   );
-                      //   // },
-                      // ),
                     ],
                   ),
                 ),
-
-                //////////////////////////////////////////////////////////////
-                // total quotation
-                // column row column
                 pw.Container(
                   padding: pw.EdgeInsets.symmetric(
                     horizontal: width * 0.01,
@@ -959,7 +914,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.25,
+                                width: width * 0.2,
                                 child: reusableText('total_price'.tr),
                               ),
                             ],
@@ -970,8 +925,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             children: [
                               pw.SizedBox(
                                 width: width * 0.05,
-                                child: reusableText(widget.quotationCurrency),
-                                // child: reusableText(primaryCurrency),
+                                child: reusableNumber(widget.quotationCurrency),
                               ),
                             ],
                           ),
@@ -979,19 +933,12 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.1,
-                                child: pw.Text(
-                                  // widget.totalAllItems,
+                                width: width * 0.08,
+                                child: reusableNumber(
                                   numberWithComma(
                                     double.parse(
                                       '${double.parse(widget.totalAllItems.replaceAll(',', ''))}',
-                                      // '${double.parse(widget.totalAllItems.replaceAll(',', '')) / double.parse(finallyRate)}',
                                     ).toStringAsFixed(2),
-                                  ),
-                                  // '${quotationController.totalAllItems}',
-                                  style: pw.TextStyle(
-                                    fontSize: 7,
-                                    color: PdfColors.black,
                                   ),
                                 ),
                               ),
@@ -1011,7 +958,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.25,
+                                width: width * 0.2,
                                 child: reusableText('dis_count'.tr),
                               ),
                             ],
@@ -1022,7 +969,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             children: [
                               pw.SizedBox(
                                 width: width * 0.05,
-                                child: reusableText(
+                                child: reusableNumber(
                                   '${widget.globalDiscount.isEmpty ? 0 : widget.globalDiscount}%',
                                 ),
                               ),
@@ -1033,9 +980,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.1,
-                                // child: reusableText('$discountOnAllItem'),
-                                child: reusableText(
+                                width: width * 0.08,
+                                child: reusableNumber(
                                   widget.discountOnAllItem == '0'
                                       ? '0.00'
                                       : widget.discountOnAllItem,
@@ -1057,7 +1003,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.25,
+                                width: width * 0.2,
                                 child: reusableText(
                                   'total_price_after_discount'.tr,
                                 ),
@@ -1070,7 +1016,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             children: [
                               pw.SizedBox(
                                 width: width * 0.05,
-                                child: reusableText(widget.quotationCurrency),
+                                child: reusableNumber(widget.quotationCurrency),
                                 // child: reusableText(primaryCurrency),
                               ),
                             ],
@@ -1079,19 +1025,12 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.1,
-                                child: pw.Text(
-                                  // '$totalPriceAfterDiscount',
-                                  // widget.totalPriceAfterDiscount,
+                                width: width * 0.08,
+                                child: reusableNumber(
                                   numberWithComma(
                                     double.parse(
                                       '${double.parse(widget.totalPriceAfterDiscount.replaceAll(',', ''))}',
-                                      // '${double.parse(widget.totalPriceAfterDiscount.replaceAll(',', '')) / double.parse(finallyRate)}',
                                     ).toStringAsFixed(2),
-                                  ),
-                                  style: pw.TextStyle(
-                                    fontSize: 7,
-                                    color: PdfColors.black,
                                   ),
                                 ),
                               ),
@@ -1099,7 +1038,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                           ),
                         ],
                       ),
-
                       pw.Divider(
                         height: 5,
                         color: PdfColors.black,
@@ -1111,7 +1049,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.25,
+                                width: width * 0.2,
                                 child: reusableText(
                                   'additional_special_discount'.tr,
                                 ),
@@ -1124,7 +1062,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             children: [
                               pw.SizedBox(
                                 width: width * 0.05,
-                                child: reusableText(
+                                child: reusableNumber(
                                   '${widget.specialDiscount.isEmpty ? 0 : widget.specialDiscount}%',
                                 ),
                               ),
@@ -1134,25 +1072,22 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.05,
-                                child: pw.Text(
-                                  // '${additionalSpecialDiscount.toStringAsFixed(2)}',
+                                width: width * 0.08,
+                                child: reusableNumber(
                                   widget.additionalSpecialDiscount,
-                                  style: pw.TextStyle(
-                                    fontSize: 7,
-                                    color: PdfColors.black,
-                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ],
                       ),
-                      pw.Divider(
-                        height: 5,
-                        color: PdfColors.black,
-                        // endIndent: 250
-                      ),
+                      primaryCurrency == widget.quotationCurrency
+                          ? pw.SizedBox.shrink()
+                          : pw.Divider(
+                            height: 5,
+                            color: PdfColors.black,
+                            // endIndent: 250
+                          ),
 
                       // TOTAL PRICE AFTER SPECIAL DISCOUNT
                       if (primaryCurrency != widget.quotationCurrency)
@@ -1162,7 +1097,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               mainAxisAlignment: pw.MainAxisAlignment.start,
                               children: [
                                 pw.SizedBox(
-                                  width: width * 0.25,
+                                  width: width * 0.2,
                                   child: reusableText(
                                     'total_price_after_special_discount'.tr,
                                   ),
@@ -1175,7 +1110,9 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               children: [
                                 pw.SizedBox(
                                   width: width * 0.05,
-                                  child: reusableText(widget.quotationCurrency),
+                                  child: reusableNumber(
+                                    widget.quotationCurrency,
+                                  ),
                                   // child: reusableText(primaryCurrency),
                                 ),
                               ],
@@ -1184,19 +1121,12 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               mainAxisAlignment: pw.MainAxisAlignment.start,
                               children: [
                                 pw.SizedBox(
-                                  width: width * 0.1,
-                                  child: pw.Text(
-                                    // '${widget.specialDiscountAmount}',
-                                    // widget.totalPriceAfterSpecialDiscount,
+                                  width: width * 0.08,
+                                  child: reusableNumber(
                                     numberWithComma(
                                       double.parse(
                                         '${double.parse(widget.totalPriceAfterSpecialDiscount.replaceAll(',', ''))}',
-                                        // '${double.parse(widget.totalPriceAfterSpecialDiscount.replaceAll(',', '')) / double.parse(finallyRate)}',
                                       ).toStringAsFixed(2),
-                                    ),
-                                    style: pw.TextStyle(
-                                      fontSize: 7,
-                                      color: PdfColors.black,
                                     ),
                                   ),
                                 ),
@@ -1204,66 +1134,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             ),
                           ],
                         ),
-                      // if (primaryCurrency != widget.quotationCurrency)
-                      //   pw.Divider(
-                      //     height: 5,
-                      //     color: PdfColors.black,
-                      //     // endIndent: 250
-                      //   ),
-                      // TOTAL PRICE AFTER SPECIAL DISCOUNT
-                      // pw.Row(
-                      //   children: [
-                      //     pw.Column(
-                      //       mainAxisAlignment: pw.MainAxisAlignment.start,
-                      //       children: [
-                      //         pw.SizedBox(
-                      //           width: width * 0.2,
-                      //           child: reusableText(
-                      //             'total_price_after_special_discount'.tr,
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //
-                      //     pw.Column(
-                      //       mainAxisAlignment: pw.MainAxisAlignment.start,
-                      //       children: [
-                      //         pw.SizedBox(
-                      //           width: width * 0.1,
-                      //           child: pw.Text(
-                      //             widget.quotationCurrency,
-                      //             style: pw.TextStyle(
-                      //               fontSize: 7,
-                      //               color: PdfColors.black,
-                      //             ),
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //     pw.Column(
-                      //       mainAxisAlignment: pw.MainAxisAlignment.start,
-                      //       children: [
-                      //         pw.SizedBox(
-                      //           width: width * 0.1,
-                      //           child: pw.Text(
-                      //             // '',
-                      //             widget
-                      //                 .totalPriceAfterSpecialDiscount,
-                      //             // numberWithComma(
-                      //             //   double.parse(
-                      //             //     '${double.parse(widget.totalPriceAfterSpecialDiscount.replaceAll(',', '')) * double.parse(calculateRateCur1ToCur2(double.parse(primaryLatestRate), double.parse(widget.quotationCurrencyLatestRate)))}',
-                      //             //   ).toStringAsFixed(2),
-                      //             // ),
-                      //             style: pw.TextStyle(
-                      //               fontSize: 7,
-                      //               color: PdfColors.black,
-                      //             ),
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ],
-                      // ),
                       pw.Divider(
                         height: 5,
                         color: PdfColors.black,
@@ -1276,7 +1146,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.25,
+                                width: width * 0.2,
                                 child: reusableText(
                                   widget.isVatNoPrinted
                                       ? ' '
@@ -1289,7 +1159,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               ),
                             ],
                           ),
-
                           pw.Column(
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
@@ -1298,23 +1167,13 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 child:
                                     companyVat.isNotEmpty &&
                                             !widget.isPrintedAs0
-                                        ? pw.Text(
+                                        ? reusableNumber(
                                           widget.isVatNoPrinted ||
                                                   widget.isPrintedAsVatExempt
                                               ? ' '
                                               : '$companyVat%',
-                                          style: pw.TextStyle(
-                                            fontSize: 7,
-                                            color: PdfColors.black,
-                                          ),
                                         )
-                                        : pw.Text(
-                                          ' 0 %',
-                                          style: pw.TextStyle(
-                                            fontSize: 7,
-                                            color: PdfColors.black,
-                                          ),
-                                        ),
+                                        : reusableNumber('0 %'),
                               ),
                             ],
                           ),
@@ -1322,16 +1181,12 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.1,
-                                child: pw.Text(
+                                width: width * 0.08,
+                                child: reusableNumber(
                                   widget.isVatNoPrinted ||
                                           widget.isPrintedAsVatExempt
                                       ? ' '
                                       : widget.vatByQuotationCurrency,
-                                  style: pw.TextStyle(
-                                    fontSize: 7,
-                                    color: PdfColors.black,
-                                  ),
                                 ),
                               ),
                             ],
@@ -1352,7 +1207,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.25,
+                                width: width * 0.2,
 
                                 child: pw.Text(
                                   'final_price_incl_vat'.tr,
@@ -1371,13 +1226,18 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             children: [
                               pw.SizedBox(
                                 width: width * 0.05,
-                                child: pw.Text(
-                                  widget.quotationCurrency,
-                                  style: pw.TextStyle(
-                                    fontSize: 7,
-                                    fontWeight: pw.FontWeight.bold,
-                                    color: PdfColors.black,
-                                  ),
+                                child: pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                                  children: [
+                                    pw.Text(
+                                      widget.quotationCurrency,
+                                      style: pw.TextStyle(
+                                        fontSize: 7,
+                                        fontWeight: pw.FontWeight.bold,
+                                        color: PdfColors.black,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -1386,14 +1246,19 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.1,
-                                child: pw.Text(
-                                  widget.finalPriceByQuotationCurrency,
-                                  style: pw.TextStyle(
-                                    fontSize: 7,
-                                    fontWeight: pw.FontWeight.bold,
-                                    color: PdfColors.black,
-                                  ),
+                                width: width * 0.08,
+                                child: pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.end,
+                                  children: [
+                                    pw.Text(
+                                      widget.finalPriceByQuotationCurrency,
+                                      style: pw.TextStyle(
+                                        fontSize: 7,
+                                        fontWeight: pw.FontWeight.bold,
+                                        color: PdfColors.black,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -1413,7 +1278,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.25,
+                                width: width * 0.2,
 
                                 child: pw.Text(
                                   'final_price_incl_vat'.tr,
@@ -1432,14 +1297,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             children: [
                               pw.SizedBox(
                                 width: width * 0.05,
-                                child: pw.Text(
-                                  primaryCurrency,
-                                  style: pw.TextStyle(
-                                    fontSize: 7,
-                                    // fontWeight: pw.FontWeight.bold,
-                                    color: PdfColors.black,
-                                  ),
-                                ),
+                                child: reusableNumber(primaryCurrency),
                               ),
                             ],
                           ),
@@ -1447,18 +1305,13 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.1,
-                                child: pw.Text(
+                                width: width * 0.08,
+                                child: reusableNumber(
                                   widget.finalPriceByQuotationCurrency == '0'
                                       ? '0.00'
                                       : numberWithComma(
                                         '${roundUp(double.parse(widget.finalPriceByQuotationCurrency.replaceAll(',', '')) / double.parse(finallyRate), 2)}',
                                       ),
-                                  style: pw.TextStyle(
-                                    fontSize: 7,
-                                    // fontWeight: pw.FontWeight.bold,
-                                    color: PdfColors.black,
-                                  ),
                                 ),
                               ),
                             ],
@@ -1468,10 +1321,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                     ],
                   ),
                 ),
-
-                //////////////////////////////////////////////////////////////
-
-                // footer
                 pw.Padding(
                   padding: pw.EdgeInsets.fromLTRB(0, 10, 0, 0),
                   child: pw.Column(
@@ -1493,16 +1342,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                       width: 180,
                                       height: 70,
                                       child: pw.Image(image),
-                                      // child: pw.Image(
-                                      //   pw.MemoryImage(
-                                      //     (quotationController.logoBytes).buffer.asUint8List(),
-                                      //   ),
-                                      //   fit:
-                                      //       pw
-                                      //           .BoxFit
-                                      //           .contain, // Display the image at its original size
-                                      // ),
-                                      // alignment: pw.Alignment.topLeft, // Align the image to the top-left (optional, but recommended)
                                     ),
                                   ],
                                 ),
@@ -1589,7 +1428,9 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 children: [
                                   pw.SizedBox(
                                     width: width * 0.25,
-                                    child: quillDeltaToPdfWidget(widget.termsAndConditions)
+                                    child: quillDeltaToPdfWidget(
+                                      widget.termsAndConditions,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1620,122 +1461,12 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                   companyBankInfo != ''
                                       ? reusableText(' $companyBankInfo')
                                       : reusableText(''),
-                                  // reusableText(
-                                  //   '${'Bank name'.tr}: ${widget.senderUser}',
-                                  // ),
-                                  // gapH4,
-                                  // reusableText(
-                                  //   '${'Account Name'.tr}: ${widget.senderUser}',
-                                  // ),
-                                  // gapH4,
-                                  // reusableText(
-                                  //   '${'Account Number'.tr}: ${widget.quotationNumber}',
-                                  // ),
-                                  // gapH4,
                                 ],
                               ),
                             ],
                           ),
                         ),
                       ),
-
-                      // international payments
-                      // pw.Padding(
-                      //   padding: pw.EdgeInsets.fromLTRB(0, 30, 0, 0),
-                      //   child: pw.SizedBox(
-                      //     // width: width * 0.15,
-                      //     child: pw.Row(
-                      //       mainAxisAlignment: pw.MainAxisAlignment.start,
-                      //       children: [
-                      //         pw.Column(
-                      //           crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      //           children: [
-                      //             gapH4,
-                      //             reusableText(
-                      //               '.For international payments via bank transfer, kindly refer to our account details mentioned',
-                      //             ),
-                      //             gapH4,
-                      //             reusableText(
-                      //               '${'Bank name'.tr}: ${widget.senderUser}',
-                      //             ),
-                      //             gapH4,
-                      //             reusableText(
-                      //               '${'Address'.tr}: ${widget.senderUser}',
-                      //             ),
-                      //             gapH4,
-                      //             reusableText(
-                      //               '${'ABA Number'.tr}: ${widget.quotationNumber}',
-                      //             ),
-                      //             gapH4,
-                      //             reusableText(
-                      //               '${'SWIFT Address'.tr}: ${widget.quotationNumber}',
-                      //             ),
-                      //             gapH4,
-                      //             reusableText(
-                      //               '${'Account Name'.tr}: ${widget.quotationNumber}',
-                      //             ),
-                      //             gapH4,
-                      //             reusableText(
-                      //               '${'Account Number'.tr}: ${widget.quotationNumber}',
-                      //             ),
-                      //             gapH4,
-                      //           ],
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      //
-                      // // delivery
-                      // pw.Padding(
-                      //   padding: pw.EdgeInsets.fromLTRB(0, 20, 0, 0),
-                      //   child: pw.SizedBox(
-                      //     // width: width * 0.15,
-                      //     child: pw.Row(
-                      //       mainAxisAlignment: pw.MainAxisAlignment.start,
-                      //       children: [
-                      //         reusableText(
-                      //           '  delivery terms and conditions',
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      //
-                      // pw.Divider(
-                      //   color: PdfColors.black,
-                      //   // endIndent: 250
-                      // ),
-                      // delivery
-                      // pw.Padding(
-                      //   padding: pw.EdgeInsets.fromLTRB(0, 0, 0, 40),
-                      //   child: pw.SizedBox(
-                      //     // width: width * 0.15,
-                      //     child: pw.Row(
-                      //       mainAxisAlignment: pw.MainAxisAlignment.start,
-                      //       children: [
-                      //         pw.Column(
-                      //           crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      //           children: [
-                      //             gapH4,
-                      //             reusableText(
-                      //               '${'.Delivery time for items available in stock'.tr}: ${widget.quotationNumber}',
-                      //             ),
-                      //             gapH4,
-                      //             reusableText(
-                      //               '${'.Delivery time for items not available in stock'.tr}: ${widget.quotationNumber}',
-                      //             ),
-                      //             gapH4,
-                      //             reusableText('${'.Additional Note'.tr}:'),
-                      //             gapH4,
-                      //             reusableText(' ${widget.quotationNumber}'),
-                      //           ],
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      //signature
                       pw.Padding(
                         padding: pw.EdgeInsets.fromLTRB(0, 200, 0, 0),
                         child: pw.Container(

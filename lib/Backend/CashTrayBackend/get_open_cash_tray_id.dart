@@ -21,7 +21,6 @@ Future getOpenCashTrayId(String sessionId,String userId) async {
   );
 
   var p = json.decode(response.body);
-  print('cashTray $p');
   if(p['success']==true && '${p['data']??[]}'!='[]') {
     return p['data'];
   }else{

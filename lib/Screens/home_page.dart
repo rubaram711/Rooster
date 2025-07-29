@@ -10,16 +10,20 @@ import 'package:rooster_app/Screens/SupplierOrder/new_supplier_order.dart';
 import 'package:rooster_app/Screens/SupplierOrder/supplier_order_summary.dart';
 import 'package:rooster_app/Screens/Transfers/transfer_details.dart';
 import 'package:rooster_app/Screens/Warehouses/warehouses.dart';
-import 'package:rooster_app/Screens/sales_invoice/new_sales_invoice.dart';
-import 'package:rooster_app/Screens/sales_invoice/sales_invoice_summary.dart';
 import 'package:rooster_app/const/colors.dart';
 import 'package:rooster_app/const/sizes.dart';
 import '../Controllers/home_controller.dart';
 import 'Combo/ComboSummaryWidgets/combo_data.dart' show ComboData;
 import 'Combo/combo_summary.dart';
+import 'Delivery/delivery.dart';
+import 'Delivery/delivery_summary.dart';
 import 'DocsReview/docs_review.dart';
+import 'PendingDocs/pending_quotation.dart';
 import 'PendingDocs/to_deleiver.dart';
+import 'PendingDocs/to_invoice.dart';
 import 'PendingDocs/to_sales_order.dart';
+import 'SalesInvoice/create_new_sales_invoice.dart';
+import 'SalesInvoice/sales_invoice_summary.dart';
 import 'SupplierOrder/supliers.dart';
 import '../Widgets/HomeWidgets/home_app_bar.dart';
 import '../Widgets/HomeWidgets/home_drawer_list_tile.dart';
@@ -84,10 +88,18 @@ class HomeBody extends StatefulWidget {
 
 class _HomeBodyState extends State<HomeBody> {
   Map<String, Widget> contentList = {
-  'docs_review': DocsReview(),
-  'pending_docs':PendingDocs(),
-  'to_sales_order':ToSalesOrder(),
-  'to_deliver':ToDeleiver(),
+    'pending_quotation': PendingQuotation(),
+    "to_invoice": ToInvoice(),
+    'delivery': const CreateDelivery(),
+    'new_delivery': const CreateDelivery(),
+    'deliveries_summary': const DeliverySummary(),
+    'sales_invoice': const CreateNewSalesInvoice(),
+    'new_sales_invoice': const CreateNewSalesInvoice(),
+    'sales_invoice_summary': const SalesInvoiceSummary(),
+    'docs_review': DocsReview(),
+    'pending_docs':PendingDocs(),
+    'to_sales_order':ToSalesOrder(),
+    'to_deliver':ToDeleiver(),
     'cash_tray_report': const CashTrayFilter(),
     'items': const ProductsPage(),
     'stock': const ProductsPage(),
@@ -119,9 +131,6 @@ class _HomeBodyState extends State<HomeBody> {
     'new_sales_order': const CreateNewClientOrder(),
     'sales_order': const CreateNewClientOrder(),
     'sales_order_summary': const ClientOrderSummary(),
-    'sales_invoice': const CreateNewSalesInvoice(),
-    'new_sales_invoice': const CreateNewSalesInvoice(),
-    'sales_invoice_summary': const SalesInvoiceSummary(),
     'supplier_order': const CreateNewSupplierOrder(),
     'new_supplier_order': const CreateNewSupplierOrder(),
     'supplier_order_summary': const SupplierOrderSummary(),
@@ -151,9 +160,15 @@ class _HomeBodyState extends State<HomeBody> {
     'inventory_management': const PhysicalInventory(),
   };
 
+  final HomeController homeController = Get.find();
+
+  @override
+  void initState() {
+    homeController.selectedTab.value='dashboard_summary';
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
-    final HomeController homeController = Get.find();
     var maxWidth = MediaQuery.of(context).size.width * 0.21;
     var minWidth = MediaQuery.of(context).size.width * 0.045;
     return Obx(

@@ -1,6 +1,6 @@
 // const String baseUrl='https://theravenstyle.com/api';
 const String baseUrl='https://theravenstyle.com/rooster-backend/public/api';
-// const String baseUrl='https://demo.theravenstyle.com/backend/public/api';//test version
+// const String baseUrl='https://demo.theravenstyle.com/mail/public/api';//test version
 const String baseImage='https://theravenstyle.com/rooster-backend/public/';
 
 
@@ -8,9 +8,11 @@ const kLoginUrl='$baseUrl/login';
 const kOrdersUrl='$baseUrl/orders';
 const kClientsTransactionsUrl='$baseUrl/clients/transactions';
 const kClientUrl='$baseUrl/clients';
+const kUpdateClientUrl='$baseUrl/clients/update';
 const kGetFieldsForCreateClientUrl='$baseUrl/clients/create';
 const kGetAllQuotationsUrl='$baseUrl/quotations';
 const kStoreQuotationUrl='$baseUrl/quotations';
+const kSendQuotationByEmailUrl='$baseUrl/quotations/email';
 const kDeleteQuotationUrl='$baseUrl/quotations';
 const kUpdateQuotation='$baseUrl/quotations/update';
 const kGetFieldsForCreateQuotationUrl='$baseUrl/quotations/create';
@@ -39,11 +41,12 @@ const kUpdateTaxationGroupUrl='$baseUrl/config/tax-groups';//id
 const kDeleteTaxationGroupUrl='$baseUrl/config/tax-groups';//id
 const kAddRateUrl='$baseUrl/config/tax-groups/rates';//id
 const kEditQuantityUrl='$baseUrl/items/quantities';
+const kGetQuantitiesUrl='$baseUrl/items/warehouseQty';
 const kEditPriceUrl='$baseUrl/items/prices';
 const kAddCashedMethodUrl='$baseUrl/config/cashing-methods';
 const kDeleteCashedMethodUrl='$baseUrl/config/cashing-methods';
 const kUpdateItemUrl='$baseUrl/items/update';
-const kUpdateCashingMethodUrl='$baseUrl/config/cashing-methods'; //id
+const kUpdateCashingMethodUrl='$baseUrl/config/cashing-methods/update'; //id
 const kCreateWarehouseUrl='$baseUrl/warehouses';
 const kGetWarehouseUrl='$baseUrl/warehouses';
 const kDeleteWarehouseUrl='$baseUrl/warehouses';
@@ -92,7 +95,9 @@ const kReportCashTrayUrl='$baseUrl/tray-report';//id
 const kCreateCashTrayUrl='$baseUrl/trays/create';
 const kSelectRoleUrl='$baseUrl/users/selectRole';
 
-const kTermsAndConditionsUrl='$baseUrl/users/selectRole';//todo change
+const kTermsAndConditionsUrl='$baseUrl/settings/terms/history';
+const kAddTermsAndConditionsUrl='$baseUrl/settings/terms/add';
+
 
 
 
@@ -100,9 +105,28 @@ const kGetCountriesUrl='https://countriesnow.space/api/v0.1/countries/population
 const kGetCitiesOfASpecifiedCountryUrl='https://countriesnow.space/api/v0.1/countries/cities';
 
 
+const kGetAllSalesOrderUrl = '$baseUrl/sales-orders';
+const kGetFieldsForCreateSalesOrderUrl = '$baseUrl/sales-orders/create';
+const kStoreSalesOrderUrl = '$baseUrl/sales-orders';
+const kUpdateSalesOrder = '$baseUrl/sales-orders/update';
+
 
 const testLoginUrl = '$baseUrl/login';
 const testCombosUrl = '$baseUrl/combos';
 const testGetFieldsForCreateComboUrl = '$baseUrl/combos/create';
 const kStoreComboUrl = '$baseUrl/combos';
 const kUpdateCombo = '$baseUrl/combos/update';
+
+const kGetDocsReview = '$baseUrl/quotations/docs-review/get';
+
+
+const kGetFieldsForCreateSalesInvoiceUrl = '$baseUrl/sales-invoices/create';
+const kGetAllSalesInvoiceUrl = '$baseUrl/sales-invoices';
+const kStoreSalesInvoiceUrl = '$baseUrl/sales-invoices';
+const kUpdateSalesInvoiceUrl = '$baseUrl/sales-invoices/update';
+
+// -------------------------------------------------------------------------------------
+const kGetFieldsForCreateDeliveryUrl = '$baseUrl/deliveries/create';
+const kStoreDeliveryUrl = '$baseUrl/deliveries';
+const kGetAllDeliveriesUrl = '$baseUrl/deliveries';
+const kUpdateDeliveryUrl = '$baseUrl/deliveries/update';

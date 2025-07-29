@@ -252,7 +252,7 @@ class DialogTextField extends StatelessWidget {
   const DialogTextField({
     super.key,
 
-    // this.onChangedFunc,
+    this.onChangedFunc,
     required this.validationFunc,
     required this.text,
     required this.rowWidth,
@@ -263,7 +263,7 @@ class DialogTextField extends StatelessWidget {
     this.globalKey,
     this.read = false,
   });
-  // final Function(String)? onChangedFunc;
+  final Function(String)? onChangedFunc;
   final Function validationFunc;
   final String text;
   final String hint;
@@ -332,7 +332,7 @@ class DialogTextField extends StatelessWidget {
               validator: (value) {
                 return validationFunc(value);
               },
-              // onChanged: (value) => onChangedFunc!(value),
+              onChanged: (value) => onChangedFunc!(value),
             ),
           ),
         ],

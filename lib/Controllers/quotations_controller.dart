@@ -309,7 +309,7 @@ class QuotationsController extends GetxController {
     quotationsList = [];
     isQuotationsFetched = false;
     update();
-    var p = await getAllQuotation(searchInQuotationsController.text);
+    var p = await getAllQuotationsWithoutPending(searchInQuotationsController.text);
     if ('$p' != '[]') {
       quotationsList = p;
       // print(quotationsList.length);

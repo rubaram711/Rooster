@@ -41,7 +41,7 @@ class _PurchaseInvoicesState extends State<PurchaseInvoicesSummary> {
   List purchaseInvoicesList=[];
   bool isPurchaseInvoicesFetched = false;
   getAllQuotationsFromBack()async{
-    var p=await getAllQuotations();
+    var p=await getAllQuotationsWithoutPending('');
     setState(() {
       purchaseInvoicesList.addAll(p);
       isPurchaseInvoicesFetched=true;
@@ -515,7 +515,7 @@ class _MobilePurchaseInvoicesSummaryState extends State<MobilePurchaseInvoicesSu
   List purchaseInvoicesList=[];
   bool isPurchaseInvoicesFetched = false;
   getAllQuotationsFromBack()async{
-    var p=await getAllQuotations();
+    var p=await getAllQuotationsWithoutPending('');
     setState(() {
       purchaseInvoicesList.addAll(p);
       isPurchaseInvoicesFetched=true;

@@ -13,10 +13,10 @@ import '../../../const/functions.dart';
 List transactionQuantitiesList=[
   {'transaction':'Physical on hand','quantities':''},
   {'transaction':'Quantity owned','quantities':''},
-  {'transaction':'Ordered not invoiced','quantities':'0 Pcs'}
+  {'transaction':'Ordered not invoiced','quantities':'0 Pcs'}//
   ,{'transaction':'delivered not invoiced','quantities':'0 Pcs'}
   ,{'transaction':'Physical on hand','quantities':'0 Pcs'}
-  ,{'transaction':'Ordered not delivered','quantities':'0 Pcs'}
+  ,{'transaction':'Ordered not delivered','quantities':'0 Pcs'}//
   ,{'transaction':'Ordered not delivered','quantities':'0 Pcs'}
   ,{'transaction':'received not purchased','quantities':'0 Pcs'}
   ,{'transaction':'purchased not received','quantities':'0 Pcs'}
@@ -40,12 +40,25 @@ class QuantitiesTabContent extends StatefulWidget {
 
 class _QuantitiesTabContentState extends State<QuantitiesTabContent> {
   ProductController productController = Get.find();
+
+  // getQuantities()async{
+  //   var res=await getQuantitiesOfProduct(productController.selectedProductId.toString());
+  //   if(res['success']==true){
+  //   setState(() {
+  //     transactionQuantitiesList[2]['quantities']='${res['data']['salesOrderQuantities']} Pcs';
+  //     transactionQuantitiesList[5]['quantities']='${res['data']['salesOrderQuantities']} Pcs';
+  //   });
+  //   }
+  // }
   @override
   void initState() {
     if(!productController.isItUpdateProduct){
       transactionQuantitiesList[0]['quantities'] = '';
       transactionQuantitiesList[1]['quantities'] = '';
+      transactionQuantitiesList[2]['quantities'] = '';
+      transactionQuantitiesList[5]['quantities'] = '';
     }
+    // getQuantities();
     super.initState();
   }
   @override

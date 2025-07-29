@@ -21,7 +21,6 @@ Future getPricesLists() async {
   );
 
   var p = json.decode(response.body);
-  print(p);
   if(response.statusCode==200) {
     return p['data'];
   }else {

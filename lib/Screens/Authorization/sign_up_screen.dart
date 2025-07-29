@@ -373,10 +373,7 @@ class _SignFormState extends State<SignForm> {
                           '${res['data']['user']['company']['id']}',
                           '${res['data']['user']['company']['name']}',
                         );
-                        print('objeXXct ${res['data']['companySettings']}');
                         if (res['data']['companySettings'].isNotEmpty) {
-                          print('object');
-                          print(res['data']['companySettings']);
                           await saveCompanySettingsLocally(
                             '${res['data']['companySettings']['costCalculationType'] ?? ''}',
                             '${res['data']['companySettings']['showQuantitiesOnPos'] ?? ''}',
@@ -412,6 +409,8 @@ class _SignFormState extends State<SignForm> {
                                     null
                                 ? ''
                                 : '${res['data']['companySettings']['posCurrency']['symbol'] ?? ''}',
+                            '${res['data']['companySettings']['primaryCurrency']['latest_rate']??''}',
+                            res['data']['companySettings']['posCurrency']==null?'': '${res['data']['companySettings']['posCurrency']['latest_rate']??''}',
                             '${res['data']['companySettings']['showLogoOnPos'] ?? '0'}',
                           );
                         }
@@ -518,7 +517,6 @@ class _SignFormState extends State<SignForm> {
                         '${res['data']['user']['company']['id']}',
                         '${res['data']['user']['company']['name']}',
                       );
-                      print('object ${res['data']['companySettings']}');
                       if (res['data']['companySettings'].isNotEmpty) {
                         // print('object');print(res['data']['companySettings']);
                         await saveCompanySettingsLocally(
@@ -552,6 +550,8 @@ class _SignFormState extends State<SignForm> {
                           res['data']['companySettings']['posCurrency'] == null
                               ? ''
                               : '${res['data']['companySettings']['posCurrency']['symbol'] ?? ''}',
+                          '${res['data']['companySettings']['primaryCurrency']['latest_rate']??''}',
+                          res['data']['companySettings']['posCurrency']==null?'': '${res['data']['companySettings']['posCurrency']['latest_rate']??''}',
                           '${res['data']['companySettings']['showLogoOnPos'] ?? '0'}',
                         );
                       }

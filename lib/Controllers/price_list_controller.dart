@@ -215,7 +215,6 @@ class PriceListController extends GetxController {
   }
 
   setSelectedAnotherPriceList(String id, String name, String code) {
-    print('objectid $id');
 
     selectedAnotherPriceListId = id;
     selectedAnotherPriceListName = name;

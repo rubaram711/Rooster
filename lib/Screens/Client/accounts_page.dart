@@ -26,6 +26,7 @@ import '../../const/colors.dart';
 import '../../const/functions.dart';
 import '../Products/products_page.dart';
 import '../PurchaseInvoice/purchase_invoice_summary.dart';
+import 'add_new_client.dart';
 
 class AccountsPage extends StatefulWidget {
   const AccountsPage({super.key});
@@ -2371,14 +2372,40 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
     }
   }
 
+  setContacts(){
+    clientController.contactsList=[];
+    for(var con in widget.info['deliveryAddresses']){
+      Map contact={
+        'type':con['type']??'1',
+        'name':con['name']??'',
+        'title':con['title']??'',
+        'jobPosition':con['job_position']??'',
+        'deliveryAddress':con['delivery_address']??'',
+        'phoneCode':con['phone_code']??'+961',
+        'phoneNumber':con['phone_number']??'',
+        'extension':con['extension']??'',
+        'mobileCode':con['mobile_code']??'+961',
+        'mobileNumber':con['mobile_number']??'',
+        'email':con['email']??'',
+        'note':con['note']??'',
+        'internalNote':con['internal_note']??'',
+      };
+      clientController.contactsList.add(contact);
+    }
+  }
+  List tabsList = [
+    'settings',
+    'contacts_and_addresses',
+    'sales',
+  ];
   @override
   void initState() {
     getFieldsForCreateClientsFromBack();
     getCountriesFromBack();
+    setContacts();
     if (widget.info['country'] != null) {
       getCitiesOfASpecifiedCountry(widget.info['country']);
     }
-    // print(widget.info);
     if(widget.info['pricelist']!=null){
       selectedPriceListId='${widget.info['pricelist']['id']}';
       priceListController.text=widget.info['pricelist']['code'];
@@ -2421,869 +2448,921 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
       color: Colors.white,
       width: MediaQuery.of(context).size.width * 0.85,
       height: MediaQuery.of(context).size.height * 0.9,
-      margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  PageTitle(text: 'update_client'.tr),
-                  InkWell(
-                    onTap: () {
-                      Get.back();
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: Primary.primary,
-                      radius: 15,
-                      child: const Icon(
-                        Icons.close_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              // gapH32,
-              // const AddPhotoCircle(),
-              gapH32,
-              Row(
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.15,
-                    child: ListTile(
-                      title: Text(
-                        'individual'.tr,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      leading: Radio(
-                        value: 1,
-                        groupValue: selectedClientType,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedClientType = value!;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.15,
-                    child: ListTile(
-                      title: Text(
-                        'company'.tr,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      leading: Radio(
-                        value: 2,
-                        groupValue: selectedClientType,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedClientType = value!;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              gapH10,
-              Text(
-                '${widget.info['clientNumber'] ?? ''}',
-                style: const TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              gapH10,
-              DialogTextField(
-                textEditingController: clientNameController,
-                text: '${'client_name'.tr}*',
-                rowWidth: MediaQuery.of(context).size.width * 0.5,
-                textFieldWidth: MediaQuery.of(context).size.width * 0.4,
-                validationFunc: (val) {
-                  if (val.isEmpty) {
-                    return 'required_field'.tr;
-                  }
-                  return null;
-                },
-              ),
-              gapH10,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  DialogTextField(
-                    textEditingController: referenceController,
-                    text: 'reference'.tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                    validationFunc: (val) {},
-                  ),
-                  PhoneTextField(
-                    textEditingController: phoneController,
-                    text: 'phone'.tr,
-                    initialValue: selectedPhoneCode,
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                    validationFunc: (String val) {
-                      if (val.isNotEmpty && val.length < 7) {
-                        return '7_digits'.tr;
-                      }
-                      return null;
-                    },
-                    onCodeSelected: (value) {
-                      setState(() {
-                        selectedPhoneCode = value;
-                      });
-                    },
-                    onChangedFunc: (value) {
-                      setState(() {
-                        // mainDescriptionController.text=value;
-                      });
-                    },
-                  ),
-                  DialogTextField(
-                    textEditingController: floorBldgController,
-                    text: 'floor_bldg'.tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                    validationFunc: (val) {},
-                  ),
-                ],
-              ),
-              gapH10,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.25,
-                    child: Row(
+      margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+      child: Column(
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.78,
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('title'.tr),
-                        DropdownMenu<String>(
-                          width: MediaQuery.of(context).size.width * 0.15,
-                          // requestFocusOnTap: false,
-                          enableSearch: true,
-                          controller: titleController,
-                          hintText: 'Doctor, Miss, Mister',
-                          inputDecorationTheme: InputDecorationTheme(
-                            // filled: true,
-                            hintStyle: const TextStyle(
-                              fontStyle: FontStyle.italic,
-                            ),
-                            contentPadding: const EdgeInsets.fromLTRB(
-                              20,
-                              0,
-                              25,
-                              5,
-                            ),
-                            // outlineBorder: BorderSide(color: Colors.black,),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Primary.primary.withAlpha(
-                                  (0.2 * 255).toInt(),
-                                ),
-                                width: 1,
-                              ),
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(9),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Primary.primary.withAlpha(
-                                  (0.4 * 255).toInt(),
-                                ),
-                                width: 2,
-                              ),
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(9),
-                              ),
+                        PageTitle(text: 'update_client'.tr),
+                        InkWell(
+                          onTap: () {
+                            Get.back();
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Primary.primary,
+                            radius: 15,
+                            child: const Icon(
+                              Icons.close_rounded,
+                              color: Colors.white,
+                              size: 20,
                             ),
                           ),
-                          // menuStyle: ,
-                          menuHeight: 250,
-                          dropdownMenuEntries:
-                              titles.map<DropdownMenuEntry<String>>((
-                                String option,
-                              ) {
-                                return DropdownMenuEntry<String>(
-                                  value: option,
-                                  label: option,
-                                );
-                              }).toList(),
-                          enableFilter: true,
-                          onSelected: (String? val) {
-                            setState(() {
-                              selectedTitle = val!;
-                            });
-                          },
                         ),
                       ],
                     ),
-                  ),
-                  PhoneTextField(
-                    textEditingController: mobileController,
-                    text: 'mobile'.tr,
-                    initialValue: selectedMobileCode,
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                    validationFunc: (val) {
-                      if (val.isNotEmpty && val.length < 7) {
-                        return '7_digits'.tr;
-                      }
-                      return null;
-                    },
-                    onCodeSelected: (value) {
-                      setState(() {
-                        selectedMobileCode = value;
-                      });
-                    },
-                    onChangedFunc: (value) {
-                      setState(() {
-                        // mainDescriptionController.text=value;
-                      });
-                    },
-                  ),
-                  DialogTextField(
-                    textEditingController: streetController,
-                    text: 'street'.tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                    validationFunc: (val) {},
-                    // onChangedFunc: (value){
-                    //   setState(() {
-                    //     // mainDescriptionController.text=value;
-                    //   });
-                    // },
-                  ),
-                ],
-              ),
-              gapH10,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  DialogTextField(
-                    textEditingController: jobPositionController,
-                    text: 'job_position'.tr,
-                    hint: 'Sales Director,Sales...',
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                    validationFunc: (val) {},
-                  ),
-                  DialogTextField(
-                    textEditingController: emailController,
-                    text: 'email'.tr,
-                    hint: 'example@gmail.com',
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                    validationFunc: (String value) {
-                      if (value.isNotEmpty &&
-                          !RegExp(
-                            r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
-                          ).hasMatch(value)) {
-                        return 'check_format'.tr;
-                      }
-                    },
-                  ),
-                  isCountriesFetched
-                      ? SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.25,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('country'.tr),
-                            DropdownMenu<String>(
-                              width: MediaQuery.of(context).size.width * 0.15,
-                              // requestFocusOnTap: false,
-                              enableSearch: true,
-                              controller: countryController,
-                              hintText: '',
-                              inputDecorationTheme: InputDecorationTheme(
-                                // filled: true,
-                                hintStyle: const TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                ),
-                                contentPadding: const EdgeInsets.fromLTRB(
-                                  20,
-                                  0,
-                                  25,
-                                  5,
-                                ),
-                                // outlineBorder: BorderSide(color: Colors.black,),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Primary.primary.withAlpha(
-                                      (0.2 * 255).toInt(),
-                                    ),
-                                    width: 1,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Primary.primary.withAlpha(
-                                      (0.4 * 255).toInt(),
-                                    ),
-                                    width: 2,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                              ),
-                              // menuStyle: ,
-                              menuHeight: 250,
-                              dropdownMenuEntries:
-                                  countriesNamesList
-                                      .map<DropdownMenuEntry<String>>((
-                                        String option,
-                                      ) {
-                                        return DropdownMenuEntry<String>(
-                                          value: option,
-                                          label: option,
-                                        );
-                                      })
-                                      .toList(),
-                              enableFilter: true,
-                              onSelected: (String? val) {
+                    // gapH32,
+                    // const AddPhotoCircle(),
+                    gapH32,
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.15,
+                          child: ListTile(
+                            title: Text(
+                              'individual'.tr,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            leading: Radio(
+                              value: 1,
+                              groupValue: selectedClientType,
+                              onChanged: (value) {
                                 setState(() {
-                                  selectedCountry = val!;
-                                  getCitiesFromBack(val);
+                                  selectedClientType = value!;
                                 });
                               },
                             ),
-                          ],
+                          ),
                         ),
-                      )
-                      : SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.25,
-                        child: loading(),
-                      ),
-                ],
-              ),
-              gapH10,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  DialogTextField(
-                    textEditingController: taxNumberController,
-                    text: 'tax_number'.tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                    validationFunc: (val) {
-                      if (selectedClientType == 2 && val.isEmpty) {
-                        return 'required_field'.tr;
-                      }
-                      return null;
-                    },
-                  ),
-                  DialogTextField(
-                    textEditingController: websiteController,
-                    text: 'website'.tr,
-                    hint: 'www.example.com',
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                    validationFunc: (String value) {
-                      // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                      //     .hasMatch(value)) {
-                      //   return 'check_format'.tr ;
-                      // }return null;
-                    },
-                  ),
-                  isCitiesFetched
-                      ? SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.25,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('city'.tr),
-                            DropdownMenu<String>(
-                              width: MediaQuery.of(context).size.width * 0.15,
-                              // requestFocusOnTap: false,
-                              enableSearch: true,
-                              controller: cityController,
-                              hintText: '',
-                              inputDecorationTheme: InputDecorationTheme(
-                                // filled: true,
-                                hintStyle: const TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                ),
-                                contentPadding: const EdgeInsets.fromLTRB(
-                                  20,
-                                  0,
-                                  25,
-                                  5,
-                                ),
-                                // outlineBorder: BorderSide(color: Colors.black,),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Primary.primary.withAlpha(
-                                      (0.2 * 255).toInt(),
-                                    ),
-                                    width: 1,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Primary.primary.withAlpha(
-                                      (0.4 * 255).toInt(),
-                                    ),
-                                    width: 2,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                              ),
-                              // menuStyle: ,
-                              menuHeight: 250,
-                              dropdownMenuEntries:
-                                  citiesNamesList
-                                      .map<DropdownMenuEntry<String>>((
-                                        String option,
-                                      ) {
-                                        return DropdownMenuEntry<String>(
-                                          value: option,
-                                          label: option,
-                                        );
-                                      })
-                                      .toList(),
-                              enableFilter: true,
-                              onSelected: (String? val) {
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.15,
+                          child: ListTile(
+                            title: Text(
+                              'company'.tr,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            leading: Radio(
+                              value: 2,
+                              groupValue: selectedClientType,
+                              onChanged: (value) {
                                 setState(() {
-                                  selectedCity = val!;
+                                  selectedClientType = value!;
                                 });
                               },
                             ),
-                          ],
+                          ),
                         ),
-                      )
-                      : SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.25,
-                        child: loading(),
-                      ),
-                ],
-              ),
-              gapH10,
-              // gapH40,
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.start,
-              //   children: [
-              //     Wrap(
-              //         spacing: 0.0,
-              //         direction: Axis.horizontal,
-              //         children: tabsList
-              //             .map((element) => _buildTabChipItem(
-              //                 element,
-              //                 // element['id'],
-              //                 // element['name'],
-              //                 tabsList.indexOf(element)))
-              //             .toList()),
-              //   ],
-              // ),
-              // Container(
-              //   padding: EdgeInsets.symmetric(
-              //       horizontal: MediaQuery.of(context).size.width * 0.01,
-              //       vertical: 25),
-              //   height: 300,
-              //   decoration: const BoxDecoration(
-              //     borderRadius: BorderRadius.only(
-              //         bottomLeft: Radius.circular(6),
-              //         bottomRight: Radius.circular(6)),
-              //     color: Colors.white,
-              //   ),
-              //   child: Column(
-              //     children: [
-              //       Column(
-              //         mainAxisAlignment: MainAxisAlignment.start,
-              //         crossAxisAlignment: CrossAxisAlignment.start,
-              //         children: [
-              //           ReusableInputNumberField(
-              //             controller: grantedDiscountController,
-              //             textFieldWidth:
-              //                 MediaQuery.of(context).size.width * 0.15,
-              //             rowWidth:
-              //                 MediaQuery.of(context).size.width * 0.25,
-              //             onChangedFunc: (val) {},
-              //             validationFunc: (value) {},
-              //             text: 'granted_discount'.tr,
-              //           ),
-              //           gapH20,
-              //           Row(
-              //             children: [
-              //               Expanded(
-              //                   child: ListTile(
-              //                 title: Text('show_in_POS'.tr,
-              //                     style: const TextStyle(fontSize: 12)),
-              //                 leading: Checkbox(
-              //                   // checkColor: Colors.white,
-              //                   // fillColor: MaterialStateProperty.resolveWith(getColor),
-              //                   value: isActiveInPosChecked,
-              //                   onChanged: (bool? value) {
-              //                     setState(() {
-              //                       isActiveInPosChecked = value!;
-              //                     });
-              //                   },
-              //                 ),
-              //               )),
-              //             ],
-              //           ),
-              //           gapH20,
-              //           Row(
-              //             children: [
-              //               Expanded(
-              //                   child: ListTile(
-              //                 title: Text('blocked'.tr,
-              //                     style: const TextStyle(fontSize: 12)),
-              //                 leading: Checkbox(
-              //                   // checkColor: Colors.white,
-              //                   // fillColor: MaterialStateProperty.resolveWith(getColor),
-              //                   value: isBlockedChecked,
-              //                   onChanged: (bool? value) {
-              //                     setState(() {
-              //                       isBlockedChecked = value!;
-              //                     });
-              //                   },
-              //                 ),
-              //               )),
-              //             ],
-              //           ),
-              //         ],
-              //       ),
-              //       // const Spacer(),
-              //       // Row(
-              //       //                 mainAxisAlignment: MainAxisAlignment.end,
-              //       //                 children: [
-              //       //                   TextButton(
-              //       //                       onPressed: () {
-              //       //                         setState(() {
-              //       //                           selectedClientType = 1;
-              //       //                           selectedPhoneCode = '';
-              //       //                           selectedMobileCode = '';
-              //       //                           paymentTerm = '';
-              //       //                           priceListSelected = '';
-              //       //                           selectedCountry = '';
-              //       //                           grantedDiscountController.clear();
-              //       //                           clientNameController.clear();
-              //       //                           referenceController.clear();
-              //       //                           internalNoteController.clear();
-              //       //                           websiteController.clear();
-              //       //                           phoneController.clear();
-              //       //                           floorBldgController.clear();
-              //       //                           titleController.clear();
-              //       //                           mobileController.clear();
-              //       //                           taxNumberController.clear();
-              //       //                           cityController.clear();
-              //       //                           countryController.clear();
-              //       //                           selectedCountry = '';
-              //       //                           selectedCity = '';
-              //       //                           emailController.clear();
-              //       //                           jobPositionController.clear();
-              //       //                           streetController.clear();
-              //       //                           isBlockedChecked = false;
-              //       //                           isActiveInPosChecked = false;
-              //       //                           grantedDiscountController.clear();
-              //       //                         });
-              //       //                       },
-              //       //                       child: Text(
-              //       //                         'discard'.tr,
-              //       //                         style: TextStyle(
-              //       //                             decoration: TextDecoration.underline,
-              //       //                             color: Primary.primary),
-              //       //                       )),
-              //       //                   gapW24,
-              //       //                   ReusableButtonWithColor(
-              //       //                       btnText: 'save'.tr,
-              //       //                       onTapFunction: () async {
-              //       //                         if (_formKey.currentState!.validate()) {
-              //       //                           var res = await updateClient(
-              //       //                               '${widget.info['id']}',
-              //       //                               isActiveInPosChecked ? '1' : '0',
-              //       //                               grantedDiscountController.text,
-              //       //                               isBlockedChecked ? '1' : '0',
-              //       //                               selectedClientType == 1
-              //       //                                   ? 'individual'
-              //       //                                   : 'company',
-              //       //                               clientNameController.text,
-              //       //                               widget.info['clientNumber'] ?? '',
-              //       //                               selectedCountry,
-              //       //                               selectedCity,
-              //       //                               '',
-              //       //                               '',
-              //       //                               streetController.text,
-              //       //                               floorBldgController.text,
-              //       //                               jobPositionController.text,
-              //       //                               selectedPhoneCode.isEmpty
-              //       //                                   ? '+961'
-              //       //                                   : selectedPhoneCode,
-              //       //                               phoneController.text,
-              //       //                               selectedMobileCode.isEmpty
-              //       //                                   ? '+961'
-              //       //                                   : selectedMobileCode,
-              //       //                               mobileController.text,
-              //       //                               emailController.text,
-              //       //                               titleController.text,
-              //       //                               '',
-              //       //                               taxNumberController.text,
-              //       //                               websiteController.text,
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               '',
-              //       //                               paymentTerm,
-              //       //                               priceListSelected,
-              //       //                               internalNoteController.text,
-              //       //                               '');
-              //       //                           if (res['success'] == true) {
-              //       //                             CommonWidgets.snackBar(
-              //       //                                 'Success', res['message']);
-              //       //                             homeController.selectedTab.value =
-              //       //                             'clients';
-              //       //                           } else {
-              //       //                             CommonWidgets.snackBar(
-              //       //                                 'error', res['message']);
-              //       //                           }
-              //       //                         }
-              //       //                       },
-              //       //                       width: 100,
-              //       //                       height: 35),
-              //       //                 ],
-              //       //               )
-              //     ],
-              //   ),
-              // ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ReusableInputNumberField(
-                    controller: grantedDiscountController,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    onChangedFunc: (val) {},
-                    validationFunc: (value) {},
-                    text: 'granted_discount'.tr,
-                  ),
-                  DialogDropMenu(
-                    controller: priceListController,
-                    optionsList:pricesListsCodes ,
-                    text: 'pricelist'.tr,
-                    hint: '',
-                    rowWidth:
-                    MediaQuery.of(context).size.width *
-                        0.25,
-                    textFieldWidth:
-                    MediaQuery.of(context).size.width *
-                        0.2,
-                    onSelected: (val) {
-                      var index=pricesListsCodes.indexOf(val);
-                      setState(() {
-                        selectedPriceListId = pricesListsIds[index];
-                      });
-                    },
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.25,
-                  )
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.25,
-                    child: ListTile(
-                      title: Text(
-                        '    ${'show_in_POS'.tr}',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      leading: Checkbox(
-                        // checkColor: Colors.white,
-                        // fillColor: MaterialStateProperty.resolveWith(getColor),
-                        value: isActiveInPosChecked,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isActiveInPosChecked = value!;
-                          });
-                        },
+                      ],
+                    ),
+                    gapH10,
+                    Text(
+                      '${widget.info['clientNumber'] ?? ''}',
+                      style: const TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.25,
-                    child: ListTile(
-                      title: Text(
-                        '    ${'blocked'.tr}',
-                        style: const TextStyle(fontSize: 12),
+                    gapH10,
+                    DialogTextField(
+                      textEditingController: clientNameController,
+                      text: '${'client_name'.tr}*',
+                      rowWidth: MediaQuery.of(context).size.width * 0.5,
+                      textFieldWidth: MediaQuery.of(context).size.width * 0.4,
+                      validationFunc: (val) {
+                        if (val.isEmpty) {
+                          return 'required_field'.tr;
+                        }
+                        return null;
+                      },
+                    ),
+                    gapH10,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        DialogTextField(
+                          textEditingController: referenceController,
+                          text: 'reference'.tr,
+                          rowWidth: MediaQuery.of(context).size.width * 0.25,
+                          textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                          validationFunc: (val) {},
+                        ),
+                        PhoneTextField(
+                          textEditingController: phoneController,
+                          text: 'phone'.tr,
+                          initialValue: selectedPhoneCode,
+                          rowWidth: MediaQuery.of(context).size.width * 0.25,
+                          textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                          validationFunc: (String val) {
+                            if (val.isNotEmpty && val.length < 7) {
+                              return '7_digits'.tr;
+                            }
+                            return null;
+                          },
+                          onCodeSelected: (value) {
+                            setState(() {
+                              selectedPhoneCode = value;
+                            });
+                          },
+                          onChangedFunc: (value) {
+                            setState(() {
+                              // mainDescriptionController.text=value;
+                            });
+                          },
+                        ),
+                        DialogTextField(
+                          textEditingController: floorBldgController,
+                          text: 'floor_bldg'.tr,
+                          rowWidth: MediaQuery.of(context).size.width * 0.25,
+                          textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                          validationFunc: (val) {},
+                        ),
+                      ],
+                    ),
+                    gapH10,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.25,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('title'.tr),
+                              DropdownMenu<String>(
+                                width: MediaQuery.of(context).size.width * 0.15,
+                                // requestFocusOnTap: false,
+                                enableSearch: true,
+                                controller: titleController,
+                                hintText: 'Doctor, Miss, Mister',
+                                inputDecorationTheme: InputDecorationTheme(
+                                  // filled: true,
+                                  hintStyle: const TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  contentPadding: const EdgeInsets.fromLTRB(
+                                    20,
+                                    0,
+                                    25,
+                                    5,
+                                  ),
+                                  // outlineBorder: BorderSide(color: Colors.black,),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Primary.primary.withAlpha(
+                                        (0.2 * 255).toInt(),
+                                      ),
+                                      width: 1,
+                                    ),
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(9),
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Primary.primary.withAlpha(
+                                        (0.4 * 255).toInt(),
+                                      ),
+                                      width: 2,
+                                    ),
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(9),
+                                    ),
+                                  ),
+                                ),
+                                // menuStyle: ,
+                                menuHeight: 250,
+                                dropdownMenuEntries:
+                                    titles.map<DropdownMenuEntry<String>>((
+                                      String option,
+                                    ) {
+                                      return DropdownMenuEntry<String>(
+                                        value: option,
+                                        label: option,
+                                      );
+                                    }).toList(),
+                                enableFilter: true,
+                                onSelected: (String? val) {
+                                  setState(() {
+                                    selectedTitle = val!;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        PhoneTextField(
+                          textEditingController: mobileController,
+                          text: 'mobile'.tr,
+                          initialValue: selectedMobileCode,
+                          rowWidth: MediaQuery.of(context).size.width * 0.25,
+                          textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                          validationFunc: (val) {
+                            if (val.isNotEmpty && val.length < 7) {
+                              return '7_digits'.tr;
+                            }
+                            return null;
+                          },
+                          onCodeSelected: (value) {
+                            setState(() {
+                              selectedMobileCode = value;
+                            });
+                          },
+                          onChangedFunc: (value) {
+                            setState(() {
+                              // mainDescriptionController.text=value;
+                            });
+                          },
+                        ),
+                        DialogTextField(
+                          textEditingController: streetController,
+                          text: 'street'.tr,
+                          rowWidth: MediaQuery.of(context).size.width * 0.25,
+                          textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                          validationFunc: (val) {},
+                          // onChangedFunc: (value){
+                          //   setState(() {
+                          //     // mainDescriptionController.text=value;
+                          //   });
+                          // },
+                        ),
+                      ],
+                    ),
+                    gapH10,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        DialogTextField(
+                          textEditingController: jobPositionController,
+                          text: 'job_position'.tr,
+                          hint: 'Sales Director,Sales...',
+                          rowWidth: MediaQuery.of(context).size.width * 0.25,
+                          textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                          validationFunc: (val) {},
+                        ),
+                        DialogTextField(
+                          textEditingController: emailController,
+                          text: 'email'.tr,
+                          hint: 'example@gmail.com',
+                          rowWidth: MediaQuery.of(context).size.width * 0.25,
+                          textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                          validationFunc: (String value) {
+                            if (value.isNotEmpty &&
+                                !RegExp(
+                                  r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                ).hasMatch(value)) {
+                              return 'check_format'.tr;
+                            }
+                          },
+                        ),
+                        isCountriesFetched
+                            ? SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.25,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('country'.tr),
+                                  DropdownMenu<String>(
+                                    width: MediaQuery.of(context).size.width * 0.15,
+                                    // requestFocusOnTap: false,
+                                    enableSearch: true,
+                                    controller: countryController,
+                                    hintText: '',
+                                    inputDecorationTheme: InputDecorationTheme(
+                                      // filled: true,
+                                      hintStyle: const TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                      contentPadding: const EdgeInsets.fromLTRB(
+                                        20,
+                                        0,
+                                        25,
+                                        5,
+                                      ),
+                                      // outlineBorder: BorderSide(color: Colors.black,),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Primary.primary.withAlpha(
+                                            (0.2 * 255).toInt(),
+                                          ),
+                                          width: 1,
+                                        ),
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(9),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Primary.primary.withAlpha(
+                                            (0.4 * 255).toInt(),
+                                          ),
+                                          width: 2,
+                                        ),
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(9),
+                                        ),
+                                      ),
+                                    ),
+                                    // menuStyle: ,
+                                    menuHeight: 250,
+                                    dropdownMenuEntries:
+                                        countriesNamesList
+                                            .map<DropdownMenuEntry<String>>((
+                                              String option,
+                                            ) {
+                                              return DropdownMenuEntry<String>(
+                                                value: option,
+                                                label: option,
+                                              );
+                                            })
+                                            .toList(),
+                                    enableFilter: true,
+                                    onSelected: (String? val) {
+                                      setState(() {
+                                        selectedCountry = val!;
+                                        getCitiesFromBack(val);
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            )
+                            : SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.25,
+                              child: loading(),
+                            ),
+                      ],
+                    ),
+                    gapH10,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        DialogTextField(
+                          textEditingController: taxNumberController,
+                          text: 'tax_number'.tr,
+                          rowWidth: MediaQuery.of(context).size.width * 0.25,
+                          textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                          validationFunc: (val) {
+                            if (selectedClientType == 2 && val.isEmpty) {
+                              return 'required_field'.tr;
+                            }
+                            return null;
+                          },
+                        ),
+                        DialogTextField(
+                          textEditingController: websiteController,
+                          text: 'website'.tr,
+                          hint: 'www.example.com',
+                          rowWidth: MediaQuery.of(context).size.width * 0.25,
+                          textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                          validationFunc: (String value) {
+                            // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            //     .hasMatch(value)) {
+                            //   return 'check_format'.tr ;
+                            // }return null;
+                          },
+                        ),
+                        isCitiesFetched
+                            ? SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.25,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('city'.tr),
+                                  DropdownMenu<String>(
+                                    width: MediaQuery.of(context).size.width * 0.15,
+                                    // requestFocusOnTap: false,
+                                    enableSearch: true,
+                                    controller: cityController,
+                                    hintText: '',
+                                    inputDecorationTheme: InputDecorationTheme(
+                                      // filled: true,
+                                      hintStyle: const TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                      contentPadding: const EdgeInsets.fromLTRB(
+                                        20,
+                                        0,
+                                        25,
+                                        5,
+                                      ),
+                                      // outlineBorder: BorderSide(color: Colors.black,),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Primary.primary.withAlpha(
+                                            (0.2 * 255).toInt(),
+                                          ),
+                                          width: 1,
+                                        ),
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(9),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Primary.primary.withAlpha(
+                                            (0.4 * 255).toInt(),
+                                          ),
+                                          width: 2,
+                                        ),
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(9),
+                                        ),
+                                      ),
+                                    ),
+                                    // menuStyle: ,
+                                    menuHeight: 250,
+                                    dropdownMenuEntries:
+                                        citiesNamesList
+                                            .map<DropdownMenuEntry<String>>((
+                                              String option,
+                                            ) {
+                                              return DropdownMenuEntry<String>(
+                                                value: option,
+                                                label: option,
+                                              );
+                                            })
+                                            .toList(),
+                                    enableFilter: true,
+                                    onSelected: (String? val) {
+                                      setState(() {
+                                        selectedCity = val!;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            )
+                            : SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.25,
+                              child: loading(),
+                            ),
+                      ],
+                    ),
+                    gapH10,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Wrap(
+                          spacing: 0.0,
+                          direction: Axis.horizontal,
+                          children:
+                          tabsList
+                              .map(
+                                (element) => _buildTabChipItem(
+                              element,
+                              // element['id'],
+                              // element['name'],
+                              tabsList.indexOf(element),
+                            ),
+                          )
+                              .toList(),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: MediaQuery.of(context).size.width * 0.01,
+                        vertical: 25,
                       ),
-                      leading: Checkbox(
-                        // checkColor: Colors.white,
-                        // fillColor: MaterialStateProperty.resolveWith(getColor),
-                        value: isBlockedChecked,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isBlockedChecked = value!;
-                          });
-                        },
+                      height: 560,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(6),
+                          bottomRight: Radius.circular(6),
+                        ),
+                        color: Colors.white,
+                      ),
+                      child: Column(
+                        children: [
+                          // selectedTabIndex == 0
+                          //     ? Column(
+                          //         mainAxisAlignment: MainAxisAlignment.start,
+                          //         crossAxisAlignment: CrossAxisAlignment.start,
+                          //         children: [
+                          //           ReusableAddCard(
+                          //             text: 'add_contact'.tr,
+                          //             onTap: () {},
+                          //           ),
+                          //         ],
+                          //       )
+                          //     : selectedTabIndex == 1
+                          //         ? Row(
+                          //             mainAxisAlignment:
+                          //                 MainAxisAlignment.spaceBetween,
+                          //             crossAxisAlignment:
+                          //                 CrossAxisAlignment.start,
+                          //             children: [
+                          //               SizedBox(
+                          //                   width: MediaQuery.of(context)
+                          //                           .size
+                          //                           .width *
+                          //                       0.3,
+                          //                   child: Column(
+                          //                     children: [
+                          //                       DialogDropMenu(
+                          //                         optionsList: const [''],
+                          //                         text: '${'sales_person'.tr}*',
+                          //                         hint: '',
+                          //                         rowWidth: MediaQuery.of(context)
+                          //                                 .size
+                          //                                 .width *
+                          //                             0.3,
+                          //                         textFieldWidth:
+                          //                             MediaQuery.of(context)
+                          //                                     .size
+                          //                                     .width *
+                          //                                 0.17,
+                          //                         onSelected: () {},
+                          //                       ),
+                          //                       gapH16,
+                          //                       DialogDropMenu(
+                          //                         optionsList: [
+                          //                           'cash'.tr,
+                          //                           'on_account'.tr
+                          //                         ],
+                          //                         text: '${'payment_terms'.tr}*',
+                          //                         hint: '',
+                          //                         rowWidth: MediaQuery.of(context)
+                          //                                 .size
+                          //                                 .width *
+                          //                             0.3,
+                          //                         textFieldWidth:
+                          //                             MediaQuery.of(context)
+                          //                                     .size
+                          //                                     .width *
+                          //                                 0.17,
+                          //                         onSelected: (val) {
+                          //                           setState(() {
+                          //                             paymentTerm = val;
+                          //                           });
+                          //                         },
+                          //                       ),
+                          //                       gapH16,
+                          //                       DialogDropMenu(
+                          //                         optionsList: ['standard'.tr],
+                          //                         text: 'pricelist'.tr,
+                          //                         hint: '',
+                          //                         rowWidth: MediaQuery.of(context)
+                          //                                 .size
+                          //                                 .width *
+                          //                             0.3,
+                          //                         textFieldWidth:
+                          //                             MediaQuery.of(context)
+                          //                                     .size
+                          //                                     .width *
+                          //                                 0.17,
+                          //                         onSelected: (val) {
+                          //                           setState(() {
+                          //                             priceListSelected = val;
+                          //                           });
+                          //                         },
+                          //                       ),
+                          //                     ],
+                          //                   )),
+                          //             ],
+                          //           )
+                          //         : selectedTabIndex == 2
+                          //             ? Column(
+                          //                 mainAxisAlignment:
+                          //                     MainAxisAlignment.start,
+                          //                 crossAxisAlignment:
+                          //                     CrossAxisAlignment.start,
+                          //                 children: [
+                          //                   DialogTextField(
+                          //                     textEditingController:
+                          //                         internalNoteController,
+                          //                     text: '${'internal_note'.tr}*',
+                          //                     rowWidth: MediaQuery.of(context)
+                          //                             .size
+                          //                             .width *
+                          //                         0.7,
+                          //                     textFieldWidth:
+                          //                         MediaQuery.of(context)
+                          //                                 .size
+                          //                                 .width *
+                          //                             0.6,
+                          //                     validationFunc: (val) {},
+                          //                   ),
+                          //                 ],
+                          //               )
+                          //             :
+                          selectedTabIndex == 0
+                              ? Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ReusableInputNumberField(
+                                controller: grantedDiscountController,
+                                textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                                rowWidth: MediaQuery.of(context).size.width * 0.25,
+                                onChangedFunc: (val) {},
+                                validationFunc: (value) {},
+                                text: 'granted_discount'.tr,
+                              ),
+                              gapH20,
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.25,
+                                child: ListTile(
+                                  title: Text(
+                                    '    ${'show_in_POS'.tr}',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  leading: Checkbox(
+                                    // checkColor: Colors.white,
+                                    // fillColor: MaterialStateProperty.resolveWith(getColor),
+                                    value: isActiveInPosChecked,
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        isActiveInPosChecked = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                              gapH20,
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.25,
+                                child: ListTile(
+                                  title: Text(
+                                    '    ${'blocked'.tr}',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  leading: Checkbox(
+                                    // checkColor: Colors.white,
+                                    // fillColor: MaterialStateProperty.resolveWith(getColor),
+                                    value: isBlockedChecked,
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        isBlockedChecked = value!;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                              : selectedTabIndex == 1
+                              ? ContactsAndAddressesSection()
+                              : Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width:
+                                MediaQuery.of(context).size.width * 0.3,
+                                child: Column(
+                                  children: [
+                                    DialogDropMenu(
+                                      optionsList: const [''],
+                                      text: '${'sales_person'.tr}*',
+                                      hint: '',
+                                      rowWidth:
+                                      MediaQuery.of(context).size.width *
+                                          0.3,
+                                      textFieldWidth:
+                                      MediaQuery.of(context).size.width *
+                                          0.17,
+                                      onSelected: () {},
+                                    ),
+                                    gapH16,
+                                    DialogDropMenu(
+                                      optionsList: [''],
+                                      text: '${'payment_terms'.tr}*',
+                                      hint: '',
+                                      rowWidth:
+                                      MediaQuery.of(context).size.width *
+                                          0.3,
+                                      textFieldWidth:
+                                      MediaQuery.of(context).size.width *
+                                          0.17,
+                                      onSelected: (val) {
+                                        setState(() {
+                                          paymentTerm = val;
+                                        });
+                                      },
+                                    ),
+                                    gapH16,
+                                    DialogDropMenu(
+                                      controller: priceListController,
+                                      optionsList:pricesListsCodes ,
+                                      text: 'pricelist'.tr,
+                                      hint: '',
+                                      rowWidth:
+                                      MediaQuery.of(context).size.width *
+                                          0.3,
+                                      textFieldWidth:
+                                      MediaQuery.of(context).size.width *
+                                          0.17,
+                                      onSelected: (val) {
+                                        var index=pricesListsCodes.indexOf(val);
+                                        setState(() {
+                                          selectedPriceListId = pricesListsIds[index];
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.25,
-                  )
-                ],
+                  ],
+                ),
               ),
-              gapH16,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        if (widget.info['country'] != null) {
-                          getCitiesOfASpecifiedCountry(widget.info['country']);
-                        }
-                         if(widget.info['pricelist']!=null){
-                          selectedPriceListId='${widget.info['pricelist']['id']}';
-                          priceListController.text=widget.info['pricelist']['code'];
-                        }
-                        selectedClientType =
-                            widget.info['type'] == 'company' ? 2 : 1;
-                        clientNameController.text = widget.info['name'] ?? '';
-                        internalNoteController.text =
-                            widget.info['internalNote'] ?? '';
-                        grantedDiscountController.text =
-                            '${widget.info['grantedDiscount'] ?? ''}';
-                        countryController.text = widget.info['country'] ?? '';
-                        selectedCountry = widget.info['country'] ?? '';
-                        countryValue = widget.info['country'] ?? '';
-                        cityController.text = widget.info['city'] ?? '';
-                        selectedCity = widget.info['city'] ?? '';
-                        cityValue = widget.info['city'] ?? '';
-                        floorBldgController.text =
-                            widget.info['floorBldg'] ?? '';
-                        streetController.text = widget.info['street'] ?? '';
-                        jobPositionController.text =
-                            widget.info['jobPosition'] ?? '';
-                        emailController.text = widget.info['email'] ?? '';
-                        titleController.text = widget.info['title'] ?? '';
-                        selectedTitle = widget.info['title'] ?? '';
-                        stateValue = widget.info['state'] ?? '';
-                        websiteController.text = widget.info['website'] ?? '';
-                        isActiveInPosChecked =
-                            '${widget.info['showOnPos'] ?? ''}' == '1'
-                                ? true
-                                : false;
-                        isBlockedChecked =
-                            '${widget.info['isBlocked'] ?? ''}' == '1'
-                                ? true
-                                : false;
-                        titleController.text = widget.info['title'] ?? '';
-                        referenceController.text =
-                            widget.info['reference'] ?? '';
-                        phoneController.text = widget.info['phoneNumber'] ?? '';
-                        selectedPhoneCode = widget.info['phoneCode'] ?? '';
-                        mobileController.text =
-                            widget.info['mobileNumber'] ?? '';
-                        selectedMobileCode = widget.info['mobileCode'] ?? '';
-                        taxNumberController.text = widget.info['taxId'] ?? '';
-                      });
-                    },
-                    child: Text(
-                      'discard'.tr,
-                      style: TextStyle(
-                        decoration: TextDecoration.underline,
-                        color: Primary.primary,
-                      ),
-                    ),
-                  ),
-                  gapW24,
-                  ReusableButtonWithColor(
-                    btnText: 'save'.tr,
-                    onTapFunction: () async {
-                      if (_formKey.currentState!.validate()) {
-                        var res = await updateClient(
-                          '${widget.info['id']}',
-                          referenceController.text,
-                          isActiveInPosChecked ? '1' : '0',
-                          grantedDiscountController.text,
-                          isBlockedChecked ? '1' : '0',
-                          selectedClientType == 1 ? 'individual' : 'company',
-                          clientNameController.text,
-                          widget.info['clientNumber'] ?? '',
-                          selectedCountry,
-                          selectedCity,
-                          '',
-                          '',
-                          streetController.text,
-                          floorBldgController.text,
-                          jobPositionController.text,
-                          selectedPhoneCode.isEmpty
-                              ? '+961'
-                              : selectedPhoneCode,
-                          phoneController.text,
-                          selectedMobileCode.isEmpty
-                              ? '+961'
-                              : selectedMobileCode,
-                          mobileController.text,
-                          emailController.text,
-                          titleController.text,
-                          '',
-                          taxNumberController.text,
-                          websiteController.text,
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          paymentTerm,
-                          selectedPriceListId,
-                          internalNoteController.text,
-                          '',
-                        );
-                        if (res['success'] == true) {
-                          Get.back();
-                          clientController.getAllClientsFromBack();
-                          homeController.selectedTab.value = 'clients';
-                          CommonWidgets.snackBar('Success', res['message']);
-                        } else {
-                          CommonWidgets.snackBar('error', res['message']);
-                        }
+            ),
+          ),
+          SizedBox(
+            // height: MediaQuery.of(context).size.height * 0.1,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      if (widget.info['country'] != null) {
+                        getCitiesOfASpecifiedCountry(widget.info['country']);
                       }
-                    },
-                    width: 100,
-                    height: 35,
+                      if(widget.info['pricelist']!=null){
+                        selectedPriceListId='${widget.info['pricelist']['id']}';
+                        priceListController.text=widget.info['pricelist']['code'];
+                      }
+                      selectedClientType =
+                      widget.info['type'] == 'company' ? 2 : 1;
+                      clientNameController.text = widget.info['name'] ?? '';
+                      internalNoteController.text =
+                          widget.info['internalNote'] ?? '';
+                      grantedDiscountController.text =
+                      '${widget.info['grantedDiscount'] ?? ''}';
+                      countryController.text = widget.info['country'] ?? '';
+                      selectedCountry = widget.info['country'] ?? '';
+                      countryValue = widget.info['country'] ?? '';
+                      cityController.text = widget.info['city'] ?? '';
+                      selectedCity = widget.info['city'] ?? '';
+                      cityValue = widget.info['city'] ?? '';
+                      floorBldgController.text =
+                          widget.info['floorBldg'] ?? '';
+                      streetController.text = widget.info['street'] ?? '';
+                      jobPositionController.text =
+                          widget.info['jobPosition'] ?? '';
+                      emailController.text = widget.info['email'] ?? '';
+                      titleController.text = widget.info['title'] ?? '';
+                      selectedTitle = widget.info['title'] ?? '';
+                      stateValue = widget.info['state'] ?? '';
+                      websiteController.text = widget.info['website'] ?? '';
+                      isActiveInPosChecked =
+                      '${widget.info['showOnPos'] ?? ''}' == '1'
+                          ? true
+                          : false;
+                      isBlockedChecked =
+                      '${widget.info['isBlocked'] ?? ''}' == '1'
+                          ? true
+                          : false;
+                      titleController.text = widget.info['title'] ?? '';
+                      referenceController.text =
+                          widget.info['reference'] ?? '';
+                      phoneController.text = widget.info['phoneNumber'] ?? '';
+                      selectedPhoneCode = widget.info['phoneCode'] ?? '';
+                      mobileController.text =
+                          widget.info['mobileNumber'] ?? '';
+                      selectedMobileCode = widget.info['mobileCode'] ?? '';
+                      taxNumberController.text = widget.info['taxId'] ?? '';
+                    });
+                  },
+                  child: Text(
+                    'discard'.tr,
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      color: Primary.primary,
+                    ),
                   ),
-                ],
+                ),
+                gapW24,
+                ReusableButtonWithColor(
+                  btnText: 'save'.tr,
+                  onTapFunction: () async {
+                    if (_formKey.currentState!.validate()) {
+                      var res = await updateClient(
+                        '${widget.info['id']}',
+                        referenceController.text,
+                        isActiveInPosChecked ? '1' : '0',
+                        grantedDiscountController.text,
+                        isBlockedChecked ? '1' : '0',
+                        selectedClientType == 1 ? 'individual' : 'company',
+                        clientNameController.text,
+                        widget.info['clientNumber'] ?? '',
+                        selectedCountry,
+                        selectedCity,
+                        '',
+                        '',
+                        streetController.text,
+                        floorBldgController.text,
+                        jobPositionController.text,
+                        selectedPhoneCode.isEmpty
+                            ? '+961'
+                            : selectedPhoneCode,
+                        phoneController.text,
+                        selectedMobileCode.isEmpty
+                            ? '+961'
+                            : selectedMobileCode,
+                        mobileController.text,
+                        emailController.text,
+                        titleController.text,
+                        '',
+                        taxNumberController.text,
+                        websiteController.text,
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        paymentTerm,
+                        selectedPriceListId,
+                        internalNoteController.text,
+                        '',
+                        clientController.contactsList
+                      );
+                      if (res['success'] == true) {
+                        Get.back();
+                        clientController.getAllClientsFromBack();
+                        homeController.selectedTab.value = 'clients';
+                        CommonWidgets.snackBar('Success', res['message']);
+                      } else {
+                        CommonWidgets.snackBar('error', res['message']);
+                      }
+                    }
+                  },
+                  width: 100,
+                  height: 35,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildTabChipItem(String name, int index) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedTabIndex = index;
+        });
+      },
+      child: ClipPath(
+        clipper: const ShapeBorderClipper(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(9),
+              topRight: Radius.circular(9),
+            ),
+          ),
+        ),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.12,
+          height: MediaQuery.of(context).size.height * 0.07,
+          // padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+          decoration: BoxDecoration(
+            color: selectedTabIndex == index ? Primary.p20 : Colors.white,
+            border:
+            selectedTabIndex == index
+                ? Border(top: BorderSide(color: Primary.primary, width: 3))
+                : null,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withAlpha((0.5 * 255).toInt()),
+                spreadRadius: 9,
+                blurRadius: 9,
+                offset: const Offset(0, 3),
               ),
             ],
+          ),
+          child: Center(
+            child: Text(
+              name.tr,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Primary.primary,
+              ),
+            ),
           ),
         ),
       ),

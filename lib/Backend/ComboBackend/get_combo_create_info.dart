@@ -18,9 +18,9 @@ Future getFieldsForCreateCombo() async {
   if (response.statusCode == 200) {
     return p['data'];
   } else {
-    print("++++++++++Error+++++++++++++");
-    print("Error connect");
-    print("+++++++++++++++++++++++");
+    // print("++++++++++Error+++++++++++++");
+    // print("Error connect");
+    // print("+++++++++++++++++++++++");
     return [];
   }
 }

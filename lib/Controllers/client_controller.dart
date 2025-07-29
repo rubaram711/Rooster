@@ -78,4 +78,66 @@ class ClientController extends GetxController {
     isTransactionsFetched = true;
     update();
   }
+
+
+  List<Map> contactsList=[
+    // {    'type':'1',
+    //   'name':'',
+    //   'title':'',
+    //   'jobPosition':'',
+    //   'deliveryAddress':'',
+    //   'phoneCode':'',
+    //   'phoneNumber':'',
+    //   'extension':'',
+    //   'mobileCode':'',
+    //   'mobileNumber':'',
+    //   'email':'',
+    //   'note':'',
+    //   'internalNote':'',}
+  ];
+   addToContactsList(Map newMap){
+     contactsList.add(newMap);
+     update();
+   }
+
+   updateContactType(int index,String newVal){
+     contactsList[index]['type']=newVal;
+   }
+   updateContactName(int index,String newVal){
+     contactsList[index]['name']=newVal;
+   }
+   updateContactTitle(int index,String newVal){
+     contactsList[index]['title']=newVal;
+   }
+   updateContactJobPosition(int index,String newVal){
+     contactsList[index]['jobPosition']=newVal;
+   }
+   updateContactDeliveryAddress(int index,String newVal){
+     contactsList[index]['deliveryAddress']=newVal;
+   }
+   updateContactPhoneCode(int index,String newVal){
+     contactsList[index]['phoneCode']=newVal;
+   }
+   updateContactPhoneNumber(int index,String newVal){
+     contactsList[index]['phoneNumber']=newVal;
+   }
+   updateContactExtension(int index,String newVal){
+     contactsList[index]['extension']=newVal;
+   }
+   updateContactMobileCode(int index,String newVal){
+     contactsList[index]['mobileCode']=newVal;
+   }
+   updateContactMobileNumber(int index,String newVal){
+     contactsList[index]['mobileNumber']=newVal;
+   }
+   updateContactEmail(int index,String newVal){
+     contactsList[index]['email']=newVal;
+   }
+   updateContactNote(int index,String newVal){
+     contactsList[index]['note']=newVal;
+   }
+   updateContactInternalNote(int index,String newVal){
+     contactsList[index]['internalNote']=newVal;
+   }
+
 }

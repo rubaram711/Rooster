@@ -13,9 +13,6 @@ Future updateReplenishment(
     String replenishmentCurrencyId,
     Map items,
     ) async {
-  print('reference');
-  print(reference);
-  print(replenishmentCurrencyId);
   String token = await getAccessTokenFromPref();
   FormData formData = FormData.fromMap({
     "destWarehouseId":destWarehouseId,

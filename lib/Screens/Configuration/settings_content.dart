@@ -115,8 +115,6 @@ class _SettingsContentState extends State<SettingsContent> {
     companySettingsController.selectedPosCurrencySymbol = posCurrencySymbol;
     companySettingsController.isCompanySubjectToVat =
         companySubjectToVat == '1' ? true : false;
-    print('posCurrency.isNotEmpty');
-    print(posCurrency);
     if(posCurrency.isNotEmpty){
       companySettingsController.isPosCurrencyFound=true;
     }
@@ -231,7 +229,6 @@ class _SettingsContentState extends State<SettingsContent> {
                             ),
                       );
                       var companyId = await getCompanyIdFromPref();
-                      print('selectedCurrencyId ${cont.selectedCurrencyId}');
                       var res = await updateSettings(
                         companyId: companyId,
                         costCalculationType:
@@ -257,7 +254,6 @@ class _SettingsContentState extends State<SettingsContent> {
                       );
                       Get.back();
                       if (res['success'] == true) {
-                        print('res $res');
                         Get.back();
                         CommonWidgets.snackBar('Success', res['message']);
                         await saveCompanySettingsLocally(
@@ -282,6 +278,8 @@ class _SettingsContentState extends State<SettingsContent> {
                           cont.posCurrency.text,
                           cont.selectedPosCurrencyId,
                           cont.selectedPosCurrencySymbol,
+                          res['data']['primaryCurrency']['latest_rate'],
+                          res['data']['posCurrency']==null?'': res['data']['posCurrency']['latest_rate'],
                           cont.isShowLogoOnPosChecked ? '1' : '0',
                         );
                         quotationController.setIsVatExemptCheckBoxShouldAppear(cont.isCompanySubjectToVat);

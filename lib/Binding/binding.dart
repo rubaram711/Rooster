@@ -21,11 +21,14 @@ import 'package:rooster_app/Controllers/session_controller.dart';
 import 'package:rooster_app/Controllers/settings_controller.dart';
 import 'package:rooster_app/Controllers/transfer_controller.dart';
 import 'package:rooster_app/Controllers/waste_reports_controller.dart';
-import 'package:rooster_app/Controllers/LanguagesController.dart';
+import 'package:rooster_app/Controllers/languages_controller.dart';
 
 import '../Controllers/combo_controller.dart';
+import '../Controllers/delivery_controller.dart';
 import '../Controllers/payment_terms_controller.dart';
-import '../Controllers/salesOrder_Controller.dart';
+import '../Controllers/pending_docs_review_controller.dart';
+import '../Controllers/sales_invoice_controller.dart';
+import '../Controllers/sales_order_controller.dart';
 import '../Controllers/taxation_controller.dart';
 import '../Screens/DocsReview/docs_review.dart';
 
@@ -61,8 +64,12 @@ class MyBinding extends Bindings {
     Get.lazyPut<ComboController>(() => ComboController());
     Get.lazyPut<CashTraysController>(() => CashTraysController());
     Get.lazyPut<DocsReview>(() => DocsReview());
-
-
+    Get.lazyPut<PendingDocsReviewController>(() => PendingDocsReviewController());
+    Get.lazyPut<SalesInvoiceController>(() => SalesInvoiceController());
+    Get.lazyPut<InventoryController>(() => InventoryController());
+    Get.lazyPut<SalesInvoiceController>(() => SalesInvoiceController());
+    Get.lazyPut<DeliveryController>(() => DeliveryController());
+    Get.lazyPut<DeliveryController>(() => DeliveryController());
     // LanguagesController languagesController=Get.put(LanguagesController());
     // ProductController productController=Get.put(ProductController());
     // CategoriesController categoriesController=Get.put(CategoriesController());

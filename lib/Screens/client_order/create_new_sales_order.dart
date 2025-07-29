@@ -1,24 +1,28 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rooster_app/Backend/Quotations/TermsAndConditions/get_terms_and_conditions.dart';
+import 'package:rooster_app/Backend/SalesOrderBackend/store_sales_order.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
+import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
+import 'package:rooster_app/Screens/Combo/combo.dart';
 import 'package:rooster_app/Screens/Products/CreateProductDialog/create_product_dialog.dart';
-import 'package:rooster_app/Screens/Quotations/print_quotation.dart';
+import 'package:rooster_app/Screens/client_order/print_sales_order.dart';
 import 'package:rooster_app/Widgets/dialog_title.dart';
 import 'package:rooster_app/Widgets/loading.dart';
 import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/utils/image_picker_helper.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
-import 'package:rooster_app/Screens/Configuration/sup_references_dialog.dart';
 import 'package:rooster_app/Screens/Quotations/create_client_dialog.dart';
 import 'package:rooster_app/Widgets/reusable_drop_down_menu.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
-import '../../../Backend/Quotations/store_quotation.dart';
 import '../../../Controllers/home_controller.dart';
 import '../../../Widgets/custom_snak_bar.dart';
 import '../../../Widgets/page_title.dart';
@@ -26,7 +30,7 @@ import '../../../Widgets/reusable_btn.dart';
 import '../../../Widgets/reusable_text_field.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
-import '../../Controllers/salesOrder_Controller.dart';
+import '../../Backend/Quotations/TermsAndConditions/save_terms_and_conditions.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/dialog_drop_menu.dart';
@@ -36,17 +40,11 @@ import '../../Widgets/table_title.dart';
 import '../../Widgets/TransferWidgets/reusable_show_info_card.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
-
 import '../../const/constants.dart';
 
 class CreateNewClientOrder extends StatefulWidget {
-  const CreateNewClientOrder({
-    super.key,
-    this.isDesktop = false,
-    this.isMobile = false,
-  });
-  final bool isDesktop;
-  final bool isMobile;
+  const CreateNewClientOrder({super.key});
+
   @override
   State<CreateNewClientOrder> createState() => _CreateNewClientOrderState();
 }
@@ -63,6 +61,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
   TextEditingController totalCommissionController = TextEditingController();
   TextEditingController refController = TextEditingController();
   TextEditingController validityController = TextEditingController();
+  TextEditingController inputDateController = TextEditingController();
   TextEditingController clientNameController = TextEditingController();
   TextEditingController codeController = TextEditingController();
 
@@ -73,13 +72,18 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
   TextEditingController priceListController = TextEditingController();
 
   TextEditingController termsAndConditionsController = TextEditingController();
+  TextEditingController cashingMethodsController = TextEditingController();
+
+  // 'exempted from vat ,printed as "vat exempted"',
+  // 'exempted from vat ,printed as "vat 0 % = 0"',
+  // 'exempted from vat , no printed ',
+  // bool isVatExemptChecked = false;
 
   // String selectedVatExemptListTrue = '';
   String globalDiscountPercentage = ''; // user insert this value
   String specialDiscountPercentage = ''; // user insert this value
 
   String selectedPaymentTerm = '',
-      selectedPriceList = '',
       selectedCurrency = '',
       termsAndConditions = '',
       specialDisc = '',
@@ -96,10 +100,9 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
 
   bool isActiveVatChecked = false;
   bool isActiveDeliveredChecked = false;
-  final SalesOrderController salesController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
   final HomeController homeController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
-  TextEditingController startTimeController = TextEditingController();
 
   int progressVar = 0;
   String selectedCustomerIds = '';
@@ -107,7 +110,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
   setVars() async {
     setState(() {
       selectedPaymentTerm = '';
-      selectedPriceList = '';
       selectedCurrency = '';
       termsAndConditions = '';
       specialDisc = '';
@@ -124,34 +126,30 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
     await exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
     currencyController.text = 'USD';
     int index = exchangeRatesController.currenciesNamesList.indexOf('USD');
-    salesController.selectedCurrencyId =
+    salesOrderController.selectedCurrencyId =
         exchangeRatesController.currenciesIdsList[index];
-    salesController.selectedCurrencySymbol =
+    salesOrderController.selectedCurrencySymbol =
         exchangeRatesController.currenciesSymbolsList[index];
-    salesController.selectedCurrencyName = 'USD';
+    salesOrderController.selectedCurrencyName = 'USD';
     var vat = await getCompanyVatFromPref();
-    salesController.setCompanyVat(double.parse(vat));
+    salesOrderController.setCompanyVat(double.parse(vat));
     var companyCurrency = await getCompanyPrimaryCurrencyFromPref();
-    salesController.setCompanyPrimaryCurrency(companyCurrency);
-    var result = exchangeRatesController.exchangeRatesList.firstWhere(
-      (item) => item["currency"] == companyCurrency,
-      orElse: () => null,
-    );
-    salesController.setLatestRate(
-      double.parse(result != null ? '${result["exchange_rate"]}' : '1'),
-    );
+    var companyCurrencyLatestRate =
+        await getPrimaryCurrencyLatestRateFromPref();
+    salesOrderController.setCompanyPrimaryCurrency(companyCurrency);
+    salesOrderController.setLatestRate(double.parse(companyCurrencyLatestRate));
   }
 
   checkVatExempt() async {
     var companySubjectToVat = await getCompanySubjectToVatFromPref();
     if (companySubjectToVat == '1') {
       vatExemptController.clear();
-      salesController.setIsVatExempted(false, false, false);
-      salesController.setIsVatExemptCheckBoxShouldAppear(true);
+      salesOrderController.setIsVatExempted(false, false, false);
+      salesOrderController.setIsVatExemptCheckBoxShouldAppear(true);
     } else {
-      salesController.setIsVatExemptCheckBoxShouldAppear(false);
-      salesController.setIsVatExempted(false, false, true);
-      salesController.setIsVatExemptChecked(true);
+      salesOrderController.setIsVatExemptCheckBoxShouldAppear(false);
+      salesOrderController.setIsVatExempted(false, false, true);
+      salesOrderController.setIsVatExemptChecked(true);
     }
   }
 
@@ -165,37 +163,98 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
     }
 
     final Uint8List imageBytes = response.bodyBytes;
+    salesOrderController.setLogo(imageBytes);
+  }
 
-    salesController.setLogo(imageBytes);
+  late QuillController _controller;
+  String? _savedContent;
+
+  void _saveContent() {
+    final deltaJson = _controller.document.toDelta().toJson();
+    final jsonString = jsonEncode(deltaJson);
+
+    setState(() {
+      _savedContent = jsonString;
+    });
+
+    // You can now send `jsonString` to your backend
+    // print('Saved content as JSON:\n$jsonString');
+    termsAndConditionsController.text = jsonString;
+  }
+
+
+  void _saveTermsAndConditions() async {
+    final deltaJson = _controller.document.toDelta().toJson();
+    final jsonString = jsonEncode(deltaJson);
+
+    setState(() {
+      _savedContent = jsonString;
+    });
+    termsAndConditionsController.text = jsonString;
+
+    // print('_savedContent $_savedContent');
+    var p = await storeTermsAndConditions(_savedContent!);
+    if (p['success'] == true) {
+      CommonWidgets.snackBar('Success', p['message']);
+    } else {
+      CommonWidgets.snackBar('error', p['message']);
+    }
+  }
+
+  List termsAndConditionsList = [];
+  int currentIndex = 0;
+  getAllTermsAndConditions() async {
+    var res = await getTermsAndConditions();
+    if (res['success'] == true) {
+      termsAndConditionsList = res['data'];
+    }
+  }
+
+  showLastTermsAndConditionsList() {
+    setState(() {
+      if (currentIndex < termsAndConditionsList.length) {
+        _savedContent = termsAndConditionsList[currentIndex];
+        currentIndex++;
+      } else {
+        CommonWidgets.snackBar('error', 'The list is over');
+      }
+    });
   }
 
   @override
   void initState() {
+    _controller = QuillController(
+      document: Document(),
+      selection: const TextSelection.collapsed(offset: 0),
+    );
     generatePdfFromImageUrl();
     checkVatExempt();
-    salesController.isVatExemptChecked = false;
-    salesController.itemsMultiPartList = [];
-    salesController.salesPersonListNames = [];
-    salesController.salesPersonListId = [];
-    salesController.isBeforeVatPrices = true;
+    salesOrderController.isVatExemptChecked = false;
+    salesOrderController.itemsMultiPartList = [];
+    salesOrderController.salesPersonListNames = [];
+    salesOrderController.salesPersonListId = [];
+    salesOrderController.isBeforeVatPrices = true;
     priceConditionController.text = 'Prices are before vat';
-    salesController.getAllUsersSalesPersonFromBack();
-    salesController.getAllTaxationGroupsFromBack();
+    salesOrderController.getAllUsersSalesPersonFromBack();
+    salesOrderController.getAllTaxationGroupsFromBack();
     setVars();
-    salesController.getFieldsForCreateQuotationFromBack();
+    salesOrderController.getFieldsForCreateSalesOrderFromBack();
     getCurrency();
-    salesController.resetSalesOrder();
-    salesController.listViewLengthInSalesOrder = 50;
+    salesOrderController.resetSalesOrder();
+    salesOrderController.listViewLengthInSalesOrder = 50;
     validityController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    inputDateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    priceListController.text = 'STANDARD';
+    getAllTermsAndConditions();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<SalesOrderController>(
-      builder: (salesCont) {
-        var keysList = salesCont.orderLinesSalesOrderList.keys.toList();
-        return salesCont.isSalesOrderInfoFetched
+      builder: (salesOrderCont) {
+        var keysList = salesOrderCont.orderLinesSalesOrderList.keys.toList();
+        return salesOrderCont.isSalesOrderInfoFetched
             ? Container(
               padding: EdgeInsets.symmetric(
                 horizontal: MediaQuery.of(context).size.width * 0.02,
@@ -206,7 +265,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
-                      children: [PageTitle(text: 'create_new_sales_order'.tr)],
+                      children: [PageTitle(text: 'create_sales_order'.tr)],
                     ),
                     gapH16,
                     Row(
@@ -223,13 +282,14 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                     builder: (BuildContext context) {
                                       List itemsInfoPrint = [];
                                       for (var item
-                                          in salesCont
+                                          in salesOrderCont
                                               .rowsInListViewInSalesOrder
                                               .values) {
                                         if ('${item['line_type_id']}' == '2') {
                                           var qty = item['item_quantity'];
                                           var map =
-                                              salesCont.itemsMap[item['item_id']
+                                              salesOrderCont
+                                                  .itemsMap[item['item_id']
                                                   .toString()];
                                           var itemName = map['item_name'];
                                           var itemPrice = double.parse(
@@ -260,10 +320,10 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                           );
                                           // double.parse(qty) * itemPrice;
                                           var quotationItemInfo = {
+                                            'line_type_id': '2',
                                             'item_name': itemName,
                                             'item_description': itemDescription,
                                             'item_quantity': qty,
-                                            // 'item_unit_price': itemPrice,
                                             'item_unit_price':
                                                 formatDoubleWithCommas(
                                                   itemPrice,
@@ -276,88 +336,201 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 ),
                                             'item_image': itemImage,
                                             'item_brand': brand,
+                                            'title': '',
+                                            'isImageList': true,
+                                            'note': '',
+                                            'image': '',
+                                          };
+                                          itemsInfoPrint.add(quotationItemInfo);
+                                        } else if ('${item['line_type_id']}' ==
+                                            '3') {
+                                          var qty = item['item_quantity'];
+                                          // var map =
+                                          //     quotationCont
+                                          //         .combosMap[item['combo']
+                                          //         .toString()];
+                                          var ind = salesOrderCont.combosIdsList
+                                              .indexOf(
+                                                item['combo'].toString(),
+                                              );
+                                          var itemName =
+                                              salesOrderCont
+                                                  .combosNamesList[ind];
+                                          var itemPrice = double.parse(
+                                            '${item['item_unit_price'] ?? 0.0}',
+                                          );
+                                          var itemDescription =
+                                              item['item_description'];
+
+                                          var itemTotal = double.parse(
+                                            '${item['item_total']}',
+                                          );
+                                          // double.parse(qty) * itemPrice;
+                                          var quotationItemInfo = {
+                                            'line_type_id': '3',
+                                            'item_name': itemName,
+                                            'item_description': itemDescription,
+                                            'item_quantity': qty,
+                                            'item_unit_price':
+                                                formatDoubleWithCommas(
+                                                  itemPrice,
+                                                ),
+                                            'item_discount':
+                                                item['item_discount'] ?? '0',
+                                            'item_total':
+                                                formatDoubleWithCommas(
+                                                  itemTotal,
+                                                ),
+                                            'note': '',
+                                            'item_image': '',
+                                            'item_brand': '',
+                                            'isImageList': true,
+                                            'title': '',
+                                            'image': '',
+                                          };
+                                          itemsInfoPrint.add(quotationItemInfo);
+                                        } else if ('${item['line_type_id']}' ==
+                                            '1') {
+                                          var quotationItemInfo = {
+                                            'line_type_id': '1',
+                                            'item_name': '',
+                                            'item_description': '',
+                                            'item_quantity': '',
+                                            'item_unit_price': '',
+                                            'item_discount': '0',
+                                            'item_total': '',
+                                            'item_image': '',
+                                            'item_brand': '',
+                                            'note': '',
+                                            'isImageList': true,
+                                            'title': item['title'],
+                                            'image': '',
+                                          };
+                                          itemsInfoPrint.add(quotationItemInfo);
+                                        } else if ('${item['line_type_id']}' ==
+                                            '5') {
+                                          var quotationItemInfo = {
+                                            'line_type_id': '5',
+                                            'item_name': '',
+                                            'item_description': '',
+                                            'item_quantity': '',
+                                            'item_unit_price': '',
+                                            'item_discount': '0',
+                                            'item_total': '',
+                                            'item_image': '',
+                                            'item_brand': '',
+                                            'title': '',
+                                            'note': item['note'],
+                                            'image': '',
+                                            'isImageList': true,
+                                          };
+                                          itemsInfoPrint.add(quotationItemInfo);
+                                        } else if ('${item['line_type_id']}' ==
+                                            '4') {
+                                          var quotationItemInfo = {
+                                            'line_type_id': '4',
+                                            'item_name': '',
+                                            'item_description': '',
+                                            'item_quantity': '',
+                                            'item_unit_price': '',
+                                            'item_discount': '0',
+                                            'item_total': '',
+                                            'item_image': '',
+                                            'item_brand': '',
+                                            'title': '',
+                                            'note': '',
+                                            'image': item['image'],
+                                            'isImageList': true,
                                           };
                                           itemsInfoPrint.add(quotationItemInfo);
                                         }
                                       }
-                                      return PrintQuotationData(
-                                        isPrintedAs0: salesCont.isPrintedAs0,
+                                      return PrintSalesOrder(
+                                        isPrintedAs0:
+                                            salesOrderCont.isPrintedAs0,
                                         isVatNoPrinted:
-                                            salesCont.isVatNoPrinted,
+                                            salesOrderCont.isVatNoPrinted,
                                         isPrintedAsVatExempt:
-                                            salesCont.isPrintedAsVatExempt,
-                                        isInQuotation: false,
-                                        quotationNumber:
-                                            salesCont.salesorderNumber,
+                                            salesOrderCont.isPrintedAsVatExempt,
+                                        isInSalesOrder: false,
+                                        salesOrderNumber:
+                                            salesOrderCont.salesOrderNumber,
                                         creationDate: validityController.text,
                                         ref: refController.text,
                                         receivedUser: '',
                                         senderUser: homeController.userName,
                                         status: '',
                                         totalBeforeVat:
-                                            salesCont.totalItems.toString(),
+                                            salesOrderCont.totalItems
+                                                .toString(),
                                         discountOnAllItem:
-                                            salesCont.preGlobalDisc.toString(),
+                                            salesOrderCont.preGlobalDisc
+                                                .toString(),
                                         totalAllItems: formatDoubleWithCommas(
-                                          salesCont.totalItems,
+                                          salesOrderCont.totalItems,
                                         ),
                                         globalDiscount:
                                             globalDiscPercentController.text,
+                                        //widget.info['globalDiscount'] ?? '0',
                                         totalPriceAfterDiscount:
-                                            salesCont.preGlobalDisc == 0.0
+                                            salesOrderCont.preGlobalDisc == 0.0
                                                 ? formatDoubleWithCommas(
-                                                  salesCont.totalItems,
+                                                  salesOrderCont.totalItems,
                                                 )
                                                 : formatDoubleWithCommas(
-                                                  salesCont.totalAfterGlobalDis,
+                                                  salesOrderCont
+                                                      .totalAfterGlobalDis,
                                                 ),
-                                        additionalSpecialDiscount: salesCont
-                                            .preSpecialDisc
-                                            .toStringAsFixed(2),
+                                        additionalSpecialDiscount:
+                                            salesOrderCont.preSpecialDisc
+                                                .toStringAsFixed(2),
                                         totalPriceAfterSpecialDiscount:
-                                            salesCont.preSpecialDisc == 0
+                                            salesOrderCont.preSpecialDisc == 0
                                                 ? formatDoubleWithCommas(
-                                                  salesCont.totalItems,
+                                                  salesOrderCont.totalItems,
                                                 )
                                                 : formatDoubleWithCommas(
-                                                  salesCont
+                                                  salesOrderCont
                                                       .totalAfterGlobalSpecialDis,
                                                 ),
-                                        totalPriceAfterSpecialDiscountByQuotationCurrency:
-                                            salesCont.preSpecialDisc == 0
+                                        totalPriceAfterSpecialDiscountBySalesOrderCurrency:
+                                            salesOrderCont.preSpecialDisc == 0
                                                 ? formatDoubleWithCommas(
-                                                  salesCont.totalItems,
+                                                  salesOrderCont.totalItems,
                                                 )
                                                 : formatDoubleWithCommas(
-                                                  salesCont
+                                                  salesOrderCont
                                                       .totalAfterGlobalSpecialDis,
                                                 ),
 
-                                        vatByQuotationCurrency:
-                                            formatDoubleWithCommas(
-                                              double.parse(salesCont.vat11),
-                                            ),
-                                        finalPriceByQuotationCurrency:
+                                        vatBySalesOrderCurrency:
                                             formatDoubleWithCommas(
                                               double.parse(
-                                                salesCont.totalSalesOrder,
+                                                salesOrderCont.vat11,
+                                              ),
+                                            ),
+                                        finalPriceBySalesOrderCurrency:
+                                            formatDoubleWithCommas(
+                                              double.parse(
+                                                salesOrderCont.totalSalesOrder,
                                               ),
                                             ),
                                         specialDisc: specialDisc.toString(),
                                         specialDiscount:
                                             specialDiscPercentController.text,
                                         specialDiscountAmount:
-                                            salesCont.specialDisc,
+                                            salesOrderCont.specialDisc,
                                         salesPerson: selectedSalesPerson,
-                                        quotationCurrency:
-                                            salesCont.selectedCurrencyName,
-                                        quotationCurrencySymbol:
-                                            salesCont.selectedCurrencySymbol,
-                                        quotationCurrencyLatestRate:
-                                            salesCont
+                                        salesOrderCurrency:
+                                            salesOrderCont.selectedCurrencyName,
+                                        salesOrderCurrencySymbol:
+                                            salesOrderCont
+                                                .selectedCurrencySymbol,
+                                        salesOrderCurrencyLatestRate:
+                                            salesOrderCont
                                                 .exchangeRateForSelectedCurrency,
                                         clientPhoneNumber:
-                                            salesCont
+                                            salesOrderCont
                                                 .phoneNumber[selectedCustomerIds] ??
                                             '---',
                                         clientName: clientNameController.text,
@@ -371,32 +544,363 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                 // }
                               },
                             ),
+
                             UnderTitleBtn(
-                              text: 'send_by_email'.tr,
-                              onTap: () {
-                                if (progressVar == 0) {
-                                  setState(() {
-                                    progressVar += 1;
-                                  });
+                              text: 'submit_and_preview'.tr,
+                              onTap: () async {
+                                _saveContent();
+
+                                var oldKeys =
+                                    salesOrderController
+                                        .rowsInListViewInSalesOrder
+                                        .keys
+                                        .toList()
+                                      ..sort();
+                                for (int i = 0; i < oldKeys.length; i++) {
+                                  salesOrderController.newRowMap[i + 1] =
+                                      salesOrderController
+                                          .rowsInListViewInSalesOrder[oldKeys[i]]!;
                                 }
-                              },
-                            ),
-                            UnderTitleBtn(
-                              text: 'confirm'.tr,
-                              onTap: () {
-                                if (progressVar == 1) {
-                                  setState(() {
-                                    progressVar += 1;
-                                  });
+
+                                var res = await storeSalesOrder(
+                                  refController.text,
+                                  selectedCustomerIds,
+                                  validityController.text,
+                                  inputDateController.text,
+                                  '', //todo paymentTermsController.text,
+                                  salesOrderCont.salesOrderNumber,
+                                  salesOrderCont.selectedPriceListId,
+                                  salesOrderCont
+                                      .selectedCurrencyId, //selectedCurrency
+                                  termsAndConditionsController.text,
+                                  selectedSalesPersonId.toString(),
+                                  '',
+                                  salesOrderCont.selectedCashingMethodId,
+                                  commissionController.text,
+                                  totalCommissionController.text,
+                                  salesOrderController.totalItems
+                                      .toString(), //total before vat
+                                  specialDiscPercentController
+                                      .text, // inserted by user
+                                  salesOrderController
+                                      .specialDisc, // calculated
+                                  globalDiscPercentController.text,
+                                  salesOrderController.globalDisc,
+                                  salesOrderController.vat11.toString(), //vat
+                                  salesOrderController.vatInPrimaryCurrency
+                                      .toString(),
+                                  salesOrderController.totalSalesOrder, //
+
+                                  salesOrderCont.isVatExemptChecked ? '1' : '0',
+                                  salesOrderCont.isVatNoPrinted ? '1' : '0',
+                                  salesOrderCont.isPrintedAsVatExempt
+                                      ? '1'
+                                      : '0',
+                                  salesOrderCont.isPrintedAs0 ? '1' : '0',
+                                  salesOrderCont.isBeforeVatPrices ? '0' : '1',
+                                  salesOrderCont.isBeforeVatPrices ? '1' : '0',
+                                  codeController.text,
+                                  salesOrderController.newRowMap,
+                                  titleController.text,
+                                );
+                                if (res['success'] == true) {
+                                  CommonWidgets.snackBar(
+                                    'Success',
+                                    res['message'],
+                                  );
+                                  homeController.selectedTab.value =
+                                      'to_invoice';
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) {
+                                        List itemsInfoPrint = [];
+                                        for (var item
+                                            in salesOrderCont
+                                                .rowsInListViewInSalesOrder
+                                                .values) {
+                                          if ('${item['line_type_id']}' ==
+                                              '2') {
+                                            var qty = item['item_quantity'];
+                                            var map =
+                                                salesOrderCont
+                                                    .itemsMap[item['item_id']
+                                                    .toString()];
+                                            var itemName = map['item_name'];
+                                            var itemPrice = double.parse(
+                                              '${item['item_unit_price'] ?? 0.0}',
+                                            );
+                                            var itemDescription =
+                                                item['item_description'];
+
+                                            var itemImage =
+                                                '${map['images']}' != '[]'
+                                                    ? map['images'][0]
+                                                    : '';
+                                            var firstBrandObject =
+                                                map['itemGroups'].firstWhere(
+                                                  (obj) =>
+                                                      obj["root_name"]
+                                                          ?.toLowerCase() ==
+                                                      "brand".toLowerCase(),
+                                                  orElse: () => null,
+                                                );
+                                            var brand =
+                                                firstBrandObject == null
+                                                    ? ''
+                                                    : firstBrandObject['name'] ??
+                                                        '';
+                                            var itemTotal = double.parse(
+                                              '${item['item_total']}',
+                                            );
+                                            // double.parse(qty) * itemPrice;
+                                            var quotationItemInfo = {
+                                              'line_type_id': '2',
+                                              'item_name': itemName,
+                                              'item_description':
+                                                  itemDescription,
+                                              'item_quantity': qty,
+                                              'item_unit_price':
+                                                  formatDoubleWithCommas(
+                                                    itemPrice,
+                                                  ),
+                                              'item_discount':
+                                                  item['item_discount'] ?? '0',
+                                              'item_total':
+                                                  formatDoubleWithCommas(
+                                                    itemTotal,
+                                                  ),
+                                              'item_image': itemImage,
+                                              'item_brand': brand,
+                                              'title': '',
+                                              'isImageList': true,
+                                              'note': '',
+                                              'image': '',
+                                            };
+                                            itemsInfoPrint.add(
+                                              quotationItemInfo,
+                                            );
+                                          } else if ('${item['line_type_id']}' ==
+                                              '3') {
+                                            var qty = item['item_quantity'];
+                                            // var map =
+                                            //     quotationCont
+                                            //         .combosMap[item['combo']
+                                            //         .toString()];
+                                            var ind = salesOrderCont
+                                                .combosIdsList
+                                                .indexOf(
+                                                  item['combo'].toString(),
+                                                );
+                                            var itemName =
+                                                salesOrderCont
+                                                    .combosNamesList[ind];
+                                            var itemPrice = double.parse(
+                                              '${item['item_unit_price'] ?? 0.0}',
+                                            );
+                                            var itemDescription =
+                                                item['item_description'];
+
+                                            var itemTotal = double.parse(
+                                              '${item['item_total']}',
+                                            );
+                                            // double.parse(qty) * itemPrice;
+                                            var quotationItemInfo = {
+                                              'line_type_id': '3',
+                                              'item_name': itemName,
+                                              'item_description':
+                                                  itemDescription,
+                                              'item_quantity': qty,
+                                              'item_unit_price':
+                                                  formatDoubleWithCommas(
+                                                    itemPrice,
+                                                  ),
+                                              'item_discount':
+                                                  item['item_discount'] ?? '0',
+                                              'item_total':
+                                                  formatDoubleWithCommas(
+                                                    itemTotal,
+                                                  ),
+                                              'note': '',
+                                              'item_image': '',
+                                              'item_brand': '',
+                                              'isImageList': true,
+                                              'title': '',
+                                              'image': '',
+                                            };
+                                            itemsInfoPrint.add(
+                                              quotationItemInfo,
+                                            );
+                                          } else if ('${item['line_type_id']}' ==
+                                              '1') {
+                                            var quotationItemInfo = {
+                                              'line_type_id': '1',
+                                              'item_name': '',
+                                              'item_description': '',
+                                              'item_quantity': '',
+                                              'item_unit_price': '',
+                                              'item_discount': '0',
+                                              'item_total': '',
+                                              'item_image': '',
+                                              'item_brand': '',
+                                              'note': '',
+                                              'isImageList': true,
+                                              'title': item['title'],
+                                              'image': '',
+                                            };
+                                            itemsInfoPrint.add(
+                                              quotationItemInfo,
+                                            );
+                                          } else if ('${item['line_type_id']}' ==
+                                              '5') {
+                                            var quotationItemInfo = {
+                                              'line_type_id': '5',
+                                              'item_name': '',
+                                              'item_description': '',
+                                              'item_quantity': '',
+                                              'item_unit_price': '',
+                                              'item_discount': '0',
+                                              'item_total': '',
+                                              'item_image': '',
+                                              'item_brand': '',
+                                              'title': '',
+                                              'note': item['note'],
+                                              'image': '',
+                                              'isImageList': true,
+                                            };
+                                            itemsInfoPrint.add(
+                                              quotationItemInfo,
+                                            );
+                                          } else if ('${item['line_type_id']}' ==
+                                              '4') {
+                                            var quotationItemInfo = {
+                                              'line_type_id': '4',
+                                              'item_name': '',
+                                              'item_description': '',
+                                              'item_quantity': '',
+                                              'item_unit_price': '',
+                                              'item_discount': '0',
+                                              'item_total': '',
+                                              'item_image': '',
+                                              'item_brand': '',
+                                              'title': '',
+                                              'note': '',
+                                              'image': item['image'],
+                                              'isImageList': true,
+                                            };
+                                            itemsInfoPrint.add(
+                                              quotationItemInfo,
+                                            );
+                                          }
+                                        }
+                                        return PrintSalesOrder(
+                                          isPrintedAs0:
+                                              salesOrderCont.isPrintedAs0,
+                                          isVatNoPrinted:
+                                              salesOrderCont.isVatNoPrinted,
+                                          isPrintedAsVatExempt:
+                                              salesOrderCont
+                                                  .isPrintedAsVatExempt,
+                                          isInSalesOrder: false,
+                                          salesOrderNumber:
+                                              salesOrderCont.salesOrderNumber,
+                                          creationDate: validityController.text,
+                                          ref: refController.text,
+                                          receivedUser: '',
+                                          senderUser: homeController.userName,
+                                          status: '',
+                                          totalBeforeVat:
+                                              salesOrderCont.totalItems
+                                                  .toString(),
+                                          discountOnAllItem:
+                                              salesOrderCont.preGlobalDisc
+                                                  .toString(),
+                                          totalAllItems: formatDoubleWithCommas(
+                                            salesOrderCont.totalItems,
+                                          ),
+                                          globalDiscount:
+                                              globalDiscPercentController.text,
+                                          //widget.info['globalDiscount'] ?? '0',
+                                          totalPriceAfterDiscount:
+                                              salesOrderCont.preGlobalDisc ==
+                                                      0.0
+                                                  ? formatDoubleWithCommas(
+                                                    salesOrderCont.totalItems,
+                                                  )
+                                                  : formatDoubleWithCommas(
+                                                    salesOrderCont
+                                                        .totalAfterGlobalDis,
+                                                  ),
+                                          additionalSpecialDiscount:
+                                              salesOrderCont.preSpecialDisc
+                                                  .toStringAsFixed(2),
+                                          totalPriceAfterSpecialDiscount:
+                                              salesOrderCont.preSpecialDisc == 0
+                                                  ? formatDoubleWithCommas(
+                                                    salesOrderCont.totalItems,
+                                                  )
+                                                  : formatDoubleWithCommas(
+                                                    salesOrderCont
+                                                        .totalAfterGlobalSpecialDis,
+                                                  ),
+                                          totalPriceAfterSpecialDiscountBySalesOrderCurrency:
+                                              salesOrderCont.preSpecialDisc == 0
+                                                  ? formatDoubleWithCommas(
+                                                    salesOrderCont.totalItems,
+                                                  )
+                                                  : formatDoubleWithCommas(
+                                                    salesOrderCont
+                                                        .totalAfterGlobalSpecialDis,
+                                                  ),
+
+                                          vatBySalesOrderCurrency:
+                                              formatDoubleWithCommas(
+                                                double.parse(
+                                                  salesOrderCont.vat11,
+                                                ),
+                                              ),
+                                          finalPriceBySalesOrderCurrency:
+                                              formatDoubleWithCommas(
+                                                double.parse(
+                                                  salesOrderCont
+                                                      .totalSalesOrder,
+                                                ),
+                                              ),
+                                          specialDisc: specialDisc.toString(),
+                                          specialDiscount:
+                                              specialDiscPercentController.text,
+                                          specialDiscountAmount:
+                                              salesOrderCont.specialDisc,
+                                          salesPerson: selectedSalesPerson,
+                                          salesOrderCurrency:
+                                              salesOrderCont
+                                                  .selectedCurrencyName,
+                                          salesOrderCurrencySymbol:
+                                              salesOrderCont
+                                                  .selectedCurrencySymbol,
+                                          salesOrderCurrencyLatestRate:
+                                              salesOrderCont
+                                                  .exchangeRateForSelectedCurrency,
+                                          clientPhoneNumber:
+                                              salesOrderCont
+                                                  .phoneNumber[selectedCustomerIds] ??
+                                              '---',
+                                          clientName: clientNameController.text,
+                                          termsAndConditions:
+                                              termsAndConditionsController.text,
+                                          itemsInfoPrint: itemsInfoPrint,
+                                        );
+                                      },
+                                    ),
+                                  );
+                                } else {
+                                  CommonWidgets.snackBar(
+                                    'error',
+                                    res['message'],
+                                  );
                                 }
-                              },
-                            ),
-                            UnderTitleBtn(
-                              text: 'cancel'.tr,
-                              onTap: () {
-                                setState(() {
-                                  progressVar = 0;
-                                });
+
+                                // }
                               },
                             ),
                           ],
@@ -417,7 +921,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                               isFirst: false,
                               isLast: false,
                               isPast: false,
-                              text: 'quotation_sent'.tr,
+                              text: 'sales_order_sent'.tr,
                             ),
                             ReusableTimeLineTile(
                               id: 2,
@@ -449,7 +953,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                salesCont.salesorderNumber,
+                                salesOrderCont.salesOrderNumber,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20,
@@ -542,13 +1046,14 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                               var index = cont
                                                   .currenciesNamesList
                                                   .indexOf(val);
-                                              salesCont.setSelectedCurrency(
+                                              salesOrderCont.setSelectedCurrency(
                                                 cont.currenciesIdsList[index],
                                                 val,
                                               );
-                                              salesCont.setSelectedCurrencySymbol(
-                                                cont.currenciesSymbolsList[index],
-                                              );
+                                              salesOrderCont
+                                                  .setSelectedCurrencySymbol(
+                                                    cont.currenciesSymbolsList[index],
+                                                  );
                                               var result = cont
                                                   .exchangeRatesList
                                                   .firstWhere(
@@ -556,7 +1061,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                         item["currency"] == val,
                                                     orElse: () => null,
                                                   );
-                                              salesCont
+                                              salesOrderCont
                                                   .setExchangeRateForSelectedCurrency(
                                                     result != null
                                                         ? '${result["exchange_rate"]}'
@@ -564,42 +1069,42 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                   );
                                             });
                                             var keys =
-                                                salesCont
+                                                salesOrderCont
                                                     .unitPriceControllers
                                                     .keys
                                                     .toList();
                                             for (
                                               int i = 0;
                                               i <
-                                                  salesCont
+                                                  salesOrderCont
                                                       .unitPriceControllers
                                                       .length;
                                               i++
                                             ) {
                                               var selectedItemId =
-                                                  '${salesCont.rowsInListViewInSalesOrder[keys[i]]['item_id']}';
+                                                  '${salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_id']}';
                                               if (selectedItemId != '') {
-                                                if (salesCont
-                                                        .priceCurrency[selectedItemId] ==
+                                                if (salesOrderCont
+                                                        .itemsPricesCurrencies[selectedItemId] ==
                                                     val) {
-                                                  salesCont
+                                                  salesOrderCont
                                                       .unitPriceControllers[keys[i]]!
-                                                      .text = salesCont
+                                                      .text = salesOrderCont
                                                           .itemUnitPrice[selectedItemId]
                                                           .toString();
-                                                } else if (salesCont
+                                                } else if (salesOrderCont
                                                             .selectedCurrencyName ==
                                                         'USD' &&
-                                                    salesCont
-                                                            .priceCurrency[selectedItemId] !=
+                                                    salesOrderCont
+                                                            .itemsPricesCurrencies[selectedItemId] !=
                                                         val) {
                                                   var result = exchangeRatesController
                                                       .exchangeRatesList
                                                       .firstWhere(
                                                         (item) =>
                                                             item["currency"] ==
-                                                            salesCont
-                                                                .priceCurrency[selectedItemId],
+                                                            salesOrderCont
+                                                                .itemsPricesCurrencies[selectedItemId],
                                                         orElse: () => null,
                                                       );
                                                   var divider = '1';
@@ -608,28 +1113,28 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                         result["exchange_rate"]
                                                             .toString();
                                                   }
-                                                  salesCont
+                                                  salesOrderCont
                                                           .unitPriceControllers[keys[i]]!
                                                           .text =
-                                                      '${double.parse('${(double.parse(salesCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                } else if (salesCont
+                                                      '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                } else if (salesOrderCont
                                                             .selectedCurrencyName !=
                                                         'USD' &&
-                                                    salesCont
-                                                            .priceCurrency[selectedItemId] ==
+                                                    salesOrderCont
+                                                            .itemsPricesCurrencies[selectedItemId] ==
                                                         'USD') {
-                                                  salesCont
+                                                  salesOrderCont
                                                           .unitPriceControllers[keys[i]]!
                                                           .text =
-                                                      '${double.parse('${(double.parse(salesCont.itemUnitPrice[selectedItemId].toString()) * double.parse(salesCont.exchangeRateForSelectedCurrency))}')}';
+                                                      '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) * double.parse(salesOrderCont.exchangeRateForSelectedCurrency))}')}';
                                                 } else {
                                                   var result = exchangeRatesController
                                                       .exchangeRatesList
                                                       .firstWhere(
                                                         (item) =>
                                                             item["currency"] ==
-                                                            salesCont
-                                                                .priceCurrency[selectedItemId],
+                                                            salesOrderCont
+                                                                .itemsPricesCurrencies[selectedItemId],
                                                         orElse: () => null,
                                                       );
                                                   var divider = '1';
@@ -639,56 +1144,185 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                             .toString();
                                                   }
                                                   var usdPrice =
-                                                      '${double.parse('${(double.parse(salesCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                  salesCont
+                                                      '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                  salesOrderCont
                                                           .unitPriceControllers[keys[i]]!
                                                           .text =
-                                                      '${double.parse('${(double.parse(usdPrice) * double.parse(salesCont.exchangeRateForSelectedCurrency))}')}';
+                                                      '${double.parse('${(double.parse(usdPrice) * double.parse(salesOrderCont.exchangeRateForSelectedCurrency))}')}';
                                                 }
-                                                if (!salesCont
+                                                if (!salesOrderCont
                                                     .isBeforeVatPrices) {
                                                   var taxRate =
                                                       double.parse(
-                                                        salesCont
+                                                        salesOrderCont
                                                             .itemsVats[selectedItemId],
                                                       ) /
                                                       100.0;
                                                   var taxValue =
                                                       taxRate *
                                                       double.parse(
-                                                        salesCont
+                                                        salesOrderCont
                                                             .unitPriceControllers[keys[i]]!
                                                             .text,
                                                       );
 
-                                                  salesCont
+                                                  salesOrderCont
                                                           .unitPriceControllers[keys[i]]!
                                                           .text =
-                                                      '${double.parse(salesCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                      '${double.parse(salesOrderCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
                                                 }
-                                                salesCont
+                                                salesOrderCont
                                                     .unitPriceControllers[keys[i]]!
                                                     .text = double.parse(
-                                                  salesCont
+                                                  salesOrderCont
                                                       .unitPriceControllers[keys[i]]!
                                                       .text,
                                                 ).toStringAsFixed(2);
                                                 var totalLine =
-                                                    '${(int.parse(salesCont.rowsInListViewInSalesOrder[keys[i]]['item_quantity']) * double.parse(salesCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(salesCont.rowsInListViewInSalesOrder[keys[i]]['item_discount']) / 100)}';
+                                                    '${(int.parse(salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_quantity']) * double.parse(salesOrderCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_discount']) / 100)}';
 
-                                                salesCont
+                                                salesOrderCont
                                                     .setEnteredUnitPriceInSalesOrder(
                                                       keys[i],
-                                                      salesCont
+                                                      salesOrderCont
                                                           .unitPriceControllers[keys[i]]!
                                                           .text,
                                                     );
-                                                salesCont
-                                                    .setMainTotalInQuotation(
+                                                salesOrderCont
+                                                    .setMainTotalInSalesOrder(
                                                       keys[i],
                                                       totalLine,
                                                     );
-                                                salesCont.getTotalItems();
+                                                salesOrderCont.getTotalItems();
+                                              }
+                                            }
+                                            var comboKeys =
+                                                salesOrderCont
+                                                    .combosPriceControllers
+                                                    .keys
+                                                    .toList();
+                                            for (
+                                              int i = 0;
+                                              i <
+                                                  salesOrderCont
+                                                      .combosPriceControllers
+                                                      .length;
+                                              i++
+                                            ) {
+                                              var selectedComboId =
+                                                  '${salesOrderCont.rowsInListViewInSalesOrder[comboKeys[i]]['combo']}';
+                                              if (selectedComboId != '') {
+                                                var ind = salesOrderCont
+                                                    .combosIdsList
+                                                    .indexOf(selectedComboId);
+                                                if (salesOrderCont
+                                                        .combosPricesCurrencies[selectedComboId] ==
+                                                    salesOrderCont
+                                                        .selectedCurrencyName) {
+                                                  salesOrderCont
+                                                      .combosPriceControllers[comboKeys[i]]!
+                                                      .text = salesOrderCont
+                                                          .combosPricesList[ind]
+                                                          .toString();
+                                                } else if (salesOrderCont
+                                                            .selectedCurrencyName ==
+                                                        'USD' &&
+                                                    salesOrderCont
+                                                            .combosPricesCurrencies[selectedComboId] !=
+                                                        salesOrderCont
+                                                            .selectedCurrencyName) {
+                                                  var result = exchangeRatesController
+                                                      .exchangeRatesList
+                                                      .firstWhere(
+                                                        (item) =>
+                                                            item["currency"] ==
+                                                            salesOrderCont
+                                                                .combosPricesCurrencies[selectedComboId],
+                                                        orElse: () => null,
+                                                      );
+                                                  var divider = '1';
+                                                  if (result != null) {
+                                                    divider =
+                                                        result["exchange_rate"]
+                                                            .toString();
+                                                  }
+                                                  salesOrderCont
+                                                          .combosPriceControllers[comboKeys[i]]!
+                                                          .text =
+                                                      '${double.parse('${(double.parse(salesOrderCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                } else if (salesOrderCont
+                                                            .selectedCurrencyName !=
+                                                        'USD' &&
+                                                    salesOrderCont
+                                                            .combosPricesCurrencies[selectedComboId] ==
+                                                        'USD') {
+                                                  salesOrderCont
+                                                          .combosPriceControllers[comboKeys[i]]!
+                                                          .text =
+                                                      '${double.parse('${(double.parse(salesOrderCont.combosPricesList[ind].toString()) * double.parse(salesOrderCont.exchangeRateForSelectedCurrency))}')}';
+                                                } else {
+                                                  var result = exchangeRatesController
+                                                      .exchangeRatesList
+                                                      .firstWhere(
+                                                        (item) =>
+                                                            item["currency"] ==
+                                                            salesOrderCont
+                                                                .combosPricesCurrencies[selectedComboId],
+                                                        orElse: () => null,
+                                                      );
+                                                  var divider = '1';
+                                                  if (result != null) {
+                                                    divider =
+                                                        result["exchange_rate"]
+                                                            .toString();
+                                                  }
+                                                  var usdPrice =
+                                                      '${double.parse('${(double.parse(salesOrderCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                  salesOrderCont
+                                                          .combosPriceControllers[comboKeys[i]]!
+                                                          .text =
+                                                      '${double.parse('${(double.parse(usdPrice) * double.parse(salesOrderCont.exchangeRateForSelectedCurrency))}')}';
+                                                }
+                                                salesOrderCont
+                                                        .combosPriceControllers[comboKeys[i]]!
+                                                        .text =
+                                                    '${double.parse(salesOrderCont.combosPriceControllers[comboKeys[i]]!.text)}';
+
+                                                salesOrderCont
+                                                    .combosPriceControllers[comboKeys[i]]!
+                                                    .text = double.parse(
+                                                  salesOrderCont
+                                                      .combosPriceControllers[comboKeys[i]]!
+                                                      .text,
+                                                ).toStringAsFixed(2);
+                                                var totalLine =
+                                                    '${(int.parse(salesOrderCont.rowsInListViewInSalesOrder[comboKeys[i]]['item_quantity']) * double.parse(salesOrderCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_discount']) / 100)}';
+                                                salesOrderCont
+                                                    .setEnteredQtyInSalesOrder(
+                                                      comboKeys[i],
+                                                      salesOrderCont
+                                                          .rowsInListViewInSalesOrder[comboKeys[i]]['item_quantity'],
+                                                    );
+                                                salesOrderCont
+                                                    .setMainTotalInSalesOrder(
+                                                      comboKeys[i],
+                                                      totalLine,
+                                                    );
+                                                salesOrderCont.getTotalItems();
+
+                                                salesOrderCont
+                                                    .setEnteredUnitPriceInSalesOrder(
+                                                      comboKeys[i],
+                                                      salesOrderCont
+                                                          .combosPriceControllers[comboKeys[i]]!
+                                                          .text,
+                                                    );
+                                                salesOrderCont
+                                                    .setMainTotalInSalesOrder(
+                                                      comboKeys[i],
+                                                      totalLine,
+                                                    );
+                                                salesOrderCont.getTotalItems();
                                               }
                                             }
                                           },
@@ -718,7 +1352,12 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       },
                                       onDateSelected: (value) {
                                         validityController.text = value;
-                                        setState(() {});
+                                        setState(() {
+                                          // LocalDate a=LocalDate.today();
+                                          // LocalDate b = LocalDate.dateTime(value);
+                                          // Period diff = b.periodSince(a);
+                                          // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                        });
                                       },
                                     ),
                                   ],
@@ -731,79 +1370,74 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text('pricelist'.tr),
-                                    GetBuilder<ExchangeRatesController>(
-                                      builder: (cont) {
-                                        return DropdownMenu<String>(
-                                          width:
-                                              MediaQuery.of(
-                                                context,
-                                              ).size.width *
-                                              0.10,
-                                          // requestFocusOnTap: false,
-                                          enableSearch: true,
-                                          controller: priceListController,
-                                          hintText: '',
-                                          inputDecorationTheme: InputDecorationTheme(
-                                            // filled: true,
-                                            hintStyle: const TextStyle(
-                                              fontStyle: FontStyle.italic,
+                                    DropdownMenu<String>(
+                                      width:
+                                          MediaQuery.of(context).size.width *
+                                          0.10,
+                                      // requestFocusOnTap: false,
+                                      enableSearch: true,
+                                      controller: priceListController,
+                                      hintText: '',
+                                      inputDecorationTheme: InputDecorationTheme(
+                                        // filled: true,
+                                        hintStyle: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                              20,
+                                              0,
+                                              25,
+                                              5,
                                             ),
-                                            contentPadding:
-                                                const EdgeInsets.fromLTRB(
-                                                  20,
-                                                  0,
-                                                  25,
-                                                  5,
-                                                ),
-                                            // outlineBorder: BorderSide(color: Colors.black,),
-                                            enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Primary.primary
-                                                    .withAlpha(
-                                                      (0.2 * 255).toInt(),
-                                                    ),
-                                                width: 1,
-                                              ),
-                                              borderRadius:
-                                                  const BorderRadius.all(
-                                                    Radius.circular(9),
-                                                  ),
+                                        // outlineBorder: BorderSide(color: Colors.black,),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.2 * 255).toInt(),
                                             ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Primary.primary
-                                                    .withAlpha(
-                                                      (0.4 * 255).toInt(),
-                                                    ),
-                                                width: 2,
-                                              ),
-                                              borderRadius:
-                                                  const BorderRadius.all(
-                                                    Radius.circular(9),
-                                                  ),
-                                            ),
+                                            width: 1,
                                           ),
-                                          // menuStyle: ,
-                                          menuHeight: 250,
-                                          dropdownMenuEntries:
-                                              termsList.map<
-                                                DropdownMenuEntry<String>
-                                              >((String option) {
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.4 * 255).toInt(),
+                                            ),
+                                            width: 2,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                      ),
+                                      // menuStyle: ,
+                                      menuHeight: 250,
+                                      dropdownMenuEntries:
+                                          salesOrderController.priceListsCodes
+                                              .map<DropdownMenuEntry<String>>((
+                                                String option,
+                                              ) {
                                                 return DropdownMenuEntry<
                                                   String
                                                 >(value: option, label: option);
-                                              }).toList(),
-                                          enableFilter: true,
-                                          onSelected: (String? val) {
-                                            setState(() {
-                                              // selectedCurrency = val!;
-                                              // var index = cont.currenciesNamesList
-                                              //     .indexOf(val);
-                                              // selectedCurrencyId =
-                                              // cont.currenciesIdsList[index];
-                                            });
-                                          },
+                                              })
+                                              .toList(),
+                                      enableFilter: true,
+                                      onSelected: (String? val) {
+                                        var index = salesOrderCont
+                                            .priceListsCodes
+                                            .indexOf(val!);
+                                        salesOrderCont.setSelectedPriceListId(
+                                          salesOrderCont.priceListsIds[index],
                                         );
+                                        setState(() {
+                                          salesOrderCont
+                                              .resetItemsAfterChangePriceList();
+                                        });
                                       },
                                     ),
                                   ],
@@ -816,27 +1450,81 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.37,
+                                width: MediaQuery.of(context).size.width * 0.15,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('input_date'.tr),
+                                    DialogDateTextField(
+                                      textEditingController:
+                                          inputDateController,
+                                      text: '',
+                                      textFieldWidth:
+                                          MediaQuery.of(context).size.width *
+                                          0.10,
+                                      // MediaQuery.of(context).size.width * 0.25,
+                                      validationFunc: (val) {},
+                                      onChangedFunc: (val) {
+                                        validityController.text = val;
+                                      },
+                                      onDateSelected: (value) {
+                                        validityController.text = value;
+                                        setState(() {
+                                          // LocalDate a=LocalDate.today();
+                                          // LocalDate b = LocalDate.dateTime(value);
+                                          // Period diff = b.periodSince(a);
+                                          // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.30,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     ReusableDropDownMenusWithSearchCode(
-                                      list: salesCont.customersMultiPartList,
+                                      list:
+                                          salesOrderCont.customersMultiPartList,
                                       text: 'code'.tr,
                                       hint: '${'search'.tr}...',
                                       controller: codeController,
                                       onSelected: (String? value) {
                                         codeController.text = value!;
-                                        int index = salesCont.customerNumberList
+                                        int index = salesOrderCont
+                                            .customerNumberList
                                             .indexOf(value);
                                         clientNameController.text =
-                                            salesCont.customerNameList[index];
+                                            salesOrderCont
+                                                .customerNameList[index];
                                         setState(() {
                                           selectedCustomerIds =
-                                              salesCont
-                                                  .customerIdsList[salesCont
+                                              salesOrderCont
+                                                  .customerIdsList[salesOrderCont
                                                   .customerNumberList
                                                   .indexOf(value)];
+                                          if (salesOrderCont
+                                              .customersPricesListsIds[index]
+                                              .isNotEmpty) {
+                                            salesOrderCont.setSelectedPriceListId(
+                                              '${salesOrderCont.customersPricesListsIds[index]}',
+                                            );
+
+                                            priceListController.text =
+                                                salesOrderCont
+                                                    .priceListsNames[salesOrderCont
+                                                    .priceListsIds
+                                                    .indexOf(
+                                                      '${salesOrderCont.customersPricesListsIds[index]}',
+                                                    )];
+                                            setState(() {
+                                              salesOrderCont
+                                                  .resetItemsAfterChangePriceList();
+                                            });
+                                          }
                                         });
                                       },
                                       validationFunc: (value) {
@@ -876,19 +1564,40 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       columnWidths: [175.0, 230.0],
                                     ),
                                     ReusableDropDownMenuWithSearch(
-                                      list: salesCont.customerNameList,
+                                      list: salesOrderCont.customerNameList,
                                       text: '',
                                       hint: '${'search'.tr}...',
                                       controller: clientNameController,
                                       onSelected: (String? val) {
                                         setState(() {
-                                          var index = salesCont.customerNameList
+                                          var index = salesOrderCont
+                                              .customerNameList
                                               .indexOf(val!);
                                           codeController.text =
-                                              salesCont
+                                              salesOrderCont
                                                   .customerNumberList[index];
                                           selectedCustomerIds =
-                                              salesCont.customerIdsList[index];
+                                              salesOrderCont
+                                                  .customerIdsList[index];
+                                          if (salesOrderCont
+                                              .customersPricesListsIds[index]
+                                              .isNotEmpty) {
+                                            salesOrderCont.setSelectedPriceListId(
+                                              '${salesOrderCont.customersPricesListsIds[index]}',
+                                            );
+
+                                            priceListController.text =
+                                                salesOrderCont
+                                                    .priceListsNames[salesOrderCont
+                                                    .priceListsIds
+                                                    .indexOf(
+                                                      '${salesOrderCont.customersPricesListsIds[index]}',
+                                                    )];
+                                            setState(() {
+                                              salesOrderCont
+                                                  .resetItemsAfterChangePriceList();
+                                            });
+                                          }
                                         });
                                       },
                                       validationFunc: (value) {
@@ -899,10 +1608,10 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       },
                                       rowWidth:
                                           MediaQuery.of(context).size.width *
-                                          0.18,
+                                          0.15,
                                       textFieldWidth:
                                           MediaQuery.of(context).size.width *
-                                          0.17,
+                                          0.14,
                                       clickableOptionText:
                                           'create_new_client'.tr,
                                       isThereClickableOption: true,
@@ -929,90 +1638,135 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   ],
                                 ),
                               ),
-                              ReusableDropDownMenuWithSearch(
-                                list: termsList,
+                              DialogTextField(
+                                textEditingController: paymentTermsController,
                                 text: 'payment_terms'.tr,
                                 hint: '',
-                                onSelected: (value) {},
-                                controller: paymentTermsController,
-                                validationFunc: (value) {},
                                 rowWidth:
                                     MediaQuery.of(context).size.width * 0.24,
                                 textFieldWidth:
                                     MediaQuery.of(context).size.width * 0.15,
-                                clickableOptionText:
-                                    'create_new_payment_terms'.tr,
-                                isThereClickableOption: true,
-                                onTappedClickableOption: () {
-                                  // showDialog<String>(
-                                  //   context: context,
-                                  //   builder:
-                                  //       (
-                                  //       BuildContext context,
-                                  //       ) => const AlertDialog(
-                                  //     backgroundColor: Colors.white,
-                                  //     shape: RoundedRectangleBorder(
-                                  //       borderRadius:
-                                  //       BorderRadius.all(
-                                  //         Radius.circular(9),
-                                  //       ),
-                                  //     ),
-                                  //     elevation: 0,
-                                  //     content: CreateClientDialog(),
-                                  //   ),
-                                  // );
-                                },
+                                validationFunc: (val) {},
                               ),
-
-                              // SizedBox(
-                              // width: MediaQuery.of(context).size.width * 0.26,
-                              // child: Row(
-                              //   mainAxisAlignment: MainAxisAlignment.center,
-                              //   children: [
-                              //     Text('Expected Delivery Date'.tr),
-                              //     gapW10,
-                              //     DialogDateTextField(
-                              //       textEditingController: validityController,
-                              //       text: '',
-                              //       textFieldWidth:
-                              //           MediaQuery.of(context).size.width *
-                              //           0.1,
-                              //       validationFunc: (val) {},
-                              //       onChangedFunc: (val) {},
-                              //       onDateSelected: (value) {
-                              //         validityController.text = value;
-                              //         setState(() {
-                              //           // LocalDate a=LocalDate.today();
-                              //           // LocalDate b = LocalDate.dateTime(value);
-                              //           // Period diff = b.periodSince(a);
-                              //           // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
-                              //         });
-                              //       },
-                              //     ),
-                              //     gapW10,
-                              //     DialogTimeTextField(
-                              //       onChangedFunc: (value) {},
-                              //       onTimeSelected: (value) {
-                              //         // cont.setStartTime(value);
-                              //       },
-                              //       textEditingController:
-                              //           startTimeController,
-                              //       // text: DateFormat.Hm().format(DateTime.now()),
-                              //       text: '00:00',
-                              //       textFieldWidth:
-                              //           widget.isMobile
-                              //               ? MediaQuery.of(
-                              //                     context,
-                              //                   ).size.width *
-                              //                   0.2
-                              //               : MediaQuery.of(
-                              //                     context,
-                              //                   ).size.width *
-                              //                   0.05,
-                              //       validationFunc: (value) {},
-                              //     ),
-                              // ],
+                              // ReusableDropDownMenuWithSearch(
+                              //   list: termsList,
+                              //   text: 'payment_terms'.tr,
+                              //   hint: '',
+                              //   onSelected: (value) {},
+                              //   controller: controller,
+                              //   validationFunc: (value) {},
+                              //   rowWidth:
+                              //       MediaQuery.of(context).size.width * 0.24,
+                              //   textFieldWidth:
+                              //       MediaQuery.of(context).size.width * 0.15,
+                              //   clickableOptionText:
+                              //       'create_new_payment_terms'.tr,
+                              //   isThereClickableOption: true,
+                              //   onTappedClickableOption: () {
+                              //     // showDialog<String>(
+                              //     //   context: context,
+                              //     //   builder:
+                              //     //       (
+                              //     //       BuildContext context,
+                              //     //       ) => const AlertDialog(
+                              //     //     backgroundColor: Colors.white,
+                              //     //     shape: RoundedRectangleBorder(
+                              //     //       borderRadius:
+                              //     //       BorderRadius.all(
+                              //     //         Radius.circular(9),
+                              //     //       ),
+                              //     //     ),
+                              //     //     elevation: 0,
+                              //     //     content: CreateClientDialog(),
+                              //     //   ),
+                              //     // );
+                              //   },
                               // ),
+                              // SizedBox(
+                              //   width: MediaQuery.of(context).size.width * 0.24,
+                              //   child: Row(
+                              //     mainAxisAlignment:
+                              //         MainAxisAlignment.spaceBetween,
+                              //     children: [
+                              //       Text('payment_terms'.tr),
+                              //
+                              //       GetBuilder<ExchangeRatesController>(
+                              //         builder: (cont) {
+                              //           return DropdownMenu<String>(
+                              //             width:
+                              //                 MediaQuery.of(
+                              //                   context,
+                              //                 ).size.width *
+                              //                 0.15,
+                              //             // requestFocusOnTap: false,
+                              //             enableSearch: true,
+                              //             controller: paymentTermsController,
+                              //             hintText: '',
+                              //             inputDecorationTheme: InputDecorationTheme(
+                              //               // filled: true,
+                              //               hintStyle: const TextStyle(
+                              //                 fontStyle: FontStyle.italic,
+                              //               ),
+                              //               contentPadding:
+                              //                   const EdgeInsets.fromLTRB(
+                              //                     20,
+                              //                     0,
+                              //                     25,
+                              //                     5,
+                              //                   ),
+                              //               // outlineBorder: BorderSide(color: Colors.black,),
+                              //               enabledBorder: OutlineInputBorder(
+                              //                 borderSide: BorderSide(
+                              //                   color: Primary.primary
+                              //                       .withAlpha(
+                              //                         (0.2 * 255).toInt(),
+                              //                       ),
+                              //                   width: 1,
+                              //                 ),
+                              //                 borderRadius:
+                              //                     const BorderRadius.all(
+                              //                       Radius.circular(9),
+                              //                     ),
+                              //               ),
+                              //               focusedBorder: OutlineInputBorder(
+                              //                 borderSide: BorderSide(
+                              //                   color: Primary.primary
+                              //                       .withAlpha(
+                              //                         (0.4 * 255).toInt(),
+                              //                       ),
+                              //                   width: 2,
+                              //                 ),
+                              //                 borderRadius:
+                              //                     const BorderRadius.all(
+                              //                       Radius.circular(9),
+                              //                     ),
+                              //               ),
+                              //             ),
+                              //             // menuStyle: ,
+                              //             menuHeight: 250,
+                              //             dropdownMenuEntries:
+                              //                 termsList.map<
+                              //                   DropdownMenuEntry<String>
+                              //                 >((String option) {
+                              //                   return DropdownMenuEntry<
+                              //                     String
+                              //                   >(value: option, label: option);
+                              //                 }).toList(),
+                              //             enableFilter: true,
+                              //             onSelected: (String? val) {
+                              //               setState(() {
+                              //                 // selectedCurrency = val!;
+                              //                 // var index = cont.currenciesNamesList
+                              //                 //     .indexOf(val);
+                              //                 // selectedCurrencyId =
+                              //                 // cont.currenciesIdsList[index];
+                              //               });
+                              //             },
+                              //           );
+                              //         },
+                              //       ),
+                              //     ],
+                              //   ),
                               // ),
                             ],
                           ),
@@ -1036,20 +1790,20 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                         ),
                                         gapW10,
                                         Text(
-                                          " ${salesCont.street[selectedCustomerIds] ?? ''} ",
+                                          " ${salesOrderCont.street[selectedCustomerIds] ?? ''} ",
                                           style: const TextStyle(fontSize: 12),
                                         ),
                                         Text(
-                                          salesCont.floorAndBuilding[selectedCustomerIds] ==
+                                          salesOrderCont.floorAndBuilding[selectedCustomerIds] ==
                                                       '' ||
-                                                  salesCont
+                                                  salesOrderCont
                                                           .floorAndBuilding[selectedCustomerIds] ==
                                                       null
                                               ? ''
                                               : ',',
                                         ),
                                         Text(
-                                          " ${salesCont.floorAndBuilding[selectedCustomerIds] ?? ''}",
+                                          " ${salesOrderCont.floorAndBuilding[selectedCustomerIds] ?? ''}",
                                           style: const TextStyle(fontSize: 12),
                                         ),
                                       ],
@@ -1064,7 +1818,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                         ),
                                         gapW10,
                                         Text(
-                                          "${salesCont.phoneNumber[selectedCustomerIds] ?? ''}",
+                                          "${salesOrderCont.phoneNumber[selectedCustomerIds] ?? ''}",
                                           style: const TextStyle(fontSize: 12),
                                         ),
                                       ],
@@ -1080,9 +1834,9 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      'price'.tr,
+                                      'price_conditions'.tr,
                                       style:
-                                          salesCont.isVatExemptChecked
+                                          salesOrderCont.isVatExemptChecked
                                               ? TextStyle(color: Others.divider)
                                               : TextStyle(),
                                     ),
@@ -1090,7 +1844,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       builder: (cont) {
                                         return DropdownMenu<String>(
                                           enabled:
-                                              !salesCont.isVatExemptChecked,
+                                              !salesOrderCont
+                                                  .isVatExemptChecked,
                                           width:
                                               MediaQuery.of(
                                                 context,
@@ -1166,53 +1921,53 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             setState(() {
                                               if (value ==
                                                   'Prices are before vat') {
-                                                salesCont.setIsBeforeVatPrices(
-                                                  true,
-                                                );
+                                                salesOrderCont
+                                                    .setIsBeforeVatPrices(true);
                                                 // ch
                                               } else {
-                                                salesCont.setIsBeforeVatPrices(
-                                                  false,
-                                                );
+                                                salesOrderCont
+                                                    .setIsBeforeVatPrices(
+                                                      false,
+                                                    );
                                               }
                                               var keys =
-                                                  salesCont
+                                                  salesOrderCont
                                                       .unitPriceControllers
                                                       .keys
                                                       .toList();
                                               for (
                                                 int i = 0;
                                                 i <
-                                                    salesCont
+                                                    salesOrderCont
                                                         .unitPriceControllers
                                                         .length;
                                                 i++
                                               ) {
                                                 var selectedItemId =
-                                                    salesCont
+                                                    salesOrderCont
                                                         .rowsInListViewInSalesOrder[keys[i]]['item_id'];
                                                 if (selectedItemId != '') {
-                                                  if (salesCont
-                                                          .priceCurrency[selectedItemId] ==
+                                                  if (salesOrderCont
+                                                          .itemsPricesCurrencies[selectedItemId] ==
                                                       selectedCurrency) {
-                                                    salesCont
+                                                    salesOrderCont
                                                         .unitPriceControllers[keys[i]]!
-                                                        .text = salesCont
+                                                        .text = salesOrderCont
                                                             .itemUnitPrice[selectedItemId]
                                                             .toString();
-                                                  } else if (salesCont
+                                                  } else if (salesOrderCont
                                                               .selectedCurrencyName ==
                                                           'USD' &&
-                                                      salesCont
-                                                              .priceCurrency[selectedItemId] !=
+                                                      salesOrderCont
+                                                              .itemsPricesCurrencies[selectedItemId] !=
                                                           selectedCurrency) {
                                                     var result = exchangeRatesController
                                                         .exchangeRatesList
                                                         .firstWhere(
                                                           (item) =>
                                                               item["currency"] ==
-                                                              salesCont
-                                                                  .priceCurrency[selectedItemId],
+                                                              salesOrderCont
+                                                                  .itemsPricesCurrencies[selectedItemId],
                                                           orElse: () => null,
                                                         );
                                                     var divider = '1';
@@ -1221,28 +1976,28 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                           result["exchange_rate"]
                                                               .toString();
                                                     }
-                                                    salesCont
+                                                    salesOrderCont
                                                             .unitPriceControllers[keys[i]]!
                                                             .text =
-                                                        '${double.parse('${(double.parse(salesCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                  } else if (salesCont
+                                                        '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                  } else if (salesOrderCont
                                                               .selectedCurrencyName !=
                                                           'USD' &&
-                                                      salesCont
-                                                              .priceCurrency[selectedItemId] ==
+                                                      salesOrderCont
+                                                              .itemsPricesCurrencies[selectedItemId] ==
                                                           'USD') {
-                                                    salesCont
+                                                    salesOrderCont
                                                             .unitPriceControllers[keys[i]]!
                                                             .text =
-                                                        '${double.parse('${(double.parse(salesCont.itemUnitPrice[selectedItemId].toString()) * double.parse(salesCont.exchangeRateForSelectedCurrency))}')}';
+                                                        '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) * double.parse(salesOrderCont.exchangeRateForSelectedCurrency))}')}';
                                                   } else {
                                                     var result = exchangeRatesController
                                                         .exchangeRatesList
                                                         .firstWhere(
                                                           (item) =>
                                                               item["currency"] ==
-                                                              salesCont
-                                                                  .priceCurrency[selectedItemId],
+                                                              salesOrderCont
+                                                                  .itemsPricesCurrencies[selectedItemId],
                                                           orElse: () => null,
                                                         );
                                                     var divider = '1';
@@ -1252,56 +2007,57 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                               .toString();
                                                     }
                                                     var usdPrice =
-                                                        '${double.parse('${(double.parse(salesCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                    salesCont
+                                                        '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                    salesOrderCont
                                                             .unitPriceControllers[keys[i]]!
                                                             .text =
-                                                        '${double.parse('${(double.parse(usdPrice) * double.parse(salesCont.exchangeRateForSelectedCurrency))}')}';
+                                                        '${double.parse('${(double.parse(usdPrice) * double.parse(salesOrderCont.exchangeRateForSelectedCurrency))}')}';
                                                   }
-                                                  if (!salesCont
+                                                  if (!salesOrderCont
                                                       .isBeforeVatPrices) {
                                                     var taxRate =
                                                         double.parse(
-                                                          salesCont
+                                                          salesOrderCont
                                                               .itemsVats[selectedItemId],
                                                         ) /
                                                         100.0;
                                                     var taxValue =
                                                         taxRate *
                                                         double.parse(
-                                                          salesCont
+                                                          salesOrderCont
                                                               .unitPriceControllers[keys[i]]!
                                                               .text,
                                                         );
 
-                                                    salesCont
+                                                    salesOrderCont
                                                             .unitPriceControllers[keys[i]]!
                                                             .text =
-                                                        '${double.parse(salesCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                        '${double.parse(salesOrderCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
                                                   }
-                                                  salesCont
+                                                  salesOrderCont
                                                       .unitPriceControllers[keys[i]]!
                                                       .text = double.parse(
-                                                    salesCont
+                                                    salesOrderCont
                                                         .unitPriceControllers[keys[i]]!
                                                         .text,
                                                   ).toStringAsFixed(2);
                                                   var totalLine =
-                                                      '${(int.parse(salesCont.rowsInListViewInSalesOrder[keys[i]]['item_quantity']) * double.parse(salesCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(salesCont.rowsInListViewInSalesOrder[keys[i]]['item_discount']) / 100)}';
+                                                      '${(int.parse(salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_quantity']) * double.parse(salesOrderCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_discount']) / 100)}';
 
-                                                  salesCont
+                                                  salesOrderCont
                                                       .setEnteredUnitPriceInSalesOrder(
                                                         keys[i],
-                                                        salesCont
+                                                        salesOrderCont
                                                             .unitPriceControllers[keys[i]]!
                                                             .text,
                                                       );
-                                                  salesCont
-                                                      .setMainTotalInQuotation(
+                                                  salesOrderCont
+                                                      .setMainTotalInSalesOrder(
                                                         keys[i],
                                                         totalLine,
                                                       );
-                                                  salesCont.getTotalItems();
+                                                  salesOrderCont
+                                                      .getTotalItems();
                                                 }
                                               }
                                             });
@@ -1312,265 +2068,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   ],
                                 ),
                               ),
-                              // SizedBox(
-                              //   width: MediaQuery.of(context).size.width * 0.28,
-                              //   child: Row(
-                              //     mainAxisAlignment: MainAxisAlignment.center,
-                              //     children: [
-                              //       salesCont
-                              //               .isVatExemptCheckBoxShouldAppear
-                              //           ? SizedBox(
-                              //             width:
-                              //                 MediaQuery.of(
-                              //                   context,
-                              //                 ).size.width *
-                              //                 0.28,
-                              //             child: Row(
-                              //               mainAxisAlignment:
-                              //                   MainAxisAlignment.center,
-                              //               children: [
-
-                              //                 Expanded(
-                              //                   child: ListTile(
-                              //                     title: Text(
-                              //                       'vat_exempt'.tr,
-                              //                       style: const TextStyle(
-                              //                         fontSize: 12,
-                              //                       ),
-                              //                     ),
-                              //                     leading: Checkbox(
-                              //                       // checkColor: Colors.white,
-                              //                       // fillColor: MaterialStateProperty.resolveWith(getColor),
-                              //                       value:
-                              //                           salesCont
-                              //                               .isVatExemptChecked,
-                              //                       onChanged: (bool? value) {
-                              //                         salesCont
-                              //                             .setIsVatExemptChecked(
-                              //                               value!,
-                              //                             );
-                              //                         if (value) {
-                              //                           vatExemptController
-                              //                                   .text =
-                              //                               vatExemptList[0];
-                              //                           salesCont
-                              //                               .setIsVatExempted(
-                              //                                 true,
-                              //                                 false,
-                              //                                 false,
-                              //                               );
-                              //                         } else {
-                              //                           vatExemptController
-                              //                               .clear();
-                              //                           salesCont
-                              //                               .setIsVatExempted(
-                              //                                 false,
-                              //                                 false,
-                              //                                 false,
-                              //                               );
-                              //                         }
-                              //                         // setState(() {
-                              //                         //   isVatExemptChecked = value!;
-                              //                         // });
-                              //                       },
-                              //                     ),
-                              //                   ),
-                              //                 ),
-                              //                 salesCont
-                              //                             .isVatExemptChecked ==
-                              //                         false
-                              //                     ? DropdownMenu<String>(
-                              //                       width:
-                              //                           MediaQuery.of(
-                              //                             context,
-                              //                           ).size.width *
-                              //                           0.15,
-                              //                       // requestFocusOnTap: false,
-                              //                       enableSearch: true,
-                              //                       controller:
-                              //                           vatExemptController,
-                              //                       hintText: '',
-                              //                       textStyle: TextStyle(
-                              //                         fontSize: 12,
-                              //                       ),
-                              //                       inputDecorationTheme: InputDecorationTheme(
-                              //                         hintStyle:
-                              //                             const TextStyle(
-                              //                               fontStyle:
-                              //                                   FontStyle
-                              //                                       .italic,
-                              //                             ),
-                              //                         contentPadding:
-                              //                             const EdgeInsets.fromLTRB(
-                              //                               20,
-                              //                               0,
-                              //                               25,
-                              //                               5,
-                              //                             ),
-                              //                         enabledBorder: OutlineInputBorder(
-                              //                           borderSide: BorderSide(
-                              //                             color: Primary.primary
-                              //                                 .withAlpha(
-                              //                                   (0.2 * 255)
-                              //                                       .toInt(),
-                              //                                 ),
-                              //                             width: 1,
-                              //                           ),
-                              //                           borderRadius:
-                              //                               const BorderRadius.all(
-                              //                                 Radius.circular(
-                              //                                   9,
-                              //                                 ),
-                              //                               ),
-                              //                         ),
-                              //                         focusedBorder: OutlineInputBorder(
-                              //                           borderSide: BorderSide(
-                              //                             color: Primary.primary
-                              //                                 .withAlpha(
-                              //                                   (0.4 * 255)
-                              //                                       .toInt(),
-                              //                                 ),
-                              //                             width: 2,
-                              //                           ),
-                              //                           borderRadius:
-                              //                               const BorderRadius.all(
-                              //                                 Radius.circular(
-                              //                                   9,
-                              //                                 ),
-                              //                               ),
-                              //                         ),
-                              //                       ),
-                              //                       menuHeight: 250,
-                              //                       dropdownMenuEntries:
-                              //                           termsList.map<
-                              //                             DropdownMenuEntry<
-                              //                               String
-                              //                             >
-                              //                           >((String option) {
-                              //                             return DropdownMenuEntry<
-                              //                               String
-                              //                             >(
-                              //                               value: option,
-                              //                               label: option,
-                              //                             );
-                              //                           }).toList(),
-                              //                       enableFilter: false,
-                              //                       onSelected:
-                              //                           (String? val) {},
-                              //                     )
-                              //                     : DropdownMenu<String>(
-                              //                       width:
-                              //                           MediaQuery.of(
-                              //                             context,
-                              //                           ).size.width *
-                              //                           0.15,
-                              //                       // requestFocusOnTap: false,
-                              //                       enableSearch: true,
-                              //                       controller:
-                              //                           vatExemptController,
-                              //                       hintText: '',
-                              //                       textStyle: TextStyle(
-                              //                         fontSize: 12,
-                              //                       ),
-                              //                       inputDecorationTheme: InputDecorationTheme(
-                              //                         // filled: true,
-                              //                         hintStyle:
-                              //                             const TextStyle(
-                              //                               fontStyle:
-                              //                                   FontStyle
-                              //                                       .italic,
-                              //                             ),
-                              //                         contentPadding:
-                              //                             const EdgeInsets.fromLTRB(
-                              //                               20,
-                              //                               0,
-                              //                               25,
-                              //                               5,
-                              //                             ),
-                              //                         enabledBorder: OutlineInputBorder(
-                              //                           borderSide: BorderSide(
-                              //                             color: Primary.primary
-                              //                                 .withAlpha(
-                              //                                   (0.2 * 255)
-                              //                                       .toInt(),
-                              //                                 ),
-                              //                             width: 1,
-                              //                           ),
-                              //                           borderRadius:
-                              //                               const BorderRadius.all(
-                              //                                 Radius.circular(
-                              //                                   9,
-                              //                                 ),
-                              //                               ),
-                              //                         ),
-                              //                         focusedBorder: OutlineInputBorder(
-                              //                           borderSide: BorderSide(
-                              //                             color: Primary.primary
-                              //                                 .withAlpha(
-                              //                                   (0.4 * 255)
-                              //                                       .toInt(),
-                              //                                 ),
-                              //                             width: 2,
-                              //                           ),
-                              //                           borderRadius:
-                              //                               const BorderRadius.all(
-                              //                                 Radius.circular(
-                              //                                   9,
-                              //                                 ),
-                              //                               ),
-                              //                         ),
-                              //                       ),
-                              //                       menuHeight: 250,
-                              //                       dropdownMenuEntries:
-                              //                           vatExemptList.map<
-                              //                             DropdownMenuEntry<
-                              //                               String
-                              //                             >
-                              //                           >((String option) {
-                              //                             return DropdownMenuEntry<
-                              //                               String
-                              //                             >(
-                              //                               value: option,
-                              //                               label: option,
-                              //                             );
-                              //                           }).toList(),
-                              //                       enableFilter: false,
-                              //                       onSelected: (String? val) {
-                              //                         setState(() {
-                              //                           if (val ==
-                              //                               'Printed as "vat exempted"') {
-                              //                             salesCont
-                              //                                 .setIsVatExempted(
-                              //                                   true,
-                              //                                   false,
-                              //                                   false,
-                              //                                 );
-                              //                           } else if (val ==
-                              //                               'Printed as "vat 0 % = 0"') {
-                              //                             salesCont
-                              //                                 .setIsVatExempted(
-                              //                                   false,
-                              //                                   true,
-                              //                                   false,
-                              //                                 );
-                              //                           } else {
-                              //                             salesCont
-                              //                                 .setIsVatExempted(
-                              //                                   false,
-                              //                                   false,
-                              //                                   true,
-                              //                                 );
-                              //                           }
-                              //                         });
-                              //                       },
-                              //                     ),
-                              //               ],
-                              //             ),
-                              //           )
-                              //           : SizedBox(),
-                              //     ],
-                              //   ),
-                              // ),
                             ],
                           ),
                           gapH16,
@@ -1583,27 +2080,13 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    //email
-                                    Row(
-                                      children: [
-                                        Text(
-                                          'email'.tr,
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                        gapW10,
-                                        Text(
-                                          "${salesCont.email[selectedCustomerIds] ?? ''}",
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                    gapH6,
                                     //vat
-                                    salesCont.isVatExemptCheckBoxShouldAppear
+                                    salesOrderCont
+                                            .isVatExemptCheckBoxShouldAppear
                                         ? Row(
                                           children: [
                                             Text(
-                                              'vat'.tr,
+                                              'vat#'.tr,
                                               style: const TextStyle(
                                                 fontSize: 12,
                                               ),
@@ -1616,7 +2099,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                 ),
                               ),
                               //vat exempt
-                              salesCont.isVatExemptCheckBoxShouldAppear
+                              salesOrderCont.isVatExemptCheckBoxShouldAppear
                                   ? SizedBox(
                                     width:
                                         MediaQuery.of(context).size.width *
@@ -1637,35 +2120,39 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                               // checkColor: Colors.white,
                                               // fillColor: MaterialStateProperty.resolveWith(getColor),
                                               value:
-                                                  salesCont.isVatExemptChecked,
+                                                  salesOrderCont
+                                                      .isVatExemptChecked,
                                               onChanged: (bool? value) {
-                                                salesCont.setIsVatExemptChecked(
-                                                  value!,
-                                                );
+                                                salesOrderCont
+                                                    .setIsVatExemptChecked(
+                                                      value!,
+                                                    );
                                                 if (value) {
                                                   // priceConditionController.clear();
                                                   priceConditionController
                                                           .text =
                                                       'Prices are before vat';
-                                                  salesCont
+                                                  salesOrderCont
                                                       .setIsBeforeVatPrices(
                                                         true,
                                                       );
                                                   vatExemptController.text =
                                                       vatExemptList[0];
-                                                  salesCont.setIsVatExempted(
-                                                    true,
-                                                    false,
-                                                    false,
-                                                  );
+                                                  salesOrderCont
+                                                      .setIsVatExempted(
+                                                        true,
+                                                        false,
+                                                        false,
+                                                      );
                                                 } else {
                                                   // priceConditionController.text='Prices are before vat';
                                                   vatExemptController.clear();
-                                                  salesCont.setIsVatExempted(
-                                                    false,
-                                                    false,
-                                                    false,
-                                                  );
+                                                  salesOrderCont
+                                                      .setIsVatExempted(
+                                                        false,
+                                                        false,
+                                                        false,
+                                                      );
                                                 }
                                                 // setState(() {
                                                 //   isVatExemptChecked = value!;
@@ -1674,7 +2161,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             ),
                                           ),
                                         ),
-                                        salesCont.isVatExemptChecked == false
+                                        salesOrderCont.isVatExemptChecked ==
+                                                false
                                             ? DropdownMenu<String>(
                                               width:
                                                   MediaQuery.of(
@@ -1818,24 +2306,27 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 setState(() {
                                                   if (val ==
                                                       'Printed as "vat exempted"') {
-                                                    salesCont.setIsVatExempted(
-                                                      true,
-                                                      false,
-                                                      false,
-                                                    );
+                                                    salesOrderCont
+                                                        .setIsVatExempted(
+                                                          true,
+                                                          false,
+                                                          false,
+                                                        );
                                                   } else if (val ==
                                                       'Printed as "vat 0 % = 0"') {
-                                                    salesCont.setIsVatExempted(
-                                                      false,
-                                                      true,
-                                                      false,
-                                                    );
+                                                    salesOrderCont
+                                                        .setIsVatExempted(
+                                                          false,
+                                                          true,
+                                                          false,
+                                                        );
                                                   } else {
-                                                    salesCont.setIsVatExempted(
-                                                      false,
-                                                      false,
-                                                      true,
-                                                    );
+                                                    salesOrderCont
+                                                        .setIsVatExempted(
+                                                          false,
+                                                          false,
+                                                          true,
+                                                        );
                                                   }
                                                 });
                                               },
@@ -1862,7 +2353,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   .map(
                                     (element) => _buildTabChipItem(
                                       element,
-
+                                      // element['id'],
+                                      // element['name'],
                                       tabsList.indexOf(element),
                                     ),
                                   )
@@ -1870,6 +2362,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                         ),
                       ],
                     ),
+                    // tabsContent[selectedTabIndex],
                     selectedTabIndex == 0
                         ? Column(
                           children: [
@@ -1893,19 +2386,25 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                     text: 'item_code'.tr,
                                     width:
                                         MediaQuery.of(context).size.width *
-                                        0.14,
+                                        0.10,
                                   ),
                                   TableTitle(
                                     text: 'description'.tr,
                                     width:
                                         MediaQuery.of(context).size.width *
-                                        0.28,
+                                        0.23,
                                   ),
                                   TableTitle(
                                     text: 'quantity'.tr,
                                     width:
                                         MediaQuery.of(context).size.width *
-                                        0.04,
+                                        0.05,
+                                  ),
+                                  TableTitle(
+                                    text: 'warehouse'.tr,
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.10,
                                   ),
                                   TableTitle(
                                     text: 'unit_price'.tr,
@@ -1931,6 +2430,11 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                         MediaQuery.of(context).size.width *
                                         0.07,
                                   ),
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.01,
+                                  ),
                                 ],
                               ),
                             ),
@@ -1951,7 +2455,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                 children: [
                                   SizedBox(
                                     height:
-                                        salesCont.listViewLengthInSalesOrder,
+                                        salesOrderCont
+                                            .listViewLengthInSalesOrder,
                                     child: ListView(
                                       children:
                                           keysList.map((key) {
@@ -1960,12 +2465,12 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 key,
                                               ), // Ensure each widget has a unique key
                                               onDismissed:
-                                                  (direction) => salesCont
+                                                  (direction) => salesOrderCont
                                                       .removeFromOrderLinesInSalesOrderList(
                                                         key.toString(),
                                                       ),
                                               child:
-                                                  salesCont
+                                                  salesOrderCont
                                                       .orderLinesSalesOrderList[key] ??
                                                   const SizedBox(),
                                             );
@@ -1998,7 +2503,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       ReusableAddCard(
                                         text: 'combo'.tr,
                                         onTap: () {
-                                          // addNewCombo();
+                                          addNewCombo();
                                         },
                                       ),
                                       gapW32,
@@ -2033,40 +2538,99 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'terms_conditions'.tr,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: TypographyColor.titleTable,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'terms_conditions'.tr,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color: TypographyColor.titleTable,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.save_alt),
+                                            onPressed: () async {
+                                              _saveTermsAndConditions();
+                                            },
+                                          ),
+                                          gapW6,
+                                          IconButton(
+                                            icon: const Icon(Icons.restore),
+                                            onPressed:
+                                                showLastTermsAndConditionsList,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                   gapH16,
-                                  ReusableTextField(
-                                    textEditingController:
-                                        termsAndConditionsController, //todo
-                                    isPasswordField: false,
-                                    hint: 'terms_conditions'.tr,
-                                    onChangedFunc: (val) {},
-                                    validationFunc: (val) {
-                                      setState(() {
-                                        termsAndConditions = val;
-                                      });
-                                    },
-                                  ),
-                                  gapH16,
-                                  Text(
-                                    'or_create_new_terms_conditions'.tr,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Primary.primary,
-                                      decoration: TextDecoration.underline,
-                                      fontStyle: FontStyle.italic,
+                                  // ReusableTextField(
+                                  //   textEditingController:
+                                  //       termsAndConditionsController, //todo
+                                  //   isPasswordField: false,
+                                  //   hint: 'terms_conditions'.tr,
+                                  //   onChangedFunc: (val) {},
+                                  //   validationFunc: (val) {
+                                  //     setState(() {
+                                  //       termsAndConditions = val;
+                                  //     });
+                                  //   },
+                                  // ),
+                                  SizedBox(
+                                    height: 300,
+                                    child: Column(
+                                      children: [
+                                        QuillSimpleToolbar(
+                                          controller: _controller,
+                                          config: QuillSimpleToolbarConfig(
+                                            showFontFamily: false,
+                                            showColorButton: false,
+                                            showBackgroundColorButton: false,
+                                            showSearchButton: false,
+                                            showDirection: false,
+                                            showLink: false,
+                                            showAlignmentButtons: false,
+                                            showLeftAlignment: false,
+                                            showRightAlignment: false,
+                                            showListCheck: false,
+                                            showIndent: false,
+                                            showQuote: false,
+                                            showCodeBlock: false,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            color: Colors.grey[100],
+                                            child: QuillEditor.basic(
+                                              controller: _controller,
+
+                                              // readOnly: false, // اجعلها true إذا كنت تريد وضع القراءة فقط
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
+                                  // gapH16,
+                                  // Text(
+                                  //   'or_create_new_terms_conditions'.tr,
+                                  //   style: TextStyle(
+                                  //     fontSize: 16,
+                                  //     color: Primary.primary,
+                                  //     decoration: TextDecoration.underline,
+                                  //     fontStyle: FontStyle.italic,
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ),
+                            gapH16,
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 vertical: 20,
@@ -2091,7 +2655,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             Text('total_before_vat'.tr),
                                             ReusableShowInfoCard(
                                               text: formatDoubleWithCommas(
-                                                salesCont.totalItems,
+                                                salesOrderController.totalItems,
                                               ),
                                               width:
                                                   MediaQuery.of(
@@ -2133,7 +2697,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                               val;
                                                         }
                                                       });
-                                                      salesCont.setGlobalDisc(
+                                                      salesOrderCont.setGlobalDisc(
                                                         globalDiscountPercentage,
                                                       );
                                                     },
@@ -2144,7 +2708,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 ReusableShowInfoCard(
                                                   text: formatDoubleWithCommas(
                                                     double.parse(
-                                                      salesCont.globalDisc,
+                                                      salesOrderController
+                                                          .globalDisc,
                                                     ),
                                                   ),
                                                   width:
@@ -2189,7 +2754,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                               val;
                                                         }
                                                       });
-                                                      salesCont.setSpecialDisc(
+                                                      salesOrderCont.setSpecialDisc(
                                                         specialDiscountPercentage,
                                                       );
                                                     },
@@ -2200,11 +2765,12 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 ReusableShowInfoCard(
                                                   text: formatDoubleWithCommas(
                                                     double.parse(
-                                                      salesCont.specialDisc,
+                                                      salesOrderController
+                                                          .specialDisc,
                                                     ),
                                                   ),
 
-                                                  // salesCont.specialDisc,
+                                                  // salesOrderCont.specialDisc,
                                                   width:
                                                       MediaQuery.of(
                                                         context,
@@ -2216,7 +2782,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                           ],
                                         ),
                                         gapH6,
-                                        salesCont.isVatNoPrinted
+                                        salesOrderCont.isVatNoPrinted
                                             ? SizedBox()
                                             : Row(
                                               mainAxisAlignment:
@@ -2224,10 +2790,12 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                       .spaceBetween,
                                               children: [
                                                 Text(
-                                                  salesCont.isPrintedAsVatExempt
+                                                  salesOrderCont
+                                                          .isPrintedAsVatExempt
                                                       ? 'vat_exempt'.tr
                                                           .toUpperCase()
-                                                      : salesCont.isPrintedAs0
+                                                      : salesOrderCont
+                                                          .isPrintedAs0
                                                       ? '${'vat'.tr} 0%'
                                                       : 'vat'.tr,
                                                 ),
@@ -2236,7 +2804,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                     ReusableShowInfoCard(
                                                       text: formatDoubleWithCommas(
                                                         double.parse(
-                                                          salesCont
+                                                          salesOrderCont
                                                               .vatInPrimaryCurrency,
                                                         ),
                                                       ),
@@ -2251,7 +2819,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                       text:
                                                           formatDoubleWithCommas(
                                                             double.parse(
-                                                              salesCont.vat11,
+                                                              salesOrderCont
+                                                                  .vat11,
                                                             ),
                                                           ),
                                                       width:
@@ -2278,7 +2847,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                               ),
                                             ),
                                             Text(
-                                              '${salesCont.selectedCurrencyName} ${formatDoubleWithCommas(double.parse(salesCont.totalSalesOrder))}',
+                                              '${salesOrderCont.selectedCurrencyName} ${formatDoubleWithCommas(double.parse(salesOrderCont.totalSalesOrder))}',
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 color: Primary.primary,
@@ -2302,74 +2871,159 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       MediaQuery.of(context).size.width * 0.15,
                                   height: 45,
                                   onTapFunction: () async {
+                                    _saveContent();
                                     var oldKeys =
-                                        salesController
+                                        salesOrderCont
                                             .rowsInListViewInSalesOrder
                                             .keys
                                             .toList()
                                           ..sort();
                                     for (int i = 0; i < oldKeys.length; i++) {
-                                      salesController.newRowMap[i + 1] =
-                                          salesController
+                                      salesOrderCont.newRowMap[i + 1] =
+                                          salesOrderCont
                                               .rowsInListViewInSalesOrder[oldKeys[i]]!;
                                     }
-
-                                    var res = await storeQuotations(
-                                      refController.text,
-                                      selectedCustomerIds,
-                                      validityController.text,
-                                      '',
-                                      '',
-                                      salesCont
-                                          .selectedCurrencyId, //selectedCurrency
-                                      termsAndConditionsController.text,
-                                      selectedSalesPersonId.toString(),
-                                      '',
-                                      '',
-                                      commissionController.text,
-                                      totalCommissionController.text,
-                                      salesController.totalItems
-                                          .toString(), //total before vat
-                                      specialDiscPercentController
-                                          .text, // inserted by user
-                                      salesController.specialDisc, // calculated
-                                      globalDiscPercentController.text,
-                                      salesController.globalDisc,
-                                      salesController.vat11.toString(), //vat
-                                      salesController.vatInPrimaryCurrency
-                                          .toString(),
-                                      salesController
-                                          .totalSalesOrder, // salesController.totalSalesOrder
-
-                                      salesCont.isVatExemptChecked ? '1' : '0',
-                                      salesCont.isVatNoPrinted ? '1' : '0',
-                                      salesCont.isPrintedAsVatExempt
-                                          ? '1'
-                                          : '0',
-                                      salesCont.isPrintedAs0 ? '1' : '0',
-                                      salesCont.isBeforeVatPrices ? '0' : '1',
-                                      salesCont.isBeforeVatPrices ? '1' : '0',
-                                      codeController.text,
-                                      // salesController.rowsInListViewInSalesOrder,
-                                      salesController.newRowMap,
-
-                                      titleController.text,
-                                    );
-                                    if (res['success'] == true) {
-                                      CommonWidgets.snackBar(
-                                        'Success',
-                                        res['message'],
-                                      );
-                                      homeController.selectedTab.value =
-                                          'quotation_summary';
-                                    } else {
+                                    bool hasType1WithEmptyTitle =
+                                        salesOrderController.newRowMap.values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '1' &&
+                                                  (map['title']?.isEmpty ??
+                                                      true);
+                                            });
+                                    bool
+                                    hasType2WithEmptyId = salesOrderController
+                                        .newRowMap
+                                        .values
+                                        .any((map) {
+                                          return map['line_type_id'] == '2' &&
+                                              (map['item_id']?.isEmpty ?? true);
+                                        });
+                                    bool
+                                    hasType3WithEmptyId = salesOrderController
+                                        .newRowMap
+                                        .values
+                                        .any((map) {
+                                          return map['line_type_id'] == '3' &&
+                                              (map['combo']?.isEmpty ?? true);
+                                        });
+                                    bool hasType4WithEmptyImage =
+                                        salesOrderController.newRowMap.values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '4' &&
+                                                  (map['image'] ==
+                                                          Uint8List(0) ||
+                                                      map['image']?.isEmpty);
+                                            });
+                                    bool
+                                    hasType5WithEmptyNote = salesOrderController
+                                        .newRowMap
+                                        .values
+                                        .any((map) {
+                                          return map['line_type_id'] == '5' &&
+                                              (map['note']?.isEmpty ?? true);
+                                        });
+                                    if (salesOrderController
+                                        .newRowMap
+                                        .isEmpty) {
                                       CommonWidgets.snackBar(
                                         'error',
-                                        res['message'],
+                                        'Order lines is Empty',
                                       );
+                                    } else if (hasType2WithEmptyId) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty item',
+                                      );
+                                    } else if (hasType3WithEmptyId) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty combo',
+                                      );
+                                    } else if (hasType1WithEmptyTitle) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty title',
+                                      );
+                                    } else if (hasType4WithEmptyImage) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty image',
+                                      );
+                                    } else if (hasType5WithEmptyNote) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty note',
+                                      );
+                                    } else {
+                                      var res = await storeSalesOrder(
+                                        refController.text,
+                                        selectedCustomerIds,
+                                        validityController.text,
+                                        inputDateController.text,
+                                        '', //todo paymentTermsController.text,
+                                        salesOrderCont.salesOrderNumber,
+                                        salesOrderCont.selectedPriceListId,
+                                        salesOrderCont
+                                            .selectedCurrencyId, //selectedCurrency
+                                        termsAndConditionsController.text,
+                                        selectedSalesPersonId.toString(),
+                                        '',
+                                        salesOrderCont.selectedCashingMethodId,
+                                        commissionController.text,
+                                        totalCommissionController.text,
+                                        salesOrderController.totalItems
+                                            .toString(), //total before vat
+                                        specialDiscPercentController
+                                            .text, // inserted by user
+                                        salesOrderController
+                                            .specialDisc, // calculated
+                                        globalDiscPercentController.text,
+                                        salesOrderController.globalDisc,
+                                        salesOrderController.vat11
+                                            .toString(), //vat
+                                        salesOrderController
+                                            .vatInPrimaryCurrency
+                                            .toString(),
+                                        salesOrderController.totalSalesOrder, //
+
+                                        salesOrderCont.isVatExemptChecked
+                                            ? '1'
+                                            : '0',
+                                        salesOrderCont.isVatNoPrinted
+                                            ? '1'
+                                            : '0',
+                                        salesOrderCont.isPrintedAsVatExempt
+                                            ? '1'
+                                            : '0',
+                                        salesOrderCont.isPrintedAs0 ? '1' : '0',
+                                        salesOrderCont.isBeforeVatPrices
+                                            ? '0'
+                                            : '1',
+                                        salesOrderCont.isBeforeVatPrices
+                                            ? '1'
+                                            : '0',
+                                        codeController.text,
+                                        salesOrderController.newRowMap,
+                                        titleController.text,
+                                      );
+                                      if (res['success'] == true) {
+                                        CommonWidgets.snackBar(
+                                          'Success',
+                                          res['message'],
+                                        );
+                                        homeController.selectedTab.value =
+                                            'to_invoice';
+                                      } else {
+                                        CommonWidgets.snackBar(
+                                          'error',
+                                          res['message'],
+                                        );
+                                      }
                                     }
                                   },
-                                  btnText: 'create_quotation'.tr,
+                                  btnText: 'create_sales_order'.tr,
                                 ),
                               ],
                             ),
@@ -2398,7 +3052,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   children: [
                                     DialogDropMenu(
                                       optionsList:
-                                          salesController.salesPersonListNames,
+                                          salesOrderCont.salesPersonListNames,
                                       text: 'sales_person'.tr,
                                       hint: 'search'.tr,
                                       rowWidth:
@@ -2410,11 +3064,11 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       onSelected: (String? val) {
                                         setState(() {
                                           selectedSalesPerson = val!;
-                                          var index = salesController
+                                          var index = salesOrderCont
                                               .salesPersonListNames
                                               .indexOf(val);
                                           selectedSalesPersonId =
-                                              salesController
+                                              salesOrderCont
                                                   .salesPersonListId[index];
                                         });
                                       },
@@ -2434,7 +3088,10 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                     ),
                                     gapH16,
                                     DialogDropMenu(
-                                      optionsList: ['cash'.tr],
+                                      controller: cashingMethodsController,
+                                      optionsList:
+                                          salesOrderCont
+                                              .cashingMethodsNamesList,
                                       text: 'cashing_method'.tr,
                                       hint: '',
                                       rowWidth:
@@ -2443,7 +3100,16 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       textFieldWidth:
                                           MediaQuery.of(context).size.width *
                                           0.15,
-                                      onSelected: () {},
+                                      onSelected: (value) {
+                                        var index = salesOrderCont
+                                            .cashingMethodsNamesList
+                                            .indexOf(value);
+                                        salesOrderCont
+                                            .setSelectedCashingMethodId(
+                                              salesOrderCont
+                                                  .cashingMethodsIdsList[index],
+                                            );
+                                      },
                                     ),
                                   ],
                                 ),
@@ -2546,43 +3212,47 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
   bool addItem = false;
   TextEditingController titleController = TextEditingController();
   String titleValue = '';
-  int quotationCounter = 0;
+  int salesOrderCounter = 0;
   addNewTitle() {
     setState(() {
-      quotationCounter += 1;
+      salesOrderCounter += 1;
     });
-    salesController.incrementListViewLengthInSalesOrder(
-      salesController.increment,
+    salesOrderController.incrementListViewLengthInSalesOrder(
+      salesOrderController.increment,
     );
-    salesController.addTorowsInListViewInSalesOrder(quotationCounter, {
-      'line_type_id': '',
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+      'line_type_id': '1',
       'item_id': '',
       'itemName': '',
       'item_main_code': '',
       'item_discount': '0',
       'item_description': '',
       'item_quantity': '0',
+      'item_warehouseId': '',
+      'combo_warehouseId': '',
       'item_unit_price': '0',
       'item_total': '0',
       'title': '',
       'note': '',
+      'combo': '',
     });
-    Widget p = ReusableTitleRow(index: quotationCounter);
+    Widget p = ReusableTitleRow(index: salesOrderCounter);
 
-    salesController.addToOrderLinesInSalesOrderList('$quotationCounter', p);
+    salesOrderController.addToOrderLinesInSalesOrderList(
+      '$salesOrderCounter',
+      p,
+    );
   }
 
   addNewItem() {
     setState(() {
-      quotationCounter += 1;
+      salesOrderCounter += 1;
     });
-    salesController.incrementListViewLengthInSalesOrder(
-      salesController.increment,
+    salesOrderController.incrementListViewLengthInSalesOrder(
+      salesOrderController.increment,
     );
 
-    // int index = salesController.orderLinesSalesOrderList.length + 1;
-
-    salesController.addTorowsInListViewInSalesOrder(quotationCounter, {
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
       'line_type_id': '2',
       'item_id': '',
       'itemName': '',
@@ -2590,37 +3260,65 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'item_discount': '0',
       'item_description': '',
       'item_quantity': '0',
+      'item_warehouseId': '',
+      'combo_warehouseId': '',
       'item_unit_price': '0',
       'item_total': '0',
       'title': '',
       'note': '',
+      'combo': '',
     });
-    salesController.addToUnitPriceControllers(quotationCounter);
-    Widget p = ReusableItemRow(index: quotationCounter);
+    salesOrderController.addToUnitPriceControllers(salesOrderCounter);
+    Widget p = ReusableItemRow(index: salesOrderCounter);
 
-    salesController.addToOrderLinesInSalesOrderList('$quotationCounter', p);
+    salesOrderController.addToOrderLinesInSalesOrderList(
+      '$salesOrderCounter',
+      p,
+    );
   }
 
   addNewCombo() {
     setState(() {
-      listViewLength = listViewLength + increment;
+      salesOrderCounter += 1;
     });
-    // Widget p = const ReusableComboRow();
-    // salesController.addToOrderLinesList(p);
-  }
+    salesOrderController.incrementListViewLengthInSalesOrder(
+      salesOrderController.increment,
+    );
 
-  //
-  // late Uint8List imageFile;
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+      'line_type_id': '3',
+      'item_id': '',
+      'itemName': '',
+      'item_main_code': '',
+      'item_discount': '0',
+      'item_description': '',
+      'item_quantity': '0',
+      'item_warehouseId': '',
+      'combo_warehouseId': '',
+      'item_unit_price': '0',
+      'item_total': '0',
+      'title': '',
+      'note': '',
+      'combo': '',
+    });
+    salesOrderController.addToCombosPricesControllers(salesOrderCounter);
+
+    Widget p = ReusableComboRow(index: salesOrderCounter);
+    salesOrderController.addToOrderLinesInSalesOrderList(
+      '$salesOrderCounter',
+      p,
+    );
+  }
 
   addNewImage() {
     setState(() {
-      quotationCounter += 1;
+      salesOrderCounter += 1;
     });
-    salesController.incrementListViewLengthInSalesOrder(
-      salesController.increment + 50,
+    salesOrderController.incrementListViewLengthInSalesOrder(
+      salesOrderController.increment + 50,
     );
 
-    salesController.addTorowsInListViewInSalesOrder(quotationCounter, {
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
       'line_type_id': '4',
       'item_id': '',
       'itemName': '',
@@ -2628,26 +3326,32 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'item_discount': '0',
       'item_description': '',
       'item_quantity': '0',
+      'item_warehouseId': '',
+      'combo_warehouseId': '',
       'item_unit_price': '0',
       'item_total': '0',
       'title': '',
       'note': '',
+      'combo': '',
       'image': Uint8List(0),
     });
-    Widget p = ReusableImageRow(index: quotationCounter);
+    Widget p = ReusableImageRow(index: salesOrderCounter);
 
-    salesController.addToOrderLinesInSalesOrderList('$quotationCounter', p);
+    salesOrderController.addToOrderLinesInSalesOrderList(
+      '$salesOrderCounter',
+      p,
+    );
   }
 
   addNewNote() {
     setState(() {
-      quotationCounter += 1;
+      salesOrderCounter += 1;
     });
-    salesController.incrementListViewLengthInSalesOrder(
-      salesController.increment,
+    salesOrderController.incrementListViewLengthInSalesOrder(
+      salesOrderController.increment,
     );
 
-    salesController.addTorowsInListViewInSalesOrder(quotationCounter, {
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
       'line_type_id': '5',
       'item_id': '',
       'itemName': '',
@@ -2655,15 +3359,21 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'item_discount': '0',
       'item_description': '',
       'item_quantity': '0',
+      'item_warehouseId': '',
+      'combo_warehouseId': '',
       'item_unit_price': '0',
       'item_total': '0',
       'title': '',
       'note': '',
+      'combo': '',
     });
 
-    Widget p = ReusableNoteRow(index: quotationCounter);
+    Widget p = ReusableNoteRow(index: salesOrderCounter);
 
-    salesController.addToOrderLinesInSalesOrderList('$quotationCounter', p);
+    salesOrderController.addToOrderLinesInSalesOrderList(
+      '$salesOrderCounter',
+      p,
+    );
   }
 
   List<Step> getSteps() => [
@@ -2707,8 +3417,9 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   TextEditingController qtyController = TextEditingController();
   TextEditingController discountController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  TextEditingController warehouseController = TextEditingController();
 
-  final SalesOrderController salesController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
   List<String> itemsList = [];
   String selectedItemId = '';
@@ -2736,21 +3447,22 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
     // discount = '0';
     // quantity = '0';
     itemCodeController.text =
-        salesController.rowsInListViewInSalesOrder[widget
+        salesOrderController.rowsInListViewInSalesOrder[widget
             .index]['item_main_code'];
     qtyController.text =
-        salesController.rowsInListViewInSalesOrder[widget
+        salesOrderController.rowsInListViewInSalesOrder[widget
             .index]['item_quantity'];
     discountController.text =
-        salesController.rowsInListViewInSalesOrder[widget
+        salesOrderController.rowsInListViewInSalesOrder[widget
             .index]['item_discount'];
     descriptionController.text =
-        salesController.rowsInListViewInSalesOrder[widget
+        salesOrderController.rowsInListViewInSalesOrder[widget
             .index]['item_description'];
     totalLine =
-        salesController.rowsInListViewInSalesOrder[widget.index]['item_total'];
+        salesOrderController.rowsInListViewInSalesOrder[widget
+            .index]['item_total'];
     itemCodeController.text =
-        salesController.rowsInListViewInSalesOrder[widget
+        salesOrderController.rowsInListViewInSalesOrder[widget
             .index]['item_main_code'];
 
     super.initState();
@@ -2797,18 +3509,18 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       descriptionController.text =
                           cont.itemsDescription[selectedItemId]!;
 
-                      if (cont.priceCurrency[selectedItemId] ==
+                      if (cont.itemsPricesCurrencies[selectedItemId] ==
                           cont.selectedCurrencyName) {
                         cont.unitPriceControllers[widget.index]!.text =
                             cont.itemUnitPrice[selectedItemId].toString();
                       } else if (cont.selectedCurrencyName == 'USD' &&
-                          cont.priceCurrency[selectedItemId] !=
+                          cont.itemsPricesCurrencies[selectedItemId] !=
                               cont.selectedCurrencyName) {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
                                   item["currency"] ==
-                                  cont.priceCurrency[selectedItemId],
+                                  cont.itemsPricesCurrencies[selectedItemId],
                               orElse: () => null,
                             );
                         var divider = '1';
@@ -2818,7 +3530,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         cont.unitPriceControllers[widget.index]!.text =
                             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
                       } else if (cont.selectedCurrencyName != 'USD' &&
-                          cont.priceCurrency[selectedItemId] == 'USD') {
+                          cont.itemsPricesCurrencies[selectedItemId] == 'USD') {
                         cont.unitPriceControllers[widget.index]!.text =
                             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       } else {
@@ -2826,7 +3538,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                             .firstWhere(
                               (item) =>
                                   item["currency"] ==
-                                  cont.priceCurrency[selectedItemId],
+                                  cont.itemsPricesCurrencies[selectedItemId],
                               orElse: () => null,
                             );
                         var divider = '1';
@@ -2865,8 +3577,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       totalLine =
                           '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       cont.setEnteredQtyInSalesOrder(widget.index, quantity);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
-                      // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     });
                     cont.setEnteredUnitPriceInSalesOrder(
@@ -2892,8 +3603,8 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     }
                     return null;
                   },
-                  rowWidth: MediaQuery.of(context).size.width * 0.13,
-                  textFieldWidth: MediaQuery.of(context).size.width * 0.13,
+                  rowWidth: MediaQuery.of(context).size.width * 0.10,
+                  textFieldWidth: MediaQuery.of(context).size.width * 0.10,
                   clickableOptionText: 'create_virtual_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
@@ -2928,13 +3639,12 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   nextFocusNode: quantityFocus,
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.27,
+                  width: MediaQuery.of(context).size.width * 0.20,
                   child: TextFormField(
                     style: GoogleFonts.openSans(fontSize: 12),
                     onFieldSubmitted: (value) {
                       FocusScope.of(context).requestFocus(focus);
                     },
-                    textAlign: TextAlign.center,
                     controller: descriptionController,
                     cursorColor: Colors.black,
                     decoration: InputDecoration(
@@ -3049,8 +3759,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
 
                       cont.setEnteredQtyInSalesOrder(widget.index, val);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
-                      // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     },
                   ),
@@ -3081,6 +3790,55 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   //   },
                   // )
                 ),
+
+                //warehouse
+                DropdownMenu<String>(
+                  width: MediaQuery.of(context).size.width * 0.10,
+                  // requestFocusOnTap: false,
+                  enableSearch: true,
+                  controller: warehouseController,
+                  hintText: 'deliver_warehouse'.tr,
+                  inputDecorationTheme: InputDecorationTheme(
+                    // filled: true,
+                    hintStyle: const TextStyle(fontStyle: FontStyle.italic),
+                    contentPadding: const EdgeInsets.fromLTRB(20, 0, 25, 5),
+                    // outlineBorder: BorderSide(color: Colors.black,),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(9)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Primary.primary.withAlpha((0.4 * 255).toInt()),
+                        width: 2,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(9)),
+                    ),
+                  ),
+                  // menuStyle: ,
+                  menuHeight: 250,
+                  dropdownMenuEntries:
+                      cont.warehousesNameList.map<DropdownMenuEntry<String>>((
+                        String option,
+                      ) {
+                        return DropdownMenuEntry<String>(
+                          value: option,
+                          label: option,
+                        );
+                      }).toList(),
+                  enableFilter: true,
+                  onSelected: (String? value) {
+                    warehouseController.text = value!;
+
+                    var index = cont.warehousesNameList.indexOf(value);
+                    var val = '${cont.warehouseIds[index]}';
+                    cont.setItemWareHouseInSalesOrder(widget.index, val);
+                  },
+                ),
+
                 // unitPrice
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.05,
@@ -3147,7 +3905,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       _formKey.currentState!.validate();
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
                       cont.setEnteredUnitPriceInSalesOrder(widget.index, val);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     },
                   ),
@@ -3218,8 +3976,8 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       _formKey.currentState!.validate();
 
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                      cont.setEnteredDiscInsalesOrder(widget.index, val);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
+                      cont.setEnteredDiscInSalesOrder(widget.index, val);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       await cont.getTotalItems();
                     },
                   ),
@@ -3233,7 +3991,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           .index]['item_total'],
                     ),
                   ),
-                  width: MediaQuery.of(context).size.width * 0.07,
+                  width: MediaQuery.of(context).size.width * 0.05,
                 ),
 
                 //more
@@ -3267,10 +4025,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                                                           ),
                                                     ),
                                                 elevation: 0,
-                                                content: ShowQuantityDialog(
-                                                  selectedItemId:
-                                                      selectedItemId,
-                                                ),
+                                                content:
+                                                    ShowItemQuantitiesDialog(
+                                                      selectedItemId:
+                                                          selectedItemId,
+                                                    ),
                                               ),
                                         );
                                       },
@@ -3286,15 +4045,15 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         child: InkWell(
                           onTap: () {
                             setState(() {
-                              salesController
+                              salesOrderController
                                   .decrementListViewLengthInSalesOrder(
-                                    salesController.increment,
+                                    salesOrderController.increment,
                                   );
-                              salesController
-                                  .removeFromrowsInListViewInSalesOrder(
+                              salesOrderController
+                                  .removeFromRowsInListViewInSalesOrder(
                                     widget.index,
                                   );
-                              salesController
+                              salesOrderController
                                   .removeFromOrderLinesInSalesOrderList(
                                     widget.index.toString(),
                                   );
@@ -3342,14 +4101,14 @@ class ReusableTitleRow extends StatefulWidget {
 
 class _ReusableTitleRowState extends State<ReusableTitleRow> {
   TextEditingController titleController = TextEditingController();
-  final SalesOrderController salesController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
   String titleValue = '0';
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     titleController.text =
-        salesController.rowsInListViewInSalesOrder[widget.index]['title'];
+        salesOrderController.rowsInListViewInSalesOrder[widget.index]['title'];
     super.initState();
   }
 
@@ -3399,8 +4158,17 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                     children: [
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.02,
-                        child: const ReusableMore(itemsList: [
-                         
+                        child: const ReusableMore(
+                          itemsList: [
+                            // PopupMenuItem<String>(
+                            //   value: '1',
+                            //   onTap: () async {},
+                            //   child: Row(
+                            //     children: [
+                            //       Text(''),
+                            //     ],
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -3409,15 +4177,15 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                         child: InkWell(
                           onTap: () {
                             setState(() {
-                              salesController
+                              salesOrderController
                                   .decrementListViewLengthInSalesOrder(
-                                    salesController.increment,
+                                    salesOrderController.increment,
                                   );
-                              salesController
-                                  .removeFromrowsInListViewInSalesOrder(
+                              salesOrderController
+                                  .removeFromRowsInListViewInSalesOrder(
                                     widget.index,
                                   );
-                              salesController
+                              salesOrderController
                                   .removeFromOrderLinesInSalesOrderList(
                                     widget.index.toString(),
                                   );
@@ -3452,14 +4220,14 @@ class ReusableNoteRow extends StatefulWidget {
 
 class _ReusableNoteRowState extends State<ReusableNoteRow> {
   TextEditingController noteController = TextEditingController();
-  final SalesOrderController salesController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
   String noteValue = '';
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     noteController.text =
-        salesController.rowsInListViewInSalesOrder[widget.index]['note'];
+        salesOrderController.rowsInListViewInSalesOrder[widget.index]['note'];
     super.initState();
   }
 
@@ -3495,8 +4263,8 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                   setState(() {
                     noteValue = val;
                   });
-                  salesController.setTypeInSalesOrder(widget.index, '5');
-                  salesController.setNoteInSalesOrder(widget.index, val);
+                  salesOrderController.setTypeInSalesOrder(widget.index, '5');
+                  salesOrderController.setNoteInSalesOrder(widget.index, val);
                 },
                 validationFunc: (val) {},
               ),
@@ -3542,15 +4310,18 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                     child: InkWell(
                       onTap: () {
                         setState(() {
-                          salesController.decrementListViewLengthInSalesOrder(
-                            salesController.increment,
-                          );
-                          salesController.removeFromrowsInListViewInSalesOrder(
-                            widget.index,
-                          );
-                          salesController.removeFromOrderLinesInSalesOrderList(
-                            widget.index.toString(),
-                          );
+                          salesOrderController
+                              .decrementListViewLengthInSalesOrder(
+                                salesOrderController.increment,
+                              );
+                          salesOrderController
+                              .removeFromRowsInListViewInSalesOrder(
+                                widget.index,
+                              );
+                          salesOrderController
+                              .removeFromOrderLinesInSalesOrderList(
+                                widget.index.toString(),
+                              );
                         });
                       },
                       child: Icon(Icons.delete_outline, color: Primary.primary),
@@ -3575,7 +4346,7 @@ class ReusableImageRow extends StatefulWidget {
 }
 
 class _ReusableImageRowState extends State<ReusableImageRow> {
-  final SalesOrderController salesController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
   late Uint8List imageFile;
 
   double listViewLength = Sizes.deviceHeight * 0.08;
@@ -3585,7 +4356,7 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
   @override
   void initState() {
     imageFile =
-        salesController.rowsInListViewInSalesOrder[widget.index]['image'];
+        salesOrderController.rowsInListViewInSalesOrder[widget.index]['image'];
     super.initState();
   }
 
@@ -3694,8 +4465,30 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                 children: [
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.02,
-                    child: ReusableMore(itemsList: [
-                       
+                    child: ReusableMore(
+                      itemsList: [
+                        // PopupMenuItem<String>(
+                        //   value: '1',
+                        //   onTap: () async {
+                        //     showDialog<String>(
+                        //         context: context,
+                        //         builder: (BuildContext context) => AlertDialog(
+                        //           backgroundColor: Colors.white,
+                        //           shape: const RoundedRectangleBorder(
+                        //             borderRadius:
+                        //             BorderRadius.all(Radius.circular(9)),
+                        //           ),
+                        //           elevation: 0,
+                        //           content: Column(
+                        //             mainAxisAlignment: MainAxisAlignment.center,
+                        //             children: [
+                        //
+                        //             ],
+                        //           ),
+                        //         ));
+                        //   },
+                        //   child: const Text('Show Quantity'),
+                        // ),
                       ],
                     ),
                   ),
@@ -3705,15 +4498,18 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                     child: InkWell(
                       onTap: () {
                         setState(() {
-                          salesController.decrementListViewLengthInSalesOrder(
-                            salesController.increment + 50,
-                          );
-                          salesController.removeFromrowsInListViewInSalesOrder(
-                            widget.index,
-                          );
-                          salesController.removeFromOrderLinesInSalesOrderList(
-                            widget.index.toString(),
-                          );
+                          salesOrderController
+                              .decrementListViewLengthInSalesOrder(
+                                salesOrderController.increment + 50,
+                              );
+                          salesOrderController
+                              .removeFromRowsInListViewInSalesOrder(
+                                widget.index,
+                              );
+                          salesOrderController
+                              .removeFromOrderLinesInSalesOrderList(
+                                widget.index.toString(),
+                              );
                         });
                       },
                       child: Icon(Icons.delete_outline, color: Primary.primary),
@@ -3731,99 +4527,636 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
 
 //combo
 class ReusableComboRow extends StatefulWidget {
-  const ReusableComboRow({super.key});
+  const ReusableComboRow({super.key, required this.index});
+  final int index;
+
   @override
   State<ReusableComboRow> createState() => _ReusableComboRowState();
 }
 
 class _ReusableComboRowState extends State<ReusableComboRow> {
-  String price = '0', disc = '0', result = '0', quantity = '0';
+  String discount = '0', result = '0', quantity = '0';
+
+  String qty = '0';
+  final ProductController productController = Get.find();
+
+  TextEditingController comboCodeController = TextEditingController();
+  TextEditingController qtyController = TextEditingController();
+  TextEditingController discountController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  TextEditingController warehouseController = TextEditingController();
+  final SalesOrderController salesOrderController = Get.find();
+  final ExchangeRatesController exchangeRatesController = Get.find();
+  List<String> itemsList = [];
+  String selectedComboId = '';
+  int selectedItem = 0;
+  bool isDataFetched = false;
+
+  String descriptionVar = '';
+  String mainCode = '';
+  String comboName = '';
+  String totalLine = '0';
+  bool isSelected = false;
+  String? selectedValue;
+  final focus = FocusNode(); //price
+  final focus1 = FocusNode(); //disc
+  final dropFocus = FocusNode(); //dropdown
+  final quantityFocus = FocusNode(); //quantity
+  double taxRate = 1;
+  double taxValue = 0;
+  final _formKey = GlobalKey<FormState>();
+  @override
+  void initState() {
+    comboCodeController.text =
+        salesOrderController.rowsInListViewInSalesOrder[widget
+            .index]['item_main_code'];
+    qtyController.text =
+        salesOrderController.rowsInListViewInSalesOrder[widget
+            .index]['item_quantity'];
+    discountController.text =
+        salesOrderController.rowsInListViewInSalesOrder[widget
+            .index]['item_discount'];
+    descriptionController.text =
+        salesOrderController.rowsInListViewInSalesOrder[widget
+            .index]['item_description'];
+    totalLine =
+        salesOrderController.rowsInListViewInSalesOrder[widget
+            .index]['item_total'];
+    comboCodeController.text =
+        salesOrderController.rowsInListViewInSalesOrder[widget
+            .index]['item_main_code'];
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width * 0.63,
-      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          DialogDropMenu(
-            optionsList: const [''],
-            text: '',
-            hint: 'combo'.tr,
-            rowWidth: MediaQuery.of(context).size.width * 0.07,
-            textFieldWidth: MediaQuery.of(context).size.width * 0.07,
-            onSelected: () {},
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.3,
-            child: ReusableNumberField(
-              textEditingController: controller, //todo
-              isPasswordField: false,
-              hint: 'lorem ipsumlorem ipsum',
-              onChangedFunc: () {},
-              validationFunc: (val) {},
+    return GetBuilder<SalesOrderController>(
+      builder: (cont) {
+        return Container(
+          height: 50,
+          margin: const EdgeInsets.symmetric(vertical: 5),
+          child: Form(
+            key: _formKey,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.02,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/newRow.png'),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                ReusableDropDownMenusWithSearch(
+                  list:
+                      cont.combosMultiPartList, // Assuming multiList is List<List<String>>
+                  text: ''.tr,
+                  hint: 'combo'.tr,
+                  controller: comboCodeController,
+                  onSelected: (String? value) async {
+                    comboCodeController.text = value!;
+                    setState(() {
+                      var ind = cont.combosCodesList.indexOf(
+                        value.split(" | ")[0],
+                      );
+                      selectedComboId = cont.combosIdsList[ind];
+                      descriptionVar = cont.combosDescriptionList[ind];
+                      mainCode = cont.combosCodesList[ind];
+                      comboName = cont.combosNamesList[ind];
+                      descriptionController.text =
+                          cont.combosDescriptionList[ind];
+
+                      if (cont.combosPricesCurrencies[selectedComboId] ==
+                          cont.selectedCurrencyName) {
+                        cont.combosPriceControllers[widget.index]!.text =
+                            cont.combosPricesList[ind].toString();
+                      } else if (cont.selectedCurrencyName == 'USD' &&
+                          cont.combosPricesCurrencies[selectedComboId] !=
+                              cont.selectedCurrencyName) {
+                        var result = exchangeRatesController.exchangeRatesList
+                            .firstWhere(
+                              (item) =>
+                                  item["currency"] ==
+                                  cont.combosPricesCurrencies[selectedComboId],
+                              orElse: () => null,
+                            );
+                        var divider = '1';
+                        if (result != null) {
+                          divider = result["exchange_rate"].toString();
+                        }
+                        cont.combosPriceControllers[widget.index]!.text =
+                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                      } else if (cont.selectedCurrencyName != 'USD' &&
+                          cont.combosPricesCurrencies[selectedComboId] ==
+                              'USD') {
+                        cont.combosPriceControllers[widget.index]!.text =
+                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                      } else {
+                        var result = exchangeRatesController.exchangeRatesList
+                            .firstWhere(
+                              (item) =>
+                                  item["currency"] ==
+                                  cont.combosPricesCurrencies[selectedComboId],
+                              orElse: () => null,
+                            );
+                        var divider = '1';
+                        if (result != null) {
+                          divider = result["exchange_rate"].toString();
+                        }
+                        var usdPrice =
+                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                        cont.combosPriceControllers[widget.index]!.text =
+                            '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                      }
+                      cont.combosPriceControllers[widget.index]!.text =
+                          '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
+                      qtyController.text = '1';
+                      quantity = '1';
+                      discountController.text = '0';
+                      discount = '0';
+                      cont
+                          .combosPriceControllers[widget.index]!
+                          .text = double.parse(
+                        cont.combosPriceControllers[widget.index]!.text,
+                      ).toStringAsFixed(2);
+                      totalLine =
+                          '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                      cont.setEnteredQtyInSalesOrder(widget.index, quantity);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
+                      cont.getTotalItems();
+                    });
+                    cont.setEnteredUnitPriceInSalesOrder(
+                      widget.index,
+                      cont.combosPriceControllers[widget.index]!.text,
+                    );
+                    cont.setComboInSalesOrder(widget.index, selectedComboId);
+                    cont.setItemNameInSalesOrder(
+                      widget.index,
+                      comboName,
+                      // value.split(" | ")[0],
+                    ); // set only first element as name
+                    cont.setMainCodeInSalesOrder(widget.index, mainCode);
+                    cont.setTypeInSalesOrder(widget.index, '3');
+                    cont.setMainDescriptionInSalesOrder(
+                      widget.index,
+                      descriptionVar,
+                    );
+                  },
+                  validationFunc: (value) {
+                    // if (value == null || value.isEmpty) {
+                    //   return 'select_option'.tr;
+                    // }
+                    // return null;
+                  },
+                  rowWidth: MediaQuery.of(context).size.width * 0.10,
+                  textFieldWidth: MediaQuery.of(context).size.width * 0.10,
+                  clickableOptionText: 'create_virtual_combo'.tr,
+                  isThereClickableOption: true,
+                  onTappedClickableOption: () {
+                    showDialog<String>(
+                      context: context,
+                      builder:
+                          (BuildContext context) => const AlertDialog(
+                            backgroundColor: Colors.white,
+                            contentPadding: EdgeInsets.all(0),
+                            titlePadding: EdgeInsets.all(0),
+                            actionsPadding: EdgeInsets.all(0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(9),
+                              ),
+                            ),
+                            elevation: 0,
+                            content: Combo(),
+                          ),
+                    );
+                  },
+                  columnWidths: [
+                    100.0,
+                    200.0,
+                    550.0,
+                    100.0,
+                  ], // Set column widths
+                  focusNode: dropFocus,
+                  nextFocusNode: quantityFocus,
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.20,
+                  child: TextFormField(
+                    style: GoogleFonts.openSans(fontSize: 12),
+                    onFieldSubmitted: (value) {
+                      FocusScope.of(context).requestFocus(focus);
+                    },
+                    controller: descriptionController,
+                    cursorColor: Colors.black,
+                    decoration: InputDecoration(
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                          width: 1,
+                        ),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                          width: 1,
+                        ),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                      ),
+                      errorStyle: const TextStyle(fontSize: 10.0),
+                      focusedErrorBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                        borderSide: BorderSide(width: 1, color: Colors.red),
+                      ),
+                    ),
+                    validator: (String? value) {
+                      return null;
+                    },
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: false,
+                      signed: true,
+                    ),
+                    onChanged: (val) {
+                      setState(() {
+                        descriptionVar = val;
+                      });
+                      _formKey.currentState!.validate();
+                      cont.setMainDescriptionInSalesOrder(
+                        widget.index,
+                        descriptionVar,
+                      );
+                    },
+                  ),
+                ),
+
+                //quantity
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.05,
+
+                  child: TextFormField(
+                    style: GoogleFonts.openSans(
+                      fontSize: 12,
+                      // fontWeight: FontWeight.w500,
+                    ),
+                    focusNode: quantityFocus,
+                    onFieldSubmitted: (value) {
+                      FocusScope.of(context).requestFocus(focus);
+                    },
+                    textAlign: TextAlign.center,
+                    controller: qtyController,
+                    cursorColor: Colors.black,
+                    decoration: InputDecoration(
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                          width: 1,
+                        ),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                          width: 1,
+                        ),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                      ),
+                      errorStyle: const TextStyle(fontSize: 10.0),
+                      focusedErrorBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                        borderSide: BorderSide(width: 1, color: Colors.red),
+                      ),
+                    ),
+                    validator: (String? value) {
+                      if (value!.isEmpty || double.parse(value) <= 0) {
+                        return 'must be >0';
+                      }
+                      return null;
+                    },
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: false,
+                      signed: true,
+                    ),
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                      // WhitelistingTextInputFormatter.digitsOnly
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        quantity = val;
+                        totalLine =
+                            '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
+                      });
+
+                      _formKey.currentState!.validate();
+                      // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
+
+                      cont.setEnteredQtyInSalesOrder(widget.index, val);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
+                      cont.getTotalItems();
+                    },
+                  ),
+
+                  // ReusableNumberField(
+                  //   textEditingController: qtyController,
+                  //   isPasswordField: false,
+                  //   isCentered: true,
+                  //   hint: '0',
+                  //   onChangedFunc: (val) {
+                  //     setState(() {
+                  //       quantity = val;
+                  //       myTotal =
+                  //           '${int.parse(quantity) * (int.parse(unitPrice) - int.parse(discount))}';
+                  //       // myTotal='${int.parse(cont.quantity) * (int.parse(cont.unitPrice) - int.parse(cont.discount))}';
+                  //     });
+                  //     _formKey.currentState!.validate();
+                  //     cont.setEnteredQtyInQuotation(widget.index, val);
+                  //
+                  //     cont.setMainTotalInQuotation(widget.index, myTotal);
+                  //     cont.getTotalItems();
+                  //   },
+                  //   validationFunc: (String? value) {
+                  //     if (value!.isEmpty || double.parse(value) <= 0) {
+                  //       return 'must be >0';
+                  //     }
+                  //     return null;
+                  //   },
+                  // )
+                ),
+                //warehouse
+                DropdownMenu<String>(
+                  width: MediaQuery.of(context).size.width * 0.10,
+                  // requestFocusOnTap: false,
+                  enableSearch: true,
+                  controller: warehouseController,
+                  hintText: 'deliver_warehouse'.tr,
+                  inputDecorationTheme: InputDecorationTheme(
+                    // filled: true,
+                    hintStyle: const TextStyle(fontStyle: FontStyle.italic),
+                    contentPadding: const EdgeInsets.fromLTRB(20, 0, 25, 5),
+                    // outlineBorder: BorderSide(color: Colors.black,),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(9)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Primary.primary.withAlpha((0.4 * 255).toInt()),
+                        width: 2,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(9)),
+                    ),
+                  ),
+                  // menuStyle: ,
+                  menuHeight: 250,
+                  dropdownMenuEntries:
+                      cont.warehousesNameList.map<DropdownMenuEntry<String>>((
+                        String option,
+                      ) {
+                        return DropdownMenuEntry<String>(
+                          value: option,
+                          label: option,
+                        );
+                      }).toList(),
+                  enableFilter: true,
+                  onSelected: (String? value) {
+                    warehouseController.text = value!;
+
+                    var index = cont.warehousesNameList.indexOf(value);
+                    var val = '${cont.warehouseIds[index]}';
+                    cont.setComboWareHouseInSalesOrder(widget.index, val);
+                  },
+                ),
+                // unitPrice
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.05,
+                  child: TextFormField(
+                    style: GoogleFonts.openSans(
+                      fontSize: 12,
+                      // fontWeight: FontWeight.w500,
+                    ),
+                    focusNode: focus,
+                    onFieldSubmitted: (value) {
+                      FocusScope.of(context).requestFocus(focus1);
+                    },
+                    textAlign: TextAlign.center,
+                    controller: cont.combosPriceControllers[widget.index],
+                    cursorColor: Colors.black,
+                    decoration: InputDecoration(
+                      hintText: "".tr,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                          width: 1,
+                        ),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                          width: 1,
+                        ),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                      ),
+                      errorStyle: const TextStyle(fontSize: 10.0),
+                      focusedErrorBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                        borderSide: BorderSide(width: 1, color: Colors.red),
+                      ),
+                    ),
+                    validator: (String? value) {
+                      return null;
+                    },
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: false,
+                      signed: true,
+                    ),
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                      // WhitelistingTextInputFormatter.digitsOnly
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        if (val == '') {
+                          cont.combosPriceControllers[widget.index]!.text = '0';
+                        } else {
+                          // cont.unitPriceControllers[widget.index]!.text = val;
+                        }
+                        // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
+                        totalLine =
+                            '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                      });
+                      _formKey.currentState!.validate();
+                      // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
+                      cont.setEnteredUnitPriceInSalesOrder(widget.index, val);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
+                      cont.getTotalItems();
+                    },
+                  ),
+                ),
+                //discount
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.05,
+                  child: TextFormField(
+                    style: GoogleFonts.openSans(
+                      fontSize: 12,
+                      // fontWeight: FontWeight.w500,
+                    ),
+                    focusNode: focus1,
+                    controller: discountController,
+                    cursorColor: Colors.black,
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      hintText: "".tr,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                          width: 1,
+                        ),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                          width: 1,
+                        ),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                      ),
+                      errorStyle: const TextStyle(fontSize: 10.0),
+                      focusedErrorBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                        borderSide: BorderSide(width: 1, color: Colors.red),
+                      ),
+                    ),
+                    validator: (String? value) {
+                      return null;
+                    },
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: false,
+                      signed: true,
+                    ),
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                      // WhitelistingTextInputFormatter.digitsOnly
+                    ],
+                    onChanged: (val) async {
+                      setState(() {
+                        if (val == '') {
+                          discountController.text = '0';
+                          discount = '0';
+                        } else {
+                          discount = val;
+                        }
+
+                        // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
+
+                        totalLine =
+                            '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                      });
+                      _formKey.currentState!.validate();
+
+                      // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
+                      cont.setEnteredDiscInSalesOrder(widget.index, val);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
+                      await cont.getTotalItems();
+                    },
+                  ),
+                ),
+
+                //total
+                ReusableShowInfoCard(
+                  text: formatDoubleWithCommas(
+                    double.parse(
+                      cont.rowsInListViewInSalesOrder[widget
+                          .index]['item_total'],
+                    ),
+                  ),
+                  width: MediaQuery.of(context).size.width * 0.05,
+                ),
+
+                //more
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.07,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.02,
+                        child: ReusableMore(itemsList: []),
+                      ),
+
+                      //delete
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.03,
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              salesOrderController
+                                  .decrementListViewLengthInSalesOrder(
+                                    salesOrderController.increment,
+                                  );
+                              salesOrderController
+                                  .removeFromRowsInListViewInSalesOrder(
+                                    widget.index,
+                                  );
+                              salesOrderController
+                                  .removeFromOrderLinesInSalesOrderList(
+                                    widget.index.toString(),
+                                  );
+                            });
+                            setState(() {
+                              cont.totalItems = 0.0;
+                              cont.globalDisc = "0.0";
+                              cont.globalDiscountPercentageValue = "0.0";
+                              cont.specialDisc = "0.0";
+                              cont.specialDiscountPercentageValue = "0.0";
+                              cont.vat11 = "0.0";
+                              cont.vatInPrimaryCurrency = "0.0";
+                              cont.totalSalesOrder = "0.0";
+                            });
+                            if (cont.rowsInListViewInSalesOrder != {}) {
+                              cont.getTotalItems();
+                            }
+                          },
+                          child: Icon(
+                            Icons.delete_outline,
+                            color: Primary.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.05,
-            child: ReusableNumberField(
-              textEditingController: controller, //todo
-              isPasswordField: false,
-              hint: '1.00',
-              onChangedFunc: (value) {
-                setState(() {
-                  quantity = value;
-                });
-              },
-              validationFunc: (val) {},
-            ),
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.05,
-            child: ReusableNumberField(
-              textEditingController: controller, //todo
-              isPasswordField: false,
-              hint: '150.00',
-              onChangedFunc: (val) {
-                setState(() {
-                  price = val;
-                });
-              },
-              validationFunc: (val) {},
-            ),
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.05,
-            child: ReusableNumberField(
-              textEditingController: controller, //todo
-              isPasswordField: false,
-              hint: '15',
-              onChangedFunc: (val) {
-                setState(() {
-                  disc = val;
-                });
-              },
-              validationFunc: (val) {},
-            ),
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.07,
-            height: 47,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Center(
-              child: Text(
-                '${int.parse(quantity) * (int.parse(price) - int.parse(disc))}',
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -3866,8 +5199,8 @@ class WarehouseAsRow extends StatelessWidget {
   }
 }
 
-class ShowQuantityDialog extends StatelessWidget {
-  const ShowQuantityDialog({super.key, required this.selectedItemId});
+class ShowItemQuantitiesDialog extends StatelessWidget {
+  const ShowItemQuantitiesDialog({super.key, required this.selectedItemId});
   final String selectedItemId;
   @override
   Widget build(BuildContext context) {
@@ -3943,1432 +5276,3 @@ class ShowQuantityDialog extends StatelessWidget {
     );
   }
 }
-
-
-// //mobile
-// class MobileCreateNewClientOrder extends StatefulWidget {
-//   const MobileCreateNewClientOrder({super.key});
-//
-//   @override
-//   State<MobileCreateNewClientOrder> createState() =>
-//       _MobileCreateNewClientOrderState();
-// }
-//
-// class _MobileCreateNewClientOrderState extends State<MobileCreateNewClientOrder> {
-//   String selectedSalesPerson = '';
-//   int selectedSalesPersonId = 0;
-//   // bool imageAvailable=false;
-//   GlobalKey accMoreKey2 = GlobalKey();
-//   TextEditingController commissionController = TextEditingController();
-//   TextEditingController totalCommissionController = TextEditingController();
-//   TextEditingController refController = TextEditingController();
-//   TextEditingController validityController = TextEditingController();
-//   TextEditingController searchController = TextEditingController();
-//   String selectedPaymentTerm = '',
-//       selectedPriceList = '',
-//       selectedCurrency = '',
-//       termsAndConditions = '',
-//       specialDisc = '',
-//       globalDisc = '';
-//   late Uint8List imageFile;
-//
-//   int currentStep = 0;
-//   int selectedTabIndex = 0;
-//   GlobalKey accMoreKey = GlobalKey();
-//   List tabsList = ['order_lines', 'other_information'];
-//   String selectedTab = 'order_lines'.tr;
-//   String? selectedItem = '';
-//
-//   double listViewLength = Sizes.deviceHeight * 0.08;
-//   double increment = Sizes.deviceHeight * 0.08;
-//   // double imageSpaceHeight = Sizes.deviceHeight * 0.1;
-//   // List<Widget> orderLinesList = [];
-//   final salesController salesController = Get.find();
-//   final HomeController homeController = Get.find();
-//   int progressVar = 0;
-//   Map data = {};
-//   bool isSalesOrderInfoFetched = false;
-//   List<String> customerNameList = [];
-//   List<String> customerTitleList = [];
-//   List customerIdsList = [];
-//   String selectedCustomerIds = '';
-//   String salesorderNumber = '';
-//   getFieldsForCreateQuotationFromBack() async {
-//     setState(() {
-//       selectedPaymentTerm = '';
-//       selectedPriceList = '';
-//       selectedCurrency = '';
-//       termsAndConditions = '';
-//       specialDisc = '';
-//       globalDisc = '';
-//       currentStep = 0;
-//       selectedTabIndex = 0;
-//       selectedItem = '';
-//       progressVar = 0;
-//       selectedCustomerIds = '';
-//
-//       salesorderNumber = '';
-//       data = {};
-//       customerNameList = [];
-//       customerIdsList = [];
-//     });
-//     var p = await getFieldsForCreateQuotation();
-//     if ('$p' != '[]') {
-//       setState(() {
-//         data.addAll(p);
-//         salesorderNumber = p['salesorderNumber'].toString();
-//         for (var client in p['clients']) {
-//           customerNameList.add('${client['name']}');
-//           customerIdsList.add('${client['id']}');
-//         }
-//         isSalesOrderInfoFetched = true;
-//       });
-//     }
-//   }
-//
-//   @override
-//   void initState() {
-//     getFieldsForCreateQuotationFromBack();
-//     super.initState();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return isSalesOrderInfoFetched
-//         ? Container(
-//       padding: EdgeInsets.symmetric(
-//         horizontal: MediaQuery.of(context).size.width * 0.03,
-//       ),
-//       height: MediaQuery.of(context).size.height * 0.75,
-//       child: SingleChildScrollView(
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               children: [PageTitle(text: 'create_new_quotation'.tr)],
-//             ),
-//             gapH16,
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 UnderTitleBtn(
-//                   text: 'preview'.tr,
-//                   onTap: () {
-//                     // setState(() {
-//                     //   // progressVar+=1;
-//                     // });
-//                   },
-//                 ),
-//                 UnderTitleBtn(
-//                   text: 'send_by_email'.tr,
-//                   onTap: () {
-//                     if (progressVar == 0) {
-//                       setState(() {
-//                         progressVar += 1;
-//                       });
-//                     }
-//                   },
-//                 ),
-//                 UnderTitleBtn(
-//                   text: 'confirm'.tr,
-//                   onTap: () {
-//                     if (progressVar == 1) {
-//                       setState(() {
-//                         progressVar += 1;
-//                       });
-//                     }
-//                   },
-//                 ),
-//                 UnderTitleBtn(
-//                   text: 'cancel'.tr,
-//                   onTap: () {
-//                     setState(() {
-//                       progressVar = 0;
-//                     });
-//                   },
-//                 ),
-//                 // UnderTitleBtn(
-//                 //   text: 'task'.tr,
-//                 //   onTap: () {
-//                 //     showDialog<String>(
-//                 //         context: context,
-//                 //         builder: (BuildContext context) =>
-//                 //         const AlertDialog(
-//                 //             backgroundColor: Colors.white,
-//                 //             shape: RoundedRectangleBorder(
-//                 //               borderRadius: BorderRadius.all(
-//                 //                   Radius.circular(9)),
-//                 //             ),
-//                 //             elevation: 0,
-//                 //             content: ScheduleTaskDialogContent()));
-//                 //   },
-//                 // ),
-//               ],
-//             ),
-//             gapH10,
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               children: [
-//                 ReusableTimeLineTile(
-//                   id: 0,
-//                   isDesktop: false,
-//                   progressVar: progressVar,
-//                   isFirst: true,
-//                   isLast: false,
-//                   isPast: true,
-//                   text: 'processing'.tr,
-//                 ),
-//                 ReusableTimeLineTile(
-//                   id: 1,
-//                   progressVar: progressVar,
-//                   isFirst: false,
-//                   isDesktop: false,
-//                   isLast: false,
-//                   isPast: false,
-//                   text: 'quotation_sent'.tr,
-//                 ),
-//                 ReusableTimeLineTile(
-//                   id: 2,
-//                   progressVar: progressVar,
-//                   isFirst: false,
-//                   isLast: true,
-//                   isDesktop: false,
-//                   isPast: false,
-//                   text: 'confirmed'.tr,
-//                 ),
-//               ],
-//             ),
-//             gapH24,
-//             Container(
-//               padding: const EdgeInsets.symmetric(
-//                 horizontal: 20,
-//                 vertical: 20,
-//               ),
-//               decoration: BoxDecoration(
-//                 border: Border.all(color: Others.divider),
-//                 borderRadius: const BorderRadius.all(Radius.circular(9)),
-//               ),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   isSalesOrderInfoFetched
-//                       ? Text(
-//                     salesorderNumber, //'${data['salesorderNumber'].toString() ?? ''}',
-//                     style: TextStyle(
-//                       fontWeight: FontWeight.bold,
-//                       fontSize: 20,
-//                       color: TypographyColor.titleTable,
-//                     ),
-//                   )
-//                       : const CircularProgressIndicator(),
-//                   gapH16,
-//                   DialogTextField(
-//                     textEditingController: refController,
-//                     text: '${'ref'.tr}:',
-//                     hint: 'manual_reference'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.5,
-//                     validationFunc: (val) {},
-//                   ),
-//                   gapH16,
-//                   DialogDropMenu(
-//                     optionsList: ['usd'.tr, 'lbp'.tr],
-//                     text: 'currency'.tr,
-//                     hint: 'usd'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.1,
-//                     onSelected: (value) {
-//                       setState(() {
-//                         selectedCurrency = value;
-//                       });
-//                     },
-//                   ),
-//                   gapH16,
-//
-//                   DialogTextField(
-//                     textEditingController: validityController,
-//                     text: 'validity'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.5,
-//                     validationFunc: (val) {},
-//                   ),
-//                   gapH16,
-//
-//                   DialogTextField(
-//                     textEditingController: validityController,
-//                     text: 'code'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.5,
-//                     validationFunc: (val) {},
-//                   ),
-//                   gapH16,
-//                   SizedBox(
-//                     width: MediaQuery.of(context).size.width * 0.9,
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         Text('${'name'.tr}*'),
-//                         DropdownMenu<String>(
-//                           width: MediaQuery.of(context).size.width * 0.5,
-//                           // requestFocusOnTap: false,
-//                           enableSearch: true,
-//                           controller: searchController,
-//                           hintText: '${'search'.tr}...',
-//                           inputDecorationTheme: InputDecorationTheme(
-//                             // filled: true,
-//                             hintStyle: const TextStyle(
-//                               fontStyle: FontStyle.italic,
-//                             ),
-//                             contentPadding: const EdgeInsets.fromLTRB(
-//                               20,
-//                               0,
-//                               25,
-//                               5,
-//                             ),
-//                             // outlineBorder: BorderSide(color: Colors.black,),
-//                             enabledBorder: OutlineInputBorder(
-//                               borderSide: BorderSide(
-//                                 color: Primary.primary.withAlpha(
-//                                   (0.2 * 255).toInt(),
-//                                 ),
-//                                 width: 1,
-//                               ),
-//                               borderRadius: const BorderRadius.all(
-//                                 Radius.circular(9),
-//                               ),
-//                             ),
-//                             focusedBorder: OutlineInputBorder(
-//                               borderSide: BorderSide(
-//                                 color: Primary.primary.withAlpha(
-//                                   (0.4 * 255).toInt(),
-//                                 ),
-//                                 width: 2,
-//                               ),
-//                               borderRadius: const BorderRadius.all(
-//                                 Radius.circular(9),
-//                               ),
-//                             ),
-//                           ),
-//                           // menuStyle: ,
-//                           menuHeight: 250,
-//                           dropdownMenuEntries:
-//                           customerNameList
-//                               .map<DropdownMenuEntry<String>>((
-//                               String option,
-//                               ) {
-//                             return DropdownMenuEntry<String>(
-//                               value: option,
-//                               label: option,
-//                             );
-//                           })
-//                               .toList(),
-//                           enableFilter: true,
-//                           onSelected: (String? val) {
-//                             setState(() {
-//                               selectedItem = val!;
-//                               var index = customerNameList.indexOf(val);
-//                               selectedCustomerIds = customerIdsList[index];
-//                             });
-//                           },
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                   gapH16,
-//
-//                   // Row(
-//                   //   mainAxisAlignment: MainAxisAlignment.start,
-//                   //   children: [
-//                   //     Text('contact_details'.tr),
-//                   //   ],
-//                   // ),
-//                   // gapH16,
-//                   DialogDropMenu(
-//                     optionsList: ['cash'.tr, 'on_account'.tr],
-//                     text: 'payment_terms'.tr,
-//                     hint: 'cash'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.5,
-//                     onSelected: (value) {
-//                       setState(() {
-//                         selectedPaymentTerm = value;
-//                       });
-//                     },
-//                   ),
-//                   gapH16,
-//                   DialogDropMenu(
-//                     optionsList: ['standard'.tr],
-//                     text: 'price_list'.tr,
-//                     hint: 'standard'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.5,
-//                     onSelected: (value) {
-//                       setState(() {
-//                         selectedPriceList = value;
-//                       });
-//                     },
-//                   ),
-//                   gapH16,
-//                 ],
-//               ),
-//             ),
-//             // Container(
-//             //   padding:
-//             //   const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-//             //   decoration: BoxDecoration(
-//             //       border: Border.all(color: Others.divider),
-//             //       borderRadius: const BorderRadius.all(Radius.circular(9))),
-//             //   child: Row(
-//             //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             //     crossAxisAlignment: CrossAxisAlignment.start,
-//             //     children: [
-//             //
-//             //       SizedBox(
-//             //         width: MediaQuery.of(context).size.width * 0.3,
-//             //         child: Column(
-//             //           crossAxisAlignment: CrossAxisAlignment.start,
-//             //           children: [
-//             //             // SizedBox(
-//             //             //   width: MediaQuery.of(context).size.width * 0.25,
-//             //             //   child: Row(
-//             //             //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             //             //     children: [
-//             //             //       Text('validity'.tr),
-//             //             //       DialogDateTextField(
-//             //             //         text: '',
-//             //             //         textFieldWidth:
-//             //             //             MediaQuery.of(context).size.width * 0.15,
-//             //             //         validationFunc: () {},
-//             //             //         onChangedFunc: (value) {
-//             //             //           setState(() {
-//             //             //             validity=value;
-//             //             //           });
-//             //             //         },
-//             //             //       ),
-//             //             //     ],
-//             //             //   ),
-//             //             // ),
-//             //
-//             //           ],
-//             //         ),
-//             //       ),
-//             //     ],
-//             //   ),
-//             // ),
-//             gapH16,
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               children: [
-//                 Wrap(
-//                   spacing: 0.0,
-//                   direction: Axis.horizontal,
-//                   children:
-//                   tabsList
-//                       .map(
-//                         (element) => _buildTabChipItem(
-//                       element,
-//                       // element['id'],
-//                       // element['name'],
-//                       tabsList.indexOf(element),
-//                     ),
-//                   )
-//                       .toList(),
-//                 ),
-//               ],
-//             ),
-//             // tabsContent[selectedTabIndex],
-//             selectedTabIndex == 0
-//                 ? Column(
-//               children: [
-//                 Container(
-//                   padding: const EdgeInsets.symmetric(
-//                     // horizontal:
-//                     //     MediaQuery.of(context).size.width * 0.01,
-//                     vertical: 15,
-//                   ),
-//                   decoration: BoxDecoration(
-//                     color: Primary.primary,
-//                     borderRadius: const BorderRadius.all(
-//                       Radius.circular(6),
-//                     ),
-//                   ),
-//                   child: Row(
-//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                     children: [
-//                       SizedBox(width: MediaQuery.of(context).size.width * 0.02,),
-//                       TableTitle(
-//                         text: 'item_code'.tr,
-//                         width: MediaQuery.of(context).size.width * 0.13,
-//                       ),
-//                       TableTitle(
-//                         text: 'description'.tr,
-//                         width: MediaQuery.of(context).size.width * 0.27,
-//                       ),
-//                       TableTitle(
-//                         text: 'quantity'.tr,
-//                         width: MediaQuery.of(context).size.width * 0.05,
-//                       ),
-//                       TableTitle(
-//                         text: 'unit_price'.tr,
-//                         width: MediaQuery.of(context).size.width * 0.05,
-//                       ),
-//                       TableTitle(
-//                         text: '${'disc'.tr}. %',
-//                         width: MediaQuery.of(context).size.width * 0.05,
-//                       ),
-//                       TableTitle(
-//                         text: 'total'.tr,
-//                         width: MediaQuery.of(context).size.width * 0.07,
-//                       ),
-//                       TableTitle(
-//                         text: '     ${'more_options'.tr}',
-//                         width: MediaQuery.of(context).size.width * 0.07,
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 GetBuilder<salesController>(
-//                   builder: (cont) {
-//                     return Container(
-//                       padding: EdgeInsets.symmetric(
-//                         horizontal:
-//                         MediaQuery.of(context).size.width * 0.01,
-//                       ),
-//                       decoration: const BoxDecoration(
-//                         borderRadius: BorderRadius.only(
-//                           bottomLeft: Radius.circular(6),
-//                           bottomRight: Radius.circular(6),
-//                         ),
-//                         color: Colors.white,
-//                       ),
-//                       child: Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           SizedBox(
-//                             height: listViewLength,
-//                             child: ListView.builder(
-//                               padding: const EdgeInsets.symmetric(
-//                                 vertical: 10,
-//                               ),
-//                               itemCount: 5,
-//                               // cont.orderLinesList
-//                               //     .length, //products is data from back res
-//                               itemBuilder:
-//                                   (context, index) => Row(
-//                                 children: [
-//                                   Container(
-//                                     width: 20,
-//                                     height: 20,
-//                                     margin:
-//                                     const EdgeInsets.symmetric(
-//                                       vertical: 15,
-//                                     ),
-//                                     decoration: const BoxDecoration(
-//                                       image: DecorationImage(
-//                                         image: AssetImage(
-//                                           'assets/images/newRow.png',
-//                                         ),
-//                                         fit: BoxFit.contain,
-//                                       ),
-//                                     ),
-//                                   ),
-//                                   // cont.orderLinesList[index],
-//                                   SizedBox(
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.03,
-//                                     child: const ReusableMore(
-//                                       itemsList: [],
-//                                     ),
-//                                   ),
-//                                   SizedBox(
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.03,
-//                                     child: InkWell(
-//                                       onTap: () {
-//                                         setState(() {
-//                                           // cont.removeFromOrderLinesList(
-//                                           //     index);
-//                                           listViewLength =
-//                                               listViewLength -
-//                                                   increment;
-//                                         });
-//                                       },
-//                                       child: Icon(
-//                                         Icons.delete_outline,
-//                                         color: Primary.primary,
-//                                       ),
-//                                     ),
-//                                   ),
-//                                 ],
-//                               ),
-//                             ),
-//                           ),
-//                           Row(
-//                             children: [
-//                               ReusableAddCard(
-//                                 text: 'title'.tr,
-//                                 onTap: () {
-//                                   addNewTitle();
-//                                 },
-//                               ),
-//                               gapW32,
-//                               ReusableAddCard(
-//                                 text: 'item'.tr,
-//                                 onTap: () {
-//                                   addNewItem();
-//                                 },
-//                               ),
-//                               gapW32,
-//                               ReusableAddCard(
-//                                 text: 'combo'.tr,
-//                                 onTap: () {
-//                                   addNewCombo();
-//                                 },
-//                               ),
-//                               gapW32,
-//                               ReusableAddCard(
-//                                 text: 'image'.tr,
-//                                 onTap: () {
-//                                   addNewImage();
-//                                 },
-//                               ),
-//                               gapW32,
-//                               ReusableAddCard(
-//                                 text: 'note'.tr,
-//                                 onTap: () {
-//                                   addNewNote();
-//                                 },
-//                               ),
-//                             ],
-//                           ),
-//                         ],
-//                       ),
-//                     );
-//                   },
-//                 ),
-//                 SizedBox(
-//                   width: MediaQuery.of(context).size.width,
-//                   height: listViewLength + 100,
-//                   child: ListView(
-//                     // physics: AlwaysScrollableScrollPhysics(),
-//                     scrollDirection: Axis.horizontal,
-//                     children: [
-//                       SizedBox(
-//                         height: listViewLength + 100,
-//                         width: MediaQuery.of(context).size.width,
-//                         child: ListView(
-//                           children: [
-//                             Container(
-//                               padding: EdgeInsets.symmetric(
-//                                 horizontal:
-//                                 MediaQuery.of(context).size.width *
-//                                     0.01,
-//                                 vertical: 15,
-//                               ),
-//                               decoration: BoxDecoration(
-//                                 color: Primary.primary,
-//                                 borderRadius: const BorderRadius.all(
-//                                   Radius.circular(6),
-//                                 ),
-//                               ),
-//                               child: Row(
-//                                 children: [
-//                                   TableTitle(
-//                                     text: 'item_code'.tr,
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.07,
-//                                   ),
-//                                   TableTitle(
-//                                     text: 'description'.tr,
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.33,
-//                                   ),
-//                                   TableTitle(
-//                                     text: 'quantity'.tr,
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.05,
-//                                   ),
-//                                   TableTitle(
-//                                     text: 'unit_price'.tr,
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.05,
-//                                   ),
-//                                   TableTitle(
-//                                     text: '${'disc'.tr}. %',
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.05,
-//                                   ),
-//                                   TableTitle(
-//                                     text: 'total'.tr,
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.07,
-//                                   ),
-//                                   TableTitle(
-//                                     text: '     ${'more_options'.tr}',
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.07,
-//                                   ),
-//                                 ],
-//                               ),
-//                             ),
-//                             GetBuilder<salesController>(
-//                               builder: (cont) {
-//                                 return Container(
-//                                   padding: EdgeInsets.symmetric(
-//                                     horizontal:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.01,
-//                                   ),
-//                                   decoration: const BoxDecoration(
-//                                     borderRadius: BorderRadius.only(
-//                                       bottomLeft: Radius.circular(6),
-//                                       bottomRight: Radius.circular(6),
-//                                     ),
-//                                     color: Colors.white,
-//                                   ),
-//                                   child: Column(
-//                                     crossAxisAlignment:
-//                                     CrossAxisAlignment.start,
-//                                     children: [
-//                                       SizedBox(
-//                                         height: listViewLength,
-//                                         child: ListView.builder(
-//                                           padding:
-//                                           const EdgeInsets.symmetric(
-//                                             vertical: 10,
-//                                           ),
-//                                           itemCount: 2,
-//                                           // cont
-//                                           //     .orderLinesList
-//                                           //     .length, //products is data from back res
-//                                           itemBuilder:
-//                                               (context, index) => Row(
-//                                             children: [
-//                                               Container(
-//                                                 width: 20,
-//                                                 height: 20,
-//                                                 margin:
-//                                                 const EdgeInsets.symmetric(
-//                                                   vertical: 15,
-//                                                 ),
-//                                                 decoration: const BoxDecoration(
-//                                                   image: DecorationImage(
-//                                                     image: AssetImage(
-//                                                       'assets/images/newRow.png',
-//                                                     ),
-//                                                     fit:
-//                                                     BoxFit
-//                                                         .contain,
-//                                                   ),
-//                                                 ),
-//                                               ),
-//                                               // cont.orderLinesList[
-//                                               //     index],
-//                                               SizedBox(
-//                                                 width:
-//                                                 MediaQuery.of(
-//                                                   context,
-//                                                 ).size.width *
-//                                                     0.03,
-//                                                 child:
-//                                                 const ReusableMore(
-//                                                   itemsList: [],
-//                                                 ),
-//                                               ),
-//                                             ],
-//                                           ),
-//                                         ),
-//                                       ),
-//                                       Row(
-//                                         children: [
-//                                           ReusableAddCard(
-//                                             text: 'title'.tr,
-//                                             onTap: () {
-//                                               addNewTitle();
-//                                             },
-//                                           ),
-//                                           gapW32,
-//                                           ReusableAddCard(
-//                                             text: 'item'.tr,
-//                                             onTap: () {
-//                                               addNewItem();
-//                                             },
-//                                           ),
-//                                           gapW32,
-//                                           ReusableAddCard(
-//                                             text: 'combo'.tr,
-//                                             onTap: () {
-//                                               addNewCombo();
-//                                             },
-//                                           ),
-//                                           gapW32,
-//                                           ReusableAddCard(
-//                                             text: 'image'.tr,
-//                                             onTap: () {
-//                                               addNewImage();
-//                                             },
-//                                           ),
-//                                           gapW32,
-//                                           ReusableAddCard(
-//                                             text: 'note'.tr,
-//                                             onTap: () {
-//                                               addNewNote();
-//                                             },
-//                                           ),
-//                                         ],
-//                                       ),
-//                                     ],
-//                                   ),
-//                                 );
-//                               },
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 gapH24,
-//                 Container(
-//                   padding: const EdgeInsets.symmetric(
-//                     vertical: 20,
-//                     horizontal: 20,
-//                   ),
-//                   decoration: BoxDecoration(
-//                     color: Colors.white,
-//                     borderRadius: BorderRadius.circular(6),
-//                   ),
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Text(
-//                         'terms_conditions'.tr,
-//                         style: TextStyle(
-//                           fontSize: 15,
-//                           color: TypographyColor.titleTable,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-//                       gapH16,
-//                       ReusableTextField(
-//                         textEditingController: controller, //todo
-//                         isPasswordField: false,
-//                         hint: 'terms_conditions'.tr,
-//                         onChangedFunc: () {},
-//                         validationFunc: (val) {
-//                           setState(() {
-//                             termsAndConditions = val;
-//                           });
-//                         },
-//                       ),
-//                       gapH16,
-//                       Text(
-//                         'or_create_new_terms_conditions'.tr,
-//                         style: TextStyle(
-//                           fontSize: 16,
-//                           color: Primary.primary,
-//                           decoration: TextDecoration.underline,
-//                           fontStyle: FontStyle.italic,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 Container(
-//                   padding: const EdgeInsets.symmetric(
-//                     vertical: 20,
-//                     horizontal: 20,
-//                   ),
-//                   decoration: BoxDecoration(
-//                     color: Primary.p20,
-//                     borderRadius: BorderRadius.circular(6),
-//                   ),
-//                   child: Row(
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     children: [
-//                       SizedBox(
-//                         width: MediaQuery.of(context).size.width * 0.8,
-//                         child: Column(
-//                           children: [
-//                             Row(
-//                               mainAxisAlignment:
-//                               MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Text('total_before_vat'.tr),
-//                                 Container(
-//                                   width:
-//                                   MediaQuery.of(
-//                                     context,
-//                                   ).size.width *
-//                                       0.2,
-//                                   height: 47,
-//                                   decoration: BoxDecoration(
-//                                     border: Border.all(
-//                                       color:
-//                                       Colors.black..withAlpha(
-//                                         (0.1 * 255).toInt(),
-//                                       ),
-//                                       width: 1,
-//                                     ),
-//                                     borderRadius: BorderRadius.circular(
-//                                       6,
-//                                     ),
-//                                   ),
-//                                   child: const Center(child: Text('0')),
-//                                 ),
-//                               ],
-//                             ),
-//                             gapH6,
-//                             Row(
-//                               mainAxisAlignment:
-//                               MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Text('global_disc'.tr),
-//                                 Row(
-//                                   children: [
-//                                     SizedBox(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       child: ReusableTextField(
-//                                         textEditingController:
-//                                         controller, //todo
-//                                         isPasswordField: false,
-//                                         hint: '0',
-//                                         onChangedFunc: (val) {
-//                                           setState(() {
-//                                             globalDisc = val;
-//                                           });
-//                                         },
-//                                         validationFunc: (val) {},
-//                                       ),
-//                                     ),
-//                                     gapW10,
-//                                     Container(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       height: 47,
-//                                       decoration: BoxDecoration(
-//                                         border: Border.all(
-//                                           color: Colors.black.withAlpha(
-//                                             (0.1 * 255).toInt(),
-//                                           ),
-//                                           width: 1,
-//                                         ),
-//                                         borderRadius:
-//                                         BorderRadius.circular(6),
-//                                       ),
-//                                       child: const Center(
-//                                         child: Text('0'),
-//                                       ),
-//                                     ),
-//                                   ],
-//                                 ),
-//                               ],
-//                             ),
-//                             gapH6,
-//                             Row(
-//                               mainAxisAlignment:
-//                               MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Text('special_disc'.tr),
-//                                 Row(
-//                                   children: [
-//                                     SizedBox(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       child: ReusableTextField(
-//                                         textEditingController:
-//                                         controller, //todo
-//                                         isPasswordField: false,
-//                                         hint: '0',
-//                                         onChangedFunc: (val) {
-//                                           setState(() {
-//                                             specialDisc = val;
-//                                           });
-//                                         },
-//                                         validationFunc: (val) {},
-//                                       ),
-//                                     ),
-//                                     gapW10,
-//                                     Container(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       height: 47,
-//                                       decoration: BoxDecoration(
-//                                         border: Border.all(
-//                                           color: Colors.black.withAlpha(
-//                                             (0.1 * 255).toInt(),
-//                                           ),
-//                                           width: 1,
-//                                         ),
-//                                         borderRadius:
-//                                         BorderRadius.circular(6),
-//                                       ),
-//                                       child: const Center(
-//                                         child: Text('0'),
-//                                       ),
-//                                     ),
-//                                   ],
-//                                 ),
-//                               ],
-//                             ),
-//                             gapH6,
-//                             Row(
-//                               mainAxisAlignment:
-//                               MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Text('vat_11'.tr),
-//                                 Row(
-//                                   children: [
-//                                     Container(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       height: 47,
-//                                       decoration: BoxDecoration(
-//                                         border: Border.all(
-//                                           color: Colors.black.withAlpha(
-//                                             (0.1 * 255).toInt(),
-//                                           ),
-//                                           width: 1,
-//                                         ),
-//                                         borderRadius:
-//                                         BorderRadius.circular(6),
-//                                       ),
-//                                       child: const Center(
-//                                         child: Text('0'),
-//                                       ),
-//                                     ),
-//                                     gapW10,
-//                                     Container(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       height: 47,
-//                                       decoration: BoxDecoration(
-//                                         border: Border.all(
-//                                           color: Colors.black.withAlpha(
-//                                             (0.1 * 255).toInt(),
-//                                           ),
-//                                           width: 1,
-//                                         ),
-//                                         borderRadius:
-//                                         BorderRadius.circular(6),
-//                                       ),
-//                                       child: const Center(
-//                                         child: Text('0.00'),
-//                                       ),
-//                                     ),
-//                                   ],
-//                                 ),
-//                               ],
-//                             ),
-//                             gapH10,
-//                             Row(
-//                               mainAxisAlignment:
-//                               MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Text(
-//                                   'total_amount'.tr,
-//                                   style: TextStyle(
-//                                     fontSize: 16,
-//                                     color: Primary.primary,
-//                                     fontWeight: FontWeight.bold,
-//                                   ),
-//                                 ),
-//                                 Text(
-//                                   '${'usd'.tr} 0.00',
-//                                   style: TextStyle(
-//                                     fontSize: 16,
-//                                     color: Primary.primary,
-//                                     fontWeight: FontWeight.bold,
-//                                   ),
-//                                 ),
-//                               ],
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 gapH28,
-//                 Row(
-//                   mainAxisAlignment: MainAxisAlignment.end,
-//                   children: [
-//                     ReusableButtonWithColor(
-//                       width: MediaQuery.of(context).size.width * 0.3,
-//                       height: 45,
-//                       onTapFunction: () async {
-//                         var res = await storeQuotation(
-//                           refController.text,
-//                           selectedCustomerIds,
-//                           validityController.text,
-//                           '',
-//                           '',
-//                           '',
-//                           termsAndConditions,
-//                           '',
-//                           '',
-//                           '',
-//                           commissionController.text,
-//                           totalCommissionController.text,
-//                           '',
-//                           specialDisc,
-//                           '',
-//                           globalDisc,
-//                           '',
-//                           '',
-//                           '',
-//                           '',
-//                         );
-//                         if (res['success'] == true) {
-//                           CommonWidgets.snackBar(
-//                             'Success',
-//                             res['message'],
-//                           );
-//                           setState(() {
-//                             isSalesOrderInfoFetched = false;
-//                             getFieldsForCreateQuotationFromBack();
-//                           });
-//                           homeController.selectedTab.value =
-//                           'quotation_summary';
-//                         } else {
-//                           CommonWidgets.snackBar(
-//                             'error',
-//                             res['message'],
-//                           );
-//                         }
-//                       },
-//                       btnText: 'create_quotation'.tr,
-//                     ),
-//                   ],
-//                 ),
-//               ],
-//             )
-//                 : Container(
-//               padding: const EdgeInsets.symmetric(
-//                 horizontal: 20,
-//                 vertical: 15,
-//               ),
-//               decoration: const BoxDecoration(
-//                 borderRadius: BorderRadius.only(
-//                   bottomLeft: Radius.circular(6),
-//                   bottomRight: Radius.circular(6),
-//                 ),
-//                 color: Colors.white,
-//               ),
-//               child: Column(
-//                 children: [
-//                   DialogDropMenu(
-//                     optionsList:  salesController.salesPersonListNames,
-//                     text: 'sales_person'.tr,
-//                     hint: 'search'.tr,
-//                     rowWidth:
-//                     MediaQuery.of(context).size.width *
-//                         0.3,
-//                     textFieldWidth:
-//                     MediaQuery.of(context).size.width *
-//                         0.15,
-//                     onSelected: (String? val) {
-//                       setState(() {
-//                         selectedSalesPerson = val!;
-//                         var index = salesController.salesPersonListNames
-//                             .indexOf(val);
-//                         selectedSalesPersonId =
-//                         salesController.salesPersonListId[index];
-//                         print(selectedSalesPerson);
-//                         print(selectedSalesPersonId);
-//                       });
-//
-//                     },
-//                   ),
-//                   gapH16,
-//                   DialogDropMenu(
-//                     optionsList: const [''],
-//                     text: 'commission_method'.tr,
-//                     hint: '',
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth:
-//                     MediaQuery.of(context).size.width * 0.4,
-//                     onSelected: () {},
-//                   ),
-//                   gapH16,
-//                   DialogDropMenu(
-//                     optionsList: ['cash'.tr],
-//                     text: 'cashing_method'.tr,
-//                     hint: '',
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth:
-//                     MediaQuery.of(context).size.width * 0.4,
-//                     onSelected: () {},
-//                   ),
-//                   gapH16,
-//                   DialogTextField(
-//                     textEditingController: commissionController,
-//                     text: 'commission'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth:
-//                     MediaQuery.of(context).size.width * 0.4,
-//                     validationFunc: (val) {},
-//                   ),
-//                   gapH16,
-//                   DialogTextField(
-//                     textEditingController: totalCommissionController,
-//                     text: 'total_commission'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth:
-//                     MediaQuery.of(context).size.width * 0.4,
-//                     validationFunc: (val) {},
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             gapH40,
-//           ],
-//         ),
-//       ),
-//     )
-//         : const CircularProgressIndicator();
-//   }
-//
-//   Widget _buildTabChipItem(String name, int index) {
-//     return GestureDetector(
-//       onTap: () {
-//         setState(() {
-//           selectedTabIndex = index;
-//         });
-//       },
-//       child: ClipPath(
-//         clipper: const ShapeBorderClipper(
-//           shape: RoundedRectangleBorder(
-//             borderRadius: BorderRadius.only(
-//               topLeft: Radius.circular(9),
-//               topRight: Radius.circular(9),
-//             ),
-//           ),
-//         ),
-//         child: Container(
-//           width: MediaQuery.of(context).size.width * 0.25,
-//           height: MediaQuery.of(context).size.height * 0.07,
-//           decoration: BoxDecoration(
-//             color: selectedTabIndex == index ? Primary.p20 : Colors.white,
-//             border:
-//             selectedTabIndex == index
-//                 ? Border(top: BorderSide(color: Primary.primary, width: 3))
-//                 : null,
-//             boxShadow: [
-//               BoxShadow(
-//                 color: Colors.grey.withAlpha((0.5 * 255).toInt()),
-//                 spreadRadius: 9,
-//                 blurRadius: 9,
-//                 // offset: const Offset(0, 3),
-//               ),
-//             ],
-//           ),
-//           child: Center(
-//             child: Text(
-//               name.tr,
-//               style: TextStyle(
-//                 fontWeight: FontWeight.bold,
-//                 color: Primary.primary,
-//               ),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   addNewTitle() {
-//     setState(() {
-//       listViewLength = listViewLength + increment;
-//     });
-//     // Widget p =
-//     Container(
-//       width: MediaQuery.of(context).size.width * 0.63,
-//       margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-//       child: ReusableTextField(
-//         textEditingController: controller, //todo
-//         isPasswordField: false,
-//         hint: 'title'.tr,
-//         onChangedFunc: (val) {},
-//         validationFunc: (val) {},
-//       ),
-//     );
-//     // salesController.addToOrderLinesList(p);
-//   }
-//
-//   // String price='0',disc='0',result='0',quantity='0';
-//   addNewItem() {
-//     setState(() {
-//       listViewLength = listViewLength + increment;
-//     });
-//
-//
-//
-//     // salesController.addToOrderLinesList(p);
-//   }
-//
-//   addNewCombo() {
-//     setState(() {
-//       listViewLength = listViewLength + increment;
-//     });
-//     // Widget p = const ReusableComboRow();
-//     // salesController.addToOrderLinesList(p);
-//   }
-//
-//   addNewImage() {
-//     setState(() {
-//       listViewLength = listViewLength + 100;
-//     });
-//     // Widget p =
-//     GetBuilder<salesController>(
-//       builder: (cont) {
-//         return InkWell(
-//           onTap: () async {
-//             final image = await ImagePickerHelper.pickImage();
-//             setState(() {
-//               imageFile = image!;
-//               cont.changeBoolVar(true);
-//               cont.increaseImageSpace(90);
-//               listViewLength = listViewLength + (cont.imageSpaceHeight) + 10;
-//             });
-//           },
-//           child: Container(
-//             margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-//             child: DottedBorder(
-//               dashPattern: const [10, 10],
-//               color: Others.borderColor,
-//               radius: const Radius.circular(9),
-//               child: SizedBox(
-//                 width: MediaQuery.of(context).size.width * 0.63,
-//                 height: cont.imageSpaceHeight,
-//                 child:
-//                 cont.imageAvailable
-//                     ? Row(
-//                   mainAxisAlignment: MainAxisAlignment.start,
-//                   children: [
-//                     Image.memory(
-//                       imageFile,
-//                       height: cont.imageSpaceHeight,
-//                     ),
-//                   ],
-//                 )
-//                     : Row(
-//                   mainAxisAlignment: MainAxisAlignment.start,
-//                   crossAxisAlignment: CrossAxisAlignment.center,
-//                   children: [
-//                     gapW20,
-//                     Icon(
-//                       Icons.cloud_upload_outlined,
-//                       color: Others.iconColor,
-//                       size: 32,
-//                     ),
-//                     gapW20,
-//                     Text(
-//                       'drag_drop_image'.tr,
-//                       style: TextStyle(
-//                         color: TypographyColor.textTable,
-//                       ),
-//                     ),
-//                     Text(
-//                       'browse'.tr,
-//                       style: TextStyle(color: Primary.primary),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//     // salesController.addToOrderLinesList(p);
-//   }
-//
-//   addNewNote() {
-//     setState(() {
-//       listViewLength = listViewLength + increment;
-//     });
-//     // Widget p =
-//     Container(
-//       width: MediaQuery.of(context).size.width * 0.63,
-//       margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-//       child: ReusableTextField(
-//         textEditingController: controller, //todo
-//         isPasswordField: false,
-//         hint: 'note'.tr,
-//         onChangedFunc: (val) {},
-//         validationFunc: (val) {},
-//       ),
-//     );
-//     // salesController.addToOrderLinesList(p);
-//   }
-//
-//   List<Step> getSteps() => [
-//     Step(
-//       title: const Text(''),
-//       content: Container(
-//         //page
-//       ),
-//       isActive: currentStep >= 0,
-//     ),
-//     Step(
-//       title: const Text(''),
-//       content: Container(),
-//       isActive: currentStep >= 1,
-//     ),
-//     Step(
-//       title: const Text(''),
-//       content: Container(),
-//       isActive: currentStep >= 2,
-//     ),
-//   ];
-// }

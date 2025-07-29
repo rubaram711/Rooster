@@ -32,8 +32,8 @@ Future storeCombo(
       MapEntry("items[$i][discount]", '${items[i]['discount']}'),
     ]);
   }
-  print("formdata*******************");
-  print(formData.fields);
+  // print("form data*******************");
+  // print(formData.fields);
 
   Response response = await Dio()
       .post(
@@ -47,9 +47,9 @@ Future storeCombo(
         ),
       )
       .catchError((err) {
-        print("+++++++Error stor Combo Connect+++++++++++++++++");
-        print(err.response);
-        print("++++++++++++++++++++++++");
+        // print("+++++++Error store Combo Connect+++++++++++++++++");
+        // print(err.response);
+        // print("++++++++++++++++++++++++");
         return err.response;
       });
 

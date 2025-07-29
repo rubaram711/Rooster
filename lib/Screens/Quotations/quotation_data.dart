@@ -15,10 +15,10 @@ import '../../Widgets/TransferWidgets/reusable_show_info_card.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/table_title.dart';
+import '../../const/Delta/convert_from_delta_to_widget.dart';
 import '../../const/urls.dart';
 
 
-import 'convert_from_delta_to_widget.dart';
 
 // import 'package:http/http.dart' as http;
 class QuotationData extends StatefulWidget {
@@ -923,7 +923,7 @@ class _QuotationDataState extends State<QuotationData> {
                 //         image: DecorationImage(
                 //           image: NetworkImage(
                 //               // "https://www.google.com/imgres?q=image&imgurl=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1575936123452-b67c3203c357%3Ffm%3Djpg%26q%3D60%26w%3D3000%26ixlib%3Drb-4.0.3%26ixid%3DM3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%253D&imgrefurl=https%3A%2F%2Funsplash.com%2Fs%2Fphotos%2Fimage&docid=ExDvm63D_wCvSM&tbnid=-mNI5DBCB_iEPM&vet=12ahUKEwitxdXs7uiLAxX_VqQEHSDQBI8QM3oECBYQAA..i&w=3000&h=2000&hcb=2&ved=2ahUKEwitxdXs7uiLAxX_VqQEHSDQBI8QM3oECBYQAA"
-                //               "https://theravenstyle.com/public/storage/quotations/images/104/v6TEQ7lVrXwGdegbut0Emfwvdrr6It1tloihspla.png"
+                //               "$baseImagestorage/quotations/images/104/v6TEQ7lVrXwGdegbut0Emfwvdrr6It1tloihspla.png"
                 //             ), // Replace with your URL
                 //           // fit: BoxFit.cover, // Adjust how the image fits
                 //         ))
@@ -1661,7 +1661,7 @@ class ReusableImageRow extends StatelessWidget {
             child:
                 info['image'] != ''
                     ? Image.network(
-                      "https://theravenstyle.com/public/${info['image']}",
+                      "$baseImage${info['image']}",
                       loadingBuilder: (
                         BuildContext context,
                         Widget child,

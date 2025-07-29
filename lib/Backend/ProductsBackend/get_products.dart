@@ -137,6 +137,6 @@ var s = {
   "decimalQuantity": 12,
   "active": 1,
   "images": [
-    "https://theravenstyle.com/public/storage/items/images/4/CVm5Zc5OTljVkFLyS9c03ib4b4wRRmYe1cSu3tXl.jpg",
+    // "$baseImages/items/images/4/CVm5Zc5OTljVkFLyS9c03ib4b4wRRmYe1cSu3tXl.jpg",
   ],
 };

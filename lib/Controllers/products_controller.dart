@@ -7,6 +7,7 @@ import 'package:rooster_app/Backend/ProductsBackend/delete_image.dart';
 import 'package:rooster_app/Screens/Products/CreateProductDialog/procurement_tab_content.dart';
 import 'package:rooster_app/Screens/Products/products_page.dart';
 import 'package:rooster_app/const/urls.dart';
+import '../Backend/ProductsBackend/get_item_quantities.dart';
 import '../Backend/ProductsBackend/get_product_create_info.dart';
 import '../Backend/ProductsBackend/get_products.dart';
 import '../Backend/ProductsBackend/post_product_images.dart';
@@ -895,6 +896,14 @@ class ProductController extends GetxController {
     counterForImages++;
   }
 
+  getQuantities()async{
+    var res=await getQuantitiesOfProduct(selectedProductId.toString());
+    if(res['success']==true){
+        transactionQuantitiesList[2]['quantities']='${res['data']['salesOrderQuantities']} Pcs';
+        transactionQuantitiesList[5]['quantities']='${res['data']['salesOrderQuantities']} Pcs';
+        transactionQuantitiesList[1]['quantities']='${res['data']['qtyOwned']} Pcs';
+    }
+  }
 
   setAllValuesForUpdate(Map product) {
     counterForImages = 1;
@@ -936,8 +945,8 @@ class ProductController extends GetxController {
     selectedCategoryId = '${product['totalQuantities'] ?? ''}';
     transactionQuantitiesList[0]['quantities'] =
         '${product['totalQuantities'] ?? ''} ${product['packageUnitName'] ?? ''}';
-    transactionQuantitiesList[1]['quantities'] =
-        '${product['totalQuantities'] ?? ''} ${product['packageUnitName'] ?? ''}';
+    // transactionQuantitiesList[1]['quantities'] =
+    //     '${product['totalQuantities'] ?? ''} ${product['packageUnitName'] ?? ''}';
     selectedCategoryId = '${product['category']['id'] ?? '1'}';
     isCanBeSoldChecked = '${product['canBeSold'] ?? '0'}' == '0' ? false : true;
     isCanBePurchasedChecked =
@@ -1043,6 +1052,7 @@ class ProductController extends GetxController {
     // print('isDiscontinuedChecked');
     // print(product['lastAllowedPurchaseDate']);
     // print(product['active']);
+    getQuantities();
     update();
   }
 

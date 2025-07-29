@@ -84,11 +84,14 @@ double roundUp(double value, int decimalPlaces) {
 }
 
 
+
+
 String calculateRateCur1ToCur2(double usdToCur1, double usdToCur2) {
   if (usdToCur1 == 0) {
     throw ArgumentError("USD to CUR1 rate cannot be zero.");
   }
-  double result =roundUp((usdToCur2 / usdToCur1),3);
+  double result =usdToCur2 / usdToCur1;
+  // double result =roundUp((usdToCur2 / usdToCur1),3);
   return (result).toString();
 }
 

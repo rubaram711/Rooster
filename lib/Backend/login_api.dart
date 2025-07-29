@@ -10,6 +10,5 @@ Future login(String email, String password) async {
     'password': password,
   });
   var p = json.decode(response.body);
-  print('objectvv $p');
   return p;
 }

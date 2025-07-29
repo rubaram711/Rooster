@@ -41,7 +41,7 @@ class _ReturnToSupplierState extends State<ReturnToSupplierSummary> {
   List returnToSupplierList=[];
   bool isReturnToSupplierFetched = false;
   getAllQuotationsFromBack()async{
-    var p=await getAllQuotations();
+    var p=await getAllQuotationsWithoutPending('');
     setState(() {
       returnToSupplierList.addAll(p);
       isReturnToSupplierFetched=true;
@@ -515,7 +515,7 @@ class _MobileReturnToSupplierSummaryState extends State<MobileReturnToSupplierSu
   List returnToSupplierList=[];
   bool isReturnToSupplierFetched = false;
   getAllQuotationsFromBack()async{
-    var p=await getAllQuotations();
+    var p=await getAllQuotationsWithoutPending('');
     setState(() {
       returnToSupplierList.addAll(p);
       isReturnToSupplierFetched=true;

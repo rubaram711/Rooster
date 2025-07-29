@@ -9,6 +9,7 @@ import '../../Backend/ClientsBackend/get_client_create_info.dart';
 import '../../Backend/ClientsBackend/store_client.dart';
 import '../../Backend/get_cities_of_a_specified_country.dart';
 import '../../Backend/get_countries.dart';
+import '../../Controllers/client_controller.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/dialog_drop_menu.dart';
@@ -18,6 +19,7 @@ import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
+import '../Client/add_new_client.dart';
 
 class CreateClientDialog extends StatefulWidget {
   const CreateClientDialog({super.key});
@@ -55,6 +57,7 @@ class _CreateClientDialogState
   int selectedTabIndex = 0;
   List tabsList = [
     'settings',
+    'contacts_and_addresses',
     'sales',
   ];
   Map data = {};
@@ -117,6 +120,7 @@ class _CreateClientDialogState
     getCountriesFromBack();
     super.initState();
   }
+  ClientController clientController=Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -619,7 +623,7 @@ class _CreateClientDialogState
                       padding: EdgeInsets.symmetric(
                           horizontal: MediaQuery.of(context).size.width * 0.01,
                           vertical: 25),
-                      height: 300,
+                      height: 600,
                       decoration: const BoxDecoration(
                         borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(6),
@@ -629,7 +633,8 @@ class _CreateClientDialogState
                       child:
                       Column(
                         children: [
-                          selectedTabIndex==0? Column(
+                          selectedTabIndex==0
+                              ? Column(
                             mainAxisAlignment:
                             MainAxisAlignment.start,
                             crossAxisAlignment:
@@ -749,7 +754,10 @@ class _CreateClientDialogState
                                 ],
                               ),
                             ],
-                          ):Row(
+                          ):
+                      selectedTabIndex==1
+                          ?ContactsAndAddressesSection()
+                          :Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -898,7 +906,8 @@ class _CreateClientDialogState
                                           paymentTerm,
                                           selectedPriceListId,
                                           internalNoteController.text,
-                                          '');
+                                          '',
+                                          clientController.contactsList);
                                       if (res['success'] == true) {
                                         CommonWidgets.snackBar('Success',
                                             res['message'] );

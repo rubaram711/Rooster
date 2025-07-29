@@ -41,7 +41,7 @@ class _ReturnFromClientState extends State<ReturnFromClientSummary> {
   List returnFromClientList=[];
   bool isReturnFromClientFetched = false;
   getAllQuotationsFromBack()async{
-    var p=await getAllQuotations();
+    var p=await getAllQuotationsWithoutPending('');
     setState(() {
       returnFromClientList.addAll(p);
       isReturnFromClientFetched=true;
@@ -515,7 +515,7 @@ class _MobileReturnFromClientSummaryState extends State<MobileReturnFromClientSu
   List returnFromClientList=[];
   bool isReturnFromClientFetched = false;
   getAllQuotationsFromBack()async{
-    var p=await getAllQuotations();
+    var p=await getAllQuotationsWithoutPending('');
     setState(() {
       returnFromClientList.addAll(p);
       isReturnFromClientFetched=true;

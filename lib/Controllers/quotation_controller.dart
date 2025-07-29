@@ -12,6 +12,17 @@ import '../const/functions.dart';
 import 'exchange_rates_controller.dart';
 
 class QuotationController extends GetxController {
+  int quotationCounter = 0;
+  setQuotationCounter(int val){
+    quotationCounter=val;
+    update;
+  }
+  String status = '';
+  setStatus(String val) {
+    status = val;
+    update();
+  }
+
   Uint8List logoBytes = Uint8List(0);
   setLogo(Uint8List val) {
     logoBytes = val;
@@ -245,7 +256,6 @@ class QuotationController extends GetxController {
     itemsCodes = {};
     itemsNames = {};
     warehousesInfo = {};
-    // warehousesList = [];
     itemUnitPrice = {};
     itemsVats = {};
     itemsPricesCurrencies = {};
@@ -256,7 +266,6 @@ class QuotationController extends GetxController {
     customersMultiPartList = [];
     customerIdsList = [];
     customerNumberList = [];
-    // itemsList = [];
     priceListsCodes = [];
     priceListsNames = [];
     priceListsIds = [];
@@ -282,27 +291,28 @@ class QuotationController extends GetxController {
     warehousesInfo = {};
     isQuotationsInfoFetched = false;
     var p = await getFieldsForCreateQuotation();
-    for (var item in p['items']) {
-      itemsCode.add('${item['mainCode']}');
-      // print('${item['mainDescription']}');
-      itemsIds.add('${item['id']}');
-      itemsInfo.add(
-        '${item['mainCode']}, ${item['mainDescription']} , ${item['totalQuantities']} Pcs',
-      );
-      itemsDes.add('${item['mainDescription']}');
-      itemsName.add('${item['item_name']}');
-      itemsTotalQuantity.add('${item['totalQuantities']}');
-      itemsMap["${item['id']}"] = item;
-      itemsDescription["${item['id']}"] = item['mainDescription'];
-      itemsNames["${item['id']}"] = item['item_name'];
-      itemsCodes["${item['id']}"] = item['mainCode'];
-      itemUnitPrice["${item['id']}"] = item['unitPrice'];
-      itemsPricesCurrencies["${item['id']}"] = item['priceCurrency']['name'];
-      List helper = item['taxationGroup']['tax_rates'];
-      helper = helper.reversed.toList();
-      itemsVats["${item['id']}"] = helper[0]['tax_rate'];
-      warehousesInfo["${item['id']}"] = item['warehouses'];
-    }
+    //todo i remove this for test
+    // for (var item in p['items']) {
+    //   itemsCode.add('${item['mainCode']}');
+    //   // print('${item['mainDescription']}');
+    //   itemsIds.add('${item['id']}');
+    //   itemsInfo.add(
+    //     '${item['mainCode']}, ${item['mainDescription']} , ${item['totalQuantities']} Pcs',
+    //   );
+    //   itemsDes.add('${item['mainDescription']}');
+    //   itemsName.add('${item['item_name']}');
+    //   itemsTotalQuantity.add('${item['totalQuantities']}');
+    //   itemsMap["${item['id']}"] = item;
+    //   itemsDescription["${item['id']}"] = item['mainDescription'];
+    //   itemsNames["${item['id']}"] = item['item_name'];
+    //   itemsCodes["${item['id']}"] = item['mainCode'];
+    //   itemUnitPrice["${item['id']}"] = item['unitPrice'];
+    //   itemsPricesCurrencies["${item['id']}"] = item['priceCurrency']['name'];
+    //   List helper = item['taxationGroup']['tax_rates'];
+    //   helper = helper.reversed.toList();
+    //   itemsVats["${item['id']}"] = helper[0]['tax_rate'];
+    //   warehousesInfo["${item['id']}"] = item['warehouses'];
+    // }
     quotationNumber = p['quotationNumber'].toString();
 
     for (var client in p['clients']) {
@@ -338,8 +348,8 @@ class QuotationController extends GetxController {
       priceListsCodes.add(priceList['code']);
       priceListsNames.add(priceList['title']);
       priceListsIds.add('${priceList['id']}');
-      if(priceList['code']=='STANDARD'){
-        selectedPriceListId='${priceList['id']}';
+      if (priceList['code'] == 'STANDARD') {
+        selectedPriceListId = '${priceList['id']}';
       }
     }
     for (var priceList in p['cashingMethods']) {
@@ -349,9 +359,9 @@ class QuotationController extends GetxController {
     for (var combo in p['combos']) {
       combosMap["${combo['id']}"] = combo;
       combosPricesCurrencies["${combo['id']}"] = combo['currency']['name'];
-      combosCodesList.add(combo['code']??'');
-      combosNamesList.add(combo['name']??'');
-      combosDescriptionList.add(combo['description']??'');
+      combosCodesList.add(combo['code'] ?? '');
+      combosNamesList.add(combo['name'] ?? '');
+      combosDescriptionList.add(combo['description'] ?? '');
       combosPricesList.add('${combo['price']}');
       combosIdsList.add('${combo['id']}');
     }
@@ -365,6 +375,8 @@ class QuotationController extends GetxController {
 
     isQuotationsInfoFetched = true;
     update();
+    //todo i add this instead
+    resetItemsAfterChangePriceList();
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
@@ -428,7 +440,8 @@ class QuotationController extends GetxController {
             } else if (selectedCurrencyName == 'USD' &&
                 itemsPricesCurrencies[selectedItemId] != selectedCurrencyName) {
               var result = exchangeRatesController.exchangeRatesList.firstWhere(
-                (item) => item["currency"] == itemsPricesCurrencies[selectedItemId],
+                (item) =>
+                    item["currency"] == itemsPricesCurrencies[selectedItemId],
                 orElse: () => null,
               );
               var divider = '1';
@@ -443,7 +456,8 @@ class QuotationController extends GetxController {
                   '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
             } else {
               var result = exchangeRatesController.exchangeRatesList.firstWhere(
-                (item) => item["currency"] == itemsPricesCurrencies[selectedItemId],
+                (item) =>
+                    item["currency"] == itemsPricesCurrencies[selectedItemId],
                 orElse: () => null,
               );
               var divider = '1';
@@ -498,8 +512,18 @@ class QuotationController extends GetxController {
   }
 
   Map newRowMap = {};
+  List<int> orderedKeys = [];
   Map rowsInListViewInQuotation = {
     // 0: {
+    //    'type': '',
+    //    'item': '',
+    //    'discount': '0',
+    //    'description': '',
+    //    'quantity': '0',
+    //    'unitPrice': '0',
+    //    'total': '0',
+    //  }
+    // 1: {
     //    'type': '',
     //    'item': '',
     //    'discount': '0',
@@ -511,17 +535,21 @@ class QuotationController extends GetxController {
   };
   clearList() {
     rowsInListViewInQuotation = {};
+    orderedKeys=[];
     update();
   }
 
   addToRowsInListViewInQuotation(int index, Map p) {
+    orderedKeys.add(index);
     rowsInListViewInQuotation[index] = p;
     update();
   }
 
   removeFromRowsInListViewInQuotation(int index) {
     rowsInListViewInQuotation.remove(index);
-
+    orderedKeys.remove(index);
+    // print('orderedKeys');
+    // print(orderedKeys);
     update();
   }
 
@@ -756,13 +784,18 @@ class QuotationController extends GetxController {
 
   //Quotations  summary section
   TextEditingController searchInQuotationsController = TextEditingController();
+  setSearchInQuotationsController(String value) {
+    searchInQuotationsController.text = value;
+    update();
+  }
+
   List quotationsList = [];
   bool isQuotationsFetched = false;
-  getAllQuotationsFromBack() async {
+  getAllQuotationsWithoutPendingFromBack() async {
     quotationsList = [];
     isQuotationsFetched = false;
     update();
-    var p = await getAllQuotation(searchInQuotationsController.text);
+    var p = await getAllQuotationsWithoutPending(searchInQuotationsController.text);
     if ('$p' != '[]') {
       quotationsList = p;
       // print(quotationsList.length);
@@ -820,5 +853,77 @@ class QuotationController extends GetxController {
     }
     isQuotationsFetched = true;
     update();
+  }
+
+  List quotationsListPending = [];
+  List quotationsListConfirmed = [];
+  List quotationsListCC = [];
+
+  getAllQuotationsFromBack() async {
+    quotationsListPending = [];
+    quotationsListConfirmed = [];
+    quotationsListCC = [];
+    quotationsList = [];
+    isQuotationsFetched = false;
+    update();
+    var p = await getAllQuotations(
+      searchInQuotationsController.text,
+    );
+    if ('$p' != '[]') {
+      quotationsList = p;
+      // print(quotationsList.length);
+      quotationsList = quotationsList.reversed.toList();
+      // isQuotationsFetched = true;
+      for (int i = 0; i < quotationsList.length; i++) {
+        var item = quotationsList[i];
+
+        if (item['status'] == 'pending' || item['status'] == 'sent') {
+          // Check if this item already exists in quotations List pending
+          bool exists = quotationsListPending.any(
+                (element) => element['id'] == item['id'],
+          );
+
+          if (!exists) {
+            quotationsListPending.add(item);
+          }
+        } else {
+          continue;
+        }
+      }
+      for (int i = 0; i < quotationsList.length; i++) {
+        var confirm = quotationsList[i];
+        if (confirm['status'] == 'confirmed') {
+          // Check if this item already exists in quotations List pending
+          bool existsConfirm = quotationsListConfirmed.any(
+                (element) => element['id'] == confirm['id'],
+          );
+
+          if (!existsConfirm) {
+            quotationsListConfirmed.add(confirm);
+          }
+        } else {
+          continue;
+        }
+        for (int i = 0; i < quotationsList.length; i++) {
+          var ccItem = quotationsList[i];
+          if (ccItem['status'] == 'confirmed' ||
+              ccItem['status'] == 'cancelled') {
+            // Check if this item already exists in quotations List pending
+            bool existsCC = quotationsListCC.any(
+                  (element) => element['id'] == ccItem['id'],
+            );
+
+            if (!existsCC) {
+              quotationsListCC.add(ccItem);
+            }
+          } else {
+            continue;
+          }
+        }
+      }
+
+      isQuotationsFetched = true;
+      update();
+    }
   }
 }

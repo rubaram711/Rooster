@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Backend/ClientsBackend/get_client_create_info.dart';
 import 'package:rooster_app/Backend/get_cities_of_a_specified_country.dart';
 import 'package:rooster_app/Backend/get_countries.dart';
+import 'package:rooster_app/Controllers/client_controller.dart';
 import 'package:rooster_app/Widgets/loading.dart';
+import 'package:rooster_app/Widgets/reusable_add_card.dart';
 import '../../Backend/ClientsBackend/store_client.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Widgets/custom_snak_bar.dart';
@@ -15,6 +17,7 @@ import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
+List<String> titles = ['Doctor', 'Miss', 'Mister', 'Maitre', 'Professor'];
 
 class AddNewClient extends StatefulWidget {
   const AddNewClient({super.key});
@@ -49,18 +52,21 @@ class _AddNewClientState extends State<AddNewClient> {
       selectedCity = '';
   String selectedPhoneCode = '', selectedMobileCode = '';
   int selectedClientType = 1;
+
+
+
+
   int selectedTabIndex = 0;
   List tabsList = [
-    // 'contacts_addresses',
-    // 'sales',
     // 'internal_note',
     'settings',
+    'contacts_and_addresses',
     'sales',
   ];
   Map data = {};
-  List<String> pricesListsNames=[];
-  List<String> pricesListsCodes=[];
-  List<String> pricesListsIds=[];
+  List<String> pricesListsNames = [];
+  List<String> pricesListsCodes = [];
+  List<String> pricesListsIds = [];
   bool isClientsInfoFetched = false;
   String copyOfClientNumber = '';
   getFieldsForCreateClientsFromBack() async {
@@ -72,7 +78,7 @@ class _AddNewClientState extends State<AddNewClient> {
         clientNumberController.text = data['clientNumber'];
         copyOfClientNumber = data['clientNumber'];
       });
-      for(var priceList in p['pricelists']){
+      for (var priceList in p['pricelists']) {
         pricesListsNames.add(priceList['title']);
         pricesListsIds.add('${priceList['id']}');
         pricesListsCodes.add('${priceList['code']}');
@@ -80,7 +86,6 @@ class _AddNewClientState extends State<AddNewClient> {
     }
   }
 
-  List<String> titles = ['Doctor', 'Miss', 'Mister', 'Maitre', 'Professor'];
   String selectedTitle = '';
   bool isActiveInPosChecked = false;
   bool isBlockedChecked = false;
@@ -117,9 +122,10 @@ class _AddNewClientState extends State<AddNewClient> {
       isCitiesFetched = true;
     });
   }
-
+  ClientController clientController=Get.find();
   @override
   void initState() {
+    clientController.contactsList=[];
     getFieldsForCreateClientsFromBack();
     getCountriesFromBack();
     super.initState();
@@ -642,7 +648,7 @@ class _AddNewClientState extends State<AddNewClient> {
                       horizontal: MediaQuery.of(context).size.width * 0.01,
                       vertical: 25,
                     ),
-                    height: 300,
+                    height: 560,
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(6),
@@ -881,6 +887,8 @@ class _AddNewClientState extends State<AddNewClient> {
                                 ),
                               ],
                             )
+                            : selectedTabIndex == 1
+                            ? ContactsAndAddressesSection()
                             : Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -922,7 +930,7 @@ class _AddNewClientState extends State<AddNewClient> {
                                       gapH16,
                                       DialogDropMenu(
                                         controller: priceListController,
-                                        optionsList:pricesListsCodes ,
+                                        optionsList: pricesListsCodes,
                                         text: 'pricelist'.tr,
                                         hint: '',
                                         rowWidth:
@@ -932,9 +940,12 @@ class _AddNewClientState extends State<AddNewClient> {
                                             MediaQuery.of(context).size.width *
                                             0.17,
                                         onSelected: (val) {
-                                          var index=pricesListsCodes.indexOf(val);
+                                          var index = pricesListsCodes.indexOf(
+                                            val,
+                                          );
                                           setState(() {
-                                            selectedPriceListId = pricesListsIds[index];
+                                            selectedPriceListId =
+                                                pricesListsIds[index];
                                           });
                                         },
                                       ),
@@ -1045,6 +1056,7 @@ class _AddNewClientState extends State<AddNewClient> {
                                     selectedPriceListId,
                                     internalNoteController.text,
                                     '',
+                                    clientController.contactsList
                                   );
                                   if (res['success'] == true) {
                                     CommonWidgets.snackBar(
@@ -1125,7 +1137,423 @@ class _AddNewClientState extends State<AddNewClient> {
       ),
     );
   }
+
 }
+
+class ContactsAndAddressesSection extends StatefulWidget {
+  const ContactsAndAddressesSection({super.key, });
+
+
+  @override
+  State<ContactsAndAddressesSection> createState() => _ContactsAndAddressesSectionState();
+}
+
+class _ContactsAndAddressesSectionState extends State<ContactsAndAddressesSection> {
+  ClientController clientController=Get.find();
+  addNewContact(){
+    Map contact={
+      'type':'1',
+      'name':'',
+      'title':'',
+      'jobPosition':'',
+      'deliveryAddress':'',
+      'phoneCode':'+961',
+      'phoneNumber':'',
+      'extension':'',
+      'mobileCode':'+961',
+      'mobileNumber':'',
+      'email':'',
+      'note':'',
+      'internalNote':'',
+    };
+    clientController.addToContactsList(contact);
+  }
+  @override
+  Widget build(BuildContext context) {
+      return GetBuilder<ClientController>(
+        builder: (cont) {
+          return Column(
+            children: [
+              SizedBox(
+                height: cont.contactsList.isEmpty?20:420,
+                child: ListView.builder(
+                  itemCount: cont.contactsList.length,
+                  itemBuilder: (context, index) => ReusableContactSection(index: index),),
+              ),
+              gapH16,
+              ReusableAddCard(
+                text: 'add_new_contact'.tr,
+                onTap: () {
+                addNewContact();
+                },
+              )
+            ],
+          );
+        }
+      );
+  }
+}
+
+class ReusableContactSection extends StatefulWidget {
+  const ReusableContactSection({super.key, required this.index});
+  final int index;
+  @override
+  State<ReusableContactSection> createState() => _ReusableContactSectionState();
+}
+
+class _ReusableContactSectionState extends State<ReusableContactSection> {
+  ClientController clientController=Get.find();
+  String selectedContactsPhoneCode = '', selectedContactsMobileCode = '';
+  int selectedContactAndAddressType = 1;
+  String selectedContactsTitle = '';
+
+  TextEditingController contactsNameController = TextEditingController();
+  TextEditingController contactsPhoneController = TextEditingController();
+  TextEditingController contactsTitleController = TextEditingController();
+  TextEditingController contactsMobileController = TextEditingController();
+  TextEditingController contactsJobPositionController = TextEditingController();
+  TextEditingController contactsAddressController = TextEditingController();
+  TextEditingController contactsEmailController = TextEditingController();
+  TextEditingController contactsNoteController = TextEditingController();
+  TextEditingController contactsExtController = TextEditingController();
+  @override
+  void initState() {
+
+      selectedContactAndAddressType=int.parse('${clientController.contactsList[widget.index]['type']??1}');
+      selectedContactsPhoneCode=clientController.contactsList[widget.index]['phoneCode']??'+961';
+      selectedContactsMobileCode=clientController.contactsList[widget.index]['mobileCode']??'+961';
+      contactsNameController.text=clientController.contactsList[widget.index]['name'];
+      contactsTitleController.text=clientController.contactsList[widget.index]['title'];
+      selectedContactsTitle=clientController.contactsList[widget.index]['title'];
+      contactsPhoneController.text=clientController.contactsList[widget.index]['phoneNumber'];
+      contactsMobileController.text=clientController.contactsList[widget.index]['mobileNumber'];
+      contactsJobPositionController.text=clientController.contactsList[widget.index]['jobPosition'];
+      contactsAddressController.text=clientController.contactsList[widget.index]['deliveryAddress'];
+      contactsEmailController.text=clientController.contactsList[widget.index]['email'];
+      contactsNoteController.text=clientController.contactsList[widget.index]['internalNote'];
+      contactsExtController.text=clientController.contactsList[widget.index]['extension'];
+
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<ClientController>(
+      builder: (cont) {
+        return Container(
+          margin: const EdgeInsets.only(top: 20.0),
+          padding: EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            border: Border.all(color: Primary.primary.withAlpha((0.2 * 255).toInt())),
+            borderRadius:  BorderRadius.circular(9),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.15,
+                    child: ListTile(
+                      title: Text(
+                        'contact'.tr,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      leading: Radio(
+                        value: 1,
+                        groupValue: selectedContactAndAddressType,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedContactAndAddressType = value!;
+                          });
+                          cont.updateContactType(widget.index,'${value!}');
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.15,
+                    child: ListTile(
+                      title: Text(
+                        'delivery_address'.tr,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      leading: Radio(
+                        value: 2,
+                        groupValue: selectedContactAndAddressType,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedContactAndAddressType = value!;
+                          });
+                          cont.updateContactType(widget.index,'${value!}');
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              gapH10,
+              Text(
+                'Contact Selection used to add the contact information of personnel within the company (e.g., CEO, CFO, ...).',
+              ),
+              gapH28,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  DialogTextField(
+                    textEditingController: contactsNameController,
+                    text: 'name'.tr,
+                    rowWidth: MediaQuery.of(context).size.width * 0.22,
+                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                    validationFunc: (val) {},
+                    onChangedFunc: (val) {
+                      cont.updateContactName(widget.index,val);
+                    },
+                  ),
+                  PhoneTextField(
+                    textEditingController: contactsPhoneController,
+                    text: 'phone'.tr,
+                    initialValue: selectedContactsPhoneCode,
+                    rowWidth: MediaQuery.of(context).size.width * 0.25,
+                    textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                    validationFunc: (String val) {
+                      if (val.isNotEmpty && val.length < 7) {
+                        return '7_digits'.tr;
+                      }
+                      return null;
+                    },
+                    onCodeSelected: (value) {
+                      cont.updateContactPhoneCode(widget.index,'$value');
+                      setState(() {
+                        selectedContactsPhoneCode = value;
+                      });
+                    },
+                    onChangedFunc: (value) {
+                      cont.updateContactPhoneNumber(widget.index,'$value');
+                    },
+                  ),
+                  DialogTextField(
+                    textEditingController: contactsExtController,
+                    text: 'ext'.tr,
+                    rowWidth: MediaQuery.of(context).size.width * 0.19,
+                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                    validationFunc: (val) {},
+                    onChangedFunc: (val) {
+                      cont.updateContactExtension(widget.index,val);
+                    },
+                  ),
+                ],
+              ),
+              gapH10,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.22,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('title'.tr),
+                        DropdownMenu<String>(
+                          width: MediaQuery.of(context).size.width * 0.15,
+                          // requestFocusOnTap: false,
+                          enableSearch: true,
+                          controller: contactsTitleController,
+                          hintText: 'Doctor, Miss, Mister',
+                          inputDecorationTheme: InputDecorationTheme(
+                            // filled: true,
+                            hintStyle: const TextStyle(
+                              fontStyle: FontStyle.italic,
+                            ),
+                            contentPadding: const EdgeInsets.fromLTRB(
+                              20,
+                              0,
+                              25,
+                              5,
+                            ),
+                            // outlineBorder: BorderSide(color: Colors.black,),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Primary.primary.withAlpha(
+                                  (0.2 * 255).toInt(),
+                                ),
+                                width: 1,
+                              ),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(9),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Primary.primary.withAlpha(
+                                  (0.4 * 255).toInt(),
+                                ),
+                                width: 2,
+                              ),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(9),
+                              ),
+                            ),
+                          ),
+                          // menuStyle: ,
+                          menuHeight: 250,
+                          dropdownMenuEntries:
+                          titles.map<DropdownMenuEntry<String>>((
+                              String option,
+                              ) {
+                            return DropdownMenuEntry<String>(
+                              value: option,
+                              label: option,
+                            );
+                          }).toList(),
+                          enableFilter: true,
+                          onSelected: (String? val) {
+                            setState(() {
+                              selectedContactsTitle = val!;
+                            });
+                            cont.updateContactTitle(widget.index,val!);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  PhoneTextField(
+                    textEditingController: contactsMobileController,
+                    text: 'mobile'.tr,
+                    initialValue: selectedContactsMobileCode,
+                    rowWidth: MediaQuery.of(context).size.width * 0.25,
+                    textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                    validationFunc: (val) {
+                      if (val.isNotEmpty && val.length < 9) {
+                        return '7_digits'.tr;
+                      }
+                      return null;
+                    },
+                    onCodeSelected: (value) {
+                      setState(() {
+                        selectedContactsMobileCode = value;
+                      });
+                      cont.updateContactMobileCode(widget.index,'${value!}');
+                    },
+                    onChangedFunc: (value) {
+                      cont.updateContactMobileNumber(widget.index,'${value!}');
+                    },
+                  ),
+                  selectedContactAndAddressType==2
+                      ? DialogTextField(
+                    textEditingController: contactsAddressController,
+                    text: 'address'.tr,
+                    rowWidth: MediaQuery.of(context).size.width * 0.19,
+                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                    validationFunc: (val) {},
+                    onChangedFunc: (val) {
+                      cont.updateContactDeliveryAddress(widget.index,val);
+                    },
+                  )
+                      :SizedBox(width: MediaQuery.of(context).size.width * 0.19),
+                ],
+              ),
+              gapH10,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  DialogTextField(
+                    textEditingController: contactsJobPositionController,
+                    text: 'job_position'.tr,
+                    hint: 'Sales Director,Sales...',
+                    rowWidth: MediaQuery.of(context).size.width * 0.22,
+                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                    validationFunc: (val) {},
+                    onChangedFunc: (val) {
+                      cont.updateContactJobPosition(widget.index,val);
+                    },
+                  ),
+                  DialogTextField(
+                    textEditingController: contactsEmailController,
+                    text: 'email'.tr,
+                    hint: 'example@gmail.com',
+                    rowWidth: MediaQuery.of(context).size.width * 0.25,
+                    textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                    validationFunc: (String value) {
+                      if (value.isNotEmpty &&
+                          !RegExp(
+                            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                          ).hasMatch(value)) {
+                        return 'check_format'.tr;
+                      }
+                    },
+                    onChangedFunc: (val) {
+                      cont.updateContactEmail(widget.index,val);
+                    },
+                  ),
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.19),
+                ],
+              ),
+              gapH48,
+              TextField(
+                controller: contactsNoteController,
+                maxLines: 6,
+                decoration: InputDecoration(
+                  hintText: 'note.....',
+                  hintStyle: const TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey,
+                  ),
+                  contentPadding: const EdgeInsets.all(16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(9),
+                    borderSide:  BorderSide(color: Primary.primary.withAlpha((0.2 * 255).toInt())),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(9),
+                    borderSide: BorderSide(color: Primary.primary.withAlpha((0.2 * 255).toInt())),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(9),
+                    borderSide:  BorderSide(width:1,color: Primary.primary.withAlpha((0.4 * 255).toInt())),
+                  ),
+                ),
+                onChanged: (val) {
+                  cont.updateContactNote(widget.index,val);
+                },
+              ),
+            ],
+          ),
+        );
+      }
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class MobileAddNewClient extends StatefulWidget {
   const MobileAddNewClient({super.key});
@@ -1259,7 +1687,7 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
     getCountriesFromBack();
     super.initState();
   }
-
+ClientController clientController=Get.find();
   @override
   Widget build(BuildContext context) {
     return isClientsInfoFetched
@@ -1959,6 +2387,7 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
                                     priceListSelected,
                                     internalNoteController.text,
                                     '',
+                                    clientController.contactsList
                                   );
                                   if (res['success'] == true) {
                                     CommonWidgets.snackBar(

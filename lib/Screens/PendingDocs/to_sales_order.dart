@@ -1,19 +1,26 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+
 import 'dart:async';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:rooster_app/Backend/Quotations/delete_quotation.dart';
 import 'package:rooster_app/Backend/Quotations/update_quotation.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
+import 'package:rooster_app/Controllers/pending_docs_review_controller.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Screens/Quotations/print_quotation.dart';
+import 'package:rooster_app/Screens/Quotations/quotation_summary.dart';
 import 'package:rooster_app/Screens/Quotations/schedule_task_dialog.dart';
 import 'package:rooster_app/Screens/Quotations/tasks.dart';
 import 'package:rooster_app/Widgets/custom_snak_bar.dart';
 import 'package:rooster_app/Widgets/page_title.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
-import 'package:rooster_app/Widgets/reusable_more.dart';
 import 'package:rooster_app/Widgets/reusable_text_field.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
 import 'package:rooster_app/Widgets/table_title.dart';
@@ -42,6 +49,7 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
   bool isArrowForwardClicked = false;
   final HomeController homeController = Get.find();
   final QuotationController quotationController = Get.find();
+  final PendingDocsReviewController pendingDocsController = Get.find();
   bool isNumberOrderedUp = true;
   bool isCreationOrderedUp = true;
   bool isCustomerOrderedUp = true;
@@ -49,7 +57,8 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
   String searchValue = '';
   Timer? searchOnStoppedTyping;
   List quotationsList = [];
-  bool isQuotationsFetched = false;
+  List quotationsListpending = [];
+  bool isPendingDocsFetched = false;
   onChangeHandler(value) {
     const duration = Duration(
       milliseconds: 800,
@@ -66,7 +75,7 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
     setState(() {
       searchValue = value;
     });
-    await quotationController.getAllQuotationsFromBack();
+    await pendingDocsController.getAllPendingDocs();
   }
 
   TaskController taskController = Get.find();
@@ -98,25 +107,77 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
     await taskController.getAllTasksFromBack(value);
   }
 
+  _quotationSearchHandler(value) {
+    const duration = Duration(
+      milliseconds: 800,
+    ); // set the duration that you want call search() after that.
+    if (searchOnStoppedTypingInTasks != null) {
+      setState(() => searchOnStoppedTypingInTasks!.cancel()); // clear timer
+    }
+    setState(
+      () =>
+          searchOnStoppedTypingInTasks = Timer(
+            duration,
+            () => searchOnQuotation(value),
+          ),
+    );
+  }
+
+  searchOnQuotation(value) async {
+    quotationController.setSearchInQuotationsController(value);
+    // pendingDocsController.setSearchInPendingDocsController(value);
+    // await pendingDocsController.getAllPendingDocs();
+    await quotationController.getAllQuotationsFromBack();
+  }
+
+  Future<void> generatePdfFromImageUrl() async {
+    String companyLogo = await getCompanyLogoFromPref();
+
+    // 1. Download image
+    final response = await http.get(Uri.parse(companyLogo));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load image');
+    }
+
+    final Uint8List imageBytes = response.bodyBytes;
+    // String companyLogo = await getCompanyLogoFromPref();
+    // final Uint8List logoBytes = await fetchImage(
+    //   companyLogo,
+    // );
+    quotationController.setLogo(imageBytes);
+  }
+
   @override
   void initState() {
-    quotationController.itemsMultiPartList = [];
-    quotationController.salesPersonListNames = [];
-    quotationController.salesPersonListId = [];
-    exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
-    quotationController.getAllUsersSalesPersonFromBack();
-    quotationController.getFieldsForCreateQuotationFromBack();
     quotationController.searchInQuotationsController.text = '';
     listViewLength =
         Sizes.deviceHeight * (0.09 * quotationController.quotationsList.length);
+    quotationController.getFieldsForCreateQuotationFromBack();
     quotationController.getAllQuotationsFromBack();
+    // pendingDocsController.getAllPendingDocs();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<QuotationController>(
+      // return GetBuilder<PendingDocsReviewController>(
       builder: (cont) {
+        // for (int i = 0; i < qu
+        //otationController.quotationsList.length; i++) {
+        //   var item = quotationController.quotationsList[i];
+
+        //   if (item['status'] == 'pending') {
+        //     // Check if this item already exists in quotationsListpending
+        //     bool exists = quotationsListpending.any(
+        //       (element) => element['id'] == item['id'],
+        //     );
+
+        //     if (!exists) {
+        //       quotationsListpending.add(item);
+        //     }
+        //   }
+        // }
         return Container(
           padding: EdgeInsets.symmetric(
             horizontal: MediaQuery.of(context).size.width * 0.02,
@@ -128,7 +189,17 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [PageTitle(text: 'to_sales_order'.tr)],
+                  children: [
+                    PageTitle(text: 'to_sales_order'.tr),
+                    ReusableButtonWithColor(
+                      width: MediaQuery.of(context).size.width * 0.15,
+                      height: 45,
+                      onTapFunction: () {
+                        homeController.selectedTab.value = 'new_quotation';
+                      },
+                      btnText: 'create_quotation'.tr,
+                    ),
+                  ],
                 ),
                 gapH24,
                 SizedBox(
@@ -140,6 +211,8 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                       if (selectedTabIndex == 1) {
                         // cont.searchInQuotationsController.text=value;
                         _onChangeTaskSearchHandler(value);
+                      } else {
+                        _quotationSearchHandler(value);
                       }
                     },
                     validationFunc: () {},
@@ -201,11 +274,11 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                                   setState(() {
                                     isNumberOrderedUp = !isNumberOrderedUp;
                                     isNumberOrderedUp
-                                        ? cont.quotationsList.sort(
+                                        ? cont.quotationsListConfirmed.sort(
                                           (a, b) => a['quotationNumber']
                                               .compareTo(b['quotationNumber']),
                                         )
-                                        : cont.quotationsList.sort(
+                                        : cont.quotationsListConfirmed.sort(
                                           (a, b) => b['quotationNumber']
                                               .compareTo(a['quotationNumber']),
                                         );
@@ -219,11 +292,11 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                                   setState(() {
                                     isCreationOrderedUp = !isCreationOrderedUp;
                                     isCreationOrderedUp
-                                        ? cont.quotationsList.sort(
+                                        ? cont.quotationsListConfirmed.sort(
                                           (a, b) => a['createdAtDate']
                                               .compareTo(b['createdAtDate']),
                                         )
-                                        : cont.quotationsList.sort(
+                                        : cont.quotationsListConfirmed.sort(
                                           (a, b) => b['createdAtDate']
                                               .compareTo(a['createdAtDate']),
                                         );
@@ -237,13 +310,13 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                                   setState(() {
                                     isCustomerOrderedUp = !isCustomerOrderedUp;
                                     isCustomerOrderedUp
-                                        ? cont.quotationsList.sort(
+                                        ? cont.quotationsListConfirmed.sort(
                                           (a, b) => '${a['client']['name']}'
                                               .compareTo(
                                                 '${b['client']['name']}',
                                               ),
                                         )
-                                        : cont.quotationsList.sort(
+                                        : cont.quotationsListConfirmed.sort(
                                           (a, b) => '${b['client']['name']}'
                                               .compareTo(
                                                 '${a['client']['name']}',
@@ -260,12 +333,12 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                                     isSalespersonOrderedUp =
                                         !isSalespersonOrderedUp;
                                     isSalespersonOrderedUp
-                                        ? cont.quotationsList.sort(
+                                        ? cont.quotationsListConfirmed.sort(
                                           (a, b) => a['salesperson'].compareTo(
                                             b['salesperson'],
                                           ),
                                         )
-                                        : cont.quotationsList.sort(
+                                        : cont.quotationsListConfirmed.sort(
                                           (a, b) => b['salesperson'].compareTo(
                                             a['salesperson'],
                                           ),
@@ -283,23 +356,22 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                                 text: 'total'.tr,
                                 width:
                                     MediaQuery.of(context).size.width *
-                                    0.07, //085
+                                    0.06, //085
                               ),
                               TableTitle(
-                                text: 'currency'.tr,
+                                text: 'cur'.tr,
+                                isCentered: false,
                                 width:
                                     MediaQuery.of(context).size.width *
-                                    0.07, //085
+                                    0.04, //085
                               ),
                               TableTitle(
                                 text: 'status'.tr,
-                                width:
-                                    MediaQuery.of(context).size.width *
-                                    0.085, //085
+                                width: 90, //085
                               ),
                               TableTitle(
                                 text: 'more_options'.tr,
-                                width: MediaQuery.of(context).size.width * 0.07,
+                                width: MediaQuery.of(context).size.width * 0.11,
                               ),
                               SizedBox(
                                 width: MediaQuery.of(context).size.width * 0.03,
@@ -316,21 +388,20 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                                   MediaQuery.of(context).size.height *
                                   0.4, //listViewLength
                               child: ListView.builder(
-                                itemCount: cont.quotationsList.length,
-                                // itemCount:  cont.quotationsList.length>9?selectedNumberOfRowsAsInt:cont.quotationsList.length,
+                                itemCount: cont.quotationsListConfirmed.length,
                                 itemBuilder: (context, index) {
-                                  if (cont.quotationsList[index]['status'] ==
-                                      'pending') {
-                                    return Column(
-                                      children: [
-                                        QuotationAsRowInTable(
-                                          info: cont.quotationsList[index],
-                                          index: index,
-                                        ),
-                                        const Divider(),
-                                      ],
-                                    );
-                                  }
+                                  return Column(
+                                    children: [
+                                      QuotationAsRowInTable(
+                                        info:
+                                            quotationController
+                                                .quotationsListConfirmed[index],
+                                        index: index,
+                                      ),
+
+                                      const Divider(),
+                                    ],
+                                  );
                                 },
                               ),
                             )
@@ -573,13 +644,14 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
   double finalPriceByQuotationCurrency = 0.0;
   List itemsInfoPrint = [];
   Map quotationItemInfo = {};
+  int quotationCounter = 0;
   // String itemCurrencyName = '';
   // String itemCurrencySymbol = '';
   // String itemCurrencyLatestRate = '';
   String brand = '';
-
   final HomeController homeController = Get.find();
   final QuotationController quotationController = Get.find();
+  final PendingDocsReviewController pendingDocsController = Get.find();
   String diss = '0';
   double totalBeforeVatvValue = 0.0;
   double globalDiscountValue = 0.0;
@@ -623,9 +695,89 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
+  String cashMethodId = '';
+  String clientId = '';
+  String pricelistId = '';
+  String salespersonId = ' ';
+  String commissionMethodId = '';
+  String currencyId = ' ';
+  late Uint8List imageFile;
+  bool isLoading = false; // Add loading state
+
 
   @override
   void initState() {
+    imageFile = Uint8List(0);
+    if (widget.info['cashingMethod'] != null) {
+      cashMethodId = '${widget.info['cashingMethod']['id']}';
+    }
+    if (widget.info['commissionMethod'] != null) {
+      commissionMethodId = '${widget.info['commissionMethod']['id']}';
+    }
+    if (widget.info['currency'] != null) {
+      currencyId = '${widget.info['currency']['id']}';
+    }
+    if (widget.info['client'] != null) {
+      clientId = widget.info['client']['id'].toString();
+    } else {
+    }
+    if (widget.info['pricelist'] != null) {
+      pricelistId = widget.info['pricelist']['id'].toString();
+    }
+    if (widget.info['salesperson'] != null) {
+      salespersonId = widget.info['salesperson']['id'].toString();
+    }
+    quotationController.orderLinesQuotationList = {};
+    quotationController.rowsInListViewInQuotation = {};
+    quotationController.selectedQuotationData['orderLines'] =
+        widget.info['orderLines'] ?? '';
+    for (
+      int i = 0;
+      i < quotationController.selectedQuotationData['orderLines'].length;
+      i++
+    ) {
+      quotationController.rowsInListViewInQuotation[i + 1] =
+          quotationController.selectedQuotationData['orderLines'][i];
+    }
+    var keys = quotationController.rowsInListViewInQuotation.keys.toList();
+    for (int i = 0; i < widget.info['orderLines'].length; i++) {
+      if (widget.info['orderLines'][i]['line_type_id'] == 2) {
+        quotationController.unitPriceControllers[i + 1] =
+            TextEditingController();
+        Widget p = ReusableItemRow(
+          index: i + 1,
+          info: quotationController.rowsInListViewInQuotation[keys[i]],
+        );
+
+        quotationController.orderLinesQuotationList['${i + 1}'] = p;
+      } else if (widget.info['orderLines'][i]['line_type_id'] == 1) {
+        Widget p = ReusableTitleRow(
+          index: i + 1,
+          info: quotationController.rowsInListViewInQuotation[keys[i]],
+        );
+        quotationController.orderLinesQuotationList['${i + 1}'] = p;
+      } else if (widget.info['orderLines'][i]['line_type_id'] == 5) {
+        Widget p = ReusableNoteRow(
+          index: i + 1,
+          info: quotationController.rowsInListViewInQuotation[keys[i]],
+        );
+        quotationController.orderLinesQuotationList['${i + 1}'] = p;
+      } else if (widget.info['orderLines'][i]['line_type_id'] == 4) {
+        Widget p = ReusableImageRow(
+          index: i + 1,
+          info: quotationController.rowsInListViewInQuotation[keys[i]],
+        );
+        quotationController.orderLinesQuotationList['${i + 1}'] = p;
+      } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
+        quotationController.combosPriceControllers[i + 1] =
+            TextEditingController();
+        Widget p = ReusableComboRow(
+          index: i + 1,
+          info: quotationController.rowsInListViewInQuotation[keys[i]],
+        );
+        quotationController.orderLinesQuotationList['${i + 1}'] = p;
+      }
+    }
     super.initState();
   }
 
@@ -702,29 +854,40 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                 ),
               ),
             ),
-
-            TableItem(
-              text: numberWithComma('${widget.info['total'] ?? ''}'),
-              width:
-                  widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.07
-                      : 150,
-            ),
-            TableItem(
-              text: '${widget.info['currency']['name'] ?? ''}',
-              width:
-                  widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.07
-                      : 150,
-            ),
             SizedBox(
               width:
                   widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.085
+                      ? MediaQuery.of(context).size.width * 0.06
                       : 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 5.0),
+                    child: Text(
+                      numberWithComma('${widget.info['total'] ?? ''}'),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: TypographyColor.textTable,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            TableItem(
+              text: '${widget.info['currency']['name'] ?? ''}',
+              isCentered: false,
+              width:
+                  widget.isDesktop
+                      ? MediaQuery.of(context).size.width * 0.04
+                      : 150,
+            ),
+            SizedBox(
+              width: widget.isDesktop ? 90 : 150,
               child: Center(
                 child: Container(
-                  width: '${widget.info['status']}'.length * 10.0,
+                  width: 90,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 1,
                     vertical: 2,
@@ -752,420 +915,1087 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
             ),
             GetBuilder<QuotationController>(
               builder: (cont) {
-                return SizedBox(
+                return Container(
+                  padding: EdgeInsets.only(left: 10),
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.07
+                          ? MediaQuery.of(context).size.width * 0.11
                           : 150,
-                  child: ReusableMore(
-                    itemsList: [
-                      PopupMenuItem<String>(
-                        value: '1',
-                        onTap: () async {
-                          itemsInfoPrint = [];
-                          quotationItemInfo = {};
-                          totalAllItems = 0;
-                          cont.totalAllItems = 0;
-                          totalAllItems = 0;
-                          cont.totalAllItems = 0;
-                          totalPriceAfterDiscount = 0;
-                          additionalSpecialDiscount = 0;
-                          totalPriceAfterSpecialDiscount = 0;
-                          totalPriceAfterSpecialDiscountByQuotationCurrency = 0;
-                          vatByQuotationCurrency = 0;
-                          vatByQuotationCurrency = 0;
-                          finalPriceByQuotationCurrency = 0;
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Tooltip(
+                        message: 'preview'.tr,
+                        child: InkWell(
+                          onTap: () async {
+                            itemsInfoPrint = [];
+                            quotationItemInfo = {};
+                            totalAllItems = 0;
+                            cont.totalAllItems = 0;
+                            totalAllItems = 0;
+                            cont.totalAllItems = 0;
+                            totalPriceAfterDiscount = 0;
+                            additionalSpecialDiscount = 0;
+                            totalPriceAfterSpecialDiscount = 0;
+                            totalPriceAfterSpecialDiscountByQuotationCurrency =
+                                0;
+                            vatByQuotationCurrency = 0;
+                            vatByQuotationCurrency = 0;
+                            finalPriceByQuotationCurrency = 0;
 
-                          for (var item in widget.info['orderLines']) {
-                            if ('${item['line_type_id']}' == '2') {
-                              qty = item['item_quantity'];
-                              var map =
-                                  cont.itemsMap[item['item_id'].toString()];
-                              itemName = map['item_name'];
-                              itemPrice = double.parse(
-                                '${item['item_unit_price'] ?? '0'}',
-                              );
-                              //     map['unitPrice'] ?? 0.0;
-                              // formatDoubleWithCommas(map['unitPrice']);
-
-                              itemDescription = item['item_description'];
-
-                              itemImage =
-                                  '${map['images']}' != '[]'
-                                      ? map['images'][0]
-                                      : '';
-                              // itemCurrencyName = map['currency']['name'];
-                              // itemCurrencySymbol = map['currency']['symbol'];
-                              // itemCurrencyLatestRate =
-                              //     map['currency']['latest_rate'];
-                              var firstBrandObject = map['itemGroups']
-                                  .firstWhere(
-                                    (obj) =>
-                                        obj["root_name"]?.toLowerCase() ==
-                                        "brand".toLowerCase(),
-                                    orElse: () => null,
-                                  );
-                              brand =
-                                  firstBrandObject == null
-                                      ? ''
-                                      : firstBrandObject['name'] ?? '';
-                              itemTotal = double.parse('${item['item_total']}');
-                              // itemTotal = double.parse(qty) * itemPrice;
-                              totalAllItems += itemTotal;
-                              quotationItemInfo = {
-                                'line_type_id': '2',
-                                'item_name': itemName,
-                                'item_description': itemDescription,
-                                'item_quantity': qty,
-                                'item_discount': item['item_discount'] ?? '0',
-                                'item_unit_price': formatDoubleWithCommas(
-                                  itemPrice,
-                                ),
-                                'item_total': formatDoubleWithCommas(itemTotal),
-                                'item_image': itemImage,
-                                'item_brand': brand,
-                                'title': '',
-                                'isImageList': false,
-                                'note': '',
-                                'image': '',
-                              };
-                              itemsInfoPrint.add(quotationItemInfo);
-                            } else if ('${item['line_type_id']}' == '3') {
-                              var qty = item['item_quantity'];
-                              // var map =
-                              // cont
-                              //     .combosMap[item['combo_id']
-                              //     .toString()];
-                              var ind = cont.combosIdsList.indexOf(
-                                item['combo_id'].toString(),
-                              );
-                              var itemName = cont.combosNamesList[ind];
-                              var itemPrice = double.parse(
-                                '${item['combo_price'] ?? 0.0}',
-                              );
-                              var itemDescription = item['combo_description'];
-
-                              var itemTotal = double.parse(
-                                '${item['combo_total']}',
-                              );
-                              // double.parse(qty) * itemPrice;
-                              var quotationItemInfo = {
-                                'line_type_id': '3',
-                                'item_name': itemName,
-                                'item_description': itemDescription,
-                                'item_quantity': qty,
-                                'item_unit_price': formatDoubleWithCommas(
-                                  itemPrice,
-                                ),
-                                'item_discount': item['combo_discount'] ?? '0',
-                                'item_total': formatDoubleWithCommas(itemTotal),
-                                'note': '',
-                                'item_image': '',
-                                'item_brand': '',
-                                'isImageList': false,
-                                'title': '',
-                                'image': '',
-                              };
-                              itemsInfoPrint.add(quotationItemInfo);
-                            } else if ('${item['line_type_id']}' == '1') {
-                              var quotationItemInfo = {
-                                'line_type_id': '1',
-                                'item_name': '',
-                                'item_description': '',
-                                'item_quantity': '',
-                                'item_unit_price': '',
-                                'item_discount': '0',
-                                'item_total': '',
-                                'item_image': '',
-                                'item_brand': '',
-                                'note': '',
-                                'isImageList': false,
-                                'title': item['title'],
-                                'image': '',
-                              };
-                              itemsInfoPrint.add(quotationItemInfo);
-                            } else if ('${item['line_type_id']}' == '5') {
-                              var quotationItemInfo = {
-                                'line_type_id': '5',
-                                'item_name': '',
-                                'item_description': '',
-                                'item_quantity': '',
-                                'item_unit_price': '',
-                                'item_discount': '0',
-                                'item_total': '',
-                                'item_image': '',
-                                'item_brand': '',
-                                'title': '',
-                                'note': item['note'],
-                                'isImageList': false,
-                                'image': '',
-                              };
-                              itemsInfoPrint.add(quotationItemInfo);
-                            } else if ('${item['line_type_id']}' == '4') {
-                              var quotationItemInfo = {
-                                'line_type_id': '4',
-                                'item_name': '',
-                                'item_description': '',
-                                'item_quantity': '',
-                                'item_unit_price': '',
-                                'item_discount': '0',
-                                'item_total': '',
-                                'item_image': '',
-                                'item_brand': '',
-                                'title': '',
-                                'note': '',
-                                'image': '$baseImage${item['image']}',
-                                'isImageList': false,
-                              };
-                              itemsInfoPrint.add(quotationItemInfo);
-                            }
-                          }
-                          // var primaryCurrency = await getCompanyPrimaryCurrencyFromPref();
-                          // var result = exchangeRatesController
-                          //     .exchangeRatesList
-                          //     .firstWhere(
-                          //       (item) =>
-                          //   item["currency"] == primaryCurrency,
-                          //   orElse: () => null,
-                          // );
-                          // var primaryLatestRate=
-                          // result != null
-                          //     ? '${result["exchange_rate"]}'
-                          //     : '1';
-                          // discountOnAllItem =
-                          //     totalAllItems *
-                          //     double.parse(
-                          //       widget.info['globalDiscount'] ?? '0',
-                          //     ) /
-                          //     100;
-
-                          totalPriceAfterDiscount =
-                              totalAllItems - discountOnAllItem;
-                          additionalSpecialDiscount =
-                              totalPriceAfterDiscount *
-                              double.parse(
-                                widget.info['specialDiscount'] ?? '0',
-                              ) /
-                              100;
-                          totalPriceAfterSpecialDiscount =
-                              totalPriceAfterDiscount -
-                              additionalSpecialDiscount;
-                          totalPriceAfterSpecialDiscountByQuotationCurrency =
-                              totalPriceAfterSpecialDiscount;
-                          vatByQuotationCurrency =
-                              '${widget.info['vatExempt']}' == '1'
-                                  ? 0
-                                  : (totalPriceAfterSpecialDiscountByQuotationCurrency *
-                                          double.parse(
-                                            await getCompanyVatFromPref(),
-                                          )) /
-                                      100;
-                          finalPriceByQuotationCurrency =
-                              totalPriceAfterSpecialDiscountByQuotationCurrency +
-                              vatByQuotationCurrency;
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (BuildContext context) {
-                                // print('widget.info[ ${widget.info['termsAndConditions']}');
-                                return PrintQuotationData(
-                                  isPrintedAs0:
-                                      '${widget.info['printedAsPercentage']}' ==
-                                              '1'
-                                          ? true
-                                          : false,
-                                  isVatNoPrinted:
-                                      '${widget.info['notPrinted']}' == '1'
-                                          ? true
-                                          : false,
-                                  isPrintedAsVatExempt:
-                                      '${widget.info['printedAsVatExempt']}' ==
-                                              '1'
-                                          ? true
-                                          : false,
-                                  isInQuotation: true,
-                                  quotationNumber:
-                                      widget.info['quotationNumber'] ?? '',
-                                  creationDate: widget.info['validity'] ?? '',
-                                  ref: widget.info['reference'] ?? '',
-                                  receivedUser: '',
-                                  senderUser: homeController.userName,
-                                  status: widget.info['status'] ?? '',
-                                  totalBeforeVat:
-                                      widget.info['totalBeforeVat'] ?? '',
-                                  discountOnAllItem:
-                                      discountOnAllItem.toString(),
-                                  totalAllItems:
-                                  // totalAllItems.toString()  ,
-                                  formatDoubleWithCommas(
-                                    totalPriceAfterDiscount,
-                                  ),
-
-                                  globalDiscount:
-                                      widget.info['globalDiscount'] ?? '0',
-
-                                  totalPriceAfterDiscount:
-                                      formatDoubleWithCommas(
-                                        totalPriceAfterDiscount,
-                                      ),
-                                  additionalSpecialDiscount:
-                                      additionalSpecialDiscount.toStringAsFixed(
-                                        2,
-                                      ),
-                                  totalPriceAfterSpecialDiscount:
-                                      formatDoubleWithCommas(
-                                        totalPriceAfterSpecialDiscount,
-                                      ),
-                                  // itemCurrencyName: itemCurrencyName,
-                                  // itemCurrencySymbol: itemCurrencySymbol,
-                                  // itemCurrencyLatestRate:
-                                  //     itemCurrencyLatestRate,
-                                  totalPriceAfterSpecialDiscountByQuotationCurrency:
-                                      formatDoubleWithCommas(
-                                        totalPriceAfterSpecialDiscountByQuotationCurrency,
-                                      ),
-
-                                  vatByQuotationCurrency:
-                                      formatDoubleWithCommas(
-                                        vatByQuotationCurrency,
-                                      ),
-                                  finalPriceByQuotationCurrency:
-                                      formatDoubleWithCommas(
-                                        finalPriceByQuotationCurrency,
-                                      ),
-                                  specialDisc: specialDisc.toString(),
-                                  specialDiscount:
-                                      widget.info['specialDiscount'] ?? '0',
-                                  specialDiscountAmount:
-                                      widget.info['specialDiscountAmount'] ??
-                                      '',
-                                  salesPerson:
-                                      widget.info['salesperson'] != null
-                                          ? widget.info['salesperson']['name']
-                                          : '---',
-                                  quotationCurrency:
-                                      widget.info['currency']['name'] ?? '',
-                                  quotationCurrencySymbol:
-                                      widget.info['currency']['symbol'] ?? '',
-                                  quotationCurrencyLatestRate:
-                                      widget.info['currency']['latest_rate'] ??
-                                      '',
-                                  clientPhoneNumber:
-                                      widget.info['client'] != null
-                                          ? widget.info['client']['phoneNumber'] ??
-                                              '---'
-                                          : "---",
-                                  clientName:
-                                      widget.info['client']['name'] ?? '',
-                                  termsAndConditions:
-                                      widget.info['termsAndConditions'] ?? '',
-                                  itemsInfoPrint: itemsInfoPrint,
+                            for (var item in widget.info['orderLines']) {
+                              if ('${item['line_type_id']}' == '2') {
+                                qty = item['item_quantity'];
+                                var map =
+                                    cont.itemsMap[item['item_id'].toString()];
+                                itemName = map['item_name'];
+                                itemPrice = double.parse(
+                                  '${item['item_unit_price'] ?? '0'}',
                                 );
-                              },
-                            ),
-                          );
-                        },
-                        child: Text('preview'.tr),
+                                //     map['unitPrice'] ?? 0.0;
+                                // formatDoubleWithCommas(map['unitPrice']);
+
+                                itemDescription = item['item_description'];
+
+                                itemImage =
+                                    '${map['images']}' != '[]'
+                                        ? '$baseImage${map['images'][0]['img_url']}'
+                                        : '';
+                                // itemCurrencyName = map['currency']['name'];
+                                // itemCurrencySymbol = map['currency']['symbol'];
+                                // itemCurrencyLatestRate =
+                                //     map['currency']['latest_rate'];
+                                var firstBrandObject = map['itemGroups']
+                                    .firstWhere(
+                                      (obj) =>
+                                          obj["root_name"]?.toLowerCase() ==
+                                          "brand".toLowerCase(),
+                                      orElse: () => null,
+                                    );
+                                brand =
+                                    firstBrandObject == null
+                                        ? ''
+                                        : firstBrandObject['name'] ?? '';
+                                itemTotal = double.parse(
+                                  '${item['item_total']}',
+                                );
+                                // itemTotal = double.parse(qty) * itemPrice;
+                                totalAllItems += itemTotal;
+                                quotationItemInfo = {
+                                  'line_type_id': '2',
+                                  'item_name': itemName,
+                                  'item_description': itemDescription,
+                                  'item_quantity': qty,
+                                  'item_discount': item['item_discount'] ?? '0',
+                                  'item_unit_price': formatDoubleWithCommas(
+                                    itemPrice,
+                                  ),
+                                  'item_total': formatDoubleWithCommas(
+                                    itemTotal,
+                                  ),
+                                  'item_image': itemImage,
+                                  'item_brand': brand,
+                                  'title': '',
+                                  'isImageList': false,
+                                  'note': '',
+                                  'image': '',
+                                };
+                                itemsInfoPrint.add(quotationItemInfo);
+                              } else if ('${item['line_type_id']}' == '3') {
+                                var qty = item['combo_quantity'];
+
+                                var ind = cont.combosIdsList.indexOf(
+                                  item['combo_id'].toString(),
+                                );
+                                var itemName = cont.combosNamesList[ind];
+                                var itemPrice = double.parse(
+                                  '${item['combo_price'] ?? 0.0}',
+                                );
+                                var itemDescription = item['combo_description'];
+
+                                var itemTotal = double.parse(
+                                  '${item['combo_total']}',
+                                );
+                                totalAllItems += itemTotal;
+                                var quotationItemInfo = {
+                                  'line_type_id': '3',
+                                  'item_name': itemName,
+                                  'item_description': itemDescription,
+                                  'item_quantity': qty,
+                                  'item_unit_price': formatDoubleWithCommas(
+                                    itemPrice,
+                                  ),
+                                  'item_discount':
+                                      item['combo_discount'] ?? '0',
+                                  'item_total': formatDoubleWithCommas(
+                                    itemTotal,
+                                  ),
+                                  'note': '',
+                                  'item_image': '',
+                                  'item_brand': '',
+                                  'isImageList': false,
+                                  'title': '',
+                                  'image': '',
+                                };
+                                itemsInfoPrint.add(quotationItemInfo);
+                              } else if ('${item['line_type_id']}' == '1') {
+                                var quotationItemInfo = {
+                                  'line_type_id': '1',
+                                  'item_name': '',
+                                  'item_description': '',
+                                  'item_quantity': '',
+                                  'item_unit_price': '',
+                                  'item_discount': '0',
+                                  'item_total': '',
+                                  'item_image': '',
+                                  'item_brand': '',
+                                  'note': '',
+                                  'isImageList': false,
+                                  'title': item['title'],
+                                  'image': '',
+                                };
+                                itemsInfoPrint.add(quotationItemInfo);
+                              } else if ('${item['line_type_id']}' == '5') {
+                                var quotationItemInfo = {
+                                  'line_type_id': '5',
+                                  'item_name': '',
+                                  'item_description': '',
+                                  'item_quantity': '',
+                                  'item_unit_price': '',
+                                  'item_discount': '0',
+                                  'item_total': '',
+                                  'item_image': '',
+                                  'item_brand': '',
+                                  'title': '',
+                                  'note': item['note'],
+                                  'isImageList': false,
+                                  'image': '',
+                                };
+                                itemsInfoPrint.add(quotationItemInfo);
+                              } else if ('${item['line_type_id']}' == '4') {
+                                var quotationItemInfo = {
+                                  'line_type_id': '4',
+                                  'item_name': '',
+                                  'item_description': '',
+                                  'item_quantity': '',
+                                  'item_unit_price': '',
+                                  'item_discount': '0',
+                                  'item_total': '',
+                                  'item_image': '',
+                                  'item_brand': '',
+                                  'title': '',
+                                  'note': '',
+                                  'image': '$baseImage${item['image']}',
+                                  'isImageList': false,
+                                };
+                                itemsInfoPrint.add(quotationItemInfo);
+                              }
+                            }
+
+                            totalPriceAfterDiscount =
+                                totalAllItems - discountOnAllItem;
+                            additionalSpecialDiscount =
+                                totalPriceAfterDiscount *
+                                double.parse(
+                                  widget.info['specialDiscount'] ?? '0',
+                                ) /
+                                100;
+                            totalPriceAfterSpecialDiscount =
+                                totalPriceAfterDiscount -
+                                additionalSpecialDiscount;
+                            totalPriceAfterSpecialDiscountByQuotationCurrency =
+                                totalPriceAfterSpecialDiscount;
+                            vatByQuotationCurrency =
+                                '${widget.info['vatExempt']}' == '1'
+                                    ? 0
+                                    : (totalPriceAfterSpecialDiscountByQuotationCurrency *
+                                            double.parse(
+                                              await getCompanyVatFromPref(),
+                                            )) /
+                                        100;
+                            finalPriceByQuotationCurrency =
+                                totalPriceAfterSpecialDiscountByQuotationCurrency +
+                                vatByQuotationCurrency;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (BuildContext context) {
+                                  // print('widget.info[ ${widget.info['termsAndConditions']}');
+                                  return PrintQuotationData(
+                                    isPrintedAs0:
+                                        '${widget.info['printedAsPercentage']}' ==
+                                                '1'
+                                            ? true
+                                            : false,
+                                    isVatNoPrinted:
+                                        '${widget.info['notPrinted']}' == '1'
+                                            ? true
+                                            : false,
+                                    isPrintedAsVatExempt:
+                                        '${widget.info['printedAsVatExempt']}' ==
+                                                '1'
+                                            ? true
+                                            : false,
+                                    isInQuotation: true,
+                                    quotationNumber:
+                                        widget.info['quotationNumber'] ?? '',
+                                    creationDate: widget.info['validity'] ?? '',
+                                    ref: widget.info['reference'] ?? '',
+                                    receivedUser: '',
+                                    senderUser: homeController.userName,
+                                    status: widget.info['status'] ?? '',
+                                    totalBeforeVat:
+                                        widget.info['totalBeforeVat'] ?? '',
+                                    discountOnAllItem:
+                                        discountOnAllItem.toString(),
+                                    totalAllItems: formatDoubleWithCommas(
+                                      totalAllItems,
+                                    ),
+
+                                    globalDiscount:
+                                        widget.info['globalDiscount'] ?? '0',
+
+                                    totalPriceAfterDiscount:
+                                        formatDoubleWithCommas(
+                                          totalPriceAfterDiscount,
+                                        ),
+                                    additionalSpecialDiscount:
+                                        additionalSpecialDiscount
+                                            .toStringAsFixed(2),
+                                    totalPriceAfterSpecialDiscount:
+                                        formatDoubleWithCommas(
+                                          totalPriceAfterSpecialDiscount,
+                                        ),
+                                    // itemCurrencyName: itemCurrencyName,
+                                    // itemCurrencySymbol: itemCurrencySymbol,
+                                    // itemCurrencyLatestRate:
+                                    //     itemCurrencyLatestRate,
+                                    totalPriceAfterSpecialDiscountByQuotationCurrency:
+                                        formatDoubleWithCommas(
+                                          totalPriceAfterSpecialDiscountByQuotationCurrency,
+                                        ),
+
+                                    vatByQuotationCurrency:
+                                        formatDoubleWithCommas(
+                                          vatByQuotationCurrency,
+                                        ),
+                                    finalPriceByQuotationCurrency:
+                                        formatDoubleWithCommas(
+                                          finalPriceByQuotationCurrency,
+                                        ),
+                                    specialDisc: specialDisc.toString(),
+                                    specialDiscount:
+                                        widget.info['specialDiscount'] ?? '0',
+                                    specialDiscountAmount:
+                                        widget.info['specialDiscountAmount'] ??
+                                        '',
+                                    salesPerson:
+                                        widget.info['salesperson'] != null
+                                            ? widget.info['salesperson']['name']
+                                            : '---',
+                                    quotationCurrency:
+                                        widget.info['currency']['name'] ?? '',
+                                    quotationCurrencySymbol:
+                                        widget.info['currency']['symbol'] ?? '',
+                                    quotationCurrencyLatestRate:
+                                        widget
+                                            .info['currency']['latest_rate'] ??
+                                        '',
+                                    clientPhoneNumber:
+                                        widget.info['client'] != null
+                                            ? widget.info['client']['phoneNumber'] ??
+                                                '---'
+                                            : "---",
+                                    clientName:
+                                        widget.info['client']['name'] ?? '',
+                                    termsAndConditions:
+                                        widget.info['termsAndConditions'] ?? '',
+                                    itemsInfoPrint: itemsInfoPrint,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          child: Icon(
+                            Icons.remove_red_eye_outlined,
+                            color: Primary.primary,
+                          ),
+                        ),
                       ),
-                      // PopupMenuItem<String>(
-                      //   value: '2',
-                      //   onTap: () async {
-                      //     showDialog<String>(
-                      //       context: context,
-                      //       builder:
-                      //           (BuildContext context) => AlertDialog(
-                      //             backgroundColor: Colors.white,
-                      //             shape: const RoundedRectangleBorder(
-                      //               borderRadius: BorderRadius.all(
-                      //                 Radius.circular(9),
+
+                      Tooltip(
+                        message: 'modify'.tr,
+                        child: InkWell(
+                          onTap: () async {
+                            showDialog<String>(
+                              context: context,
+                              builder:
+                                  (BuildContext context) => AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(9),
+                                      ),
+                                    ),
+                                    elevation: 0,
+                                    content: UpdateQuotationDialog(
+                                      index: widget.index,
+                                      info: widget.info,
+                                    ),
+                                  ),
+                            );
+                          },
+                          child: Icon(Icons.edit, color: Primary.primary),
+                        ),
+                      ),
+
+                      //               Tooltip(
+                      //                 message: 'confirm'.tr,
+                      //                 child: InkWell(
+                      //                   onTap: () async {
+                      //                     //update from back
+                      //                     print("newRowMap");
+                      //                     var oldKeys =
+                      //                         quotationController
+                      //                             .rowsInListViewInQuotation
+                      //                             .keys
+                      //                             .toList()
+                      //                           ..sort();
+                      //                     for (int i = 0; i < oldKeys.length; i++) {
+                      //                       quotationController.newRowMap[i + 1] =
+                      //                           quotationController
+                      //                               .rowsInListViewInQuotation[oldKeys[i]]!;
+                      //                     }
+                      //                     print(quotationController.newRowMap);
+                      //                     print("NEWMAP-------------------");
+                      //                     Map<int, dynamic> orderLinesMap = {
+                      //                       for (
+                      //                         int i = 0;
+                      //                         i < widget.info['orderLines'].length;
+                      //                         i++
+                      //                       )
+                      //                         (i + 1): widget.info['orderLines'][i],
+                      //                     };
+                      //                     print(orderLinesMap);
+                      //                     var res = await updateQuotation(
+                      //                       '${widget.info['id']}',
+                      //                       // false,
+                      //                       '${widget.info['reference'] ?? ''}',
+                      //                       clientId,
+
+                      //                       '${widget.info['validity'] ?? ''}',
+                      //                       '${widget.info['inputDate'] ?? ''}',
+
+                      //                       '', //todo paymentTermsController.text,
+                      //                       pricelistId,
+                      //                       currencyId,
+                      //                       '${widget.info['termsAndConditions']}',
+                      //                       salespersonId,
+                      //                       commissionMethodId,
+                      //                       cashMethodId,
+                      //                       '${widget.info['commissionRate'] ?? ''}',
+                      //                       '${widget.info['commissionTotal'] ?? ''}',
+                      //                       '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                      //                       '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                      //                       '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                      //                       '${widget.info['globalDiscountAmount'] ?? ''}',
+                      //                       '${widget.info['globalDiscount'] ?? ''}',
+                      //                       '${widget.info['vat'] ?? ''}', //vat
+                      //                       '${widget.info['vatLebanese'] ?? ''}',
+                      //                       '${widget.info['total'] ?? ''}',
+                      //                       '${widget.info['vatExempt'] ?? ''}',
+                      //                       '${widget.info['notPrinted'] ?? ''}',
+                      //                       '${widget.info['printedAsVatExempt'] ?? ''}',
+                      //                       '${widget.info['printedAsPercentage'] ?? ''}',
+                      //                       '${widget.info['vatInclusivePrices'] ?? ''}',
+                      //                       '${widget.info['beforeVatPrices'] ?? ''}',
+
+                      //                       '${widget.info['code'] ?? ''}',
+
+                      //                       'confirmed', // status,
+                      //                       // quotationController.newRowMap,
+                      //                       orderLinesMap,
+                      //                     );
+                      //                     if (res['success'] == true) {
+                      //                       // homeController.selectedTab.value =
+                      //                       //     "quotation_summary";
+                      //                       pendingDocsController.getAllPendingDocs();
+                      //                       homeController.selectedTab.value =
+                      //                           "quotation_summary";
+                      //                       CommonWidgets.snackBar('Success', res['message']);
+                      //                     } else {
+                      //                       CommonWidgets.snackBar('error', res['message']);
+                      //                     }
+                      //                   },
+                      //                   child: Icon(Icons.check, color: Primary.primary),
+                      //                 ),
                       //               ),
-                      //             ),
-                      //             elevation: 0,
-                      //             content: UpdateQuotationDialog(
-                      //               index: widget.index,
-                      //               info: widget.info,
-                      //             ),
-                      //           ),
-                      //     );
-                      //   },
-                      //   child: Text('Update'.tr),
-                      // ),
-                      PopupMenuItem<String>(
-                        value: '2',
-                        onTap: () async {
-                          //update from back
-                          var res = await updateQuotation(
-                            '${widget.info['id']}',
+                      //  00
+                      Tooltip(
+                        message: 'send'.tr,
+                        child: InkWell(
+                          onTap: () async {
+                            Map<int, Map<String, dynamic>> orderLines1 = {};
 
-                            '${widget.info['id']['reference']}',
-                            '${widget.info['id']['client']['id']}',
+                            Map<int, dynamic> orderLinesMap = {
+                              for (
+                                int i = 0;
+                                i < widget.info['orderLines'].length;
+                                i++
+                              )
+                                (i + 1): widget.info['orderLines'][i],
+                            };
 
-                            '${widget.info['id']['validity']}',
-                            '', //todo paymentTermsController.text,
-                            '${widget.info['id']['pricelist']['id']}',
-                            '${widget.info['id']['currency']['id']}',
-                            '${widget.info['id']['termsAndConditions']}',
-                            '${widget.info['id']['salesperson']['id']}',
-                            '',
-                            '${widget.info['id']['cashingMethod']}',
-                            '${widget.info['id']['commissionMethod']}',
-                            '${widget.info['id']['commissionTotal']}',
-                            '${widget.info['id']['totalBeforeVat']}', //total before vat
-                            '${widget.info['id']['specialDiscountAmount']}', // inserted by user
-                            '${widget.info['id']['specialDiscount']}', // calculated
-                            '${widget.info['id']['globalDiscountAmount']}',
-                            '${widget.info['id']['globalDiscount']}',
-                            '${widget.info['id']['vat']}', //vat
-                            '${widget.info['id']['vatLebanese']}',
-                            '${widget.info['id']['total']}',
-                            quotationController.isVatExemptChecked ? '1' : '0',
-                            quotationController.isVatNoPrinted ? '1' : '0',
-                            quotationController.isPrintedAsVatExempt
-                                ? '1'
-                                : '0',
-                            quotationController.isPrintedAs0 ? '1' : '0',
-                            quotationController.isBeforeVatPrices ? '0' : '1',
-                            quotationController.isBeforeVatPrices ? '1' : '0',
+                            for (int i = 0; i < orderLinesMap.length; i++) {
+                              Map<String, dynamic> selectedOrderLine =
+                                  orderLinesMap[i + 1];
+                              orderLines1[i + 1] = {};
+                              if (selectedOrderLine['line_type_id'] == 1) {
+                                // Map the fields you want to copy from selectedOrderLine to orderLines1
 
-                            '${widget.info['id']['code']}',
-                            'cancelled', // status,
-                            // quotationController.rowsInListViewInQuotation,
-                            widget.info['id']['orderLines'],
-                          );
-                          if (res['success'] == true) {
-                            setState(() {
-                              quotationController
-                                  .decrementListViewLengthInQuotation(
-                                    quotationController.increment,
-                                  );
-                              quotationController
-                                  .removeFromRowsInListViewInQuotation(
-                                    widget.index,
-                                  );
-                              quotationController
-                                  .removeFromOrderLinesInQuotationList(
-                                    widget.index.toString(),
-                                  );
-                            });
-                            CommonWidgets.snackBar(
-                              'Success',
-                              'Cancelled Successfully',
+                                orderLines1[i + 1]!['line_type_id'] =
+                                    selectedOrderLine['line_type_id']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_id'] = '';
+
+                                orderLines1[i + 1]!['itemName'] = '';
+                                orderLines1[i + 1]!['item_main_code'] = '';
+                                orderLines1[i + 1]!['item_discount'] = '0';
+                                orderLines1[i + 1]!['item_description'] = '';
+                                orderLines1[i + 1]!['item_quantity'] = '0';
+
+                                orderLines1[i + 1]!['item_unit_price'] = '0';
+                                orderLines1[i + 1]!['item_total'] = '0';
+                                orderLines1[i + 1]!['title'] =
+                                    selectedOrderLine['title'] ?? '';
+                                orderLines1[i + 1]!['note'] = '';
+                                orderLines1[i + 1]!['combo'] = '';
+                                // Add more fields as needed
+                              }
+                              if (selectedOrderLine['line_type_id'] == 2) {
+                                // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                                orderLines1[i + 1]!['line_type_id'] =
+                                    selectedOrderLine['line_type_id']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_id'] =
+                                    selectedOrderLine['item_id']?.toString() ??
+                                    '';
+
+                                orderLines1[i + 1]!['itemName'] =
+                                    selectedOrderLine['item_name'] ?? '';
+                                orderLines1[i + 1]!['item_main_code'] =
+                                    selectedOrderLine['item_main_code'] ?? '';
+                                orderLines1[i + 1]!['item_discount'] =
+                                    selectedOrderLine['item_discount']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_description'] =
+                                    selectedOrderLine['item_description'] ?? '';
+                                orderLines1[i + 1]!['item_quantity'] =
+                                    selectedOrderLine['item_quantity']
+                                        ?.toString() ??
+                                    '';
+
+                                orderLines1[i + 1]!['item_unit_price'] =
+                                    selectedOrderLine['item_unit_price']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_total'] =
+                                    selectedOrderLine['item_total']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['title'] =
+                                    selectedOrderLine['title'] ?? '';
+                                orderLines1[i + 1]!['note'] =
+                                    selectedOrderLine['note'] ?? '';
+                                orderLines1[i + 1]!['combo'] = '';
+                                // Add more fields as needed
+                              }
+                              if (selectedOrderLine['line_type_id'] == 3) {
+                                // Map the fields you want to copy from selectedOrderLine to orderLines1
+                                orderLines1[i + 1]!['line_type_id'] =
+                                    selectedOrderLine['line_type_id']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_id'] = '';
+
+                                orderLines1[i + 1]!['itemName'] =
+                                    selectedOrderLine['combo_name'] ?? '';
+                                orderLines1[i + 1]!['item_main_code'] =
+                                    selectedOrderLine['combo_code'] ?? '';
+                                orderLines1[i + 1]!['item_discount'] =
+                                    selectedOrderLine['combo_discount']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_description'] =
+                                    selectedOrderLine['combo_description'] ??
+                                    '';
+                                orderLines1[i + 1]!['item_quantity'] =
+                                    selectedOrderLine['combo_quantity']
+                                        ?.toString() ??
+                                    '';
+
+                                orderLines1[i + 1]!['item_unit_price'] =
+                                    selectedOrderLine['combo_unit_price']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_total'] =
+                                    selectedOrderLine['combo_total']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['title'] =
+                                    selectedOrderLine['title'] ?? '';
+                                orderLines1[i + 1]!['note'] =
+                                    selectedOrderLine['note'] ?? '';
+                                orderLines1[i + 1]!['combo'] =
+                                    selectedOrderLine['combo_id']?.toString() ??
+                                    '';
+                                // Add more fields as needed
+                              }
+                              if (selectedOrderLine['line_type_id'] == 4) {
+                                // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                                orderLines1[i + 1]!['line_type_id'] =
+                                    selectedOrderLine['line_type_id']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_id'] = '';
+
+                                orderLines1[i + 1]!['itemName'] = '';
+                                orderLines1[i + 1]!['item_main_code'] = '';
+                                orderLines1[i + 1]!['item_discount'] = '0';
+                                orderLines1[i + 1]!['item_description'] = '';
+                                orderLines1[i + 1]!['item_quantity'] = '0';
+
+                                orderLines1[i + 1]!['item_unit_price'] = '0';
+                                orderLines1[i + 1]!['item_total'] = '0';
+                                orderLines1[i + 1]!['title'] = '';
+                                orderLines1[i + 1]!['note'] = '';
+                                if (selectedOrderLine['image'] != null &&
+                                    selectedOrderLine['image'].isNotEmpty) {
+                                  try {
+                                    final response = await http.get(
+                                      Uri.parse(
+                                        '$baseImage${selectedOrderLine['image']}',
+                                      ),
+                                    );
+
+                                    if (response.statusCode == 200) {
+                                      imageFile = response.bodyBytes;
+                                    } else {
+                                      imageFile = Uint8List(
+                                        0,
+                                      ); // Set to empty if loading fails
+                                    }
+                                  } catch (e) {
+                                    imageFile = Uint8List(
+                                      0,
+                                    ); // Set to empty if loading fails
+                                  }
+                                } else {
+                                  imageFile = Uint8List(
+                                    0,
+                                  ); // Set to empty if no image URL
+                                }
+                                orderLines1[i + 1]!['image'] = imageFile;
+                                // Add more fields as needed
+                              }
+                              if (selectedOrderLine['line_type_id'] == 5) {
+                                // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                                orderLines1[i + 1]!['line_type_id'] =
+                                    selectedOrderLine['line_type_id']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_id'] = '';
+
+                                orderLines1[i + 1]!['itemName'] = '';
+                                orderLines1[i + 1]!['item_main_code'] = '';
+                                orderLines1[i + 1]!['item_discount'] = '0';
+                                orderLines1[i + 1]!['item_description'] = '';
+                                orderLines1[i + 1]!['item_quantity'] = '0';
+
+                                orderLines1[i + 1]!['item_unit_price'] = '0';
+                                orderLines1[i + 1]!['item_total'] = '0';
+                                orderLines1[i + 1]!['title'] = '';
+                                orderLines1[i + 1]!['note'] =
+                                    selectedOrderLine['note'] ?? '';
+                                orderLines1[i + 1]!['combo'] = '';
+                                // Add more fields as needed
+                              }
+                            }
+
+                            var res = await updateQuotation(
+                              '${widget.info['id']}',
+                              // false,
+                              '${widget.info['reference'] ?? ''}',
+                              clientId,
+
+                              '${widget.info['validity'] ?? ''}',
+                              '${widget.info['inputDate'] ?? ''}',
+
+                              '', //todo paymentTermsController.text,
+                              pricelistId,
+                              currencyId,
+                              '${widget.info['termsAndConditions']}',
+                              salespersonId,
+                              commissionMethodId,
+                              cashMethodId,
+                              '${widget.info['commissionRate'] ?? ''}',
+                              '${widget.info['commissionTotal'] ?? ''}',
+                              '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                              '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                              '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                              '${widget.info['globalDiscountAmount'] ?? ''}',
+                              '${widget.info['globalDiscount'] ?? ''}',
+                              '${widget.info['vat'] ?? ''}', //vat
+                              '${widget.info['vatLebanese'] ?? ''}',
+                              '${widget.info['total'] ?? ''}',
+                              '${widget.info['vatExempt'] ?? ''}',
+                              '${widget.info['notPrinted'] ?? ''}',
+                              '${widget.info['printedAsVatExempt'] ?? ''}',
+                              '${widget.info['printedAsPercentage'] ?? ''}',
+                              '${widget.info['vatInclusivePrices'] ?? ''}',
+                              '${widget.info['beforeVatPrices'] ?? ''}',
+
+                              '${widget.info['code'] ?? ''}',
+                              'sent', // status,
+                              orderLines1,
                             );
-                          } else {
-                            CommonWidgets.snackBar(
-                              'error',
-                              'Error : Not Cancelled',
-                            );
-                          }
-                        },
-                        child: Text('cancelled'.tr),
+                            if (res['success'] == true) {
+                              // homeController.selectedTab.value =
+                              //     "quotation_summary";
+
+                              pendingDocsController.getAllPendingDocs();
+                              homeController.selectedTab.value =
+                                  "quotation_summary";
+                              CommonWidgets.snackBar('Success', res['message']);
+                            } else {
+                              CommonWidgets.snackBar('error', res['message']);
+                            }
+                          },
+                          child: Icon(
+                            Icons.send,
+                            color: Primary.primary,
+                            size: 17.00,
+                          ),
+                        ),
                       ),
+
+                      Tooltip(
+                        message: 'cancel'.tr,
+                        child: InkWell(
+                          onTap: () async {
+                            Map<int, Map<String, dynamic>> orderLines1 = {};
+
+                            Map<int, dynamic> orderLinesMap = {
+                              for (
+                                int i = 0;
+                                i < widget.info['orderLines'].length;
+                                i++
+                              )
+                                (i + 1): widget.info['orderLines'][i],
+                            };
+
+                            for (int i = 0; i < orderLinesMap.length; i++) {
+                              Map<String, dynamic> selectedOrderLine =
+                                  orderLinesMap[i + 1];
+                              orderLines1[i + 1] = {};
+                              if (selectedOrderLine['line_type_id'] == 1) {
+                                // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                                orderLines1[i + 1]!['line_type_id'] =
+                                    selectedOrderLine['line_type_id']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_id'] = '';
+
+                                orderLines1[i + 1]!['itemName'] = '';
+                                orderLines1[i + 1]!['item_main_code'] = '';
+                                orderLines1[i + 1]!['item_discount'] = '0';
+                                orderLines1[i + 1]!['item_description'] = '';
+                                orderLines1[i + 1]!['item_quantity'] = '0';
+
+                                orderLines1[i + 1]!['item_unit_price'] = '0';
+                                orderLines1[i + 1]!['item_total'] = '0';
+                                orderLines1[i + 1]!['title'] =
+                                    selectedOrderLine['title'] ?? '';
+                                orderLines1[i + 1]!['note'] = '';
+                                orderLines1[i + 1]!['combo'] = '';
+                                // Add more fields as needed
+                              }
+                              if (selectedOrderLine['line_type_id'] == 2) {
+                                // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                                orderLines1[i + 1]!['line_type_id'] =
+                                    selectedOrderLine['line_type_id']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_id'] =
+                                    selectedOrderLine['item_id']?.toString() ??
+                                    '';
+
+                                orderLines1[i + 1]!['itemName'] =
+                                    selectedOrderLine['item_name'] ?? '';
+                                orderLines1[i + 1]!['item_main_code'] =
+                                    selectedOrderLine['item_main_code'] ?? '';
+                                orderLines1[i + 1]!['item_discount'] =
+                                    selectedOrderLine['item_discount']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_description'] =
+                                    selectedOrderLine['item_description'] ?? '';
+                                orderLines1[i + 1]!['item_quantity'] =
+                                    selectedOrderLine['item_quantity']
+                                        ?.toString() ??
+                                    '';
+
+                                orderLines1[i + 1]!['item_unit_price'] =
+                                    selectedOrderLine['item_unit_price']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_total'] =
+                                    selectedOrderLine['item_total']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['title'] =
+                                    selectedOrderLine['title'] ?? '';
+                                orderLines1[i + 1]!['note'] =
+                                    selectedOrderLine['note'] ?? '';
+                                orderLines1[i + 1]!['combo'] = '';
+                                // Add more fields as needed
+                              }
+                              if (selectedOrderLine['line_type_id'] == 3) {
+                                // Map the fields you want to copy from selectedOrderLine to orderLines1
+                                orderLines1[i + 1]!['line_type_id'] =
+                                    selectedOrderLine['line_type_id']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_id'] = '';
+
+                                orderLines1[i + 1]!['itemName'] =
+                                    selectedOrderLine['combo_name'] ?? '';
+                                orderLines1[i + 1]!['item_main_code'] =
+                                    selectedOrderLine['combo_code'] ?? '';
+                                orderLines1[i + 1]!['item_discount'] =
+                                    selectedOrderLine['combo_discount']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_description'] =
+                                    selectedOrderLine['combo_description'] ??
+                                    '';
+                                orderLines1[i + 1]!['item_quantity'] =
+                                    selectedOrderLine['combo_quantity']
+                                        ?.toString() ??
+                                    '';
+
+                                orderLines1[i + 1]!['item_unit_price'] =
+                                    selectedOrderLine['combo_unit_price']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_total'] =
+                                    selectedOrderLine['combo_total']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['title'] =
+                                    selectedOrderLine['title'] ?? '';
+                                orderLines1[i + 1]!['note'] =
+                                    selectedOrderLine['note'] ?? '';
+                                orderLines1[i + 1]!['combo'] =
+                                    selectedOrderLine['combo_id']?.toString() ??
+                                    '';
+                                // Add more fields as needed
+                              }
+                              if (selectedOrderLine['line_type_id'] == 4) {
+                                // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                                orderLines1[i + 1]!['line_type_id'] =
+                                    selectedOrderLine['line_type_id']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_id'] = '';
+
+                                orderLines1[i + 1]!['itemName'] = '';
+                                orderLines1[i + 1]!['item_main_code'] = '';
+                                orderLines1[i + 1]!['item_discount'] = '0';
+                                orderLines1[i + 1]!['item_description'] = '';
+                                orderLines1[i + 1]!['item_quantity'] = '0';
+
+                                orderLines1[i + 1]!['item_unit_price'] = '0';
+                                orderLines1[i + 1]!['item_total'] = '0';
+                                orderLines1[i + 1]!['title'] = '';
+                                orderLines1[i + 1]!['note'] = '';
+                                if (selectedOrderLine['image'] != null &&
+                                    selectedOrderLine['image'].isNotEmpty) {
+                                  try {
+                                    final response = await http.get(
+                                      Uri.parse(
+                                        '$baseImage${selectedOrderLine['image']}',
+                                      ),
+                                    );
+
+                                    if (response.statusCode == 200) {
+                                      imageFile = response.bodyBytes;
+                                    } else {
+                                      imageFile = Uint8List(
+                                        0,
+                                      ); // Set to empty if loading fails
+                                    }
+                                  } catch (e) {
+                                    imageFile = Uint8List(
+                                      0,
+                                    ); // Set to empty if loading fails
+                                  }
+                                } else {
+                                  imageFile = Uint8List(
+                                    0,
+                                  ); // Set to empty if no image URL
+                                }
+                                orderLines1[i + 1]!['image'] = imageFile;
+                                // Add more fields as needed
+                              }
+                              if (selectedOrderLine['line_type_id'] == 5) {
+                                // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                                orderLines1[i + 1]!['line_type_id'] =
+                                    selectedOrderLine['line_type_id']
+                                        ?.toString() ??
+                                    '';
+                                orderLines1[i + 1]!['item_id'] = '';
+
+                                orderLines1[i + 1]!['itemName'] = '';
+                                orderLines1[i + 1]!['item_main_code'] = '';
+                                orderLines1[i + 1]!['item_discount'] = '0';
+                                orderLines1[i + 1]!['item_description'] = '';
+                                orderLines1[i + 1]!['item_quantity'] = '0';
+
+                                orderLines1[i + 1]!['item_unit_price'] = '0';
+                                orderLines1[i + 1]!['item_total'] = '0';
+                                orderLines1[i + 1]!['title'] = '';
+                                orderLines1[i + 1]!['note'] =
+                                    selectedOrderLine['note'] ?? '';
+                                orderLines1[i + 1]!['combo'] = '';
+                                // Add more fields as needed
+                              }
+                            }
+
+                            var res = await updateQuotation(
+                              '${widget.info['id']}',
+                              // false,
+                              '${widget.info['reference'] ?? ''}',
+                              clientId,
+
+                              '${widget.info['validity'] ?? ''}',
+                              '${widget.info['inputDate'] ?? ''}',
+
+                              '', //todo paymentTermsController.text,
+                              pricelistId,
+                              currencyId,
+                              '${widget.info['termsAndConditions']}',
+                              salespersonId,
+                              commissionMethodId,
+                              cashMethodId,
+                              '${widget.info['commissionRate'] ?? ''}',
+                              '${widget.info['commissionTotal'] ?? ''}',
+                              '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                              '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                              '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                              '${widget.info['globalDiscountAmount'] ?? ''}',
+                              '${widget.info['globalDiscount'] ?? ''}',
+                              '${widget.info['vat'] ?? ''}', //vat
+                              '${widget.info['vatLebanese'] ?? ''}',
+                              '${widget.info['total'] ?? ''}',
+                              '${widget.info['vatExempt'] ?? ''}',
+                              '${widget.info['notPrinted'] ?? ''}',
+                              '${widget.info['printedAsVatExempt'] ?? ''}',
+                              '${widget.info['printedAsPercentage'] ?? ''}',
+                              '${widget.info['vatInclusivePrices'] ?? ''}',
+                              '${widget.info['beforeVatPrices'] ?? ''}',
+
+                              '${widget.info['code'] ?? ''}',
+                              'cancelled', // status,
+                              orderLines1,
+                            );
+                            if (res['success'] == true) {
+                              // homeController.selectedTab.value =
+                              //     "quotation_summary";
+
+                              pendingDocsController.getAllPendingDocs();
+                              homeController.selectedTab.value =
+                                  "quotation_summary";
+                              CommonWidgets.snackBar('Success', res['message']);
+                            } else {
+                              CommonWidgets.snackBar('error', res['message']);
+                            }
+                          },
+                          child: Icon(
+                            Icons.cancel_outlined,
+                            color: Primary.primary,
+                          ),
+                        ),
+                      ),
+
+                      // ReusableMore(
+                      //   itemsList: [
+                      //
+                      //     PopupMenuItem<String>(
+                      //       value: '2',
+                      //       onTap: () async {
+                      //         //update from back
+                      //
+                      //         var res = await updateQuotation(
+                      //           '${widget.info['id']}',
+                      //           // false,
+                      //           '${widget.info['reference'] ?? ''}',
+                      //           clientId,
+                      //
+                      //           '${widget.info['validity'] ?? ''}',
+                      //           '${widget.info['inputDate'] ?? ''}',
+                      //
+                      //           '', //todo paymentTermsController.text,
+                      //           pricelistId,
+                      //           currencyId,
+                      //           '${widget.info['termsAndConditions']}',
+                      //           salespersonId,
+                      //           commissionMethodId,
+                      //           cashMethodId,
+                      //           '${widget.info['commissionRate'] ?? ''}',
+                      //           '${widget.info['commissionTotal'] ?? ''}',
+                      //           '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                      //           '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                      //           '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                      //           '${widget.info['globalDiscountAmount'] ?? ''}',
+                      //           '${widget.info['globalDiscount'] ?? ''}',
+                      //           '${widget.info['vat'] ?? ''}', //vat
+                      //           '${widget.info['vatLebanese'] ?? ''}',
+                      //           '${widget.info['total'] ?? ''}',
+                      //           '${widget.info['vatExempt'] ?? ''}',
+                      //           '${widget.info['notPrinted'] ?? ''}',
+                      //           '${widget.info['printedAsVatExempt'] ?? ''}',
+                      //           '${widget.info['printedAsPercentage'] ?? ''}',
+                      //           '${widget.info['vatInclusivePrices'] ?? ''}',
+                      //           '${widget.info['beforeVatPrices'] ?? ''}',
+                      //
+                      //           '${widget.info['code'] ?? ''}',
+                      //
+                      //           'confirmed', // status,
+                      //           quotationController.newRowMap,
+                      //         );
+                      //         if (res['success'] == true) {
+                      //           // homeController.selectedTab.value =
+                      //           //     "quotation_summary";
+                      //           pendingDocsController.getAllPendingDocs();
+                      //           CommonWidgets.snackBar('Success', res['message']);
+                      //         } else {
+                      //           CommonWidgets.snackBar('error', res['message']);
+                      //         }
+                      //       },
+                      //       child: Text('Confirm'.tr),
+                      //     ),
+                      //     PopupMenuItem<String>(
+                      //       value: '3',
+                      //       onTap: () async {
+                      //         //cancel from back
+                      //
+                      //         var res = await updateQuotation(
+                      //           '${widget.info['id']}',
+                      //           // false,
+                      //           '${widget.info['reference'] ?? ''}',
+                      //           clientId,
+                      //
+                      //           '${widget.info['validity'] ?? ''}',
+                      //           '${widget.info['inputDate'] ?? ''}',
+                      //
+                      //           '', //todo paymentTermsController.text,
+                      //           pricelistId,
+                      //           currencyId,
+                      //           '${widget.info['termsAndConditions']}',
+                      //           salespersonId,
+                      //           commissionMethodId,
+                      //           cashMethodId,
+                      //           '${widget.info['commissionRate'] ?? ''}',
+                      //           '${widget.info['commissionTotal'] ?? ''}',
+                      //           '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                      //           '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                      //           '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                      //           '${widget.info['globalDiscountAmount'] ?? ''}',
+                      //           '${widget.info['globalDiscount'] ?? ''}',
+                      //           '${widget.info['vat'] ?? ''}', //vat
+                      //           '${widget.info['vatLebanese'] ?? ''}',
+                      //           '${widget.info['total'] ?? ''}',
+                      //           '${widget.info['vatExempt'] ?? ''}',
+                      //           '${widget.info['notPrinted'] ?? ''}',
+                      //           '${widget.info['printedAsVatExempt'] ?? ''}',
+                      //           '${widget.info['printedAsPercentage'] ?? ''}',
+                      //           '${widget.info['vatInclusivePrices'] ?? ''}',
+                      //           '${widget.info['beforeVatPrices'] ?? ''}',
+                      //
+                      //           '${widget.info['code'] ?? ''}',
+                      //           'cancelled', // status,
+                      //           // quotationController.rowsInListViewInQuotation,
+                      //           quotationController.newRowMap,
+                      //         );
+                      //         if (res['success'] == true) {
+                      //           // homeController.selectedTab.value =
+                      //           //     "quotation_summary";
+                      //
+                      //           pendingDocsController.getAllPendingDocs();
+                      //           CommonWidgets.snackBar('Success', res['message']);
+                      //         } else {
+                      //           CommonWidgets.snackBar('error', res['message']);
+                      //         }
+                      //       },
+                      //       child: Text('cancel'.tr),
+                      //     ),
+                      //     PopupMenuItem<String>(
+                      //       value: '4',
+                      //       onTap: () async {
+                      //         showDialog<String>(
+                      //           context: context,
+                      //           builder:
+                      //               (BuildContext context) => AlertDialog(
+                      //                 backgroundColor: Colors.white,
+                      //                 shape: const RoundedRectangleBorder(
+                      //                   borderRadius: BorderRadius.all(
+                      //                     Radius.circular(9),
+                      //                   ),
+                      //                 ),
+                      //                 elevation: 0,
+                      //                 content: UpdateQuotationDialog(
+                      //                   index: widget.index,
+                      //                   info: widget.info,
+                      //                 ),
+                      //               ),
+                      //         );
+                      //       },
+                      //       child: Text('Update'.tr),
+                      //     ),
+                      //   ],
+                      // ),
                     ],
                   ),
                 );
               },
             ),
-            SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.03,
+              child: InkWell(
+                onTap: () async {
+                  var res = await deleteQuotation('${(widget.info['id'])}');
+                  var p = json.decode(res.body);
+                  if (res.statusCode == 200) {
+                    CommonWidgets.snackBar('Success', p['message']);
+                    pendingDocsController.getAllPendingDocs();
+                  } else {
+                    CommonWidgets.snackBar('error', p['message']);
+                  }
+                },
+                child: Icon(Icons.delete_outline, color: Primary.primary),
+              ),
+            ),
           ],
         ),
       ),

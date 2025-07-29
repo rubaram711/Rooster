@@ -5,7 +5,7 @@ import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
 import 'package:rooster_app/Screens/Combo/ComboSummaryWidgets/showitems.dart';
-import 'package:rooster_app/Screens/Combo/ComboSummaryWidgets/updateComboDialog.dart';
+import 'package:rooster_app/Screens/Combo/ComboSummaryWidgets/update_combo_dialog.dart';
 import 'package:rooster_app/Screens/Combo/combo.dart';
 import 'package:rooster_app/Widgets/page_title.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';

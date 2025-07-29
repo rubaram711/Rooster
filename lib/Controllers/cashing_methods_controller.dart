@@ -1,9 +1,18 @@
+import 'dart:typed_data';
+
 import 'package:get/get.dart';
 
 import '../Backend/get_currencies.dart';
 
 
 class CashingMethodsController extends GetxController {
+  Uint8List? imageFile;
+  String imageLink='';
+  setImageFile(Uint8List val) {
+    imageFile=val;
+    update();
+  }
+
   int selectedTabIndex = 0;
   List cashingMethodsList = [];
   bool isCashingMethodsFetched = false;

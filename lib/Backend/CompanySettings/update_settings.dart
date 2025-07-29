@@ -65,10 +65,10 @@ if(imageFile!=null) {
       )
       .catchError((err) {
         // if (err is DioError) {
-          print(err.response);
+        //   print(err.response);
         // }
         return err.response;
       });
-  print('lll #%${response.data['data']}');
+  // print('lll #%${response.data['data']}');
   return response.data;
 }

@@ -87,8 +87,6 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
     comboController.addToUnitPriceControllers(comboCounter);
     Widget p = ReusableItemRow(index: comboCounter, info: {});
     comboController.addToOrderLinesInComboList('$comboCounter', p);
-    print("add item");
-    print(comboController.rowsInListViewInCombo);
   }
 
   @override
@@ -121,8 +119,6 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
         index: i + 1,
         info: comboController.rowsInListViewInCombo[keys[i]],
       );
-      print("initial");
-      print(comboController.rowsInListViewInCombo[1]);
       comboController.orderLinesComboList['${i + 1}'] = p;
     }
     comboCounter = comboController.rowsInListViewInCombo.length;
@@ -316,22 +312,11 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                   ) {
                                     var selectedItemId =
                                         '${comboController.rowsInListViewInCombo[keys[i]]['item_id']}';
-                                    print("selectedItemId");
-                                    print(selectedItemId);
 
                                     if (selectedItemId != '') {
                                       if (comboController
                                               .priceCurrency[selectedItemId] ==
                                           val) {
-                                        print("if1 cur");
-                                        print("keys[i]");
-                                        print(keys[i]);
-                                        print(
-                                          "comboControlleritemUnitPriceselectedItemId",
-                                        );
-                                        print(
-                                          "${comboController.itemUnitPrice[selectedItemId]}",
-                                        );
                                         comboController
                                             .unitPriceControllers[keys[i]]!
                                             .text = comboController
@@ -341,7 +326,6 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                           comboController
                                                   .priceCurrency[selectedItemId] !=
                                               val) {
-                                        print("if2 cur");
                                         var result = exchangeRatesController
                                             .exchangeRatesList
                                             .firstWhere(
@@ -367,8 +351,6 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                           comboController
                                                   .priceCurrency[selectedItemId] ==
                                               'USD') {
-                                        print("if3 cur");
-                                        print(keys[i]);
                                         comboController
                                                 .unitPriceControllers[keys[i]]!
                                                 .text =
@@ -380,7 +362,6 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                                     .text)
                                                 .toString();
                                       } else {
-                                        print("end else cur");
                                         var result = exchangeRatesController
                                             .exchangeRatesList
                                             .firstWhere(
@@ -403,7 +384,6 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                                 .text =
                                             '${double.parse('${(double.parse(usdPrice) * double.parse(comboController.exchangeRateForSelectedCurrency))}')}';
                                       }
-                                      print("out end else");
                                       comboController
                                           .unitPriceControllers[keys[i]]!
                                           .text = double.parse(
@@ -521,7 +501,7 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           //+++++++++++++++++Rows in table With SingleScrollView+++++++++++++++++++++++++++++++
-                          Container(
+                          SizedBox(
                             height: MediaQuery.of(context).size.width * 0.13,
                             child: SingleChildScrollView(
                               child: Column(
@@ -556,18 +536,18 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                           Row(
                             children: [
                               ReusableAddCard(
-                                text: 'create_new_combo'.tr,
+                                text: 'add_items'.tr,
                                 onTap: () {
                                   addNewItem();
                                 },
                               ),
                               gapW32,
-                              ReusableAddCard(
-                                text: 'create_append'.tr,
-                                onTap: () {
-                                  // addNewItem();
-                                },
-                              ),
+                              // ReusableAddCard(
+                              //   text: 'create_append'.tr,
+                              //   onTap: () {
+                              //     // addNewItem();
+                              //   },
+                              // ),
                             ],
                           ),
 
@@ -708,13 +688,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
     if (combocont.priceCurrency[selectedItemId] ==
         combocont.selectedCurrencyName) {
-      print("if 1 in reusableRow");
       combocont.unitPriceControllers[widget.index]!.text =
           combocont.itemUnitPrice[selectedItemId].toString();
     } else if (combocont.selectedCurrencyName == 'USD' &&
         combocont.priceCurrency[selectedItemId] !=
             combocont.selectedCurrencyName) {
-      print("if 2 in reusableRow");
       var result = exchangeRatesController.exchangeRatesList.firstWhere(
         (item) => item["currency"] == combocont.priceCurrency[selectedItemId],
         orElse: () => null,
@@ -727,11 +705,9 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
           '${double.parse('${(double.parse(combocont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
     } else if (combocont.selectedCurrencyName != 'USD' &&
         combocont.priceCurrency[selectedItemId] == 'USD') {
-      print("if 3 reusableRow");
       combocont.unitPriceControllers[widget.index]!.text =
           '${double.parse('${(double.parse(combocont.itemUnitPrice[selectedItemId].toString()) * double.parse(combocont.exchangeRateForSelectedCurrency))}')}';
     } else {
-      print("end else reusableRow");
       var result = exchangeRatesController.exchangeRatesList.firstWhere(
         (item) => item["currency"] == combocont.priceCurrency[selectedItemId],
         orElse: () => null,
@@ -745,7 +721,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
       combocont.unitPriceControllers[widget.index]!.text =
           '${double.parse('${(double.parse(usdPrice) * double.parse(combocont.exchangeRateForSelectedCurrency))}')}';
     }
-    print("out end else reusableRow");
     combocont.unitPriceControllers[widget.index]!.text = double.parse(
       combocont.unitPriceControllers[widget.index]!.text,
     ).toStringAsFixed(2);
@@ -838,8 +813,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       qty =
                           '${cont.items[cont.itemsName.indexOf(value)]['quantity']}'
                               .toString();
-                      print("qty in setstate in reusableRow");
-                      print(qty);
                       name = value;
 
                       discription =
@@ -855,13 +828,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       // **************************Currency***********************************************************************************
                       if (cont.priceCurrency[selectedItemId] ==
                           cont.selectedCurrencyName) {
-                        print("if1 in setstate in reusableRow");
                         cont.unitPriceControllers[widget.index]!.text =
                             cont.itemUnitPrice[selectedItemId].toString();
                       } else if (cont.selectedCurrencyName == 'USD' &&
                           cont.priceCurrency[selectedItemId] !=
                               cont.selectedCurrencyName) {
-                        print("if2 in setstate in reusableRow");
 
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
@@ -878,12 +849,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
                       } else if (cont.selectedCurrencyName != 'USD' &&
                           cont.priceCurrency[selectedItemId] == 'USD') {
-                        print("if3 in setstate in reusableRow");
 
                         cont.unitPriceControllers[widget.index]!.text =
                             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       } else {
-                        print("end else in setstate in reusableRow");
 
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
@@ -901,7 +870,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         cont.unitPriceControllers[widget.index]!.text =
                             '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       }
-                      print("out end else in setstate in reusableRow");
 
                       quantityComboController.text = '1';
                       quantity = '1';
@@ -921,7 +889,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       cont.getTotalItems();
                     });
                     //setstate
-                    print("out setstate in setstate in reusableRow");
 
                     cont.setEnteredUnitPriceInCombo(
                       widget.index,

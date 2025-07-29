@@ -1,29 +1,20 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rooster_app/Backend/Quotations/delete_quotation.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
-import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
-import 'package:rooster_app/Screens/Quotations/print_quotation.dart';
-import 'package:rooster_app/Screens/Quotations/quotation_summary.dart';
 import 'package:rooster_app/Screens/Quotations/schedule_task_dialog.dart';
 import 'package:rooster_app/Screens/Quotations/tasks.dart';
-import 'package:rooster_app/Widgets/custom_snak_bar.dart';
 import 'package:rooster_app/Widgets/page_title.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
-import 'package:rooster_app/Widgets/reusable_more.dart';
 import 'package:rooster_app/Widgets/reusable_text_field.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
 import 'package:rooster_app/Widgets/table_title.dart';
 import 'package:rooster_app/const/colors.dart';
 import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
-import 'package:rooster_app/const/urls.dart';
 
 class DocsReview extends StatefulWidget {
   const DocsReview({super.key});
@@ -69,7 +60,7 @@ class _DocsReviewState extends State<DocsReview> {
     setState(() {
       searchValue = value;
     });
-    await quotationController.getAllQuotationsFromBack();
+    await quotationController.getAllQuotationsWithoutPendingFromBack();
   }
 
   TaskController taskController = Get.find();
@@ -112,7 +103,7 @@ class _DocsReviewState extends State<DocsReview> {
     quotationController.searchInQuotationsController.text = '';
     listViewLength =
         Sizes.deviceHeight * (0.09 * quotationController.quotationsList.length);
-    quotationController.getAllQuotationsFromBack();
+    quotationController.getAllQuotationsWithoutPendingFromBack();
     super.initState();
   }
 

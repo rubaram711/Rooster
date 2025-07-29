@@ -40,6 +40,8 @@ class CashTraysController extends GetxController {
         cashTraysNumbersList.add(v['tray_number']);
         cashTraysIdsList.add('${v['id']}');
       }
+      cashTraysNumbersList=cashTraysNumbersList.reversed.toList();
+      cashTraysIdsList=cashTraysIdsList.reversed.toList();
     }
     isCashTraysFetched = true;
     update();
@@ -61,6 +63,8 @@ class CashTraysController extends GetxController {
 
   Map report = {};
   int cashingMethodsListLength=0;
+  List<Map<String, dynamic>> sortedSalesReport =[];
+  List<Map<String, dynamic>> sortedWasteReport =[];
 
 
 
@@ -70,7 +74,14 @@ class CashTraysController extends GetxController {
       report = res['data'];
       List cashingMethodsList=report['cashingMethodsTotals']??[];
       cashingMethodsListLength=cashingMethodsList.length;
-
+      sortedSalesReport =
+      List<Map<String, dynamic>>.from(
+          report['salesReport'] ?? [])
+        ..sort((a, b) => (b['qty'] as num).compareTo(a['qty'] as num));
+      sortedWasteReport =
+      List<Map<String, dynamic>>.from(
+          report['wasteReport'] ?? [])
+        ..sort((a, b) => (b['qty'] as num).compareTo(a['qty'] as num));
       update();
     }
     return res;

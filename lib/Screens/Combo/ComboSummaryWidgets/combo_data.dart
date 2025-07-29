@@ -27,7 +27,6 @@ class _ComboDataState extends State<ComboData> {
   @override
   void initState() {
     super.initState();
-    print(comboController.selectedComboData);
   }
 
   @override

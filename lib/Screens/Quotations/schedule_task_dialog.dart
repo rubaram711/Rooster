@@ -300,7 +300,7 @@ class _ScheduleTaskDialogContentState extends State<ScheduleTaskDialogContent> {
                               Get.back();
                               // homeController.selectedTab.value =
                               // 'categories';
-                              quotationController.getAllQuotationsFromBack();
+                              quotationController.getAllQuotationsWithoutPendingFromBack();
                               taskController.getAllTasksFromBack('');
                               taskCont.searchInTasksController.clear();
                               CommonWidgets.snackBar('Success', res['message']);
@@ -318,7 +318,7 @@ class _ScheduleTaskDialogContentState extends State<ScheduleTaskDialogContent> {
                               Get.back();
                               // homeController.selectedTab.value =
                               // 'categories';
-                              quotationController.getAllQuotationsFromBack();
+                              quotationController.getAllQuotationsWithoutPendingFromBack();
                               CommonWidgets.snackBar('Success', res['message']);
                             } else {
                               CommonWidgets.snackBar('error', res['message']);

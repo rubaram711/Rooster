@@ -141,7 +141,6 @@ class _UpdateReplenishmentDialogState extends State<UpdateReplenishmentDialog> {
 
   @override
   void initState() {
-    print('info ${widget.info}');
     getCategoriesFromBack();
     transferController.itemsListInReplenish = {};
     setData();

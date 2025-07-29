@@ -40,7 +40,7 @@ class _SupplierOrderState extends State<SupplierOrderSummary> {
   List supplierOrdersList=[];
   bool isQuotationsFetched = false;
   getAllQuotationsFromBack()async{
-    var p=await getAllQuotations();
+    var p=await getAllQuotationsWithoutPending('');
     setState(() {
       supplierOrdersList.addAll(p);
       isQuotationsFetched=true;
@@ -515,7 +515,7 @@ class _MobileSupplierOrderSummaryState extends State<MobileSupplierOrderSummary>
   List supplierOrdersList=[];
   bool isQuotationsFetched = false;
   getAllQuotationsFromBack()async{
-    var p=await getAllQuotations();
+    var p=await getAllQuotationsWithoutPending('');
     setState(() {
       supplierOrdersList.addAll(p);
       isQuotationsFetched=true;

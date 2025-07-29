@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/discounts_controller.dart';
 import 'package:rooster_app/Controllers/inventory_controller.dart';
-import 'package:rooster_app/Controllers/salesOrder_Controller.dart';
+import 'package:rooster_app/Controllers/sales_order_Controller.dart';
 import 'package:rooster_app/Screens/Configuration/currencies_and_rates.dart';
 import 'package:rooster_app/const/sizes.dart';
 import '../../Controllers/cashing_methods_controller.dart';
@@ -22,7 +22,7 @@ import '../../Controllers/taxation_controller.dart';
 import '../../Controllers/transfer_controller.dart';
 import '../../Controllers/users_controller.dart';
 import '../../Controllers/warehouse_controller.dart';
-import '../../Controllers/LanguagesController.dart';
+import '../../Controllers/languages_controller.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Screens/Authorization/sign_up_screen.dart';
 import '../../Screens/Configuration/cashing_method.dart';
@@ -312,9 +312,11 @@ class _AdminSectionInHomeAppBarState extends State<AdminSectionInHomeAppBar> {
                           //     builder: (BuildContext context) {
                           //   return const SignUpScreen();
                           // }));
+
                           await saveUserInfoLocally('', '', '', '', '','',);
-                          await saveCompanySettingsLocally('', '','','','', '','','', '','','','','','','','','','','','','','');
+                          await saveCompanySettingsLocally('', '','','','', '','','', '','','','','','','','','','','','','','','','');
                           // Get.reset();
+
                           emailController.clear();
                           passwordController.clear();
 

@@ -326,8 +326,8 @@ class _SessionDetailsAfterFilterState extends State<SessionDetailsAfterFilter> {
         sheet
             .getRangeByIndex(i + 2, 2)
             .setText(
-              sessionController.sessionsDetails[i].primaryCurrencyTotal
-                  .toString(),
+              sessionController.sessionsDetails[i].primaryCurrencyTotal!
+                  .toStringAsFixed(2),
             );
         sheet
             .getRangeByIndex(i + 2, 3)
@@ -360,12 +360,12 @@ class _SessionDetailsAfterFilterState extends State<SessionDetailsAfterFilter> {
             );
         sheet
             .getRangeByIndex(i + 2, 8)
-            .setText(sessionController.sessionsDetails[i].received.toString());
+            .setText(sessionController.sessionsDetails[i].received!.toStringAsFixed(2));
         sheet
             .getRangeByIndex(i + 2, 9)
             .setText(
-              sessionController.sessionsDetails[i].receivedOtherCurrency
-                  .toString(),
+              sessionController.sessionsDetails[i].receivedOtherCurrency!.toStringAsFixed(2)
+                  ,
             );
       } else if (sessionController.sessionsDetails[i].orderNumber ==
           'selectedCurrencyTOTAL') {
@@ -377,7 +377,7 @@ class _SessionDetailsAfterFilterState extends State<SessionDetailsAfterFilter> {
         sheet
             .getRangeByIndex(i + 2, 2)
             .setText(
-              sessionController.sessionsDetails[i].selectedCurrTotal.toString(),
+              sessionController.sessionsDetails[i].selectedCurrTotal!.toStringAsFixed(2),
             );
         sheet
             .getRangeByIndex(i + 2, 3)
@@ -432,12 +432,12 @@ class _SessionDetailsAfterFilterState extends State<SessionDetailsAfterFilter> {
             );
         sheet
             .getRangeByIndex(i + 2, 8)
-            .setText(sessionController.sessionsDetails[i].received.toString());
+            .setText(sessionController.sessionsDetails[i].received!.toStringAsFixed(2));
         sheet
             .getRangeByIndex(i + 2, 9)
             .setText(
               sessionController.sessionsDetails[i].receivedOtherCurrency
-                  .toString(),
+              !.toStringAsFixed(2),
             );
         sheet
             .getRangeByIndex(i + 2, 10)
@@ -585,47 +585,47 @@ class _SessionDetailsAfterFilterState extends State<SessionDetailsAfterFilter> {
       if (sessionController.sessionsDetails[i].orderNumber == 'TOTAL') {
         row.cells[0].value = 'totals'.tr;
         row.cells[1].value =
-            '${sessionController.sessionsDetails[i].primaryCurrencyTotal}';
+            sessionController.sessionsDetails[i].primaryCurrencyTotal!.toStringAsFixed(2);
         row.cells[2].value =
-            '${sessionController.sessionsDetails[i].primaryCurrencyTaxValue}';
+            sessionController.sessionsDetails[i].primaryCurrencyTaxValue!.toStringAsFixed(2);
         row.cells[3].value =
-            '${sessionController.sessionsDetails[i].primaryCurrencyDiscountValue}';
+            sessionController.sessionsDetails[i].primaryCurrencyDiscountValue!.toStringAsFixed(2);
         row.cells[4].value =
-            '${sessionController.sessionsDetails[i].receivedOtherCurrency}';
+            sessionController.sessionsDetails[i].receivedOtherCurrency!.toStringAsFixed(2);
         row.cells[5].value =
-            '${sessionController.sessionsDetails[i].posCurrencyTotal}';
+            sessionController.sessionsDetails[i].posCurrencyTotal!.toStringAsFixed(2);
         row.cells[6].value =
-            '${sessionController.sessionsDetails[i].posCurrencyTaxValue}';
+            sessionController.sessionsDetails[i].posCurrencyTaxValue!.toStringAsFixed(2);
         row.cells[7].value =
             '${sessionController.sessionsDetails[i].posCurrencyDiscountValue}';
-        row.cells[8].value = '${sessionController.sessionsDetails[i].received}';
+        row.cells[8].value = sessionController.sessionsDetails[i].received!.toStringAsFixed(2);
       } else if (sessionController.sessionsDetails[i].orderNumber ==
           'selectedCurrencyTOTAL') {
         row.cells[0].value =
             '${'totals'.tr} (${sessionController.selectedCurrencyName})';
         row.cells[1].value =
-            '${sessionController.sessionsDetails[i].selectedCurrTotal}';
+            sessionController.sessionsDetails[i].selectedCurrTotal!.toStringAsFixed(2);
         row.cells[2].value =
-            '${sessionController.sessionsDetails[i].selectedCurrTaxTotal}';
+            sessionController.sessionsDetails[i].selectedCurrTaxTotal!.toStringAsFixed(2);
         row.cells[3].value =
-            '${sessionController.sessionsDetails[i].selectedCurrDiscountTotal}';
+            sessionController.sessionsDetails[i].selectedCurrDiscountTotal!.toStringAsFixed(2);
       } else {
         row.cells[0].value = sessionController.sessionsDetails[i].orderNumber;
         row.cells[1].value =
-            '${sessionController.sessionsDetails[i].primaryCurrencyTotal}';
+            sessionController.sessionsDetails[i].primaryCurrencyTotal!.toStringAsFixed(2);
         row.cells[2].value =
-            '${sessionController.sessionsDetails[i].primaryCurrencyTaxValue}';
+            sessionController.sessionsDetails[i].primaryCurrencyTaxValue!.toStringAsFixed(2);
         row.cells[3].value =
-            '${sessionController.sessionsDetails[i].primaryCurrencyDiscountValue}';
+            sessionController.sessionsDetails[i].primaryCurrencyDiscountValue!.toStringAsFixed(2);
         row.cells[4].value =
-            '${sessionController.sessionsDetails[i].receivedOtherCurrency}';
+            sessionController.sessionsDetails[i].receivedOtherCurrency!.toStringAsFixed(2);
         row.cells[5].value =
-            '${sessionController.sessionsDetails[i].posCurrencyTotal}';
+            sessionController.sessionsDetails[i].posCurrencyTotal!.toStringAsFixed(2);
         row.cells[6].value =
-            '${sessionController.sessionsDetails[i].posCurrencyTaxValue}';
+            sessionController.sessionsDetails[i].posCurrencyTaxValue!.toStringAsFixed(2);
         row.cells[7].value =
-            '${sessionController.sessionsDetails[i].posCurrencyDiscountValue}';
-        row.cells[8].value = '${sessionController.sessionsDetails[i].received}';
+            sessionController.sessionsDetails[i].posCurrencyDiscountValue!.toStringAsFixed(2);
+        row.cells[8].value = sessionController.sessionsDetails[i].received!.toStringAsFixed(2);
         row.cells[9].value =
             sessionController.sessionsDetails[i].openedAt ?? '';
         row.cells[10].value =
@@ -729,40 +729,40 @@ class SessionOrderDataSource extends DataGridSource {
               ),
               DataGridCell<String>(
                 columnName: 'usd_total',
-                value: numberWithComma(e.primaryCurrencyTotal.toString()),
+                value: numberWithComma(e.primaryCurrencyTotal!.toStringAsFixed(2)),
               ),
               DataGridCell<String>(
                 columnName: 'usd_taxes',
-                value: numberWithComma(e.primaryCurrencyTaxValue.toString()),
+                value: numberWithComma(e.primaryCurrencyTaxValue!.toStringAsFixed(2)),
               ),
               DataGridCell<String>(
                 columnName: 'usd_discount',
                 value: numberWithComma(
-                  e.primaryCurrencyDiscountValue.toString(),
+                  e.primaryCurrencyDiscountValue!.toStringAsFixed(2),
                 ),
               ),
               DataGridCell<String>(
                 columnName: 'other_currency_total',
-                value: numberWithComma(e.posCurrencyTotal.toString()),
+                value: numberWithComma(e.posCurrencyTotal!.toStringAsFixed(2)),
               ),
               DataGridCell<String>(
                 columnName: 'other_currency_taxes',
                 value: numberWithComma(
-                  numberWithComma(e.posCurrencyTaxValue.toString()),
+                  numberWithComma(e.posCurrencyTaxValue!.toStringAsFixed(2)),
                 ),
               ),
               DataGridCell<String>(
                 columnName: 'other_currency_discount',
-                value: numberWithComma(e.posCurrencyDiscountValue.toString()),
+                value: numberWithComma(e.posCurrencyDiscountValue!.toStringAsFixed(2)),
               ),
 
               DataGridCell<String>(
                 columnName: 'received',
-                value: e.received.toString(),
+                value: e.received!.toStringAsFixed(2),
               ),
               DataGridCell<String>(
                 columnName: 'other_currency_received',
-                value: numberWithComma(e.receivedOtherCurrency.toString()),
+                value: numberWithComma(e.receivedOtherCurrency!.toStringAsFixed(2)),
               ),
               const DataGridCell<String>(columnName: 'opened_at', value: ''),
               const DataGridCell<String>(columnName: 'closed_at', value: ''),
@@ -791,15 +791,15 @@ class SessionOrderDataSource extends DataGridSource {
               ),
               DataGridCell<String>(
                 columnName: 'usd_total',
-                value: numberWithComma(e.selectedCurrTotal.toString()),
+                value: numberWithComma(e.selectedCurrTotal!.toStringAsFixed(2)),
               ),
               DataGridCell<String>(
                 columnName: 'usd_taxes',
-                value: numberWithComma(e.selectedCurrTaxTotal.toString()),
+                value: numberWithComma(e.selectedCurrTaxTotal!.toStringAsFixed(2)),
               ),
               DataGridCell<String>(
                 columnName: 'usd_discount',
-                value: e.selectedCurrDiscountTotal.toString(),
+                value: e.selectedCurrDiscountTotal!.toStringAsFixed(2),
               ),
               const DataGridCell<String>(
                 columnName: 'other_currency_total',
@@ -845,39 +845,39 @@ class SessionOrderDataSource extends DataGridSource {
               ),
               DataGridCell<String>(
                 columnName: 'usd_total',
-                value: numberWithComma(e.primaryCurrencyTotal.toString()),
+                value: numberWithComma(e.primaryCurrencyTotal!.toStringAsFixed(2)),
               ),
               DataGridCell<String>(
                 columnName: 'usd_taxes',
-                value: numberWithComma(e.primaryCurrencyTaxValue.toString()),
+                value: numberWithComma(e.primaryCurrencyTaxValue!.toStringAsFixed(2)),
               ),
               DataGridCell<String>(
                 columnName: 'usd_discount',
                 value: numberWithComma(
-                  e.primaryCurrencyDiscountValue.toString(),
+                  e.primaryCurrencyDiscountValue!.toStringAsFixed(2),
                 ),
               ),
               DataGridCell<String>(
                 columnName: 'other_currency_total',
-                value: numberWithComma(e.posCurrencyTotal.toString()),
+                value: numberWithComma(e.posCurrencyTotal!.toStringAsFixed(2)),
               ),
               DataGridCell<String>(
                 columnName: 'other_currency_taxes',
-                value: numberWithComma(e.posCurrencyTaxValue.toString()),
+                value: numberWithComma(e.posCurrencyTaxValue!.toStringAsFixed(2)),
               ),
               DataGridCell<String>(
                 columnName: 'other_currency_discount',
-                value: numberWithComma(e.posCurrencyDiscountValue.toString()),
+                value: numberWithComma(e.posCurrencyDiscountValue!.toStringAsFixed(2)),
               ),
 
               DataGridCell<String>(
                 columnName: 'received',
                 value:
-                    '${e.received != null ? numberWithComma('${e.received}') : 0}',
+                    '${e.received != null ? numberWithComma(e.received!.toStringAsFixed(2)) : 0}',
               ),
               DataGridCell<String>(
                 columnName: 'other_currency_received',
-                value: numberWithComma(e.receivedOtherCurrency.toString()),
+                value: numberWithComma(e.receivedOtherCurrency!.toStringAsFixed(2)),
               ),
               DataGridCell<String>(
                 columnName: 'opened_at',

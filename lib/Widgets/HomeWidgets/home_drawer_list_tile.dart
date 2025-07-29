@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/const/sizes.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+// import 'package:flutter_svg/flutter_svg.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Controllers/products_controller.dart';
 import '../../Screens/Combo/combo.dart';
@@ -26,14 +26,24 @@ class DrawerMenu extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  InkWell(
-                    onTap:(){
-                      // homeController.selectedTab.value ='dashboard_summary';
-                    },
-                    child: SvgPicture.asset(
-                      'assets/images/RoosterLogoDraft.svg',
-                      height: MediaQuery.of(context).size.height * 0.2,
-                      // height: MediaQuery.of(context).size.height*0.3,
+                  // InkWell(
+                  //   onTap:(){
+                  //     // homeController.selectedTab.value ='dashboard_summary';
+                  //   },
+                  //   child: SvgPicture.asset(
+                  //     'assets/images/RoosterLogoDraft.svg',
+                  //     height: MediaQuery.of(context).size.height * 0.2,
+                  //     // height: MediaQuery.of(context).size.height*0.3,
+                  //   ),
+                  // ),
+                  Container(
+                    // width: 20,
+                    height: MediaQuery.of(context).size.height * 0.2,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/rooster.jpeg'),
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                   gapH20,
@@ -164,6 +174,7 @@ const List<Entry> data = <Entry>[
         'pending_docs',
         "",
         <Entry>[
+          Entry('pending_quotation', ""),
           Entry(
             'to_sales_order',
             "",
@@ -1229,14 +1240,24 @@ class _SideBarBasicState extends State<SideBarBasic>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    InkWell(
-                      onTap:(){
-                        homeController.selectedTab.value ='dashboard_summary';
-                      },
-                      child: SvgPicture.asset(
-                        'assets/images/RoosterLogoDraft.svg',
-                        width: isCollapsed?widget.minWidth-15:widget.maxWidth-15,
-                        // height: MediaQuery.of(context).size.height*0.3,
+                    // InkWell(
+                    //   onTap:(){
+                    //     homeController.selectedTab.value ='dashboard_summary';
+                    //   },
+                    //   child: SvgPicture.asset(
+                    //     'assets/images/RoosterLogoDraft.svg',
+                    //     width: isCollapsed?widget.minWidth-15:widget.maxWidth-15,
+                    //     // height: MediaQuery.of(context).size.height*0.3,
+                    //   ),
+                    // ),
+                    Container(
+                      width: isCollapsed?widget.minWidth-15:widget.maxWidth-15,
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/rooster.jpeg'),
+                          // fit: BoxFit.fill,
+                        ),
                       ),
                     ),
                     gapH20,

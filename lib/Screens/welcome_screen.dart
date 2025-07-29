@@ -72,7 +72,8 @@ class ServiceCard extends StatelessWidget {
               MaterialPageRoute(
                   builder: (BuildContext context) {
                     return const HomePage();
-                  }));}
+                  }));
+          }
           else{
             final Uri url = Uri.parse(info["link"]);
             if (!await launchUrl(url)) {

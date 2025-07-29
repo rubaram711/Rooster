@@ -96,12 +96,11 @@ class _MyAppState extends State<MyApp> {
         )
       ),
       localizationsDelegates: const [
-        quill.FlutterQuillLocalizations.delegate, // مهم جدًا
-        // يمكنك إضافة Delegates أخرى هنا حسب الحاجة
+        quill.FlutterQuillLocalizations.delegate,
       ],
       supportedLocales: const [
         Locale('en'), // English
-        Locale('ar'), // Arabic (اختياري)
+        Locale('ar'), // Arabic
       ],
       translations: AppLocalization(),
       locale: const Locale('en'),

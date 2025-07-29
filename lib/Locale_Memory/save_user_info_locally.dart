@@ -10,7 +10,7 @@ saveUserInfoLocally(
 ) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('accessToken', accessToken);
-  prefs.setString('login_ID', userId);
+  prefs.setString('login_IDd', userId);
   prefs.setString('email', email);
   prefs.setString('name', name);
   prefs.setString('companyId', companyId);
@@ -20,14 +20,14 @@ saveUserInfoLocally(
 Future<Map> getUserInfoFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String accessToken = prefs.getString('accessToken') ?? '';
-  String userId = prefs.getString('login_ID') ?? '';
+  String userId = prefs.getString('login_IDd') ?? '';
   String email = prefs.getString('email') ?? '';
   String name = prefs.getString('name') ?? '';
   String companyId = prefs.getString('companyId') ?? '';
   String companyName = prefs.getString('companyName') ?? '';
   return {
     'accessToken': accessToken,
-    'login_ID': userId,
+    'login_IDd': userId,
     'email': email,
     'name': name,
     'companyId': companyId,
@@ -55,7 +55,7 @@ Future<String> getNameFromPref() async {
 
 Future<String> getIdFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String userId = prefs.getString('login_ID') ?? '';
+  String userId = prefs.getString('login_IDd') ?? '';
   return userId;
 }
 
@@ -111,6 +111,8 @@ saveCompanySettingsLocally(
   String posCurrency,
   String posCurrencyId,
   String posCurrencySymbol,
+    String primaryCurrencyLatestRate,
+    String posCurrencyLatestRate,
   String showLogoOnPos,
 ) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -135,6 +137,8 @@ saveCompanySettingsLocally(
   prefs.setString('posCurrency', posCurrency);
   prefs.setString('posCurrencyId', posCurrencyId);
   prefs.setString('posCurrencySymbol', posCurrencySymbol);
+  prefs.setString('posCurrencyLatestRate', posCurrencyLatestRate);
+  prefs.setString('primaryCurrencyLatestRate', primaryCurrencyLatestRate);
   prefs.setString('companySubjectToVat', companySubjectToVat);
 }
 
@@ -250,4 +254,16 @@ Future<String> getCompanySubjectToVatFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String companySubjectToVat = prefs.getString('companySubjectToVat') ?? '';
   return companySubjectToVat;
+}
+
+
+Future<String> getPosCurrencyLatestRateFromPref() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String posCurrencyLatestRate = prefs.getString('posCurrencyLatestRate') ?? '';
+  return posCurrencyLatestRate;
+}
+Future<String> getPrimaryCurrencyLatestRateFromPref() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String primaryCurrencyLatestRate = prefs.getString('primaryCurrencyLatestRate') ?? '1';
+  return primaryCurrencyLatestRate;
 }

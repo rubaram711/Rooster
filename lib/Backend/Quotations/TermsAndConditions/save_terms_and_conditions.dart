@@ -5,7 +5,7 @@ import '../../../const/urls.dart';
 
 
 Future storeTermsAndConditions(String termsAndConditions) async {
-  final uri = Uri.parse(kTermsAndConditionsUrl);
+  final uri = Uri.parse(kAddTermsAndConditionsUrl);
   String token = await getAccessTokenFromPref();
   var response = await http.post(
       uri,

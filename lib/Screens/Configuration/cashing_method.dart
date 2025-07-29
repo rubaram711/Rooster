@@ -1,21 +1,25 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Backend/ConfigurationsBackend/CashingMethods/delete_cashing_method.dart';
-import 'package:rooster_app/Backend/ConfigurationsBackend/update_cashing_method.dart';
+import 'package:rooster_app/Backend/ConfigurationsBackend/CashingMethods/update_cashing_method.dart';
 import 'package:rooster_app/Controllers/cashing_methods_controller.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
 import '../../Backend/ConfigurationsBackend/CashingMethods/add_cashing_method.dart';
 import '../../Controllers/home_controller.dart';
+import '../../Widgets/add_photo_circle.dart';
 import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/dialog_title.dart';
 import '../../Widgets/loading.dart';
+import '../../Widgets/reusable_photo_card_in_update_product.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../Widgets/table_item.dart';
 import '../../Widgets/table_title.dart';
+import 'package:rooster_app/utils/image_picker_helper.dart';
+
+import '../../const/urls.dart';
 
 
 List tabsList = [
@@ -506,7 +510,7 @@ class _CashingMethodAsRowInTableState extends State<CashingMethodAsRowInTable> {
                     var p = await updateCashingMethod(
                         '${cont.cashingMethodsList[widget.index]['id']}',
                         cont.cashingMethodsList[widget.index]['title'], //titleController.text,
-                        value ? '1' : '0');
+                        value ? '1' : '0',cont.imageFile);
                     if (p['success'] == true) {
                       // Get.back();
                       CommonWidgets.snackBar('success'.tr, p['message']);
@@ -566,79 +570,104 @@ class _CreateCashingMethodsState extends State<CreateCashingMethods> {
       height:homeController.isMobile.value ?MediaQuery.of(context).size.height* 0.6: MediaQuery.of(context).size.height * 0.65,
       child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            gapH20,
-            DialogTextField(
-              textEditingController: titleController,
-              text: '${'title'.tr}*',
-              rowWidth:homeController.isMobile.value ?MediaQuery.of(context).size.width* 0.6: MediaQuery.of(context).size.width * 0.35,
-              textFieldWidth:homeController.isMobile.value ?MediaQuery.of(context).size.width* 0.4: MediaQuery.of(context).size.width * 0.25,
-              validationFunc: (String value) {
-                if (value.isEmpty) {
-                  return 'required_field'.tr;
-                }return null;
-              },
-            ),
-            gapH16,
-            Row(
+        child: GetBuilder<CashingMethodsController>(
+          builder: (cont) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text('active'.tr),
-                gapW28,
-                Checkbox(
-                  // checkColor: Colors.white,
-                  // fillColor: MaterialStateProperty.resolveWith(getColor),
-                  value: isCashedMethodChecked,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      isCashedMethodChecked = value!;
-                    });
+                gapH20,
+               cont.imageFile != null
+                   ? InkWell(
+                 onTap: () async {
+                   final image =
+                   await ImagePickerHelper.pickImage();
+                   cont.setImageFile(image!);
+                 },
+                 child: ReusablePhotoCircle(
+                   imageFilePassed: cont.imageFile!,
+                 ),
+               )
+                   : ReusableAddPhotoCircle(
+                 onTapCircle: () async {
+                   final image =
+                   await ImagePickerHelper.pickImage();
+                   if (image != null) {
+                     cont.setImageFile(image);
+                   }
+                 },
+               ),
+                gapH16,
+                DialogTextField(
+                  textEditingController: titleController,
+                  text: '${'title'.tr}*',
+                  rowWidth:homeController.isMobile.value ?MediaQuery.of(context).size.width* 0.6: MediaQuery.of(context).size.width * 0.35,
+                  textFieldWidth:homeController.isMobile.value ?MediaQuery.of(context).size.width* 0.4: MediaQuery.of(context).size.width * 0.25,
+                  validationFunc: (String value) {
+                    if (value.isEmpty) {
+                      return 'required_field'.tr;
+                    }return null;
                   },
                 ),
+                gapH16,
+                Row(
+                  children: [
+                    Text('active'.tr),
+                    gapW28,
+                    Checkbox(
+                      // checkColor: Colors.white,
+                      // fillColor: MaterialStateProperty.resolveWith(getColor),
+                      value: isCashedMethodChecked,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isCashedMethodChecked = value!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                        onPressed: () {
+                          setState(() {
+                            titleController.clear();
+                            isCashedMethodChecked = false;
+                          });
+                        },
+                        child: Text(
+                          'discard'.tr,
+                          style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: Primary.primary),
+                        )),
+                    gapW24,
+                    ReusableButtonWithColor(
+                        btnText: 'save'.tr,
+                        onTapFunction: () async {
+                          if (_formKey.currentState!.validate()) {
+                            var p = await addCashedMethod(titleController.text,
+                                isCashedMethodChecked ? '1' : '0',cont.imageFile);
+                            if (p['success'] == true) {
+                              // Get.back();
+                              CommonWidgets.snackBar('success'.tr,
+                                  p['message']);
+                              cashingMethodsController.setSelectedTabIndex(0);
+                              cashingMethodsController.getCashingMethodsFromBack();
+                            } else {
+                              CommonWidgets.snackBar('error', p['message']);
+                            }
+                          }
+                        },
+                        width: 100,
+                        height: 35),
+                  ],
+                ),
               ],
-            ),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                    onPressed: () {
-                      setState(() {
-                        titleController.clear();
-                        isCashedMethodChecked = false;
-                      });
-                    },
-                    child: Text(
-                      'discard'.tr,
-                      style: TextStyle(
-                          decoration: TextDecoration.underline,
-                          color: Primary.primary),
-                    )),
-                gapW24,
-                ReusableButtonWithColor(
-                    btnText: 'save'.tr,
-                    onTapFunction: () async {
-                      if (_formKey.currentState!.validate()) {
-                        var p = await addCashedMethod(titleController.text,
-                            isCashedMethodChecked ? '1' : '0');
-                        if (p['success'] == true) {
-                          // Get.back();
-                          CommonWidgets.snackBar('success'.tr,
-                              p['message']);
-                          cashingMethodsController.setSelectedTabIndex(0);
-                          cashingMethodsController.getCashingMethodsFromBack();
-                        } else {
-                          CommonWidgets.snackBar('error', p['message']);
-                        }
-                      }
-                    },
-                    width: 100,
-                    height: 35),
-              ],
-            ),
-          ],
+            );
+          }
         ),
       ),
     );
@@ -669,6 +698,7 @@ class _UpdateCashedMethodDialogState extends State<UpdateCashedMethodDialog> {
   void initState() {
     titleController.text='${cashingMethodsController.cashingMethodsList[widget.index]['title'] ?? ''}';
     isCashedMethodChecked = '${cashingMethodsController.cashingMethodsList[widget.index]['active']}' == '1';
+    cashingMethodsController.imageLink = cashingMethodsController.cashingMethodsList[widget.index]['image']??'';
     super.initState();
   }
   @override
@@ -676,83 +706,130 @@ class _UpdateCashedMethodDialogState extends State<UpdateCashedMethodDialog> {
     return  Container(
       color: Colors.white,
       // width: Sizes.deviceWidth*0.2,
-      height: 250,
+      height: 350,
       // margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
       // padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            gapH20,
-            DialogTextField(
-              textEditingController: titleController,
-              text: '${'title'.tr}*',
-              rowWidth:homeController.isMobile.value ?MediaQuery.of(context).size.width* 0.6: MediaQuery.of(context).size.width * 0.3,
-              textFieldWidth:homeController.isMobile.value ?MediaQuery.of(context).size.width* 0.4: MediaQuery.of(context).size.width * 0.25,
-              validationFunc: (String value) {
-                if (value.isEmpty) {
-                  return 'required_field'.tr;
-                }return null;
-              },
-            ),
-            gapH16,
-            Row(
+        child: GetBuilder<CashingMethodsController>(
+          builder: (cont) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text('active'.tr),
-                gapW28,
-                Checkbox(
-                  value: isCashedMethodChecked,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      isCashedMethodChecked = value!;
-                    });
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    cont.imageFile != null
+                        ? InkWell(
+                      onTap: () async {
+                        final image =
+                        await ImagePickerHelper.pickImage();
+                        cont.setImageFile(image!);
+                      },
+                      child: ReusablePhotoCircle(
+                        imageFilePassed: cont.imageFile!,
+                      ),
+                    )
+                        : cont.imageLink.isNotEmpty
+                        ? InkWell(
+                      onTap: () async {
+                        final image =
+                        await ImagePickerHelper.pickImage();
+                        cont.setImageFile(image!);
+                      },
+                      child: ReusablePhotoCard(url: '$baseImage${cont.imageLink}'),
+                    )
+                        : ReusableAddPhotoCircle(
+                      onTapCircle: () async {
+                        final image =
+                        await ImagePickerHelper.pickImage();
+                        if (image != null) {
+                          cont.setImageFile(image);
+                        }
+                      },
+                    ),
+                    // ReusableAddPhotoCircle(
+                    //   onTapCircle: () async {
+                    //     final image = await ImagePickerHelper.pickImage();
+                    //     print('image $image');
+                    //     cont.setImageFile(image!);
+                    //     print('cont.imageFile');
+                    //     print(cont.imageFile);
+                    //   },
+                    // )
+                  ],
+                ),
+                gapH20,
+                DialogTextField(
+                  textEditingController: titleController,
+                  text: '${'title'.tr}*',
+                  rowWidth:homeController.isMobile.value ?MediaQuery.of(context).size.width* 0.6: MediaQuery.of(context).size.width * 0.3,
+                  textFieldWidth:homeController.isMobile.value ?MediaQuery.of(context).size.width* 0.4: MediaQuery.of(context).size.width * 0.25,
+                  validationFunc: (String value) {
+                    if (value.isEmpty) {
+                      return 'required_field'.tr;
+                    }return null;
                   },
                 ),
+                gapH16,
+                Row(
+                  children: [
+                    Text('active'.tr),
+                    gapW28,
+                    Checkbox(
+                      value: isCashedMethodChecked,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isCashedMethodChecked = value!;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                        onPressed: () {
+                          setState(() {
+                            titleController.text='${cashingMethodsController.cashingMethodsList[widget.index]['title'] ?? ''}';
+                            isCashedMethodChecked = '${cashingMethodsController.cashingMethodsList[widget.index]['active']}' == '1';
+                          });
+                        },
+                        child: Text(
+                          'discard'.tr,
+                          style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: Primary.primary),
+                        )),
+                    gapW24,
+                    ReusableButtonWithColor(
+                        btnText: 'save'.tr,
+                        onTapFunction: () async {
+                          if (_formKey.currentState!.validate()) {
+                            var p = await updateCashingMethod(
+                                '${cashingMethodsController.cashingMethodsList[widget.index]['id']}',
+                                 titleController.text,
+                                isCashedMethodChecked ? '1' : '0',cont.imageFile);
+                            if (p['success'] == true) {
+                              titleController.clear();
+                              Get.back();
+                              CommonWidgets.snackBar('success'.tr, p['message']);
+                              cashingMethodsController.getCashingMethodsFromBack();
+                            } else {
+                              CommonWidgets.snackBar('error', p['message']);
+                            }
+                          }
+                        },
+                        width: 100,
+                        height: 35),
+                  ],
+                ),
               ],
-            ),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                    onPressed: () {
-                      setState(() {
-                        titleController.text='${cashingMethodsController.cashingMethodsList[widget.index]['title'] ?? ''}';
-                        isCashedMethodChecked = '${cashingMethodsController.cashingMethodsList[widget.index]['active']}' == '1';
-                      });
-                    },
-                    child: Text(
-                      'discard'.tr,
-                      style: TextStyle(
-                          decoration: TextDecoration.underline,
-                          color: Primary.primary),
-                    )),
-                gapW24,
-                ReusableButtonWithColor(
-                    btnText: 'save'.tr,
-                    onTapFunction: () async {
-                      if (_formKey.currentState!.validate()) {
-                        var p = await updateCashingMethod(
-                            '${cashingMethodsController.cashingMethodsList[widget.index]['id']}',
-                             titleController.text,
-                            isCashedMethodChecked ? '1' : '0');
-                        if (p['success'] == true) {
-                          titleController.clear();
-                          Get.back();
-                          CommonWidgets.snackBar('success'.tr, p['message']);
-                          cashingMethodsController.getCashingMethodsFromBack();
-                        } else {
-                          CommonWidgets.snackBar('error', p['message']);
-                        }
-                      }
-                    },
-                    width: 100,
-                    height: 35),
-              ],
-            ),
-          ],
+            );
+          }
         ),
       )
     );
