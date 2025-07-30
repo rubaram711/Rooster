@@ -1,19 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:rooster_app/Backend/Quotations/send_by_email.dart';
-import 'package:rooster_app/Backend/Quotations/update_quotation.dart';
+import 'package:rooster_app/Backend/SalesOrderBackend/update_sales_order.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
-import 'package:rooster_app/Controllers/quotation_controller.dart';
+import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Screens/Products/CreateProductDialog/create_product_dialog.dart';
-import 'package:rooster_app/Screens/Quotations/create_client_dialog.dart';
+import 'package:rooster_app/Screens/client_order/create_client_dialog.dart';
+import 'package:rooster_app/Screens/client_order/create_new_sales_order.dart';
 import 'package:rooster_app/Widgets/TransferWidgets/reusable_show_info_card.dart';
 import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
 import 'package:rooster_app/Widgets/reusable_add_card.dart';
@@ -35,12 +34,11 @@ import '../../const/constants.dart';
 import '../../const/functions.dart';
 import '../../const/urls.dart';
 import '../Combo/combo.dart';
-import 'create_new_quotation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 
-class UpdateQuotationDialog extends StatefulWidget {
-  const UpdateQuotationDialog({
+class UpdateSalesOrderDialog extends StatefulWidget {
+  const UpdateSalesOrderDialog({
     super.key,
     required this.index,
     required this.info,
@@ -49,10 +47,10 @@ class UpdateQuotationDialog extends StatefulWidget {
   final Map info;
 
   @override
-  State<UpdateQuotationDialog> createState() => _UpdateQuotationDialogState();
+  State<UpdateSalesOrderDialog> createState() => _UpdateSalesOrderDialogState();
 }
 
-class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
+class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
   final _formKey = GlobalKey<FormState>();
   String selectedSalesPerson = '';
   int selectedSalesPersonId = 0;
@@ -86,7 +84,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   List<String> termsList = [];
 
   final HomeController homeController = Get.find();
-  final QuotationController quotationController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
 
   String paymentTerm = '',
       priceListSelected = '',
@@ -108,29 +106,29 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
       specialDisc = '',
       globalDisc = '';
   final ExchangeRatesController exchangeRatesController = Get.find();
-
+  int salesOrderCounter = 0;
   Map orderLine = {};
 
   getCurrency() async {
-    quotationController.selectedCurrencyId =
+    salesOrderController.selectedCurrencyId =
         widget.info['currency']['id'].toString();
     selectedCurrency = widget.info['currency']['name'] ?? '';
     currencyController.text = selectedCurrency;
     int index = exchangeRatesController.currenciesNamesList.indexOf(
       selectedCurrency,
     );
-    quotationController.selectedCurrencyId =
-        exchangeRatesController.currenciesIdsList[index];
-    quotationController.selectedCurrencyName = selectedCurrency;
+    salesOrderController.selectedCurrencyId =
+    exchangeRatesController.currenciesIdsList[index];
+    salesOrderController.selectedCurrencyName = selectedCurrency;
     var vat = await getCompanyVatFromPref();
-    quotationController.setCompanyVat(double.parse(vat));
+    salesOrderController.setCompanyVat(double.parse(vat));
     var companyCurrency = await getCompanyPrimaryCurrencyFromPref();
-    quotationController.setCompanyPrimaryCurrency(companyCurrency);
+    salesOrderController.setCompanyPrimaryCurrency(companyCurrency);
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
-      (item) => item["currency"] == companyCurrency,
+          (item) => item["currency"] == companyCurrency,
       orElse: () => null,
     );
-    quotationController.setLatestRate(
+    salesOrderController.setLatestRate(
       double.parse(result != null ? '${result["exchange_rate"]}' : '1'),
     );
   }
@@ -140,27 +138,27 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     var companySubjectToVat = await getCompanySubjectToVatFromPref();
     if (companySubjectToVat == '1') {
       vatExemptController.clear();
-      quotationController.setIsVatExempted(false, false, false);
-      quotationController.setIsVatExemptCheckBoxShouldAppear(true);
+      salesOrderController.setIsVatExempted(false, false, false);
+      salesOrderController.setIsVatExemptCheckBoxShouldAppear(true);
     } else {
-      quotationController.setIsVatExemptCheckBoxShouldAppear(false);
-      quotationController.setIsVatExempted(false, false, true);
-      quotationController.setIsVatExemptChecked(true);
+      salesOrderController.setIsVatExemptCheckBoxShouldAppear(false);
+      salesOrderController.setIsVatExempted(false, false, true);
+      salesOrderController.setIsVatExemptChecked(true);
     }
     if ('${widget.info['printedAsPercentage'] ?? ''}' == '1') {
-      quotationController.isPrintedAs0 = true;
+      salesOrderController.isPrintedAs0 = true;
       vatExemptController.text = 'Printed as "vat 0 % = 0"';
     }
     if ('${widget.info['printedAsVatExempt']}' == '1') {
-      quotationController.isPrintedAsVatExempt = true;
+      salesOrderController.isPrintedAsVatExempt = true;
       vatExemptController.text = 'Printed as "vat exempted"';
     }
     if ('${widget.info['notPrinted'] ?? ''}' == '1') {
-      quotationController.isVatNoPrinted = true;
+      salesOrderController.isVatNoPrinted = true;
       vatExemptController.text = 'No printed ';
     }
-    quotationController.isVatExemptChecked =
-        '${widget.info['vatExempt'] ?? ''}' == '1' ? true : false;
+    salesOrderController.isVatExemptChecked =
+    '${widget.info['vatExempt'] ?? ''}' == '1' ? true : false;
   }
 
   late QuillController _controller;
@@ -199,42 +197,40 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   int progressVar = 0;
 
   setProgressVar() {
-    quotationController.status = widget.info['status'];
+    salesOrderController.status = widget.info['status'];
     progressVar =
-        widget.info['status'] == "pending"
-            ? 0
-            : widget.info['status'] == 'sent'
-            ? 1
-            : widget.info['status'] == 'confirmed'
-            ? 2
-            : 0;
+    widget.info['status'] == "pending"
+        ? 0
+        : widget.info['status'] == 'sent'
+        ? 1
+        : widget.info['status'] == 'confirmed'
+        ? 2
+        : 0;
   }
 
   String oldTermsAndConditionsString = '';
   @override
   void initState() {
-    quotationController.rowsInListViewInQuotation = {};
-    quotationController.orderedKeys = [];
     // print('widget.info');
     // print(widget.info);
-    quotationController.quotationCounter = 0;
+
     checkVatExempt();
     getCurrency();
-    // quotationController.orderLinesQuotationList = {};
-    quotationController.rowsInListViewInQuotation = {};
+    salesOrderController.orderLinesSalesOrderList = {};
+    salesOrderController.rowsInListViewInSalesOrder = {};
     setProgressVar();
 
     if (widget.info['cashingMethod'] != null) {
       cashingMethodsController.text =
-          '${widget.info['cashingMethod']['title'] ?? ''}';
-      quotationController.selectedCashingMethodId =
-          '${widget.info['cashingMethod']['id']}';
+      '${widget.info['cashingMethod']['title'] ?? ''}';
+      salesOrderController.selectedCashingMethodId =
+      '${widget.info['cashingMethod']['id']}';
     }
 
     if (widget.info['pricelist'] != null) {
       priceListController.text = '${widget.info['pricelist']['code'] ?? ''}';
-      quotationController.selectedPriceListId =
-          '${widget.info['pricelist']['id']}';
+      salesOrderController.selectedPriceListId =
+      '${widget.info['pricelist']['id']}';
     } else {
       priceListController.text = 'STANDARD';
     }
@@ -242,18 +238,18 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     if (widget.info['salesperson'] != null) {
       selectedSalesPerson = '${widget.info['salesperson']['name'] ?? ''}';
       salesPersonController.text =
-          '${widget.info['salesperson']['name'] ?? ''}';
+      '${widget.info['salesperson']['name'] ?? ''}';
       selectedSalesPersonId = widget.info['salesperson']['id'] ?? 0;
     }
 
     if ('${widget.info['beforeVatPrices'] ?? ''}' == '1') {
       priceConditionController.text = 'Prices are before vat';
-      quotationController.isBeforeVatPrices = true;
+      salesOrderController.isBeforeVatPrices = true;
     }
 
     if ('${widget.info['vatInclusivePrices'] ?? ''}' == '1') {
       priceConditionController.text = 'Prices are vat inclusive';
-      quotationController.isBeforeVatPrices = false;
+      salesOrderController.isBeforeVatPrices = false;
     }
 
     searchController.text = widget.info['client']['name'] ?? '';
@@ -286,107 +282,100 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
         widget.info['globalDiscount'] ?? '0.0'; // entered by user
     specialDiscPercentController.text =
         widget.info['specialDiscount'] ?? '0.0'; //entered by user
-    quotationController.globalDisc =
+    salesOrderController.globalDisc =
         widget.info['globalDiscountAmount'] ?? '0.0';
-    quotationController.specialDisc =
+    salesOrderController.specialDisc =
         widget.info['specialDiscountAmount'] ?? '0.0';
-    quotationController.totalItems = double.parse(
+    salesOrderController.totalItems = double.parse(
       '${widget.info['totalBeforeVat'] ?? '0.0'}',
     );
     // print('isVatZero $isVatZero');
-    quotationController.vat11 =
-        quotationController.isVatExemptChecked
-            ? '0'
-            : '${widget.info['vat'] ?? ''}';
-    quotationController.vatInPrimaryCurrency =
-        quotationController.isVatExemptChecked
-            ? '0'
-            : '${widget.info['vatLebanese'] ?? ''}';
+    salesOrderController.vat11 =
+    salesOrderController.isVatExemptChecked
+        ? '0'
+        : '${widget.info['vat'] ?? ''}';
+    salesOrderController.vatInPrimaryCurrency =
+    salesOrderController.isVatExemptChecked
+        ? '0'
+        : '${widget.info['vatLebanese'] ?? ''}';
 
     // quotationController.totalQuotation = '${widget.info['total'] ?? ''}';
-    quotationController.totalQuotation = ((quotationController.totalItems -
-                double.parse(quotationController.globalDisc) -
-                double.parse(quotationController.specialDisc)) +
-            double.parse(quotationController.vat11))
+    salesOrderController.totalSalesOrder = ((salesOrderController.totalItems -
+        double.parse(salesOrderController.globalDisc) -
+        double.parse(salesOrderController.specialDisc)) +
+        double.parse(salesOrderController.vat11))
         .toStringAsFixed(2);
-    quotationController.city[selectedCustomerIds] =
+    salesOrderController.city[selectedCustomerIds] =
         widget.info['client']['city'] ?? '';
-    quotationController.country[selectedCustomerIds] =
+    salesOrderController.country[selectedCustomerIds] =
         widget.info['client']['country'] ?? '';
-    quotationController.email[selectedCustomerIds] =
+    salesOrderController.email[selectedCustomerIds] =
         widget.info['client']['email'] ?? '';
-    quotationController.phoneNumber[selectedCustomerIds] =
+    salesOrderController.phoneNumber[selectedCustomerIds] =
         widget.info['client']['phoneNumber'] ?? '';
-    quotationController.selectedQuotationData['orderLines'] =
+    salesOrderController.selectedSalesOrderData['orderLines'] =
         widget.info['orderLines'] ?? '';
     for (
-      int i = 0;
-      i < quotationController.selectedQuotationData['orderLines'].length;
-      i++
+    int i = 0;
+    i < salesOrderController.selectedSalesOrderData['orderLines'].length;
+    i++
     ) {
-      quotationController.rowsInListViewInQuotation[i + 1] =
-          quotationController.selectedQuotationData['orderLines'][i];
-      quotationController.orderedKeys.add(i + 1);
-      if (quotationController.selectedQuotationData['orderLines'][i]['line_type_id'] == 2) {
-        quotationController.unitPriceControllers[i + 1] =
+      salesOrderController.rowsInListViewInSalesOrder[i + 1] =
+      salesOrderController.selectedSalesOrderData['orderLines'][i];
+    }
+    var keys = salesOrderController.rowsInListViewInSalesOrder.keys.toList();
+
+    for (int i = 0; i < widget.info['orderLines'].length; i++) {
+      if (widget.info['orderLines'][i]['line_type_id'] == 2) {
+        salesOrderController.unitPriceControllers[i + 1] =
             TextEditingController();
-      } else if (quotationController.selectedQuotationData['orderLines'][i]['line_type_id'] == 3) {
-        quotationController.combosPriceControllers[i + 1] =
+        Widget p = ReusableItemRow(
+          index: i + 1,
+          info: salesOrderController.rowsInListViewInSalesOrder[keys[i]],
+        );
+
+        salesOrderController.orderLinesSalesOrderList['${i + 1}'] = p;
+      } else if (widget.info['orderLines'][i]['line_type_id'] == 1) {
+        Widget p = ReusableTitleRow(
+          index: i + 1,
+          info: salesOrderController.rowsInListViewInSalesOrder[keys[i]],
+        );
+        salesOrderController.orderLinesSalesOrderList['${i + 1}'] = p;
+      } else if (widget.info['orderLines'][i]['line_type_id'] == 5) {
+        Widget p = ReusableNoteRow(
+          index: i + 1,
+          info: salesOrderController.rowsInListViewInSalesOrder[keys[i]],
+        );
+        salesOrderController.orderLinesSalesOrderList['${i + 1}'] = p;
+      } else if (widget.info['orderLines'][i]['line_type_id'] == 4) {
+        Widget p = ReusableImageRow(
+          index: i + 1,
+          info: salesOrderController.rowsInListViewInSalesOrder[keys[i]],
+        );
+        salesOrderController.orderLinesSalesOrderList['${i + 1}'] = p;
+      } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
+        salesOrderController.combosPriceControllers[i + 1] =
             TextEditingController();
+        Widget p = ReusableComboRow(
+          index: i + 1,
+          info: salesOrderController.rowsInListViewInSalesOrder[keys[i]],
+        );
+        salesOrderController.orderLinesSalesOrderList['${i + 1}'] = p;
       }
     }
-    //
-    // for (int i = 0; i < widget.info['orderLines'].length; i++) {
-    //   quotationController.orderedKeys.add(i + 1);
-    //   if (widget.info['orderLines'][i]['line_type_id'] == 2) {
-    //     quotationController.unitPriceControllers[i + 1] =
-    //         TextEditingController();
-    //     //   Widget p = ReusableItemRow(
-    //     //     index: i + 1,
-    //     //     info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     //   );
-    //     //
-    //     //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //     // } else if (widget.info['orderLines'][i]['line_type_id'] == 1) {
-    //     //   Widget p = ReusableTitleRow(
-    //     //     index: i + 1,
-    //     //     info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     //   );
-    //     //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //     // } else if (widget.info['orderLines'][i]['line_type_id'] == 5) {
-    //     //   Widget p = ReusableNoteRow(
-    //     //     index: i + 1,
-    //     //     info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     //   );
-    //     //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //     // } else if (widget.info['orderLines'][i]['line_type_id'] == 4) {
-    //     //   Widget p = ReusableImageRow(
-    //     //     index: i + 1,
-    //     //     info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     //   );
-    //     //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //   } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
-    //     quotationController.combosPriceControllers[i + 1] =
-    //         TextEditingController();
-    //     // Widget p = ReusableComboRow(
-    //     //   index: i + 1,
-    //     //   info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     // );
-    //     // quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //   }
-    // }
-    quotationController.quotationCounter =
-        quotationController.rowsInListViewInQuotation.length;
-    quotationController.listViewLengthInQuotation =
-        quotationController.rowsInListViewInQuotation.length * 60;
+
+    salesOrderCounter = salesOrderController.rowsInListViewInSalesOrder.length;
+    salesOrderController.listViewLengthInSalesOrder =
+        salesOrderController.orderLinesSalesOrderList.length * 60;
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<QuotationController>(
-      builder: (quotationCont) {
+    return GetBuilder<SalesOrderController>(
+      builder: (salesOrderCont) {
+        var keysList = salesOrderCont.orderLinesSalesOrderList.keys.toList();
         return Container(
           color: Colors.white,
           width: MediaQuery.of(context).size.width * 0.85,
@@ -401,7 +390,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      PageTitle(text: 'update_quotation'.tr),
+                      PageTitle(text: 'update_sales_order'.tr),
                       InkWell(
                         onTap: () {
                           Get.back();
@@ -427,88 +416,77 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                           UnderTitleBtn(
                             text: 'send_by_email'.tr,
                             onTap: () async {
-                              bool hasType1WithEmptyTitle = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '1' &&
-                                        (map['title']?.isEmpty ?? true);
-                                  });
-                              bool hasType2WithEmptyId = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '2' &&
-                                        (map['item_id']?.isEmpty ?? true);
-                                  });
-                              bool hasType3WithEmptyId = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '3' &&
-                                        (map['combo']?.isEmpty ?? true);
-                                  });
-                              bool hasType4WithEmptyImage = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '4' &&
-                                        (map['image'] == Uint8List(0) ||
-                                            map['image']?.isEmpty);
-                                  });
-                              bool hasType5WithEmptyNote = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '5' &&
-                                        (map['note']?.isEmpty ?? true);
-                                  });
-                              if (quotationController
-                                  .rowsInListViewInQuotation
-                                  .isEmpty) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'Order lines is Empty',
-                                );
-                              } else if (hasType2WithEmptyId) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty item',
-                                );
-                              } else if (hasType3WithEmptyId) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty combo',
-                                );
-                              } else if (hasType1WithEmptyTitle) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty title',
-                                );
-                              } else if (hasType4WithEmptyImage) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty image',
-                                );
-                              } else if (hasType5WithEmptyNote) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty note',
-                                );
-                              } else {
-                                setState(() {
-                                  progressVar = 1;
-                                });
-                                var res = await sendByEmail(
+                              setState(() {
+                                progressVar = 1;
+                              });
+                              salesOrderCont.setStatus('sent');
+                              var oldKeys =
+                              salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .keys
+                                  .toList()
+                                ..sort();
+                              for (int i = 0; i < oldKeys.length; i++) {
+                                salesOrderController.newRowMap[i + 1] =
+                                salesOrderController
+                                    .rowsInListViewInSalesOrder[oldKeys[i]]!;
+                              }
+                              if (_formKey.currentState!.validate()) {
+                                _saveContent();
+
+                                var res = await updateSalesOrdder(
                                   '${widget.info['id']}',
+                                  // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                  false,
+                                  refController.text,
+                                  selectedCustomerIds,
+                                  validityController.text,
+                                  inputDateController.text,
+                                  '', //todo paymentTermsController.text,
+                                  salesOrderCont.selectedPriceListId,
+                                  salesOrderCont
+                                      .selectedCurrencyId, //selectedCurrency
+                                  termsAndConditionsController.text,
+                                  selectedSalesPersonId.toString(),
+                                  '',
+                                  salesOrderCont.selectedCashingMethodId,
+                                  commissionController.text,
+                                  totalCommissionController.text,
+                                  salesOrderController.totalItems
+                                      .toString(), //total before vat
+                                  specialDiscPercentController
+                                      .text, // inserted by user
+                                  salesOrderController
+                                      .specialDisc, // calculated
+                                  globalDiscPercentController.text,
+                                  salesOrderController.globalDisc,
+                                  salesOrderController.vat11.toString(), //vat
+                                  salesOrderController.vatInPrimaryCurrency
+                                      .toString(),
+                                  salesOrderController
+                                      .totalSalesOrder, // quotationController.totalQuotation
+
+                                  salesOrderCont.isVatExemptChecked ? '1' : '0',
+                                  salesOrderCont.isVatNoPrinted ? '1' : '0',
+                                  salesOrderCont.isPrintedAsVatExempt
+                                      ? '1'
+                                      : '0',
+                                  salesOrderCont.isPrintedAs0 ? '1' : '0',
+                                  salesOrderCont.isBeforeVatPrices ? '0' : '1',
+
+                                  salesOrderCont.isBeforeVatPrices ? '1' : '0',
+                                  codeController.text,
+                                  salesOrderCont.status, // status,
+                                  // quotationController.rowsInListViewInQuotation,
+                                  salesOrderController.newRowMap,
                                 );
-                                if ('${res['success']}' == 'true') {
+                                if (res['success'] == true) {
                                   Get.back();
-                                  quotationController
-                                      .getAllQuotationsWithoutPendingFromBack();
+                                  salesOrderController
+                                      .getAllSalesOrderFromBack();
                                   // homeController.selectedTab.value = 'new_quotation';
                                   homeController.selectedTab.value =
-                                      'quotation_summary';
+                                  'sales_order_summary';
                                   CommonWidgets.snackBar(
                                     'Success',
                                     res['message'],
@@ -524,159 +502,94 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                           ),
                           UnderTitleBtn(
                             text: 'confirm'.tr,
-                            onTap: () async {
-                              quotationCont.setStatus('confirmed');
+                            onTap: ()
+                            // {
+                            //     setState(() {
+                            //       progressVar = 2;
+                            //     });
+                            //     quotationCont.setStatus('confirmed');
+                            //
+                            // },
+                            async {
+                              setState(() {
+                                progressVar = 2;
+                              });
+                              salesOrderCont.setStatus('confirmed');
                               var oldKeys =
-                                  quotationController
-                                      .rowsInListViewInQuotation
-                                      .keys
-                                      .toList()
-                                    ..sort();
+                              salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .keys
+                                  .toList()
+                                ..sort();
                               for (int i = 0; i < oldKeys.length; i++) {
-                                quotationController
-                                        .rowsInListViewInQuotation[i + 1] =
-                                    quotationController
-                                        .rowsInListViewInQuotation[oldKeys[i]]!;
+                                salesOrderController.newRowMap[i + 1] =
+                                salesOrderController
+                                    .rowsInListViewInSalesOrder[oldKeys[i]]!;
                               }
-                              bool hasType1WithEmptyTitle = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '1' &&
-                                        (map['title']?.isEmpty ?? true);
-                                  });
-                              bool hasType2WithEmptyId = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '2' &&
-                                        (map['item_id']?.isEmpty ?? true);
-                                  });
-                              bool hasType3WithEmptyId = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '3' &&
-                                        (map['combo']?.isEmpty ?? true);
-                                  });
-                              bool hasType4WithEmptyImage = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '4' &&
-                                        (map['image'] == Uint8List(0) ||
-                                            map['image']?.isEmpty);
-                                  });
-                              bool hasType5WithEmptyNote = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '5' &&
-                                        (map['note']?.isEmpty ?? true);
-                                  });
-                              if (quotationController
-                                  .rowsInListViewInQuotation
-                                  .isEmpty) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'Order lines is Empty',
-                                );
-                              } else if (hasType2WithEmptyId) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty item',
-                                );
-                              } else if (hasType3WithEmptyId) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty combo',
-                                );
-                              } else if (hasType1WithEmptyTitle) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty title',
-                                );
-                              } else if (hasType4WithEmptyImage) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty image',
-                                );
-                              } else if (hasType5WithEmptyNote) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty note',
-                                );
-                              } else {
-                                if (_formKey.currentState!.validate()) {
-                                  _saveContent();
-                                  var res = await updateQuotation(
-                                    '${widget.info['id']}',
-                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                    refController.text,
-                                    selectedCustomerIds,
-                                    validityController.text,
-                                    inputDateController.text,
-                                    '', //todo paymentTermsController.text,
-                                    quotationCont.selectedPriceListId,
-                                    quotationCont
-                                        .selectedCurrencyId, //selectedCurrency
-                                    termsAndConditionsController.text,
-                                    selectedSalesPersonId.toString(),
-                                    '',
-                                    quotationCont.selectedCashingMethodId,
-                                    commissionController.text,
-                                    totalCommissionController.text,
-                                    quotationController.totalItems
-                                        .toString(), //total before vat
-                                    specialDiscPercentController
-                                        .text, // inserted by user
-                                    quotationController
-                                        .specialDisc, // calculated
-                                    globalDiscPercentController.text,
-                                    quotationController.globalDisc,
-                                    quotationController.vat11.toString(), //vat
-                                    quotationController.vatInPrimaryCurrency
-                                        .toString(),
-                                    quotationController
-                                        .totalQuotation, // quotationController.totalQuotation
+                              if (_formKey.currentState!.validate()) {
+                                _saveContent();
+                                var res = await updateSalesOrdder(
+                                  '${widget.info['id']}',
+                                  // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                  false,
+                                  refController.text,
+                                  selectedCustomerIds,
+                                  validityController.text,
+                                  inputDateController.text,
+                                  '', //todo paymentTermsController.text,
+                                  salesOrderCont.selectedPriceListId,
+                                  salesOrderCont
+                                      .selectedCurrencyId, //selectedCurrency
+                                  termsAndConditionsController.text,
+                                  selectedSalesPersonId.toString(),
+                                  '',
+                                  salesOrderCont.selectedCashingMethodId,
+                                  commissionController.text,
+                                  totalCommissionController.text,
+                                  salesOrderController.totalItems
+                                      .toString(), //total before vat
+                                  specialDiscPercentController
+                                      .text, // inserted by user
+                                  salesOrderController
+                                      .specialDisc, // calculated
+                                  globalDiscPercentController.text,
+                                  salesOrderController.globalDisc,
+                                  salesOrderController.vat11.toString(), //vat
+                                  salesOrderController.vatInPrimaryCurrency
+                                      .toString(),
+                                  salesOrderController
+                                      .totalSalesOrder, // quotationController.totalQuotation
 
-                                    quotationCont.isVatExemptChecked
-                                        ? '1'
-                                        : '0',
-                                    quotationCont.isVatNoPrinted ? '1' : '0',
-                                    quotationCont.isPrintedAsVatExempt
-                                        ? '1'
-                                        : '0',
-                                    quotationCont.isPrintedAs0 ? '1' : '0',
-                                    quotationCont.isBeforeVatPrices ? '0' : '1',
+                                  salesOrderCont.isVatExemptChecked ? '1' : '0',
+                                  salesOrderCont.isVatNoPrinted ? '1' : '0',
+                                  salesOrderCont.isPrintedAsVatExempt
+                                      ? '1'
+                                      : '0',
+                                  salesOrderCont.isPrintedAs0 ? '1' : '0',
+                                  salesOrderCont.isBeforeVatPrices ? '0' : '1',
 
-                                    quotationCont.isBeforeVatPrices ? '1' : '0',
-                                    codeController.text,
-                                    quotationCont.status,
-                                    quotationController
-                                        .rowsInListViewInQuotation,
-                                    quotationCont.orderedKeys,
+                                  salesOrderCont.isBeforeVatPrices ? '1' : '0',
+                                  codeController.text,
+                                  salesOrderCont.status, // status,
+                                  // quotationController.rowsInListViewInQuotation,
+                                  salesOrderController.newRowMap,
+                                );
+                                if (res['success'] == true) {
+                                  Get.back();
+                                  salesOrderController
+                                      .getAllSalesOrderFromBack();
+                                  // homeController.selectedTab.value = 'new_quotation';
+                                  homeController.selectedTab.value =
+                                  'sales_order_summary';
+                                  CommonWidgets.snackBar(
+                                    'Success',
+                                    res['message'],
                                   );
-                                  if (res['success'] == true) {
-                                    setState(() {
-                                      progressVar = 2;
-                                    });
-                                    Get.back();
-                                    quotationController
-                                        .getAllQuotationsWithoutPendingFromBack();
-                                    // homeController.selectedTab.value = 'new_quotation';
-                                    homeController.selectedTab.value =
-                                        'quotation_summary';
-                                    CommonWidgets.snackBar(
-                                      'Success',
-                                      res['message'],
-                                    );
-                                  } else {
-                                    CommonWidgets.snackBar(
-                                      'error',
-                                      res['message'],
-                                    );
-                                  }
+                                } else {
+                                  CommonWidgets.snackBar(
+                                    'error',
+                                    res['message'],
+                                  );
                                 }
                               }
                             },
@@ -691,145 +604,82 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                             //   quotationCont.setStatus('cancelled');
                             // },
                             async {
-                              quotationCont.setStatus('cancelled');
+                              salesOrderCont.setStatus('cancelled');
+                              var oldKeys =
+                              salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .keys
+                                  .toList()
+                                ..sort();
+                              for (int i = 0; i < oldKeys.length; i++) {
+                                salesOrderController.newRowMap[i + 1] =
+                                salesOrderController
+                                    .rowsInListViewInSalesOrder[oldKeys[i]]!;
+                              }
+                              if (_formKey.currentState!.validate()) {
+                                _saveContent();
+                                var res = await updateSalesOrdder(
+                                  '${widget.info['id']}',
+                                  false,
+                                  // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                  refController.text,
+                                  selectedCustomerIds,
+                                  validityController.text,
+                                  inputDateController.text,
+                                  '', //todo paymentTermsController.text,
+                                  salesOrderCont.selectedPriceListId,
+                                  salesOrderCont
+                                      .selectedCurrencyId, //selectedCurrency
+                                  termsAndConditionsController.text,
+                                  selectedSalesPersonId.toString(),
+                                  '',
+                                  salesOrderCont.selectedCashingMethodId,
+                                  commissionController.text,
+                                  totalCommissionController.text,
+                                  salesOrderController.totalItems
+                                      .toString(), //total before vat
+                                  specialDiscPercentController
+                                      .text, // inserted by user
+                                  salesOrderController
+                                      .specialDisc, // calculated
+                                  globalDiscPercentController.text,
+                                  salesOrderController.globalDisc,
+                                  salesOrderController.vat11.toString(), //vat
+                                  salesOrderController.vatInPrimaryCurrency
+                                      .toString(),
+                                  salesOrderController
+                                      .totalSalesOrder, // quotationController.totalQuotation
 
-                              bool hasType1WithEmptyTitle = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '1' &&
-                                        (map['title']?.isEmpty ?? true);
-                                  });
-                              bool hasType2WithEmptyId = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '2' &&
-                                        (map['item_id']?.isEmpty ?? true);
-                                  });
-                              bool hasType3WithEmptyId = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '3' &&
-                                        (map['combo']?.isEmpty ?? true);
-                                  });
-                              bool hasType4WithEmptyImage = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '4' &&
-                                        (map['image'] == Uint8List(0) ||
-                                            map['image']?.isEmpty);
-                                  });
-                              bool hasType5WithEmptyNote = quotationController
-                                  .rowsInListViewInQuotation
-                                  .values
-                                  .any((map) {
-                                    return map['line_type_id'] == '5' &&
-                                        (map['note']?.isEmpty ?? true);
-                                  });
-                              if (quotationController
-                                  .rowsInListViewInQuotation
-                                  .isEmpty) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'Order lines is Empty',
-                                );
-                              } else if (hasType2WithEmptyId) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty item',
-                                );
-                              } else if (hasType3WithEmptyId) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty combo',
-                                );
-                              } else if (hasType1WithEmptyTitle) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty title',
-                                );
-                              } else if (hasType4WithEmptyImage) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty image',
-                                );
-                              } else if (hasType5WithEmptyNote) {
-                                CommonWidgets.snackBar(
-                                  'error',
-                                  'You have an empty note',
-                                );
-                              } else {
-                                if (_formKey.currentState!.validate()) {
-                                  _saveContent();
-                                  var res = await updateQuotation(
-                                    '${widget.info['id']}',
-                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                    refController.text,
-                                    selectedCustomerIds,
-                                    validityController.text,
-                                    inputDateController.text,
-                                    '', //todo paymentTermsController.text,
-                                    quotationCont.selectedPriceListId,
-                                    quotationCont
-                                        .selectedCurrencyId, //selectedCurrency
-                                    termsAndConditionsController.text,
-                                    selectedSalesPersonId.toString(),
-                                    '',
-                                    quotationCont.selectedCashingMethodId,
-                                    commissionController.text,
-                                    totalCommissionController.text,
-                                    quotationController.totalItems
-                                        .toString(), //total before vat
-                                    specialDiscPercentController
-                                        .text, // inserted by user
-                                    quotationController
-                                        .specialDisc, // calculated
-                                    globalDiscPercentController.text,
-                                    quotationController.globalDisc,
-                                    quotationController.vat11.toString(), //vat
-                                    quotationController.vatInPrimaryCurrency
-                                        .toString(),
-                                    quotationController
-                                        .totalQuotation, // quotationController.totalQuotation
+                                  salesOrderCont.isVatExemptChecked ? '1' : '0',
+                                  salesOrderCont.isVatNoPrinted ? '1' : '0',
+                                  salesOrderCont.isPrintedAsVatExempt
+                                      ? '1'
+                                      : '0',
+                                  salesOrderCont.isPrintedAs0 ? '1' : '0',
+                                  salesOrderCont.isBeforeVatPrices ? '0' : '1',
 
-                                    quotationCont.isVatExemptChecked
-                                        ? '1'
-                                        : '0',
-                                    quotationCont.isVatNoPrinted ? '1' : '0',
-                                    quotationCont.isPrintedAsVatExempt
-                                        ? '1'
-                                        : '0',
-                                    quotationCont.isPrintedAs0 ? '1' : '0',
-                                    quotationCont.isBeforeVatPrices ? '0' : '1',
-
-                                    quotationCont.isBeforeVatPrices ? '1' : '0',
-                                    codeController.text,
-                                    quotationCont.status, // status,
-                                    // quotationController.rowsInListViewInQuotation,
-                                    quotationController
-                                        .rowsInListViewInQuotation,
-                                    quotationController.orderedKeys,
+                                  salesOrderCont.isBeforeVatPrices ? '1' : '0',
+                                  codeController.text,
+                                  salesOrderCont.status, // status,
+                                  // quotationController.rowsInListViewInQuotation,
+                                  salesOrderController.newRowMap,
+                                );
+                                if (res['success'] == true) {
+                                  Get.back();
+                                  salesOrderController
+                                      .getAllSalesOrderFromBack();
+                                  // homeController.selectedTab.value = 'new_quotation';
+                                  homeController.selectedTab.value =
+                                  'sales_order_summary';
+                                  CommonWidgets.snackBar(
+                                    'Success',
+                                    res['message'],
                                   );
-                                  if (res['success'] == true) {
-                                    Get.back();
-                                    quotationController
-                                        .getAllQuotationsWithoutPendingFromBack();
-                                    // homeController.selectedTab.value = 'new_quotation';
-                                    homeController.selectedTab.value =
-                                        'quotation_summary';
-                                    CommonWidgets.snackBar(
-                                      'Success',
-                                      res['message'],
-                                    );
-                                  } else {
-                                    CommonWidgets.snackBar(
-                                      'error',
-                                      res['message'],
-                                    );
-                                  }
+                                } else {
+                                  CommonWidgets.snackBar(
+                                    'error',
+                                    res['message'],
+                                  );
                                 }
                               }
                             },
@@ -852,7 +702,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                             isFirst: false,
                             isLast: false,
                             isPast: false,
-                            text: 'quotation_sent'.tr,
+                            text: 'sales_order_sent'.tr,
                           ),
                           ReusableTimeLineTile(
                             id: 2,
@@ -885,7 +735,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  '${widget.info['quotationNumber'] ?? ''}',
+                                  '${widget.info['salesOrderNumber'] ?? ''}',
                                   style: const TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -898,23 +748,23 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               text: '${'ref'.tr}:',
                               hint: 'manual_reference'.tr,
                               rowWidth:
-                                  MediaQuery.of(context).size.width * 0.18,
+                              MediaQuery.of(context).size.width * 0.18,
                               textFieldWidth:
-                                  MediaQuery.of(context).size.width * 0.15,
+                              MediaQuery.of(context).size.width * 0.15,
                               validationFunc: (val) {},
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.11,
                               child: Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('currency'.tr),
                                   GetBuilder<ExchangeRatesController>(
                                     builder: (cont) {
                                       return DropdownMenu<String>(
                                         width:
-                                            MediaQuery.of(context).size.width *
+                                        MediaQuery.of(context).size.width *
                                             0.07,
                                         // requestFocusOnTap: false,
                                         enableSearch: true,
@@ -926,12 +776,12 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                             fontStyle: FontStyle.italic,
                                           ),
                                           contentPadding:
-                                              const EdgeInsets.fromLTRB(
-                                                20,
-                                                0,
-                                                25,
-                                                5,
-                                              ),
+                                          const EdgeInsets.fromLTRB(
+                                            20,
+                                            0,
+                                            25,
+                                            5,
+                                          ),
                                           // outlineBorder: BorderSide(color: Colors.black,),
                                           enabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -941,9 +791,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                               width: 1,
                                             ),
                                             borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
-                                                ),
+                                            const BorderRadius.all(
+                                              Radius.circular(9),
+                                            ),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -953,112 +803,112 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                               width: 2,
                                             ),
                                             borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
-                                                ),
+                                            const BorderRadius.all(
+                                              Radius.circular(9),
+                                            ),
                                           ),
                                         ),
                                         // menuStyle: ,
                                         menuHeight: 250,
                                         dropdownMenuEntries:
-                                            cont.currenciesNamesList.map<
-                                              DropdownMenuEntry<String>
-                                            >((String option) {
-                                              return DropdownMenuEntry<String>(
-                                                value: option,
-                                                label: option,
-                                              );
-                                            }).toList(),
+                                        cont.currenciesNamesList.map<
+                                            DropdownMenuEntry<String>
+                                        >((String option) {
+                                          return DropdownMenuEntry<String>(
+                                            value: option,
+                                            label: option,
+                                          );
+                                        }).toList(),
                                         enableFilter: true,
                                         onSelected: (String? val) {
                                           setState(() {
                                             selectedCurrency = val!;
                                             var index = cont.currenciesNamesList
                                                 .indexOf(val);
-                                            quotationCont.setSelectedCurrency(
+                                            salesOrderCont.setSelectedCurrency(
                                               cont.currenciesIdsList[index],
                                               val,
                                             );
                                             var result = cont.exchangeRatesList
                                                 .firstWhere(
                                                   (item) =>
-                                                      item["currency"] == val,
-                                                  orElse: () => null,
-                                                );
-                                            quotationCont
+                                              item["currency"] == val,
+                                              orElse: () => null,
+                                            );
+                                            salesOrderCont
                                                 .setExchangeRateForSelectedCurrency(
-                                                  result != null
-                                                      ? '${result["exchange_rate"]}'
-                                                      : '1',
-                                                );
+                                              result != null
+                                                  ? '${result["exchange_rate"]}'
+                                                  : '1',
+                                            );
                                           });
                                           var keys =
-                                              quotationCont
-                                                  .unitPriceControllers
-                                                  .keys
-                                                  .toList();
+                                          salesOrderCont
+                                              .unitPriceControllers
+                                              .keys
+                                              .toList();
                                           for (
-                                            int i = 0;
-                                            i <
-                                                quotationCont
-                                                    .unitPriceControllers
-                                                    .length;
-                                            i++
+                                          int i = 0;
+                                          i <
+                                              salesOrderCont
+                                                  .unitPriceControllers
+                                                  .length;
+                                          i++
                                           ) {
                                             var selectedItemId =
-                                                '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
+                                                '${salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_id']}';
                                             if (selectedItemId != '') {
-                                              if (quotationCont
-                                                      .itemsPricesCurrencies[selectedItemId] ==
+                                              if (salesOrderCont
+                                                  .itemsPricesCurrencies[selectedItemId] ==
                                                   val) {
-                                                quotationCont
+                                                salesOrderCont
                                                     .unitPriceControllers[keys[i]]!
-                                                    .text = quotationCont
-                                                        .itemUnitPrice[selectedItemId]
-                                                        .toString();
+                                                    .text = salesOrderCont
+                                                    .itemUnitPrice[selectedItemId]
+                                                    .toString();
                                               } else if (val == 'USD' &&
-                                                  quotationCont
-                                                          .itemsPricesCurrencies[selectedItemId] !=
+                                                  salesOrderCont
+                                                      .itemsPricesCurrencies[selectedItemId] !=
                                                       val) {
                                                 var result = exchangeRatesController
                                                     .exchangeRatesList
                                                     .firstWhere(
                                                       (item) =>
-                                                          item["currency"] ==
-                                                          quotationCont
-                                                              .itemsPricesCurrencies[selectedItemId],
-                                                      orElse: () => null,
-                                                    );
+                                                  item["currency"] ==
+                                                      salesOrderCont
+                                                          .itemsPricesCurrencies[selectedItemId],
+                                                  orElse: () => null,
+                                                );
                                                 var divider = '1';
                                                 if (result != null) {
                                                   divider =
                                                       result["exchange_rate"]
                                                           .toString();
                                                 }
-                                                quotationCont
-                                                        .unitPriceControllers[keys[i]]!
-                                                        .text =
-                                                    '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                              } else if (quotationCont
-                                                          .selectedCurrencyName !=
-                                                      'USD' &&
-                                                  quotationCont
-                                                          .itemsPricesCurrencies[selectedItemId] ==
+                                                salesOrderCont
+                                                    .unitPriceControllers[keys[i]]!
+                                                    .text =
+                                                '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                              } else if (salesOrderCont
+                                                  .selectedCurrencyName !=
+                                                  'USD' &&
+                                                  salesOrderCont
+                                                      .itemsPricesCurrencies[selectedItemId] ==
                                                       'USD') {
-                                                quotationCont
-                                                        .unitPriceControllers[keys[i]]!
-                                                        .text =
-                                                    '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                salesOrderCont
+                                                    .unitPriceControllers[keys[i]]!
+                                                    .text =
+                                                '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) * double.parse(salesOrderCont.exchangeRateForSelectedCurrency))}')}';
                                               } else {
                                                 var result = exchangeRatesController
                                                     .exchangeRatesList
                                                     .firstWhere(
                                                       (item) =>
-                                                          item["currency"] ==
-                                                          quotationCont
-                                                              .itemsPricesCurrencies[selectedItemId],
-                                                      orElse: () => null,
-                                                    );
+                                                  item["currency"] ==
+                                                      salesOrderCont
+                                                          .itemsPricesCurrencies[selectedItemId],
+                                                  orElse: () => null,
+                                                );
                                                 var divider = '1';
                                                 if (result != null) {
                                                   divider =
@@ -1066,55 +916,55 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                           .toString();
                                                 }
                                                 var usdPrice =
-                                                    '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                quotationCont
-                                                        .unitPriceControllers[keys[i]]!
-                                                        .text =
-                                                    '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                    '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                salesOrderCont
+                                                    .unitPriceControllers[keys[i]]!
+                                                    .text =
+                                                '${double.parse('${(double.parse(usdPrice) * double.parse(salesOrderCont.exchangeRateForSelectedCurrency))}')}';
                                               }
-                                              if (!quotationCont
+                                              if (!salesOrderCont
                                                   .isBeforeVatPrices) {
                                                 var taxRate =
                                                     double.parse(
-                                                      quotationCont
+                                                      salesOrderCont
                                                           .itemsVats[selectedItemId],
                                                     ) /
-                                                    100.0;
+                                                        100.0;
                                                 var taxValue =
                                                     taxRate *
-                                                    double.parse(
-                                                      quotationCont
-                                                          .unitPriceControllers[keys[i]]!
-                                                          .text,
-                                                    );
+                                                        double.parse(
+                                                          salesOrderCont
+                                                              .unitPriceControllers[keys[i]]!
+                                                              .text,
+                                                        );
 
-                                                quotationCont
-                                                        .unitPriceControllers[keys[i]]!
-                                                        .text =
-                                                    '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                salesOrderCont
+                                                    .unitPriceControllers[keys[i]]!
+                                                    .text =
+                                                '${double.parse(salesOrderCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
                                               }
-                                              quotationCont
+                                              salesOrderCont
                                                   .unitPriceControllers[keys[i]]!
                                                   .text = double.parse(
-                                                quotationCont
+                                                salesOrderCont
                                                     .unitPriceControllers[keys[i]]!
                                                     .text,
                                               ).toStringAsFixed(2);
                                               var totalLine =
-                                                  '${(double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-                                              quotationCont
-                                                  .setEnteredUnitPriceInQuotation(
-                                                    keys[i],
-                                                    quotationCont
-                                                        .unitPriceControllers[keys[i]]!
-                                                        .text,
-                                                  );
-                                              quotationCont
-                                                  .setMainTotalInQuotation(
-                                                    keys[i],
-                                                    totalLine,
-                                                  );
-                                              quotationCont.getTotalItems();
+                                                  '${(double.parse(salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_quantity']) * double.parse(salesOrderCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_discount']) / 100)}';
+                                              salesOrderCont
+                                                  .setEnteredUnitPriceInSalesOrder(
+                                                keys[i],
+                                                salesOrderCont
+                                                    .unitPriceControllers[keys[i]]!
+                                                    .text,
+                                              );
+                                              salesOrderCont
+                                                  .setMainTotalInSalesOrder(
+                                                keys[i],
+                                                totalLine,
+                                              );
+                                              salesOrderCont.getTotalItems();
                                             }
                                           }
                                         },
@@ -1124,19 +974,18 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 ],
                               ),
                             ),
-
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.14,
                               child: Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('validity'.tr),
                                   DialogDateTextField(
                                     textEditingController: validityController,
                                     text: '',
                                     textFieldWidth:
-                                        MediaQuery.of(context).size.width *
+                                    MediaQuery.of(context).size.width *
                                         0.10,
                                     // MediaQuery.of(context).size.width * 0.25,
                                     validationFunc: (val) {},
@@ -1160,12 +1009,12 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('Pricelist'.tr),
                                   DropdownMenu<String>(
                                     width:
-                                        MediaQuery.of(context).size.width *
+                                    MediaQuery.of(context).size.width *
                                         0.10,
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
@@ -1209,25 +1058,25 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     // menuStyle: ,
                                     menuHeight: 250,
                                     dropdownMenuEntries:
-                                        quotationCont.priceListsCodes
-                                            .map<DropdownMenuEntry<String>>((
-                                              String option,
-                                            ) {
-                                              return DropdownMenuEntry<String>(
-                                                value: option,
-                                                label: option,
-                                              );
-                                            })
-                                            .toList(),
+                                    salesOrderCont.priceListsCodes
+                                        .map<DropdownMenuEntry<String>>((
+                                        String option,
+                                        ) {
+                                      return DropdownMenuEntry<String>(
+                                        value: option,
+                                        label: option,
+                                      );
+                                    })
+                                        .toList(),
                                     enableFilter: true,
                                     onSelected: (String? val) {
-                                      var index = quotationCont.priceListsCodes
+                                      var index = salesOrderCont.priceListsCodes
                                           .indexOf(val!);
-                                      quotationCont.setSelectedPriceListId(
-                                        quotationCont.priceListsIds[index],
+                                      salesOrderCont.setSelectedPriceListId(
+                                        salesOrderCont.priceListsIds[index],
                                       );
                                       setState(() {
-                                        quotationCont
+                                        salesOrderCont
                                             .resetItemsAfterChangePriceList();
                                       });
                                     },
@@ -1245,14 +1094,14 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('input_date'.tr),
                                   DialogDateTextField(
                                     textEditingController: inputDateController,
                                     text: '',
                                     textFieldWidth:
-                                        MediaQuery.of(context).size.width *
+                                    MediaQuery.of(context).size.width *
                                         0.09,
                                     // MediaQuery.of(context).size.width * 0.25,
                                     validationFunc: (val) {},
@@ -1277,13 +1126,13 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               width: MediaQuery.of(context).size.width * 0.37,
                               child: Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text('code'.tr),
                                   DropdownMenu<String>(
                                     width:
-                                        MediaQuery.of(context).size.width *
+                                    MediaQuery.of(context).size.width *
                                         0.15,
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
@@ -1325,49 +1174,49 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     ),
                                     menuHeight: 250,
                                     dropdownMenuEntries:
-                                        quotationCont.customerNumberList
-                                            .map<DropdownMenuEntry<String>>((
-                                              option,
-                                            ) {
-                                              return DropdownMenuEntry<String>(
-                                                value: option,
-                                                label: option,
-                                              );
-                                            })
-                                            .toList(),
+                                    salesOrderCont.customerNumberList
+                                        .map<DropdownMenuEntry<String>>((
+                                        option,
+                                        ) {
+                                      return DropdownMenuEntry<String>(
+                                        value: option,
+                                        label: option,
+                                      );
+                                    })
+                                        .toList(),
                                     enableFilter: true,
                                     onSelected: (String? val) {
                                       setState(() {
                                         selectedItemCode = val!;
-                                        indexNum = quotationCont
+                                        indexNum = salesOrderCont
                                             .customerNumberList
                                             .indexOf(selectedItemCode);
                                         selectedCustomerIds =
-                                            quotationCont
-                                                .customerIdsList[indexNum];
+                                        salesOrderCont
+                                            .customerIdsList[indexNum];
                                         searchController.text =
-                                            quotationCont
-                                                .customerNameList[indexNum];
+                                        salesOrderCont
+                                            .customerNameList[indexNum];
                                       });
                                     },
                                   ),
                                   ReusableDropDownMenuWithSearch(
-                                    list: quotationCont.customerNameList,
+                                    list: salesOrderCont.customerNameList,
                                     text: '',
                                     hint: '${'search'.tr}...',
                                     controller: searchController,
                                     onSelected: (String? val) {
                                       setState(() {
                                         selectedItem = val!;
-                                        var index = quotationCont
+                                        var index = salesOrderCont
                                             .customerNameList
                                             .indexOf(selectedItem);
                                         selectedCustomerIds =
-                                            quotationCont
-                                                .customerIdsList[index];
+                                        salesOrderCont
+                                            .customerIdsList[index];
                                         codeController.text =
-                                            quotationCont
-                                                .customerNumberList[index];
+                                        salesOrderCont
+                                            .customerNumberList[index];
 
                                         // codeController =
                                         //     quotationController.codeController;
@@ -1375,11 +1224,11 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     },
                                     validationFunc: (value) {},
                                     rowWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.18,
+                                    MediaQuery.of(context).size.width *
+                                        0.15,
                                     textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.17,
+                                    MediaQuery.of(context).size.width *
+                                        0.14,
                                     clickableOptionText: 'create_new_client'.tr,
                                     isThereClickableOption: true,
                                     onTappedClickableOption: () {
@@ -1387,17 +1236,17 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                         context: context,
                                         builder:
                                             (BuildContext context) =>
-                                                const AlertDialog(
-                                                  backgroundColor: Colors.white,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                          Radius.circular(9),
-                                                        ),
-                                                  ),
-                                                  elevation: 0,
-                                                  content: CreateClientDialog(),
-                                                ),
+                                        const AlertDialog(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.all(
+                                              Radius.circular(9),
+                                            ),
+                                          ),
+                                          elevation: 0,
+                                          content: CreateClientDialog(),
+                                        ),
                                       );
                                     },
                                   ),
@@ -1409,9 +1258,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               text: 'payment_terms'.tr,
                               hint: '',
                               rowWidth:
-                                  MediaQuery.of(context).size.width * 0.24,
+                              MediaQuery.of(context).size.width * 0.24,
                               textFieldWidth:
-                                  MediaQuery.of(context).size.width * 0.15,
+                              MediaQuery.of(context).size.width * 0.15,
                               validationFunc: (val) {},
                             ),
                             // SizedBox(
@@ -1518,20 +1367,20 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                       ),
                                       gapW10,
                                       Text(
-                                        " ${quotationCont.street[selectedCustomerIds] ?? ''} ",
+                                        " ${salesOrderCont.street[selectedCustomerIds] ?? ''} ",
                                         style: const TextStyle(fontSize: 12),
                                       ),
                                       Text(
-                                        quotationCont.floorAndBuilding[selectedCustomerIds] ==
-                                                    '' ||
-                                                quotationCont
-                                                        .floorAndBuilding[selectedCustomerIds] ==
-                                                    null
+                                        salesOrderCont.floorAndBuilding[selectedCustomerIds] ==
+                                            '' ||
+                                            salesOrderCont
+                                                .floorAndBuilding[selectedCustomerIds] ==
+                                                null
                                             ? ''
                                             : ',',
                                       ),
                                       Text(
-                                        " ${quotationCont.floorAndBuilding[selectedCustomerIds] ?? ''}",
+                                        " ${salesOrderCont.floorAndBuilding[selectedCustomerIds] ?? ''}",
                                         style: const TextStyle(fontSize: 12),
                                       ),
                                     ],
@@ -1546,7 +1395,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                       ),
                                       gapW10,
                                       Text(
-                                        "${quotationCont.phoneNumber[selectedCustomerIds] ?? ''}",
+                                        "${salesOrderCont.phoneNumber[selectedCustomerIds] ?? ''}",
                                         style: const TextStyle(fontSize: 12),
                                       ),
                                     ],
@@ -1559,22 +1408,22 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               width: MediaQuery.of(context).size.width * 0.24,
                               child: Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'price'.tr,
                                     style:
-                                        quotationCont.isVatExemptChecked
-                                            ? TextStyle(color: Others.divider)
-                                            : TextStyle(),
+                                    salesOrderCont.isVatExemptChecked
+                                        ? TextStyle(color: Others.divider)
+                                        : TextStyle(),
                                   ),
                                   GetBuilder<ExchangeRatesController>(
                                     builder: (cont) {
                                       return DropdownMenu<String>(
                                         enabled:
-                                            !quotationCont.isVatExemptChecked,
+                                        !salesOrderCont.isVatExemptChecked,
                                         width:
-                                            MediaQuery.of(context).size.width *
+                                        MediaQuery.of(context).size.width *
                                             0.15,
                                         // requestFocusOnTap: false,
                                         enableSearch: true,
@@ -1590,12 +1439,12 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                             fontStyle: FontStyle.italic,
                                           ),
                                           contentPadding:
-                                              const EdgeInsets.fromLTRB(
-                                                20,
-                                                0,
-                                                25,
-                                                5,
-                                              ),
+                                          const EdgeInsets.fromLTRB(
+                                            20,
+                                            0,
+                                            25,
+                                            5,
+                                          ),
                                           // outlineBorder: BorderSide(color: Colors.black,),
                                           disabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -1603,9 +1452,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                               width: 1,
                                             ),
                                             borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
-                                                ),
+                                            const BorderRadius.all(
+                                              Radius.circular(9),
+                                            ),
                                           ),
                                           enabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -1615,9 +1464,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                               width: 1,
                                             ),
                                             borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
-                                                ),
+                                            const BorderRadius.all(
+                                              Radius.circular(9),
+                                            ),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -1627,102 +1476,102 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                               width: 2,
                                             ),
                                             borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
-                                                ),
+                                            const BorderRadius.all(
+                                              Radius.circular(9),
+                                            ),
                                           ),
                                         ),
                                         // menuStyle: ,
                                         menuHeight: 250,
                                         dropdownMenuEntries:
-                                            pricesVatConditions.map<
-                                              DropdownMenuEntry<String>
-                                            >((String option) {
-                                              return DropdownMenuEntry<String>(
-                                                value: option,
-                                                label: option,
-                                              );
-                                            }).toList(),
+                                        pricesVatConditions.map<
+                                            DropdownMenuEntry<String>
+                                        >((String option) {
+                                          return DropdownMenuEntry<String>(
+                                            value: option,
+                                            label: option,
+                                          );
+                                        }).toList(),
                                         enableFilter: true,
                                         onSelected: (String? value) {
                                           setState(() {
                                             if (value ==
                                                 'Prices are before vat') {
-                                              quotationCont
+                                              salesOrderCont
                                                   .setIsBeforeVatPrices(true);
                                             } else {
-                                              quotationCont
+                                              salesOrderCont
                                                   .setIsBeforeVatPrices(false);
                                             }
                                             var keys =
-                                                quotationCont
-                                                    .unitPriceControllers
-                                                    .keys
-                                                    .toList();
+                                            salesOrderCont
+                                                .unitPriceControllers
+                                                .keys
+                                                .toList();
                                             for (
-                                              int i = 0;
-                                              i <
-                                                  quotationCont
-                                                      .unitPriceControllers
-                                                      .length;
-                                              i++
+                                            int i = 0;
+                                            i <
+                                                salesOrderCont
+                                                    .unitPriceControllers
+                                                    .length;
+                                            i++
                                             ) {
                                               var selectedItemId =
-                                                  '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
+                                                  '${salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_id']}';
                                               if (selectedItemId != '') {
-                                                if (quotationCont
-                                                        .itemsPricesCurrencies[selectedItemId] ==
+                                                if (salesOrderCont
+                                                    .itemsPricesCurrencies[selectedItemId] ==
                                                     selectedCurrency) {
-                                                  quotationCont
+                                                  salesOrderCont
                                                       .unitPriceControllers[keys[i]]!
-                                                      .text = quotationCont
-                                                          .itemUnitPrice[selectedItemId]
-                                                          .toString();
-                                                } else if (quotationCont
-                                                            .selectedCurrencyName ==
-                                                        'USD' &&
-                                                    quotationCont
-                                                            .itemsPricesCurrencies[selectedItemId] !=
+                                                      .text = salesOrderCont
+                                                      .itemUnitPrice[selectedItemId]
+                                                      .toString();
+                                                } else if (salesOrderCont
+                                                    .selectedCurrencyName ==
+                                                    'USD' &&
+                                                    salesOrderCont
+                                                        .itemsPricesCurrencies[selectedItemId] !=
                                                         selectedCurrency) {
                                                   var result = exchangeRatesController
                                                       .exchangeRatesList
                                                       .firstWhere(
                                                         (item) =>
-                                                            item["currency"] ==
-                                                            quotationCont
-                                                                .itemsPricesCurrencies[selectedItemId],
-                                                        orElse: () => null,
-                                                      );
+                                                    item["currency"] ==
+                                                        salesOrderCont
+                                                            .itemsPricesCurrencies[selectedItemId],
+                                                    orElse: () => null,
+                                                  );
                                                   var divider = '1';
                                                   if (result != null) {
                                                     divider =
                                                         result["exchange_rate"]
                                                             .toString();
                                                   }
-                                                  quotationCont
-                                                          .unitPriceControllers[keys[i]]!
-                                                          .text =
-                                                      '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                } else if (quotationCont
-                                                            .selectedCurrencyName !=
-                                                        'USD' &&
-                                                    quotationCont
-                                                            .itemsPricesCurrencies[selectedItemId] ==
+                                                  salesOrderCont
+                                                      .unitPriceControllers[keys[i]]!
+                                                      .text =
+                                                  '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                } else if (salesOrderCont
+                                                    .selectedCurrencyName !=
+                                                    'USD' &&
+                                                    salesOrderCont
+                                                        .itemsPricesCurrencies[selectedItemId] ==
                                                         'USD') {
-                                                  quotationCont
-                                                          .unitPriceControllers[keys[i]]!
-                                                          .text =
-                                                      '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                  salesOrderCont
+                                                      .unitPriceControllers[keys[i]]!
+                                                      .text =
+                                                  '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) * double.parse(salesOrderCont.exchangeRateForSelectedCurrency))}')}';
                                                 } else {
                                                   var result = exchangeRatesController
                                                       .exchangeRatesList
                                                       .firstWhere(
                                                         (item) =>
-                                                            item["currency"] ==
-                                                            quotationCont
-                                                                .itemsPricesCurrencies[selectedItemId],
-                                                        orElse: () => null,
-                                                      );
+                                                    item["currency"] ==
+                                                        salesOrderCont
+                                                            .itemsPricesCurrencies[selectedItemId],
+                                                    orElse: () => null,
+                                                  );
                                                   var divider = '1';
                                                   if (result != null) {
                                                     divider =
@@ -1730,56 +1579,56 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                             .toString();
                                                   }
                                                   var usdPrice =
-                                                      '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                  quotationCont
-                                                          .unitPriceControllers[keys[i]]!
-                                                          .text =
-                                                      '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                      '${double.parse('${(double.parse(salesOrderCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                  salesOrderCont
+                                                      .unitPriceControllers[keys[i]]!
+                                                      .text =
+                                                  '${double.parse('${(double.parse(usdPrice) * double.parse(salesOrderCont.exchangeRateForSelectedCurrency))}')}';
                                                 }
-                                                if (!quotationCont
+                                                if (!salesOrderCont
                                                     .isBeforeVatPrices) {
                                                   var taxRate =
                                                       double.parse(
-                                                        quotationCont
+                                                        salesOrderCont
                                                             .itemsVats[selectedItemId],
                                                       ) /
-                                                      100.0;
+                                                          100.0;
                                                   var taxValue =
                                                       taxRate *
-                                                      double.parse(
-                                                        quotationCont
-                                                            .unitPriceControllers[keys[i]]!
-                                                            .text,
-                                                      );
+                                                          double.parse(
+                                                            salesOrderCont
+                                                                .unitPriceControllers[keys[i]]!
+                                                                .text,
+                                                          );
 
-                                                  quotationCont
-                                                          .unitPriceControllers[keys[i]]!
-                                                          .text =
-                                                      '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                  salesOrderCont
+                                                      .unitPriceControllers[keys[i]]!
+                                                      .text =
+                                                  '${double.parse(salesOrderCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
                                                 }
-                                                quotationCont
+                                                salesOrderCont
                                                     .unitPriceControllers[keys[i]]!
                                                     .text = double.parse(
-                                                  quotationCont
+                                                  salesOrderCont
                                                       .unitPriceControllers[keys[i]]!
                                                       .text,
                                                 ).toStringAsFixed(2);
                                                 var totalLine =
-                                                    '${(double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                                    '${(double.parse(salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_quantity']) * double.parse(salesOrderCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(salesOrderCont.rowsInListViewInSalesOrder[keys[i]]['item_discount']) / 100)}';
 
-                                                quotationCont
-                                                    .setEnteredUnitPriceInQuotation(
-                                                      keys[i],
-                                                      quotationCont
-                                                          .unitPriceControllers[keys[i]]!
-                                                          .text,
-                                                    );
-                                                quotationCont
-                                                    .setMainTotalInQuotation(
-                                                      keys[i],
-                                                      totalLine,
-                                                    );
-                                                quotationCont.getTotalItems();
+                                                salesOrderCont
+                                                    .setEnteredUnitPriceInSalesOrder(
+                                                  keys[i],
+                                                  salesOrderCont
+                                                      .unitPriceControllers[keys[i]]!
+                                                      .text,
+                                                );
+                                                salesOrderCont
+                                                    .setMainTotalInSalesOrder(
+                                                  keys[i],
+                                                  totalLine,
+                                                );
+                                                salesOrderCont.getTotalItems();
                                               }
                                             }
                                           });
@@ -1809,7 +1658,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                         style: const TextStyle(fontSize: 12),
                                       ),
                                       gapW10,
-                                      GetBuilder<QuotationController>(
+                                      GetBuilder<SalesOrderController>(
                                         builder: (cont) {
                                           return Text(
                                             "${cont.email[selectedCustomerIds] ?? ''}",
@@ -1822,247 +1671,247 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     ],
                                   ),
                                   gapH6,
-                                  quotationCont.isVatExemptCheckBoxShouldAppear
+                                  salesOrderCont.isVatExemptCheckBoxShouldAppear
                                       ? Row(
-                                        children: [
-                                          Text(
-                                            'vat'.tr,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          gapW10,
-                                        ],
-                                      )
+                                    children: [
+                                      Text(
+                                        'vat'.tr,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      gapW10,
+                                    ],
+                                  )
                                       : SizedBox(),
                                 ],
                               ),
                             ),
                             gapW16,
                             //vat exempt
-                            quotationCont.isVatExemptCheckBoxShouldAppear
+                            salesOrderCont.isVatExemptCheckBoxShouldAppear
                                 ? SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.28,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: ListTile(
-                                          title: Text(
-                                            'vat_exempt'.tr,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
+                              width:
+                              MediaQuery.of(context).size.width * 0.28,
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: ListTile(
+                                      title: Text(
+                                        'vat_exempt'.tr,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      leading: Checkbox(
+                                        value:
+                                        salesOrderCont
+                                            .isVatExemptChecked,
+                                        onChanged: (bool? value) {
+                                          salesOrderCont
+                                              .setIsVatExemptChecked(
+                                            value!,
+                                          );
+                                          if (value) {
+                                            priceConditionController.text =
+                                            'Prices are before vat';
+                                            salesOrderCont
+                                                .setIsBeforeVatPrices(true);
+                                            vatExemptController.text =
+                                            vatExemptList[0];
+                                            salesOrderCont.setIsVatExempted(
+                                              true,
+                                              false,
+                                              false,
+                                            );
+                                          } else {
+                                            vatExemptController.clear();
+                                            salesOrderCont.setIsVatExempted(
+                                              false,
+                                              false,
+                                              false,
+                                            );
+                                          }
+                                          // setState(() {
+                                          //   isVatExemptChecked = value!;
+                                          // });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  salesOrderCont.isVatExemptChecked == false
+                                      ? DropdownMenu<String>(
+                                    width:
+                                    MediaQuery.of(
+                                      context,
+                                    ).size.width *
+                                        0.15,
+                                    enableSearch: true,
+                                    controller: vatExemptController,
+                                    hintText: '',
+
+                                    textStyle: const TextStyle(
+                                      fontSize: 12,
+                                    ),
+                                    inputDecorationTheme:
+                                    InputDecorationTheme(
+                                      hintStyle: const TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                      enabledBorder:
+                                      OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Primary.primary
+                                              .withAlpha(
+                                            (0.2 * 255)
+                                                .toInt(),
                                           ),
-                                          leading: Checkbox(
-                                            value:
-                                                quotationCont
-                                                    .isVatExemptChecked,
-                                            onChanged: (bool? value) {
-                                              quotationCont
-                                                  .setIsVatExemptChecked(
-                                                    value!,
-                                                  );
-                                              if (value) {
-                                                priceConditionController.text =
-                                                    'Prices are before vat';
-                                                quotationCont
-                                                    .setIsBeforeVatPrices(true);
-                                                vatExemptController.text =
-                                                    vatExemptList[0];
-                                                quotationCont.setIsVatExempted(
-                                                  true,
-                                                  false,
-                                                  false,
-                                                );
-                                              } else {
-                                                vatExemptController.clear();
-                                                quotationCont.setIsVatExempted(
-                                                  false,
-                                                  false,
-                                                  false,
-                                                );
-                                              }
-                                              // setState(() {
-                                              //   isVatExemptChecked = value!;
-                                              // });
-                                            },
+                                          width: 1,
+                                        ),
+                                        borderRadius:
+                                        const BorderRadius.all(
+                                          Radius.circular(
+                                            9,
                                           ),
                                         ),
                                       ),
-                                      quotationCont.isVatExemptChecked == false
-                                          ? DropdownMenu<String>(
-                                            width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
-                                                0.15,
-                                            enableSearch: true,
-                                            controller: vatExemptController,
-                                            hintText: '',
-
-                                            textStyle: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                            inputDecorationTheme:
-                                                InputDecorationTheme(
-                                                  hintStyle: const TextStyle(
-                                                    fontStyle: FontStyle.italic,
-                                                  ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                          color: Primary.primary
-                                                              .withAlpha(
-                                                                (0.2 * 255)
-                                                                    .toInt(),
-                                                              ),
-                                                          width: 1,
-                                                        ),
-                                                        borderRadius:
-                                                            const BorderRadius.all(
-                                                              Radius.circular(
-                                                                9,
-                                                              ),
-                                                            ),
-                                                      ),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                          color: Primary.primary
-                                                              .withAlpha(
-                                                                (0.4 * 255)
-                                                                    .toInt(),
-                                                              ),
-                                                          width: 2,
-                                                        ),
-                                                        borderRadius:
-                                                            const BorderRadius.all(
-                                                              Radius.circular(
-                                                                9,
-                                                              ),
-                                                            ),
-                                                      ),
-                                                ),
-                                            // menuStyle: ,
-                                            menuHeight: 250,
-                                            dropdownMenuEntries:
-                                                termsList.map<
-                                                  DropdownMenuEntry<String>
-                                                >((String option) {
-                                                  return DropdownMenuEntry<
-                                                    String
-                                                  >(
-                                                    value: option,
-                                                    label: option,
-                                                  );
-                                                }).toList(),
-                                            enableFilter: true,
-                                            onSelected: (String? val) {},
-                                          )
-                                          : DropdownMenu<String>(
-                                            width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
-                                                0.15,
-                                            // requestFocusOnTap: false,
-                                            enableSearch: true,
-                                            controller: vatExemptController,
-                                            hintText: '',
-
-                                            textStyle: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                            inputDecorationTheme:
-                                                InputDecorationTheme(
-                                                  // filled: true,
-                                                  hintStyle: const TextStyle(
-                                                    fontStyle: FontStyle.italic,
-                                                  ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                          color: Primary.primary
-                                                              .withAlpha(
-                                                                (0.2 * 255)
-                                                                    .toInt(),
-                                                              ),
-                                                          width: 1,
-                                                        ),
-                                                        borderRadius:
-                                                            const BorderRadius.all(
-                                                              Radius.circular(
-                                                                9,
-                                                              ),
-                                                            ),
-                                                      ),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                          color: Primary.primary
-                                                              .withAlpha(
-                                                                (0.4 * 255)
-                                                                    .toInt(),
-                                                              ),
-                                                          width: 2,
-                                                        ),
-                                                        borderRadius:
-                                                            const BorderRadius.all(
-                                                              Radius.circular(
-                                                                9,
-                                                              ),
-                                                            ),
-                                                      ),
-                                                ),
-                                            // menuStyle: ,
-                                            menuHeight: 250,
-                                            dropdownMenuEntries:
-                                                vatExemptList.map<
-                                                  DropdownMenuEntry<String>
-                                                >((String option) {
-                                                  return DropdownMenuEntry<
-                                                    String
-                                                  >(
-                                                    value: option,
-                                                    label: option,
-                                                  );
-                                                }).toList(),
-                                            enableFilter: true,
-                                            onSelected: (String? val) {
-                                              setState(() {
-                                                if (val ==
-                                                    'Printed as "vat exempted"') {
-                                                  quotationCont
-                                                      .setIsVatExempted(
-                                                        true,
-                                                        false,
-                                                        false,
-                                                      );
-                                                } else if (val ==
-                                                    'Printed as "vat 0 % = 0"') {
-                                                  quotationCont
-                                                      .setIsVatExempted(
-                                                        false,
-                                                        true,
-                                                        false,
-                                                      );
-                                                } else {
-                                                  quotationCont
-                                                      .setIsVatExempted(
-                                                        false,
-                                                        false,
-                                                        true,
-                                                      );
-                                                }
-                                              });
-                                            },
+                                      focusedBorder:
+                                      OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Primary.primary
+                                              .withAlpha(
+                                            (0.4 * 255)
+                                                .toInt(),
                                           ),
-                                    ],
+                                          width: 2,
+                                        ),
+                                        borderRadius:
+                                        const BorderRadius.all(
+                                          Radius.circular(
+                                            9,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    // menuStyle: ,
+                                    menuHeight: 250,
+                                    dropdownMenuEntries:
+                                    termsList.map<
+                                        DropdownMenuEntry<String>
+                                    >((String option) {
+                                      return DropdownMenuEntry<
+                                          String
+                                      >(
+                                        value: option,
+                                        label: option,
+                                      );
+                                    }).toList(),
+                                    enableFilter: true,
+                                    onSelected: (String? val) {},
+                                  )
+                                      : DropdownMenu<String>(
+                                    width:
+                                    MediaQuery.of(
+                                      context,
+                                    ).size.width *
+                                        0.15,
+                                    // requestFocusOnTap: false,
+                                    enableSearch: true,
+                                    controller: vatExemptController,
+                                    hintText: '',
+
+                                    textStyle: const TextStyle(
+                                      fontSize: 12,
+                                    ),
+                                    inputDecorationTheme:
+                                    InputDecorationTheme(
+                                      // filled: true,
+                                      hintStyle: const TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                      enabledBorder:
+                                      OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Primary.primary
+                                              .withAlpha(
+                                            (0.2 * 255)
+                                                .toInt(),
+                                          ),
+                                          width: 1,
+                                        ),
+                                        borderRadius:
+                                        const BorderRadius.all(
+                                          Radius.circular(
+                                            9,
+                                          ),
+                                        ),
+                                      ),
+                                      focusedBorder:
+                                      OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Primary.primary
+                                              .withAlpha(
+                                            (0.4 * 255)
+                                                .toInt(),
+                                          ),
+                                          width: 2,
+                                        ),
+                                        borderRadius:
+                                        const BorderRadius.all(
+                                          Radius.circular(
+                                            9,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    // menuStyle: ,
+                                    menuHeight: 250,
+                                    dropdownMenuEntries:
+                                    vatExemptList.map<
+                                        DropdownMenuEntry<String>
+                                    >((String option) {
+                                      return DropdownMenuEntry<
+                                          String
+                                      >(
+                                        value: option,
+                                        label: option,
+                                      );
+                                    }).toList(),
+                                    enableFilter: true,
+                                    onSelected: (String? val) {
+                                      setState(() {
+                                        if (val ==
+                                            'Printed as "vat exempted"') {
+                                          salesOrderCont
+                                              .setIsVatExempted(
+                                            true,
+                                            false,
+                                            false,
+                                          );
+                                        } else if (val ==
+                                            'Printed as "vat 0 % = 0"') {
+                                          salesOrderCont
+                                              .setIsVatExempted(
+                                            false,
+                                            true,
+                                            false,
+                                          );
+                                        } else {
+                                          salesOrderCont
+                                              .setIsVatExempted(
+                                            false,
+                                            false,
+                                            true,
+                                          );
+                                        }
+                                      });
+                                    },
                                   ),
-                                )
+                                ],
+                              ),
+                            )
                                 : SizedBox(),
                           ],
                         ),
@@ -2078,293 +1927,93 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                         spacing: 0.0,
                         direction: Axis.horizontal,
                         children:
-                            tabsList
-                                .map(
-                                  (element) => _buildTabChipItem(
-                                    element,
-                                    // element['id'],
-                                    // element['name'],
-                                    tabsList.indexOf(element),
-                                  ),
-                                )
-                                .toList(),
+                        tabsList
+                            .map(
+                              (element) => _buildTabChipItem(
+                            element,
+                            // element['id'],
+                            // element['name'],
+                            tabsList.indexOf(element),
+                          ),
+                        )
+                            .toList(),
                       ),
                     ],
                   ),
 
                   selectedTabIndex == 0
                       ? Column(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              // horizontal:
-                              //     MediaQuery.of(context).size.width * 0.01,
-                              vertical: 15,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Primary.primary,
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(6),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.02,
-                                ),
-                                TableTitle(
-                                  text: 'item_code'.tr,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.15,
-                                ),
-                                TableTitle(
-                                  text: 'description'.tr,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                ),
-                                TableTitle(
-                                  text: 'quantity'.tr,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.04,
-                                ),
-                                TableTitle(
-                                  text: 'unit_price'.tr,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.07,
-                                ),
-                                TableTitle(
-                                  text: '${'disc'.tr}. %',
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.05,
-                                ),
-                                TableTitle(
-                                  text: 'total'.tr,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.05,
-                                ),
-                                TableTitle(
-                                  text: 'more_options'.tr,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.07,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal:
-                                  MediaQuery.of(context).size.width * 0.01,
-                            ),
-                            decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(6),
-                                bottomRight: Radius.circular(6),
-                              ),
-                              color: Colors.white,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  height:
-                                      quotationCont.listViewLengthInQuotation +
-                                      50,
-                                  child: ScrollConfiguration(
-                                    behavior: const MaterialScrollBehavior()
-                                        .copyWith(
-                                          dragDevices: {
-                                            PointerDeviceKind.touch,
-                                            PointerDeviceKind.mouse,
-                                          },
-                                        ),
-                                    child: ReorderableListView.builder(
-                                      itemCount:
-                                          quotationCont
-                                              .rowsInListViewInQuotation
-                                              .keys
-                                              .length,
-                                      buildDefaultDragHandles: false,
-                                      itemBuilder: (context, index) {
-                                        final key =
-                                            quotationCont.orderedKeys[index];
-                                        final row =
-                                            quotationCont
-                                                .rowsInListViewInQuotation[key]!;
-                                        final lineType =
-                                            '${row['line_type_id'] ?? ''}';
-                                        return Dismissible(
-                                          key: ValueKey(key),
-                                          onDismissed: (direction) {
-                                            setState(() {
-                                              quotationController
-                                                  .decrementListViewLengthInQuotation(
-                                                    quotationController
-                                                        .increment,
-                                                  );
-                                              quotationController
-                                                  .removeFromRowsInListViewInQuotation(
-                                                    key,
-                                                  );
-                                              // quotationController
-                                              //     .removeFromOrderLinesInQuotationList(
-                                              //   key.toString(),
-                                              // );
-                                            });
-                                          },
-                                          child: SizedBox(
-                                            width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width,
-                                            child: Row(
-                                              children: [
-                                                ReorderableDragStartListener(
-                                                  index: index,
-                                                  child: Container(
-                                                    width:
-                                                        MediaQuery.of(
-                                                          context,
-                                                        ).size.width *
-                                                        0.02,
-                                                    height: 20,
-                                                    margin:
-                                                        const EdgeInsets.symmetric(
-                                                          vertical: 15,
-                                                        ),
-                                                    decoration: const BoxDecoration(
-                                                      image: DecorationImage(
-                                                        image: AssetImage(
-                                                          'assets/images/newRow.png',
-                                                        ),
-                                                        fit: BoxFit.contain,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  child:
-                                                      lineType == '1'
-                                                          ? ReusableTitleRow(
-                                                            index: key,
-                                                            info: row,
-                                                          )
-                                                          : lineType == '2'
-                                                          ? ReusableItemRow(
-                                                            index: key,
-                                                            info: row,
-                                                          )
-                                                          : lineType == '3'
-                                                          ? ReusableComboRow(
-                                                            index: key,
-                                                            info: row,
-                                                          )
-                                                          : lineType == '4'
-                                                          ? ReusableImageRow(
-                                                            index: key,
-                                                            info: row,
-                                                          )
-                                                          : ReusableNoteRow(
-                                                            index: key,
-                                                            info: row,
-                                                          ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      onReorder: (oldIndex, newIndex) {
-                                        setState(() {
-                                          if (newIndex > oldIndex) {
-                                            newIndex -= 1;
-                                          }
-                                          final movedKey = quotationCont
-                                              .orderedKeys
-                                              .removeAt(oldIndex);
-                                          quotationCont.orderedKeys.insert(
-                                            newIndex,
-                                            movedKey,
-                                          );
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ),
-
-                                // SizedBox(
-                                //   height:
-                                //   quotationCont.listViewLengthInQuotation +
-                                //       50,
-                                //   child: ListView(
-                                //     children:
-                                //     keysList.map((key) {
-                                //       return Dismissible(
-                                //         key: Key(
-                                //           key,
-                                //         ), // Ensure each widget has a unique key
-                                //         onDismissed:
-                                //             (direction) => quotationCont
-                                //             .removeFromOrderLinesInQuotationList(
-                                //           key.toString(),
-                                //         ),
-                                //         child:
-                                //         quotationCont
-                                //             .orderLinesQuotationList[key] ??
-                                //             const SizedBox(),
-                                //       );
-                                //     }).toList(),
-                                //   ),
-                                // ),
-                                Row(
-                                  children: [
-                                    ReusableAddCard(
-                                      text: 'title'.tr,
-                                      onTap: () {
-                                        addNewTitle();
-                                      },
-                                    ),
-                                    gapW32,
-                                    ReusableAddCard(
-                                      text: 'item'.tr,
-                                      onTap: () {
-                                        addNewItem();
-                                      },
-                                    ),
-                                    gapW32,
-                                    ReusableAddCard(
-                                      text: 'combo'.tr,
-                                      onTap: () {
-                                        addNewCombo();
-                                      },
-                                    ),
-                                    gapW32,
-                                    ReusableAddCard(
-                                      text: 'image'.tr,
-                                      onTap: () {
-                                        addNewImage();
-                                      },
-                                    ),
-                                    gapW32,
-                                    ReusableAddCard(
-                                      text: 'note'.tr,
-                                      onTap: () {
-                                        addNewNote();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          gapH24,
-                        ],
-                      )
-                      : Container(
+                    children: [
+                      Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width * 0.04,
+                          // horizontal:
+                          //     MediaQuery.of(context).size.width * 0.01,
                           vertical: 15,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Primary.primary,
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(6),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width:
+                              MediaQuery.of(context).size.width * 0.02,
+                            ),
+                            TableTitle(
+                              text: 'item_code'.tr,
+                              width:
+                              MediaQuery.of(context).size.width * 0.10,
+                            ),
+                            TableTitle(
+                              text: 'description'.tr,
+                              width:
+                              MediaQuery.of(context).size.width * 0.23,
+                            ),
+                            TableTitle(
+                              text: 'quantity'.tr,
+                              width:
+                              MediaQuery.of(context).size.width * 0.05,
+                            ),
+                            TableTitle(
+                              text: 'warehouse'.tr,
+                              width:
+                              MediaQuery.of(context).size.width * 0.10,
+                            ),
+                            TableTitle(
+                              text: 'unit_price'.tr,
+                              width:
+                              MediaQuery.of(context).size.width * 0.05,
+                            ),
+                            TableTitle(
+                              text: '${'disc'.tr}. %',
+                              width:
+                              MediaQuery.of(context).size.width * 0.05,
+                            ),
+                            TableTitle(
+                              text: 'total'.tr,
+                              width:
+                              MediaQuery.of(context).size.width * 0.05,
+                            ),
+                            TableTitle(
+                              text: 'more_options'.tr,
+                              width:
+                              MediaQuery.of(context).size.width * 0.07,
+                            ),
+                            SizedBox(
+                              width:
+                              MediaQuery.of(context).size.width * 0.01,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal:
+                          MediaQuery.of(context).size.width * 0.01,
                         ),
                         decoration: const BoxDecoration(
                           borderRadius: BorderRadius.only(
@@ -2373,108 +2022,193 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                           ),
                           color: Colors.white,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.35,
-                              child: Column(
-                                children: [
-                                  DialogDropMenu(
-                                    controller: salesPersonController,
-                                    optionsList:
-                                        quotationController
-                                            .salesPersonListNames,
-                                    text: 'sales_person'.tr,
-                                    hint: 'search'.tr,
-                                    rowWidth:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    onSelected: (String? val) {
-                                      setState(() {
-                                        selectedSalesPerson = val!;
-                                        var index = quotationController
-                                            .salesPersonListNames
-                                            .indexOf(val);
-                                        selectedSalesPersonId =
-                                            quotationController
-                                                .salesPersonListId[index];
-                                      });
-                                    },
-                                  ),
-                                  gapH16,
-                                  DialogDropMenu(
-                                    optionsList: const [''],
-                                    text: 'commission_method'.tr,
-                                    hint: '',
-                                    rowWidth:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    onSelected: () {},
-                                  ),
-                                  gapH16,
-                                  DialogDropMenu(
-                                    controller: cashingMethodsController,
-                                    optionsList:
-                                        quotationCont.cashingMethodsNamesList,
-                                    text: 'cashing_method'.tr,
-                                    hint: '',
-                                    rowWidth:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    onSelected: (value) {
-                                      var index = quotationCont
-                                          .cashingMethodsNamesList
-                                          .indexOf(value);
-                                      quotationCont.setSelectedCashingMethodId(
-                                        quotationCont
-                                            .cashingMethodsIdsList[index],
-                                      );
-                                    },
-                                  ),
-                                ],
+                              height:
+                              salesOrderCont
+                                  .listViewLengthInSalesOrder +
+                                  50,
+                              child: ListView(
+                                children:
+                                keysList.map((key) {
+                                  return Dismissible(
+                                    key: Key(
+                                      key,
+                                    ), // Ensure each widget has a unique key
+                                    onDismissed:
+                                        (direction) => salesOrderCont
+                                        .removeFromOrderLinesInSalesOrderList(
+                                      key.toString(),
+                                    ),
+                                    child:
+                                    salesOrderCont
+                                        .orderLinesSalesOrderList[key] ??
+                                        const SizedBox(),
+                                  );
+                                }).toList(),
                               ),
                             ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.3,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  DialogTextField(
-                                    textEditingController: commissionController,
-                                    text: 'commission'.tr,
-                                    rowWidth:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    validationFunc: (val) {},
-                                  ),
-                                  gapH16,
-                                  DialogTextField(
-                                    textEditingController:
-                                        totalCommissionController,
-                                    text: 'total_commission'.tr,
-                                    rowWidth:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    validationFunc: (val) {},
-                                  ),
-                                ],
-                              ),
+
+                            Row(
+                              children: [
+                                ReusableAddCard(
+                                  text: 'title'.tr,
+                                  onTap: () {
+                                    addNewTitle();
+                                  },
+                                ),
+                                gapW32,
+                                ReusableAddCard(
+                                  text: 'item'.tr,
+                                  onTap: () {
+                                    addNewItem();
+                                  },
+                                ),
+                                gapW32,
+                                ReusableAddCard(
+                                  text: 'combo'.tr,
+                                  onTap: () {
+                                    addNewCombo();
+                                  },
+                                ),
+                                gapW32,
+                                ReusableAddCard(
+                                  text: 'image'.tr,
+                                  onTap: () {
+                                    addNewImage();
+                                  },
+                                ),
+                                gapW32,
+                                ReusableAddCard(
+                                  text: 'note'.tr,
+                                  onTap: () {
+                                    addNewNote();
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
+                      gapH24,
+                    ],
+                  )
+                      : Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width * 0.04,
+                      vertical: 15,
+                    ),
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(6),
+                        bottomRight: Radius.circular(6),
+                      ),
+                      color: Colors.white,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.35,
+                          child: Column(
+                            children: [
+                              DialogDropMenu(
+                                controller: salesPersonController,
+                                optionsList:
+                                salesOrderController
+                                    .salesPersonListNames,
+                                text: 'sales_person'.tr,
+                                hint: 'search'.tr,
+                                rowWidth:
+                                MediaQuery.of(context).size.width * 0.3,
+                                textFieldWidth:
+                                MediaQuery.of(context).size.width *
+                                    0.15,
+                                onSelected: (String? val) {
+                                  setState(() {
+                                    selectedSalesPerson = val!;
+                                    var index = salesOrderController
+                                        .salesPersonListNames
+                                        .indexOf(val);
+                                    selectedSalesPersonId =
+                                    salesOrderController
+                                        .salesPersonListId[index];
+                                  });
+                                },
+                              ),
+                              gapH16,
+                              DialogDropMenu(
+                                optionsList: const [''],
+                                text: 'commission_method'.tr,
+                                hint: '',
+                                rowWidth:
+                                MediaQuery.of(context).size.width * 0.3,
+                                textFieldWidth:
+                                MediaQuery.of(context).size.width *
+                                    0.15,
+                                onSelected: () {},
+                              ),
+                              gapH16,
+                              DialogDropMenu(
+                                controller: cashingMethodsController,
+                                optionsList:
+                                salesOrderCont.cashingMethodsNamesList,
+                                text: 'cashing_method'.tr,
+                                hint: '',
+                                rowWidth:
+                                MediaQuery.of(context).size.width * 0.3,
+                                textFieldWidth:
+                                MediaQuery.of(context).size.width *
+                                    0.15,
+                                onSelected: (value) {
+                                  var index = salesOrderCont
+                                      .cashingMethodsNamesList
+                                      .indexOf(value);
+                                  salesOrderCont.setSelectedCashingMethodId(
+                                    salesOrderCont
+                                        .cashingMethodsIdsList[index],
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              DialogTextField(
+                                textEditingController: commissionController,
+                                text: 'commission'.tr,
+                                rowWidth:
+                                MediaQuery.of(context).size.width * 0.3,
+                                textFieldWidth:
+                                MediaQuery.of(context).size.width *
+                                    0.15,
+                                validationFunc: (val) {},
+                              ),
+                              gapH16,
+                              DialogTextField(
+                                textEditingController:
+                                totalCommissionController,
+                                text: 'total_commission'.tr,
+                                rowWidth:
+                                MediaQuery.of(context).size.width * 0.3,
+                                textFieldWidth:
+                                MediaQuery.of(context).size.width *
+                                    0.15,
+                                validationFunc: (val) {},
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
                   gapH10,
 
@@ -2528,7 +2262,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                   child: QuillEditor.basic(
                                     controller: _controller,
 
-                                    // readOnly: false, // اجعلها true إذا كنت تريد وضع القراءة فقط
+                                    // readOnly: false,
                                   ),
                                 ),
                               ),
@@ -2563,7 +2297,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
 
                   gapH16,
 
-                  GetBuilder<QuotationController>(
+                  GetBuilder<SalesOrderController>(
                     builder: (cont) {
                       return Container(
                         padding: const EdgeInsets.symmetric(
@@ -2583,7 +2317,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 children: [
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text('total_before_vat'.tr),
                                       ReusableShowInfoCard(
@@ -2591,7 +2325,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                           2,
                                         ),
                                         width:
-                                            MediaQuery.of(context).size.width *
+                                        MediaQuery.of(context).size.width *
                                             0.1,
                                       ),
                                     ],
@@ -2599,20 +2333,20 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                   gapH6,
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text('global_disc'.tr),
                                       Row(
                                         children: [
                                           SizedBox(
                                             width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
+                                            MediaQuery.of(
+                                              context,
+                                            ).size.width *
                                                 0.1,
                                             child: ReusableNumberField(
                                               textEditingController:
-                                                  globalDiscPercentController,
+                                              globalDiscPercentController,
                                               isPasswordField: false,
                                               isCentered: true,
                                               hint: '0',
@@ -2626,7 +2360,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                     globalDiscPercentController
                                                         .text = '0';
                                                     globalDiscountPercentage =
-                                                        '0';
+                                                    '0';
                                                   } else {
                                                     globalDiscountPercentage =
                                                         val;
@@ -2644,9 +2378,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                           ReusableShowInfoCard(
                                             text: cont.globalDisc,
                                             width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
+                                            MediaQuery.of(
+                                              context,
+                                            ).size.width *
                                                 0.1,
                                           ),
                                         ],
@@ -2656,20 +2390,20 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                   gapH6,
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text('special_disc'.tr),
                                       Row(
                                         children: [
                                           SizedBox(
                                             width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
+                                            MediaQuery.of(
+                                              context,
+                                            ).size.width *
                                                 0.1,
                                             child: ReusableNumberField(
                                               textEditingController:
-                                                  specialDiscPercentController,
+                                              specialDiscPercentController,
                                               isPasswordField: false,
                                               isCentered: true,
                                               hint: '0',
@@ -2679,7 +2413,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                     specialDiscPercentController
                                                         .text = '0';
                                                     specialDiscountPercentage =
-                                                        '0';
+                                                    '0';
                                                   } else {
                                                     specialDiscountPercentage =
                                                         val;
@@ -2696,9 +2430,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                           ReusableShowInfoCard(
                                             text: cont.specialDisc,
                                             width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
+                                            MediaQuery.of(
+                                              context,
+                                            ).size.width *
                                                 0.1,
                                           ),
                                         ],
@@ -2706,42 +2440,42 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     ],
                                   ),
                                   gapH6,
-                                  quotationCont.isVatExemptCheckBoxShouldAppear
+                                  salesOrderCont.isVatExemptCheckBoxShouldAppear
                                       ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('vat'.tr),
+                                      Row(
                                         children: [
-                                          Text('vat'.tr),
-                                          Row(
-                                            children: [
-                                              ReusableShowInfoCard(
-                                                text: cont.vatInPrimaryCurrency,
-                                                // .toString(),
-                                                width:
-                                                    MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
-                                                    0.1,
-                                              ),
-                                              gapW10,
-                                              ReusableShowInfoCard(
-                                                text: cont.vat11,
-                                                // .toString(),
-                                                width:
-                                                    MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
-                                                    0.1,
-                                              ),
-                                            ],
+                                          ReusableShowInfoCard(
+                                            text: cont.vatInPrimaryCurrency,
+                                            // .toString(),
+                                            width:
+                                            MediaQuery.of(
+                                              context,
+                                            ).size.width *
+                                                0.1,
+                                          ),
+                                          gapW10,
+                                          ReusableShowInfoCard(
+                                            text: cont.vat11,
+                                            // .toString(),
+                                            width:
+                                            MediaQuery.of(
+                                              context,
+                                            ).size.width *
+                                                0.1,
                                           ),
                                         ],
-                                      )
+                                      ),
+                                    ],
+                                  )
                                       : SizedBox(),
                                   gapH10,
                                   Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'total_amount'.tr,
@@ -2753,7 +2487,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                       ),
                                       Text(
                                         // '${'usd'.tr} 0.00',
-                                        '${quotationCont.selectedCurrencyName} ${formatDoubleWithCommas(double.parse(quotationCont.totalQuotation))}',
+                                        '${salesOrderCont.selectedCurrencyName} ${formatDoubleWithCommas(double.parse(salesOrderCont.totalSalesOrder))}',
                                         style: TextStyle(
                                           fontSize: 16,
                                           color: Primary.primary,
@@ -2891,45 +2625,54 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                       ReusableButtonWithColor(
                         btnText: 'save'.tr,
                         onTapFunction: () async {
-                          bool hasType1WithEmptyTitle = quotationController
-                              .rowsInListViewInQuotation
+                          var oldKeys =
+                          salesOrderController
+                              .rowsInListViewInSalesOrder
+                              .keys
+                              .toList()
+                            ..sort();
+                          for (int i = 0; i < oldKeys.length; i++) {
+                            salesOrderController.newRowMap[i + 1] =
+                            salesOrderController
+                                .rowsInListViewInSalesOrder[oldKeys[i]]!;
+                          }
+                          bool hasType1WithEmptyTitle = salesOrderController
+                              .newRowMap
                               .values
                               .any((map) {
-                                return map['line_type_id'] == '1' &&
-                                    (map['title']?.isEmpty ?? true);
-                              });
-                          bool hasType2WithEmptyId = quotationController
-                              .rowsInListViewInQuotation
+                            return map['line_type_id'] == '1' &&
+                                (map['title']?.isEmpty ?? true);
+                          });
+                          bool hasType2WithEmptyId = salesOrderController
+                              .newRowMap
                               .values
                               .any((map) {
-                                return map['line_type_id'] == '2' &&
-                                    (map['item_id']?.isEmpty ?? true);
-                              });
-                          bool hasType3WithEmptyId = quotationController
-                              .rowsInListViewInQuotation
+                            return map['line_type_id'] == '2' &&
+                                (map['item_id']?.isEmpty ?? true);
+                          });
+                          bool hasType3WithEmptyId = salesOrderController
+                              .newRowMap
                               .values
                               .any((map) {
-                                return map['line_type_id'] == '3' &&
-                                    (map['combo']?.isEmpty ?? true);
-                              });
-                          bool hasType4WithEmptyImage = quotationController
-                              .rowsInListViewInQuotation
+                            return map['line_type_id'] == '3' &&
+                                (map['combo']?.isEmpty ?? true);
+                          });
+                          bool hasType4WithEmptyImage = salesOrderController
+                              .newRowMap
                               .values
                               .any((map) {
-                                return map['line_type_id'] == '4' &&
-                                    (map['image'] == Uint8List(0) ||
-                                        map['image']?.isEmpty);
-                              });
-                          bool hasType5WithEmptyNote = quotationController
-                              .rowsInListViewInQuotation
+                            return map['line_type_id'] == '4' &&
+                                (map['image'] == Uint8List(0) ||
+                                    map['image']?.isEmpty);
+                          });
+                          bool hasType5WithEmptyNote = salesOrderController
+                              .newRowMap
                               .values
                               .any((map) {
-                                return map['line_type_id'] == '5' &&
-                                    (map['note']?.isEmpty ?? true);
-                              });
-                          if (quotationController
-                              .rowsInListViewInQuotation
-                              .isEmpty) {
+                            return map['line_type_id'] == '5' &&
+                                (map['note']?.isEmpty ?? true);
+                          });
+                          if (salesOrderController.newRowMap.isEmpty) {
                             CommonWidgets.snackBar(
                               'error',
                               'Order lines is Empty',
@@ -2962,55 +2705,55 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                           } else {
                             if (_formKey.currentState!.validate()) {
                               _saveContent();
-                              var res = await updateQuotation(
+                              var res = await updateSalesOrdder(
                                 '${widget.info['id']}',
+                                false,
                                 // termsAndConditionsController.text!=oldTermsAndConditionsString,
                                 refController.text,
                                 selectedCustomerIds,
                                 validityController.text,
                                 inputDateController.text,
                                 '', //todo paymentTermsController.text,
-                                quotationCont.selectedPriceListId,
-                                quotationCont
+                                salesOrderCont.selectedPriceListId,
+                                salesOrderCont
                                     .selectedCurrencyId, //selectedCurrency
                                 termsAndConditionsController.text,
                                 selectedSalesPersonId.toString(),
                                 '',
-                                quotationCont.selectedCashingMethodId,
+                                salesOrderCont.selectedCashingMethodId,
                                 commissionController.text,
                                 totalCommissionController.text,
-                                quotationController.totalItems
+                                salesOrderController.totalItems
                                     .toString(), //total before vat
                                 specialDiscPercentController
                                     .text, // inserted by user
-                                quotationController.specialDisc, // calculated
+                                salesOrderController.specialDisc, // calculated
                                 globalDiscPercentController.text,
-                                quotationController.globalDisc,
-                                quotationController.vat11.toString(), //vat
-                                quotationController.vatInPrimaryCurrency
+                                salesOrderController.globalDisc,
+                                salesOrderController.vat11.toString(), //vat
+                                salesOrderController.vatInPrimaryCurrency
                                     .toString(),
-                                quotationController
-                                    .totalQuotation, // quotationController.totalQuotation
+                                salesOrderController
+                                    .totalSalesOrder, // quotationController.totalQuotation
 
-                                quotationCont.isVatExemptChecked ? '1' : '0',
-                                quotationCont.isVatNoPrinted ? '1' : '0',
-                                quotationCont.isPrintedAsVatExempt ? '1' : '0',
-                                quotationCont.isPrintedAs0 ? '1' : '0',
-                                quotationCont.isBeforeVatPrices ? '0' : '1',
+                                salesOrderCont.isVatExemptChecked ? '1' : '0',
+                                salesOrderCont.isVatNoPrinted ? '1' : '0',
+                                salesOrderCont.isPrintedAsVatExempt ? '1' : '0',
+                                salesOrderCont.isPrintedAs0 ? '1' : '0',
+                                salesOrderCont.isBeforeVatPrices ? '0' : '1',
 
-                                quotationCont.isBeforeVatPrices ? '1' : '0',
+                                salesOrderCont.isBeforeVatPrices ? '1' : '0',
                                 codeController.text,
-                                quotationCont.status,
-                                quotationController.rowsInListViewInQuotation,
-                                quotationController.orderedKeys,
+                                salesOrderCont.status, // status,
+                                // quotationController.rowsInListViewInQuotation,
+                                salesOrderController.newRowMap,
                               );
                               if (res['success'] == true) {
                                 Get.back();
-                                quotationController
-                                    .getAllQuotationsFromBack();
+                                salesOrderController.getAllSalesOrderFromBack();
                                 // homeController.selectedTab.value = 'new_quotation';
                                 homeController.selectedTab.value =
-                                    'quotation_summary';
+                                'sales_order_summary';
                                 CommonWidgets.snackBar(
                                   'Success',
                                   res['message'],
@@ -3058,9 +2801,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
           decoration: BoxDecoration(
             color: selectedTabIndex == index ? Primary.p20 : Colors.white,
             border:
-                selectedTabIndex == index
-                    ? Border(top: BorderSide(color: Primary.primary, width: 3))
-                    : null,
+            selectedTabIndex == index
+                ? Border(top: BorderSide(color: Primary.primary, width: 3))
+                : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withAlpha((0.5 * 255).toInt()),
@@ -3090,172 +2833,158 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
 
   addNewTitle() {
     setState(() {
-      quotationController.quotationCounter += 1;
+      salesOrderCounter += 1;
     });
-    quotationController.incrementListViewLengthInQuotation(
-      quotationController.increment,
+    salesOrderController.incrementListViewLengthInSalesOrder(
+      salesOrderController.increment,
     );
-    quotationController
-        .addToRowsInListViewInQuotation(quotationController.quotationCounter, {
-          'line_type_id': '1',
-          'item_id': '',
-          'itemName': '',
-          'item_main_code': '',
-          'item_discount': '0',
-          'item_description': '',
-          'item_quantity': '0',
-          'item_unit_price': '0',
-          'item_total': '0',
-          'title': '',
-          'note': '',
-        });
-    // Widget p = ReusableTitleRow(
-    //   index: quotationController.quotationCounter,
-    //   info: {},
-    // );
-    // quotationController.addToOrderLinesInQuotationList(
-    //   '${quotationController.quotationCounter}',
-    //   p,
-    // );
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+      'line_type_id': '1',
+      'item_id': '',
+      'itemName': '',
+      'item_main_code': '',
+      'item_discount': '0',
+      'item_description': '',
+      'item_quantity': '0',
+      'item_warehouseId': '',
+      'combo_warehouseId': '',
+      'item_unit_price': '0',
+      'item_total': '0',
+      'title': '',
+      'note': '',
+    });
+    Widget p = ReusableTitleRow(index: salesOrderCounter, info: {});
+    salesOrderController.addToOrderLinesInSalesOrderList(
+      '$salesOrderCounter',
+      p,
+    );
   }
-  // int quotationCounter = 0;
+  // int salesOrderCounter = 0;
 
   addNewItem() {
     setState(() {
-      quotationController.quotationCounter += 1;
+      salesOrderCounter += 1;
     });
-    quotationController.incrementListViewLengthInQuotation(
-      quotationController.increment,
+    salesOrderController.incrementListViewLengthInSalesOrder(
+      salesOrderController.increment,
     );
-    quotationController
-        .addToRowsInListViewInQuotation(quotationController.quotationCounter, {
-          'line_type_id': '2',
-          'item_id': '',
-          'itemName': '',
-          'item_main_code': '',
-          'item_discount': '0',
-          'item_description': '',
-          'item_quantity': '1',
-          'item_unit_price': '0',
-          'item_total': '0',
-          'title': '',
-          'note': '',
-        });
-    quotationController.addToUnitPriceControllers(
-      quotationController.quotationCounter,
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+      'line_type_id': '2',
+      'item_id': '',
+      'itemName': '',
+      'item_main_code': '',
+      'item_discount': '0',
+      'item_description': '',
+      'item_quantity': '1',
+      'item_warehouseId': '',
+      'combo_warehouseId': '',
+      'item_unit_price': '0',
+      'item_total': '0',
+      'title': '',
+      'note': '',
+    });
+    salesOrderController.addToUnitPriceControllers(salesOrderCounter);
+    Widget p = ReusableItemRow(index: salesOrderCounter, info: {});
+    salesOrderController.addToOrderLinesInSalesOrderList(
+      '$salesOrderCounter',
+      p,
     );
-    // Widget p = ReusableItemRow(
-    //   index: quotationController.quotationCounter,
-    //   info: {},
-    // );
-    // quotationController.addToOrderLinesInQuotationList(
-    //   '${quotationController.quotationCounter}',
-    //   p,
-    // );
   }
 
   addNewCombo() {
     setState(() {
-      quotationController.quotationCounter += 1;
+      salesOrderCounter += 1;
     });
-    quotationController.incrementListViewLengthInQuotation(
-      quotationController.increment,
+    salesOrderController.incrementListViewLengthInSalesOrder(
+      salesOrderController.increment,
     );
-    quotationController
-        .addToRowsInListViewInQuotation(quotationController.quotationCounter, {
-          'line_type_id': '3',
-          'item_id': '',
-          'itemName': '',
-          'item_main_code': '',
-          'item_discount': '0',
-          'item_description': '',
-          'item_quantity': '1',
-          'item_unit_price': '0',
-          'item_total': '0',
-          'title': '',
-          'note': '',
-          'combo': '',
-        });
-    quotationController.addToCombosPricesControllers(
-      quotationController.quotationCounter,
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+      'line_type_id': '3',
+      'item_id': '',
+      'itemName': '',
+      'item_main_code': '',
+      'item_discount': '0',
+      'item_description': '',
+      'item_quantity': '1',
+      'item_warehouseId': '',
+      'combo_warehouseId': '',
+      'item_unit_price': '0',
+      'item_total': '0',
+      'title': '',
+      'note': '',
+      'combo': '',
+    });
+    salesOrderController.addToCombosPricesControllers(salesOrderCounter);
+    Widget p = ReusableComboRow(index: salesOrderCounter, info: {});
+    salesOrderController.addToOrderLinesInSalesOrderList(
+      '$salesOrderCounter',
+      p,
     );
-    // Widget p = ReusableComboRow(
-    //   index: quotationController.quotationCounter,
-    //   info: {},
-    // );
-    // quotationController.addToOrderLinesInQuotationList(
-    //   '${quotationController.quotationCounter}',
-    //   p,
-    // );
   }
 
   addNewImage() {
     setState(() {
-      quotationController.quotationCounter += 1;
+      salesOrderCounter += 1;
     });
-    quotationController.incrementListViewLengthInQuotation(
-      quotationController.increment,
+    salesOrderController.incrementListViewLengthInSalesOrder(
+      salesOrderController.increment,
     );
 
-    quotationController
-        .addToRowsInListViewInQuotation(quotationController.quotationCounter, {
-          'line_type_id': '4',
-          'item_id': '',
-          'itemName': '',
-          'item_main_code': '',
-          'item_discount': '0',
-          'item_description': '',
-          'item_quantity': '0',
-          'item_unit_price': '0',
-          'item_total': '0',
-          'title': '',
-          'note': '',
-          'image': Uint8List(0),
-        });
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+      'line_type_id': '4',
+      'item_id': '',
+      'itemName': '',
+      'item_main_code': '',
+      'item_discount': '0',
+      'item_description': '',
+      'item_quantity': '0',
+      'item_warehouseId': '',
+      'combo_warehouseId': '',
+      'item_unit_price': '0',
+      'item_total': '0',
+      'title': '',
+      'note': '',
+      'image': Uint8List(0),
+    });
 
-    // Widget p = ReusableImageRow(
-    //   index: quotationController.quotationCounter,
-    //   info: {},
-    // );
-    //
-    // quotationController.addToOrderLinesInQuotationList(
-    //   '${quotationController.quotationCounter}',
-    //   p,
-    // );
+    Widget p = ReusableImageRow(index: salesOrderCounter, info: {});
+
+    salesOrderController.addToOrderLinesInSalesOrderList(
+      '$salesOrderCounter',
+      p,
+    );
   }
 
   addNewNote() {
     setState(() {
-      quotationController.quotationCounter += 1;
+      salesOrderCounter += 1;
     });
-    quotationController.incrementListViewLengthInQuotation(
-      quotationController.increment,
+    salesOrderController.incrementListViewLengthInSalesOrder(
+      salesOrderController.increment,
     );
 
-    quotationController
-        .addToRowsInListViewInQuotation(quotationController.quotationCounter, {
-          'line_type_id': '5',
-          'item_id': '',
-          'itemName': '',
-          'item_main_code': '',
-          'item_discount': '0',
-          'item_description': '',
-          'item_quantity': '0',
-          'item_unit_price': '0',
-          'item_total': '0',
-          'title': '',
-          'note': '',
-        });
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+      'line_type_id': '5',
+      'item_id': '',
+      'itemName': '',
+      'item_main_code': '',
+      'item_discount': '0',
+      'item_description': '',
+      'item_quantity': '0',
+      'item_warehouseId': '',
+      'combo_warehouseId': '',
+      'item_unit_price': '0',
+      'item_total': '0',
+      'title': '',
+      'note': '',
+    });
 
-    // Widget p = ReusableNoteRow(
-    //   index: quotationController.quotationCounter,
-    //   info: {},
-    // );
-    //
-    // quotationController.addToOrderLinesInQuotationList(
-    //   '${quotationController.quotationCounter}',
-    //   p,
-    // );
+    Widget p = ReusableNoteRow(index: salesOrderCounter, info: {});
+
+    salesOrderController.addToOrderLinesInSalesOrderList(
+      '$salesOrderCounter',
+      p,
+    );
 
     // quotationController.addToOrderLinesList(p);
   }
@@ -3297,9 +3026,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   TextEditingController qtyController = TextEditingController();
   TextEditingController discountController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  TextEditingController warehouseNameController = TextEditingController();
 
   final ProductController productController = Get.find();
-  final QuotationController quotationController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
 
   String selectedItemId = '';
@@ -3319,26 +3049,79 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
   setPrice() {
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
-      (item) => item["currency"] == quotationController.selectedCurrencyName,
+          (item) => item["currency"] == salesOrderController.selectedCurrencyName,
       orElse: () => null,
     );
-    quotationController.exchangeRateForSelectedCurrency =
-        result != null ? '${result["exchange_rate"]}' : '1';
-    quotationController.unitPriceControllers[widget.index]!.text =
-        '${widget.info['item_unit_price'] ?? '1'}';
+    salesOrderController.exchangeRateForSelectedCurrency =
+    result != null ? '${result["exchange_rate"]}' : '1';
+    salesOrderController.unitPriceControllers[widget.index]!.text =
+    '${widget.info['item_unit_price'] ?? '1'}';
     selectedItemId = widget.info['item_id'].toString();
-    quotationController.unitPriceControllers[widget.index]!.text =
-        '${double.parse(quotationController.unitPriceControllers[widget.index]!.text) + taxValue}';
-    quotationController.unitPriceControllers[widget.index]!.text = double.parse(
-      quotationController.unitPriceControllers[widget.index]!.text,
+    if (salesOrderController.itemsPricesCurrencies[selectedItemId] ==
+        salesOrderController.selectedCurrencyName) {
+      salesOrderController.unitPriceControllers[widget.index]!.text =
+          salesOrderController.itemUnitPrice[selectedItemId].toString();
+    } else if (salesOrderController.selectedCurrencyName == 'USD' &&
+        salesOrderController.itemsPricesCurrencies[selectedItemId] !=
+            salesOrderController.selectedCurrencyName) {
+      var result = exchangeRatesController.exchangeRatesList.firstWhere(
+            (item) =>
+        item["currency"] ==
+            salesOrderController.itemsPricesCurrencies[selectedItemId],
+        orElse: () => null,
+      );
+      var divider = '1';
+      if (result != null) {
+        divider = result["exchange_rate"].toString();
+      }
+      salesOrderController.unitPriceControllers[widget.index]!.text =
+      '${double.parse('${(double.parse(salesOrderController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+    } else if (salesOrderController.selectedCurrencyName != 'USD' &&
+        salesOrderController.itemsPricesCurrencies[selectedItemId] == 'USD') {
+      salesOrderController.unitPriceControllers[widget.index]!.text =
+      '${double.parse('${(double.parse(salesOrderController.itemUnitPrice[selectedItemId].toString()) * double.parse(salesOrderController.exchangeRateForSelectedCurrency))}')}';
+    } else {
+      var result = exchangeRatesController.exchangeRatesList.firstWhere(
+            (item) =>
+        item["currency"] ==
+            salesOrderController.itemsPricesCurrencies[selectedItemId],
+        orElse: () => null,
+      );
+      var divider = '1';
+      if (result != null) {
+        divider = result["exchange_rate"].toString();
+      }
+      var usdPrice =
+          '${double.parse('${(double.parse(salesOrderController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+      salesOrderController.unitPriceControllers[widget.index]!.text =
+      '${double.parse('${(double.parse(usdPrice) * double.parse(salesOrderController.exchangeRateForSelectedCurrency))}')}';
+    }
+    if (salesOrderController.isBeforeVatPrices) {
+      taxRate = 1;
+      taxValue = 0;
+    } else {
+      taxRate =
+          double.parse(salesOrderController.itemsVats[selectedItemId]) / 100.0;
+      taxValue =
+          taxRate *
+              double.parse(
+                salesOrderController.unitPriceControllers[widget.index]!.text,
+              );
+    }
+    salesOrderController.unitPriceControllers[widget.index]!.text =
+    '${double.parse(salesOrderController.unitPriceControllers[widget.index]!.text) + taxValue}';
+    salesOrderController
+        .unitPriceControllers[widget.index]!
+        .text = double.parse(
+      salesOrderController.unitPriceControllers[widget.index]!.text,
     ).toStringAsFixed(2);
 
     // qtyController.text = '1';
-    quotationController.rowsInListViewInQuotation[widget
-            .index]['item_unit_price'] =
-        quotationController.unitPriceControllers[widget.index]!.text;
-    quotationController.rowsInListViewInQuotation[widget.index]['itemName'] =
-        quotationController.itemsNames[selectedItemId];
+    salesOrderController.rowsInListViewInSalesOrder[widget
+        .index]['item_unit_price'] =
+        salesOrderController.unitPriceControllers[widget.index]!.text;
+    salesOrderController.rowsInListViewInSalesOrder[widget.index]['itemName'] =
+    salesOrderController.itemsNames[selectedItemId];
   }
 
   @override
@@ -3347,37 +3130,52 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
       qtyController.text = '${widget.info['item_quantity'] ?? '1'}';
       quantity = '${widget.info['item_quantity'] ?? '1'}';
 
+      warehouseNameController.text =
+      salesOrderController
+          .warehousesNames['${widget.info['item_warehouse_id']}'];
+
       discountController.text = widget.info['item_discount'] ?? '0.0';
       discount = widget.info['item_discount'] ?? '0.0';
 
       totalLine = widget.info['item_total'] ?? '0';
       mainDescriptionVar = widget.info['item_description'] ?? '';
-      mainCode = widget.info['item_main_code'] ?? '';
+      // print(
+      //   "--------------------------------------------------------------------widget.info['item_main_code']",
+      // );
+      // print(widget.info['item_main_code'] ?? '');
+      // mainCode = widget.info['item_main_code'] ?? '';
+
       descriptionController.text = widget.info['item_description'] ?? '';
 
-      itemCodeController.text = widget.info['item_main_code'].toString();
+      itemCodeController.text = widget.info['item_name'].toString();
       selectedItemId = widget.info['item_id'].toString();
 
       setPrice();
     } else {
+      // discountController.text = '0';
+      // discount = '0';
+      // qtyController.text = '0';
+      // quantity = '0';
+      // quotationController.unitPriceControllers[widget.index]!.text = '0';
+
       itemCodeController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_main_code'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_main_code'];
       qtyController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_quantity'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_quantity'];
       discountController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_discount'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_discount'];
       descriptionController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_description'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_description'];
       totalLine =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_total'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_total'];
       itemCodeController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_main_code'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_main_code'];
     }
 
     super.initState();
@@ -3385,7 +3183,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<QuotationController>(
+    return GetBuilder<SalesOrderController>(
       builder: (cont) {
         return Container(
           height: 50,
@@ -3395,10 +3193,22 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                //image
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.02,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/newRow.png'),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
                 ReusableDropDownMenusWithSearch(
                   list:
-                      quotationController
-                          .itemsMultiPartList, // Assuming multiList is List<List<String>>
+                  salesOrderController
+                      .itemsMultiPartList, // Assuming multiList is List<List<String>>
                   text: ''.tr,
                   hint: 'item_code'.tr,
                   controller: itemCodeController,
@@ -3406,13 +3216,13 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     itemCodeController.text = value!;
                     setState(() {
                       selectedItemId =
-                          '${cont.itemsIds[cont.itemsCode.indexOf(value.split(" | ")[0])]}'; //get the id by the first element of the list.
+                      '${cont.itemsIds[cont.itemsCode.indexOf(value.split(" | ")[0])]}'; //get the id by the first element of the list.
                       mainDescriptionVar =
-                          cont.itemsDescription[selectedItemId];
+                      cont.itemsDescription[selectedItemId];
                       mainCode = cont.itemsCodes[selectedItemId];
                       itemName = cont.itemsNames[selectedItemId];
                       descriptionController.text =
-                          cont.itemsDescription[selectedItemId]!;
+                      cont.itemsDescription[selectedItemId]!;
                       if (cont.itemsPricesCurrencies[selectedItemId] ==
                           cont.selectedCurrencyName) {
                         cont.unitPriceControllers[widget.index]!.text =
@@ -3423,28 +3233,28 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
-                                  item["currency"] ==
-                                  cont.itemsPricesCurrencies[selectedItemId],
-                              orElse: () => null,
-                            );
+                          item["currency"] ==
+                              cont.itemsPricesCurrencies[selectedItemId],
+                          orElse: () => null,
+                        );
                         var divider = '1';
                         if (result != null) {
                           divider = result["exchange_rate"].toString();
                         }
                         cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                        '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
                       } else if (cont.selectedCurrencyName != 'USD' &&
                           cont.itemsPricesCurrencies[selectedItemId] == 'USD') {
                         cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                        '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       } else {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
-                                  item["currency"] ==
-                                  cont.itemsPricesCurrencies[selectedItemId],
-                              orElse: () => null,
-                            );
+                          item["currency"] ==
+                              cont.itemsPricesCurrencies[selectedItemId],
+                          orElse: () => null,
+                        );
                         var divider = '1';
                         if (result != null) {
                           divider = result["exchange_rate"].toString();
@@ -3452,7 +3262,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         var usdPrice =
                             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
                         cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                        '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       }
                       if (cont.isBeforeVatPrices) {
                         taxRate = 1;
@@ -3460,38 +3270,38 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       } else {
                         taxRate =
                             double.parse(cont.itemsVats[selectedItemId]) /
-                            100.0;
+                                100.0;
                         taxValue =
                             taxRate *
-                            double.parse(
-                              cont.unitPriceControllers[widget.index]!.text,
-                            );
+                                double.parse(
+                                  cont.unitPriceControllers[widget.index]!.text,
+                                );
                       }
                       cont.unitPriceControllers[widget.index]!.text =
-                          '${double.parse(cont.unitPriceControllers[widget.index]!.text) + taxValue}';
+                      '${double.parse(cont.unitPriceControllers[widget.index]!.text) + taxValue}';
                       qtyController.text = '1';
                       quantity = '1';
                       discountController.text = '0';
                       discount = '0';
                       totalLine =
-                          '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                      cont.setEnteredQtyInQuotation(widget.index, quantity);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
+                      '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                      cont.setEnteredQtyInSalesOrder(widget.index, quantity);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     });
-                    cont.setEnteredUnitPriceInQuotation(
+                    cont.setEnteredUnitPriceInSalesOrder(
                       widget.index,
                       cont.unitPriceControllers[widget.index]!.text,
                     );
-                    cont.setItemIdInQuotation(widget.index, selectedItemId);
-                    cont.setItemNameInQuotation(
+                    cont.setItemIdInSalesOrder(widget.index, selectedItemId);
+                    cont.setItemNameInSalesOrder(
                       widget.index,
                       itemName,
                       // value.split(" | ")[0],
                     ); // set only first element as name
-                    cont.setMainCodeInQuotation(widget.index, mainCode);
-                    cont.setTypeInQuotation(widget.index, '2');
-                    cont.setMainDescriptionInQuotation(
+                    cont.setMainCodeInSalesOrder(widget.index, mainCode);
+                    cont.setTypeInSalesOrder(widget.index, '2');
+                    cont.setMainDescriptionInSalesOrder(
                       widget.index,
                       mainDescriptionVar,
                     );
@@ -3502,8 +3312,8 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     // }
                     // return null;
                   },
-                  rowWidth: MediaQuery.of(context).size.width * 0.15,
-                  textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                  rowWidth: MediaQuery.of(context).size.width * 0.10,
+                  textFieldWidth: MediaQuery.of(context).size.width * 0.10,
                   clickableOptionText: 'create_virtual_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
@@ -3514,18 +3324,18 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       context: context,
                       builder:
                           (BuildContext context) => const AlertDialog(
-                            backgroundColor: Colors.white,
-                            contentPadding: EdgeInsets.all(0),
-                            titlePadding: EdgeInsets.all(0),
-                            actionsPadding: EdgeInsets.all(0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(9),
-                              ),
-                            ),
-                            elevation: 0,
-                            content: CreateProductDialogContent(),
+                        backgroundColor: Colors.white,
+                        contentPadding: EdgeInsets.all(0),
+                        titlePadding: EdgeInsets.all(0),
+                        actionsPadding: EdgeInsets.all(0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(9),
                           ),
+                        ),
+                        elevation: 0,
+                        content: CreateProductDialogContent(),
+                      ),
                     );
                   },
                   columnWidths: [
@@ -3538,7 +3348,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   nextFocusNode: quantityFocus, // Set column widths
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.3,
+                  width: MediaQuery.of(context).size.width * 0.20,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
                       fontSize: 12,
@@ -3589,7 +3399,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       });
 
                       _formKey.currentState!.validate();
-                      cont.setMainDescriptionInQuotation(
+                      cont.setMainDescriptionInSalesOrder(
                         widget.index,
                         mainDescriptionVar,
                       );
@@ -3599,7 +3409,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
                 //quantity
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.06,
+                  width: MediaQuery.of(context).size.width * 0.05,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
                       fontSize: 12,
@@ -3657,20 +3467,69 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       setState(() {
                         quantity = val;
                         totalLine =
-                            '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
 
                       _formKey.currentState!.validate();
 
-                      cont.setEnteredQtyInQuotation(widget.index, val);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
+                      cont.setEnteredQtyInSalesOrder(widget.index, val);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     },
                   ),
                 ),
+
+                //warehouse
+                DropdownMenu<String>(
+                  width: MediaQuery.of(context).size.width * 0.10,
+                  // requestFocusOnTap: false,
+                  enableSearch: true,
+                  controller: warehouseNameController,
+                  hintText: 'deliver_warehouse'.tr,
+                  inputDecorationTheme: InputDecorationTheme(
+                    // filled: true,
+                    hintStyle: const TextStyle(fontStyle: FontStyle.italic),
+                    contentPadding: const EdgeInsets.fromLTRB(20, 0, 25, 5),
+                    // outlineBorder: BorderSide(color: Colors.black,),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(9)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Primary.primary.withAlpha((0.4 * 255).toInt()),
+                        width: 2,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(9)),
+                    ),
+                  ),
+                  // menuStyle: ,
+                  menuHeight: 250,
+                  dropdownMenuEntries:
+                  cont.warehousesNameList.map<DropdownMenuEntry<String>>((
+                      String option,
+                      ) {
+                    return DropdownMenuEntry<String>(
+                      value: option,
+                      label: option,
+                    );
+                  }).toList(),
+                  enableFilter: true,
+                  onSelected: (String? value) {
+                    warehouseNameController.text = value!;
+
+                    var index = cont.warehousesNameList.indexOf(value);
+                    var val = '${cont.warehouseIds[index]}';
+                    cont.setItemWareHouseInSalesOrder(widget.index, val);
+                  },
+                ),
+
                 // unitPrice
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.07,
+                  width: MediaQuery.of(context).size.width * 0.05,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
                       fontSize: 12,
@@ -3735,12 +3594,12 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         }
                         // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
                         totalLine =
-                            '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                      cont.setEnteredUnitPriceInQuotation(widget.index, val);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
+                      cont.setEnteredUnitPriceInSalesOrder(widget.index, val);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     },
                   ),
@@ -3755,41 +3614,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus1,
-                    onFieldSubmitted: (value) {
-                      setState(() {
-                        quotationController.quotationCounter += 1;
-                      });
-                      quotationController.incrementListViewLengthInQuotation(
-                        quotationController.increment,
-                      );
-                      quotationController.addToRowsInListViewInQuotation(
-                        quotationController.quotationCounter,
-                        {
-                          'line_type_id': '2',
-                          'item_id': '',
-                          'itemName': '',
-                          'item_main_code': '',
-                          'item_discount': '0',
-                          'item_description': '',
-                          'item_quantity': '1',
-                          'item_unit_price': '0',
-                          'item_total': '0',
-                          'title': '',
-                          'note': '',
-                        },
-                      );
-                      quotationController.addToUnitPriceControllers(
-                        quotationController.quotationCounter,
-                      );
-                      // Widget p = ReusableItemRow(
-                      //   index: quotationController.quotationCounter,
-                      //   info: {},
-                      // );
-                      // quotationController.addToOrderLinesInQuotationList(
-                      //   '${quotationController.quotationCounter}',
-                      //   p,
-                      // );
-                    },
                     controller: discountController,
                     cursorColor: Colors.black,
                     textAlign: TextAlign.center,
@@ -3845,13 +3669,13 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           discount = val;
                         }
                         totalLine =
-                            '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
 
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                      cont.setEnteredDiscInQuotation(widget.index, val);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
+                      cont.setEnteredDiscInSalesOrder(widget.index, val);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     },
                   ),
@@ -3863,11 +3687,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   // text: '${double.parse(totalLine).toStringAsFixed(2)}',
                   text: formatDoubleWithCommas(
                     double.parse(
-                      cont.rowsInListViewInQuotation[widget
+                      cont.rowsInListViewInSalesOrder[widget
                           .index]['item_total'],
                     ),
                   ),
-                  width: MediaQuery.of(context).size.width * 0.07,
+                  width: MediaQuery.of(context).size.width * 0.05,
                 ),
 
                 //more
@@ -3875,32 +3699,32 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   width: MediaQuery.of(context).size.width * 0.02,
                   child: ReusableMore(
                     itemsList:
-                        selectedItemId.isEmpty
-                            ? []
-                            : [
-                              PopupMenuItem<String>(
-                                value: '1',
-                                onTap: () async {
-                                  showDialog<String>(
-                                    context: context,
-                                    builder:
-                                        (BuildContext context) => AlertDialog(
-                                          backgroundColor: Colors.white,
-                                          shape: const RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(9),
-                                            ),
-                                          ),
-                                          elevation: 0,
-                                          content: ShowItemQuantitiesDialog(
-                                            selectedItemId: selectedItemId,
-                                          ),
-                                        ),
-                                  );
-                                },
-                                child: Text('Show Quantity'),
+                    selectedItemId.isEmpty
+                        ? []
+                        : [
+                      PopupMenuItem<String>(
+                        value: '1',
+                        onTap: () async {
+                          showDialog<String>(
+                            context: context,
+                            builder:
+                                (BuildContext context) => AlertDialog(
+                              backgroundColor: Colors.white,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(9),
+                                ),
                               ),
-                            ],
+                              elevation: 0,
+                              content: ShowItemQuantitiesDialog(
+                                selectedItemId: selectedItemId,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text('Show Quantity'),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -3909,16 +3733,16 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   width: MediaQuery.of(context).size.width * 0.03,
                   child: InkWell(
                     onTap: () {
-                      quotationController.decrementListViewLengthInQuotation(
-                        quotationController.increment,
+                      salesOrderController.decrementListViewLengthInSalesOrder(
+                        salesOrderController.increment,
                       );
-                      quotationController.removeFromRowsInListViewInQuotation(
+                      salesOrderController.removeFromRowsInListViewInSalesOrder(
                         widget.index,
                       );
 
-                      // quotationController.removeFromOrderLinesInQuotationList(
-                      //   (widget.index).toString(),
-                      // );
+                      salesOrderController.removeFromOrderLinesInSalesOrderList(
+                        (widget.index).toString(),
+                      );
 
                       setState(() {
                         cont.totalItems = 0.0;
@@ -3928,11 +3752,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         cont.specialDiscountPercentageValue = "0.0";
                         cont.vat11 = "0.0";
                         cont.vatInPrimaryCurrency = "0.0";
-                        cont.totalQuotation = "0.0";
+                        cont.totalSalesOrder = "0.0";
 
                         cont.getTotalItems();
                       });
-                      if (cont.rowsInListViewInQuotation != {}) {
+                      if (cont.rowsInListViewInSalesOrder != {}) {
                         cont.getTotalItems();
                       }
                     },
@@ -3959,7 +3783,7 @@ class ReusableTitleRow extends StatefulWidget {
 
 class _ReusableTitleRowState extends State<ReusableTitleRow> {
   TextEditingController titleController = TextEditingController();
-  final QuotationController quotationController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
   String titleValue = '0';
 
   final _formKey = GlobalKey<FormState>();
@@ -3968,13 +3792,13 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
   void initState() {
     // titleController.text = widget.info['title'] ?? '';
     titleController.text =
-        quotationController.rowsInListViewInQuotation[widget.index]['title'];
+    salesOrderController.rowsInListViewInSalesOrder[widget.index]['title'];
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<QuotationController>(
+    return GetBuilder<SalesOrderController>(
       builder: (cont) {
         return Container(
           height: 50,
@@ -3984,6 +3808,17 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.02,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/newRow.png'),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.73,
                   child: ReusableTextField(
@@ -3994,8 +3829,8 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                       setState(() {
                         titleValue = val;
                       });
-                      cont.setTypeInQuotation(widget.index, '1');
-                      cont.setTitleInQuotation(widget.index, val);
+                      cont.setTypeInSalesOrder(widget.index, '1');
+                      cont.setTitleInSalesOrder(widget.index, val);
                     },
                     validationFunc: (val) {},
                   ),
@@ -4020,15 +3855,15 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                   width: MediaQuery.of(context).size.width * 0.03,
                   child: InkWell(
                     onTap: () {
-                      quotationController.decrementListViewLengthInQuotation(
-                        quotationController.increment,
+                      salesOrderController.decrementListViewLengthInSalesOrder(
+                        salesOrderController.increment,
                       );
-                      quotationController.removeFromRowsInListViewInQuotation(
+                      salesOrderController.removeFromRowsInListViewInSalesOrder(
                         widget.index,
                       );
-                      // quotationController.removeFromOrderLinesInQuotationList(
-                      //   (widget.index).toString(),
-                      // );
+                      salesOrderController.removeFromOrderLinesInSalesOrderList(
+                        (widget.index).toString(),
+                      );
                     },
                     child: Icon(Icons.delete_outline, color: Primary.primary),
                   ),
@@ -4052,14 +3887,14 @@ class ReusableNoteRow extends StatefulWidget {
 
 class _ReusableNoteRowState extends State<ReusableNoteRow> {
   TextEditingController noteController = TextEditingController();
-  final QuotationController quotationController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
   String noteValue = '';
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     noteController.text =
-        quotationController.rowsInListViewInQuotation[widget.index]['note'];
+    salesOrderController.rowsInListViewInSalesOrder[widget.index]['note'];
     super.initState();
   }
 
@@ -4074,6 +3909,20 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           // mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            //image
+            Container(
+              width: MediaQuery.of(context).size.width * 0.02,
+              height: 20,
+              margin: const EdgeInsets.symmetric(vertical: 15),
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/newRow.png'),
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+
+            //note
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.73,
               child: ReusableTextField(
@@ -4084,8 +3933,8 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                   setState(() {
                     noteValue = val;
                   });
-                  quotationController.setTypeInQuotation(widget.index, '5');
-                  quotationController.setNoteInQuotation(widget.index, val);
+                  salesOrderController.setTypeInSalesOrder(widget.index, '5');
+                  salesOrderController.setNoteInSalesOrder(widget.index, val);
                 },
                 validationFunc: (val) {},
               ),
@@ -4126,15 +3975,15 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
               child: InkWell(
                 onTap: () {
                   setState(() {
-                    quotationController.decrementListViewLengthInQuotation(
-                      quotationController.increment,
+                    salesOrderController.decrementListViewLengthInSalesOrder(
+                      salesOrderController.increment,
                     );
-                    quotationController.removeFromRowsInListViewInQuotation(
+                    salesOrderController.removeFromRowsInListViewInSalesOrder(
                       widget.index,
                     );
-                    // quotationController.removeFromOrderLinesInQuotationList(
-                    //   widget.index.toString(),
-                    // );
+                    salesOrderController.removeFromOrderLinesInSalesOrderList(
+                      widget.index.toString(),
+                    );
                   });
                 },
                 child: Icon(Icons.delete_outline, color: Primary.primary),
@@ -4156,7 +4005,7 @@ class ReusableImageRow extends StatefulWidget {
 }
 
 class _ReusableImageRowState extends State<ReusableImageRow> {
-  final QuotationController quotationController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
   late Uint8List imageFile;
   bool isLoading = false; // Add loading state
   double listViewLength = Sizes.deviceHeight * 0.08;
@@ -4180,6 +4029,7 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
         final response = await http.get(
           Uri.parse('$baseImage${widget.info['image']}'),
         );
+
         if (response.statusCode == 200) {
           imageFile = response.bodyBytes;
         } else {
@@ -4191,7 +4041,7 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
     } else {
       imageFile = Uint8List(0); // Set to empty if no image URL
     }
-    quotationController.setImageInQuotation(widget.index, imageFile);
+    salesOrderController.setImageInSalesOrder(widget.index, imageFile);
     setState(() {
       isLoading = false;
     });
@@ -4199,7 +4049,7 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<QuotationController>(
+    return GetBuilder<SalesOrderController>(
       builder: (cont) {
         return Container(
           height: 100,
@@ -4209,7 +4059,21 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                GetBuilder<QuotationController>(
+                //image
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.02,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/newRow.png'),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+
+                //image
+                GetBuilder<SalesOrderController>(
                   builder: (cont) {
                     return InkWell(
                       onTap: () async {
@@ -4219,8 +4083,8 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                           cont.changeBoolVar(true);
                           cont.increaseImageSpace(30);
                         });
-                        cont.setTypeInQuotation(widget.index, '4');
-                        cont.setImageInQuotation(widget.index, imageFile);
+                        cont.setTypeInSalesOrder(widget.index, '4');
+                        cont.setImageInSalesOrder(widget.index, imageFile);
                       },
                       child: Container(
                         margin: const EdgeInsets.symmetric(
@@ -4235,44 +4099,44 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                             width: MediaQuery.of(context).size.width * 0.72,
                             height: cont.imageSpaceHeight,
                             child:
-                                imageFile.isNotEmpty
-                                    ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Image.memory(
-                                          imageFile,
-                                          height: cont.imageSpaceHeight,
-                                        ),
-                                      ],
-                                    )
-                                    : Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        gapW20,
-                                        Icon(
-                                          Icons.cloud_upload_outlined,
-                                          color: Others.iconColor,
-                                          size: 32,
-                                        ),
-                                        gapW20,
-                                        Text(
-                                          'drag_drop_image'.tr,
-                                          style: TextStyle(
-                                            color: TypographyColor.textTable,
-                                          ),
-                                        ),
-                                        Text(
-                                          'browse'.tr,
-                                          style: TextStyle(
-                                            color: Primary.primary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                            imageFile.isNotEmpty
+                                ? Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.start,
+                              children: [
+                                Image.memory(
+                                  imageFile,
+                                  height: cont.imageSpaceHeight,
+                                ),
+                              ],
+                            )
+                                : Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.start,
+                              crossAxisAlignment:
+                              CrossAxisAlignment.center,
+                              children: [
+                                gapW20,
+                                Icon(
+                                  Icons.cloud_upload_outlined,
+                                  color: Others.iconColor,
+                                  size: 32,
+                                ),
+                                gapW20,
+                                Text(
+                                  'drag_drop_image'.tr,
+                                  style: TextStyle(
+                                    color: TypographyColor.textTable,
+                                  ),
+                                ),
+                                Text(
+                                  'browse'.tr,
+                                  style: TextStyle(
+                                    color: Primary.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -4316,15 +4180,16 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                   child: InkWell(
                     onTap: () {
                       setState(() {
-                        quotationController.decrementListViewLengthInQuotation(
-                          quotationController.increment + 50,
+                        salesOrderController
+                            .decrementListViewLengthInSalesOrder(
+                          salesOrderController.increment + 50,
                         );
-                        quotationController.removeFromRowsInListViewInQuotation(
-                          widget.index,
+                        salesOrderController
+                            .removeFromRowsInListViewInSalesOrder(widget.index);
+                        salesOrderController
+                            .removeFromOrderLinesInSalesOrderList(
+                          widget.index.toString(),
                         );
-                        // quotationController.removeFromOrderLinesInQuotationList(
-                        //   widget.index.toString(),
-                        // );
                       });
                     },
                     child: Icon(Icons.delete_outline, color: Primary.primary),
@@ -4355,8 +4220,9 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
   TextEditingController qtyController = TextEditingController();
   TextEditingController discountController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  TextEditingController warehouseComboController = TextEditingController();
 
-  final QuotationController quotationController = Get.find();
+  final SalesOrderController salesOrderController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
 
   String selectedComboId = '';
@@ -4376,15 +4242,15 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
   setPrice() {
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
-      (item) => item["currency"] == quotationController.selectedCurrencyName,
+          (item) => item["currency"] == salesOrderController.selectedCurrencyName,
       orElse: () => null,
     );
 
-    quotationController.exchangeRateForSelectedCurrency =
-        result != null ? '${result["exchange_rate"]}' : '1';
+    salesOrderController.exchangeRateForSelectedCurrency =
+    result != null ? '${result["exchange_rate"]}' : '1';
 
-    quotationController.combosPriceControllers[widget.index]!.text =
-        '${widget.info['combo_price'] ?? ''}';
+    salesOrderController.combosPriceControllers[widget.index]!.text =
+    '${widget.info['combo_unit_price'] ?? ''}';
 
     selectedComboId = widget.info['combo_id'].toString();
     // var ind=quotationController.combosIdsList.indexOf(selectedComboId);
@@ -4445,41 +4311,45 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
     // ).toStringAsFixed(2);
 
     // qtyController.text = '1';
-    quotationController.rowsInListViewInQuotation[widget
-            .index]['item_unit_price'] =
-        quotationController.combosPriceControllers[widget.index]!.text;
-    quotationController.rowsInListViewInQuotation[widget.index]['item_total'] =
-        '${widget.info['combo_total']}';
-    quotationController.rowsInListViewInQuotation[widget.index]['combo'] =
+    salesOrderController.rowsInListViewInSalesOrder[widget
+        .index]['item_unit_price'] =
+        salesOrderController.combosPriceControllers[widget.index]!.text;
+    salesOrderController.rowsInListViewInSalesOrder[widget
+        .index]['item_total'] =
+    '${widget.info['combo_total']}';
+    salesOrderController.rowsInListViewInSalesOrder[widget.index]['combo'] =
         widget.info['combo_id'].toString();
   }
 
   @override
   void initState() {
-    print('my note  ${widget.index} is ${widget.info}');
-    print(quotationController.rowsInListViewInQuotation[widget.index]);
+    if (widget.info.isNotEmpty) {
 
-    if (widget.info['combo_quantity']!=null ) {
-      qtyController.text = '${widget.info['combo_quantity'] ?? widget.info['item_quantity']}';
-      quantity = '${widget.info['combo_quantity'] ?? widget.info['item_quantity']}';
-      quotationController.rowsInListViewInQuotation[widget
-              .index]['item_quantity'] =
-          '${widget.info['combo_quantity'] ?? widget.info['item_quantity']}';
+      qtyController.text = '${widget.info['combo_quantity'] ?? ''}';
+      quantity = '${widget.info['combo_quantity'] ?? '0.0'}';
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_quantity'] =
+      '${widget.info['combo_quantity'] ?? '0.0'}';
 
+      warehouseComboController.text =
+      salesOrderController
+          .warehousesNames['${widget.info['combo_warehouse_id'] ?? 10}'];
       discountController.text = widget.info['combo_discount'] ?? '';
       discount = widget.info['combo_discount'] ?? '0.0';
-      quotationController.rowsInListViewInQuotation[widget
-              .index]['item_discount'] =
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_discount'] =
           widget.info['combo_discount'] ?? '0.0';
 
       totalLine = widget.info['combo_total'] ?? '';
+
       mainDescriptionVar = widget.info['combo_description'] ?? '';
 
       mainCode = widget.info['combo_code'] ?? '';
+
       descriptionController.text = widget.info['combo_description'] ?? '';
 
-      quotationController.rowsInListViewInQuotation[widget
-              .index]['item_description'] =
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_description'] =
           widget.info['combo_description'] ?? '';
 
       comboCodeController.text = widget.info['combo_code'].toString();
@@ -4492,46 +4362,24 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
       // qtyController.text = '0';
       // quantity = '0';
       // quotationController.combosPriceControllers[widget.index]!.text = '0';
-      if (quotationController.rowsInListViewInQuotation[widget
-              .index]['combo'] !=
-          '') {
-        quotationController.combosPriceControllers[widget.index]!.text =
-            quotationController.rowsInListViewInQuotation[widget
-                .index]['item_unit_price'];
-        selectedComboId =
-            quotationController.rowsInListViewInQuotation[widget
-                .index]['combo'];
-      }
       comboCodeController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_main_code'];
-      mainCode =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_main_code'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_main_code'];
       qtyController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_quantity'];
-      quantity =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_quantity'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_quantity'];
       discountController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_discount'];
-      discount =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_discount'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_discount'];
       descriptionController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_description'];
-      mainDescriptionVar =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_description'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_description'];
       totalLine =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_total'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_total'];
       comboCodeController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_main_code'];
+      salesOrderController.rowsInListViewInSalesOrder[widget
+          .index]['item_main_code'];
     }
 
     super.initState();
@@ -4539,7 +4387,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<QuotationController>(
+    return GetBuilder<SalesOrderController>(
       builder: (cont) {
         return Container(
           height: 50,
@@ -4549,10 +4397,22 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                //image
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.02,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/newRow.png'),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
                 ReusableDropDownMenusWithSearch(
                   list:
-                      quotationController
-                          .combosMultiPartList, // Assuming multiList is List<List<String>>
+                  salesOrderController
+                      .combosMultiPartList, // Assuming multiList is List<List<String>>
                   text: ''.tr,
                   hint: 'combo'.tr,
                   controller: comboCodeController,
@@ -4567,7 +4427,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       mainCode = cont.combosCodesList[ind];
                       comboName = cont.combosNamesList[ind];
                       descriptionController.text =
-                          cont.combosDescriptionList[ind];
+                      cont.combosDescriptionList[ind];
                       if (cont.combosPricesCurrencies[selectedComboId] ==
                           cont.selectedCurrencyName) {
                         cont.combosPriceControllers[widget.index]!.text =
@@ -4578,29 +4438,29 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
-                                  item["currency"] ==
-                                  cont.combosPricesCurrencies[selectedComboId],
-                              orElse: () => null,
-                            );
+                          item["currency"] ==
+                              cont.combosPricesCurrencies[selectedComboId],
+                          orElse: () => null,
+                        );
                         var divider = '1';
                         if (result != null) {
                           divider = result["exchange_rate"].toString();
                         }
                         cont.combosPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                        '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
                       } else if (cont.selectedCurrencyName != 'USD' &&
                           cont.combosPricesCurrencies[selectedComboId] ==
                               'USD') {
                         cont.combosPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                        '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       } else {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
-                                  item["currency"] ==
-                                  cont.combosPricesCurrencies[selectedComboId],
-                              orElse: () => null,
-                            );
+                          item["currency"] ==
+                              cont.combosPricesCurrencies[selectedComboId],
+                          orElse: () => null,
+                        );
                         var divider = '1';
                         if (result != null) {
                           divider = result["exchange_rate"].toString();
@@ -4608,34 +4468,34 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         var usdPrice =
                             '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
                         cont.combosPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                        '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       }
 
                       cont.combosPriceControllers[widget.index]!.text =
-                          '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
+                      '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
                       qtyController.text = '1';
                       quantity = '1';
                       discountController.text = '0';
                       discount = '0';
                       totalLine =
-                          '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                      cont.setEnteredQtyInQuotation(widget.index, quantity);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
+                      '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                      cont.setEnteredQtyInSalesOrder(widget.index, quantity);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     });
-                    cont.setEnteredUnitPriceInQuotation(
+                    cont.setEnteredUnitPriceInSalesOrder(
                       widget.index,
                       cont.combosPriceControllers[widget.index]!.text,
                     );
-                    cont.setComboInQuotation(widget.index, selectedComboId);
-                    cont.setItemNameInQuotation(
+                    cont.setComboInSalesOrder(widget.index, selectedComboId);
+                    cont.setItemNameInSalesOrder(
                       widget.index,
                       comboName,
                       // value.split(" | ")[0],
                     ); // set only first element as name
-                    cont.setMainCodeInQuotation(widget.index, mainCode);
-                    cont.setTypeInQuotation(widget.index, '3');
-                    cont.setMainDescriptionInQuotation(
+                    cont.setMainCodeInSalesOrder(widget.index, mainCode);
+                    cont.setTypeInSalesOrder(widget.index, '3');
+                    cont.setMainDescriptionInSalesOrder(
                       widget.index,
                       mainDescriptionVar,
                     );
@@ -4646,8 +4506,8 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                     // }
                     return null;
                   },
-                  rowWidth: MediaQuery.of(context).size.width * 0.15,
-                  textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                  rowWidth: MediaQuery.of(context).size.width * 0.10,
+                  textFieldWidth: MediaQuery.of(context).size.width * 0.10,
                   clickableOptionText: 'create_virtual_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
@@ -4655,18 +4515,18 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       context: context,
                       builder:
                           (BuildContext context) => const AlertDialog(
-                            backgroundColor: Colors.white,
-                            contentPadding: EdgeInsets.all(0),
-                            titlePadding: EdgeInsets.all(0),
-                            actionsPadding: EdgeInsets.all(0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(9),
-                              ),
-                            ),
-                            elevation: 0,
-                            content: Combo(),
+                        backgroundColor: Colors.white,
+                        contentPadding: EdgeInsets.all(0),
+                        titlePadding: EdgeInsets.all(0),
+                        actionsPadding: EdgeInsets.all(0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(9),
                           ),
+                        ),
+                        elevation: 0,
+                        content: Combo(),
+                      ),
                     );
                   },
                   columnWidths: [
@@ -4679,7 +4539,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   nextFocusNode: quantityFocus, // Set column widths
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.3,
+                  width: MediaQuery.of(context).size.width * 0.20,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
                       fontSize: 12,
@@ -4730,7 +4590,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       });
 
                       _formKey.currentState!.validate();
-                      cont.setMainDescriptionInQuotation(
+                      cont.setMainDescriptionInSalesOrder(
                         widget.index,
                         mainDescriptionVar,
                       );
@@ -4740,7 +4600,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
                 //quantity
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.06,
+                  width: MediaQuery.of(context).size.width * 0.05,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
                       fontSize: 12,
@@ -4798,20 +4658,68 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       setState(() {
                         quantity = val;
                         totalLine =
-                            '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
 
                       _formKey.currentState!.validate();
 
-                      cont.setEnteredQtyInQuotation(widget.index, val);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
+                      cont.setEnteredQtyInSalesOrder(widget.index, val);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     },
                   ),
                 ),
+                //warehouse
+                DropdownMenu<String>(
+                  width: MediaQuery.of(context).size.width * 0.10,
+                  // requestFocusOnTap: false,
+                  enableSearch: true,
+                  controller: warehouseComboController,
+                  hintText: 'deliver_warehouse'.tr,
+                  inputDecorationTheme: InputDecorationTheme(
+                    // filled: true,
+                    hintStyle: const TextStyle(fontStyle: FontStyle.italic),
+                    contentPadding: const EdgeInsets.fromLTRB(20, 0, 25, 5),
+                    // outlineBorder: BorderSide(color: Colors.black,),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(9)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Primary.primary.withAlpha((0.4 * 255).toInt()),
+                        width: 2,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(9)),
+                    ),
+                  ),
+                  // menuStyle: ,
+                  menuHeight: 250,
+                  dropdownMenuEntries:
+                  cont.warehousesNameList.map<DropdownMenuEntry<String>>((
+                      String option,
+                      ) {
+                    return DropdownMenuEntry<String>(
+                      value: option,
+                      label: option,
+                    );
+                  }).toList(),
+                  enableFilter: true,
+                  onSelected: (String? value) {
+                    warehouseComboController.text = value!;
+
+                    var index = cont.warehousesNameList.indexOf(value);
+                    var val = '${cont.warehouseIds[index]}';
+                    cont.setComboWareHouseInSalesOrder(widget.index, val);
+                  },
+                ),
+
                 // unitPrice
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.07,
+                  width: MediaQuery.of(context).size.width * 0.05,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
                       fontSize: 12,
@@ -4876,12 +4784,12 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         }
                         // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
                         totalLine =
-                            '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                      cont.setEnteredUnitPriceInQuotation(widget.index, val);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
+                      cont.setEnteredUnitPriceInSalesOrder(widget.index, val);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     },
                   ),
@@ -4896,42 +4804,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus1,
-                    onFieldSubmitted: (value) {
-                      setState(() {
-                        quotationController.quotationCounter += 1;
-                      });
-                      quotationController.incrementListViewLengthInQuotation(
-                        quotationController.increment,
-                      );
-                      quotationController.addToRowsInListViewInQuotation(
-                        quotationController.quotationCounter,
-                        {
-                          'line_type_id': '3',
-                          'item_id': '',
-                          'itemName': '',
-                          'item_main_code': '',
-                          'item_discount': '0',
-                          'item_description': '',
-                          'item_quantity': '1',
-                          'item_unit_price': '0',
-                          'item_total': '0',
-                          'title': '',
-                          'note': '',
-                          'combo': '',
-                        },
-                      );
-                      quotationController.addToCombosPricesControllers(
-                        quotationController.quotationCounter,
-                      );
-                      Widget p = ReusableComboRow(
-                        index: quotationController.quotationCounter,
-                        info: {},
-                      );
-                      // quotationController.addToOrderLinesInQuotationList(
-                      //   '${quotationController.quotationCounter}',
-                      //   p,
-                      // );
-                    },
                     controller: discountController,
                     cursorColor: Colors.black,
                     textAlign: TextAlign.center,
@@ -4987,13 +4859,13 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                           discount = val;
                         }
                         totalLine =
-                            '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
 
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                      cont.setEnteredDiscInQuotation(widget.index, val);
-                      cont.setMainTotalInQuotation(widget.index, totalLine);
+                      cont.setEnteredDiscInSalesOrder(widget.index, val);
+                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
                       cont.getTotalItems();
                     },
                   ),
@@ -5005,11 +4877,11 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   // text: '${double.parse(totalLine).toStringAsFixed(2)}',
                   text: formatDoubleWithCommas(
                     double.parse(
-                      cont.rowsInListViewInQuotation[widget
+                      cont.rowsInListViewInSalesOrder[widget
                           .index]['item_total'],
                     ),
                   ),
-                  width: MediaQuery.of(context).size.width * 0.07,
+                  width: MediaQuery.of(context).size.width * 0.05,
                 ),
 
                 //more
@@ -5017,32 +4889,32 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   width: MediaQuery.of(context).size.width * 0.02,
                   child: ReusableMore(
                     itemsList:
-                        selectedComboId.isEmpty
-                            ? []
-                            : [
-                              // PopupMenuItem<String>(
-                              //   value: '1',
-                              //   onTap: () async {
-                              //     showDialog<String>(
-                              //       context: context,
-                              //       builder:
-                              //           (BuildContext context) => AlertDialog(
-                              //         backgroundColor: Colors.white,
-                              //         shape: const RoundedRectangleBorder(
-                              //           borderRadius: BorderRadius.all(
-                              //             Radius.circular(9),
-                              //           ),
-                              //         ),
-                              //         elevation: 0,
-                              //         content: ShowItemQuantitiesDialog(
-                              //           selectedItemId: selectedComboId,
-                              //         ),
-                              //       ),
-                              //     );
-                              //   },
-                              //   child: Text('Show Quantity'),
-                              // ),
-                            ],
+                    selectedComboId.isEmpty
+                        ? []
+                        : [
+                      // PopupMenuItem<String>(
+                      //   value: '1',
+                      //   onTap: () async {
+                      //     showDialog<String>(
+                      //       context: context,
+                      //       builder:
+                      //           (BuildContext context) => AlertDialog(
+                      //         backgroundColor: Colors.white,
+                      //         shape: const RoundedRectangleBorder(
+                      //           borderRadius: BorderRadius.all(
+                      //             Radius.circular(9),
+                      //           ),
+                      //         ),
+                      //         elevation: 0,
+                      //         content: ShowItemQuantitiesDialog(
+                      //           selectedItemId: selectedComboId,
+                      //         ),
+                      //       ),
+                      //     );
+                      //   },
+                      //   child: Text('Show Quantity'),
+                      // ),
+                    ],
                   ),
                 ),
 
@@ -5051,16 +4923,16 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   width: MediaQuery.of(context).size.width * 0.03,
                   child: InkWell(
                     onTap: () {
-                      quotationController.decrementListViewLengthInQuotation(
-                        quotationController.increment,
+                      salesOrderController.decrementListViewLengthInSalesOrder(
+                        salesOrderController.increment,
                       );
-                      quotationController.removeFromRowsInListViewInQuotation(
+                      salesOrderController.removeFromRowsInListViewInSalesOrder(
                         widget.index,
                       );
 
-                      // quotationController.removeFromOrderLinesInQuotationList(
-                      //   (widget.index).toString(),
-                      // );
+                      salesOrderController.removeFromOrderLinesInSalesOrderList(
+                        (widget.index).toString(),
+                      );
 
                       setState(() {
                         cont.totalItems = 0.0;
@@ -5070,11 +4942,11 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         cont.specialDiscountPercentageValue = "0.0";
                         cont.vat11 = "0.0";
                         cont.vatInPrimaryCurrency = "0.0";
-                        cont.totalQuotation = "0.0";
+                        cont.totalSalesOrder = "0.0";
 
                         cont.getTotalItems();
                       });
-                      if (cont.rowsInListViewInQuotation != {}) {
+                      if (cont.rowsInListViewInSalesOrder != {}) {
                         cont.getTotalItems();
                       }
                     },

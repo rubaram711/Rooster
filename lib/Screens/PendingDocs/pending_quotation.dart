@@ -764,48 +764,56 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
     ) {
       quotationController.rowsInListViewInQuotation[i + 1] =
           quotationController.selectedQuotationData['orderLines'][i];
-    }
-    // var keys = quotationController.rowsInListViewInQuotation.keys.toList();
-    for (int i = 0; i < widget.info['orderLines'].length; i++) {
       quotationController.orderedKeys.add(i+1);
-      if (widget.info['orderLines'][i]['line_type_id'] == 2) {
+      if (quotationController.selectedQuotationData['orderLines'][i]['line_type_id'] == 2) {
         quotationController.unitPriceControllers[i + 1] =
             TextEditingController();
-    //     Widget p = ReusableItemRow(
-    //       index: i + 1,
-    //       info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     );
-    //
-    //     quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //   }
-        //   else if (widget.info['orderLines'][i]['line_type_id'] == 1) {
-    //     Widget p = ReusableTitleRow(
-    //       index: i + 1,
-    //       info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     );
-    //     quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //   } else if (widget.info['orderLines'][i]['line_type_id'] == 5) {
-    //     Widget p = ReusableNoteRow(
-    //       index: i + 1,
-    //       info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     );
-    //     quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //   } else if (widget.info['orderLines'][i]['line_type_id'] == 4) {
-    //     Widget p = ReusableImageRow(
-    //       index: i + 1,
-    //       info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     );
-    //     quotationController.orderLinesQuotationList['${i + 1}'] = p;
-      } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
+      } else if (quotationController.selectedQuotationData['orderLines'][i]['line_type_id'] == 3) {
         quotationController.combosPriceControllers[i + 1] =
             TextEditingController();
-        // Widget p = ReusableComboRow(
-        //   index: i + 1,
-        //   info: quotationController.rowsInListViewInQuotation[keys[i]],
-        // );
-        // quotationController.orderLinesQuotationList['${i + 1}'] = p;
       }
     }
+    // var keys = quotationController.rowsInListViewInQuotation.keys.toList();
+    // for (int i = 0; i < widget.info['orderLines'].length; i++) {
+    //   quotationController.orderedKeys.add(i+1);
+    //   if (widget.info['orderLines'][i]['line_type_id'] == 2) {
+    //     quotationController.unitPriceControllers[i + 1] =
+    //         TextEditingController();
+    // //     Widget p = ReusableItemRow(
+    // //       index: i + 1,
+    // //       info: quotationController.rowsInListViewInQuotation[keys[i]],
+    // //     );
+    // //
+    // //     quotationController.orderLinesQuotationList['${i + 1}'] = p;
+    // //   }
+    //     //   else if (widget.info['orderLines'][i]['line_type_id'] == 1) {
+    // //     Widget p = ReusableTitleRow(
+    // //       index: i + 1,
+    // //       info: quotationController.rowsInListViewInQuotation[keys[i]],
+    // //     );
+    // //     quotationController.orderLinesQuotationList['${i + 1}'] = p;
+    // //   } else if (widget.info['orderLines'][i]['line_type_id'] == 5) {
+    // //     Widget p = ReusableNoteRow(
+    // //       index: i + 1,
+    // //       info: quotationController.rowsInListViewInQuotation[keys[i]],
+    // //     );
+    // //     quotationController.orderLinesQuotationList['${i + 1}'] = p;
+    // //   } else if (widget.info['orderLines'][i]['line_type_id'] == 4) {
+    // //     Widget p = ReusableImageRow(
+    // //       index: i + 1,
+    // //       info: quotationController.rowsInListViewInQuotation[keys[i]],
+    // //     );
+    // //     quotationController.orderLinesQuotationList['${i + 1}'] = p;
+    //   } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
+    //     quotationController.combosPriceControllers[i + 1] =
+    //         TextEditingController();
+    //     // Widget p = ReusableComboRow(
+    //     //   index: i + 1,
+    //     //   info: quotationController.rowsInListViewInQuotation[keys[i]],
+    //     // );
+    //     // quotationController.orderLinesQuotationList['${i + 1}'] = p;
+    //   }
+    // }
     super.initState();
   }
 

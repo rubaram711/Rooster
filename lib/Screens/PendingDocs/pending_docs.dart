@@ -35,6 +35,7 @@ import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/const/urls.dart';
 
 import '../Quotations/update_quotation_dialog.dart';
+import '../client_order/update_sales_order_dialog.dart';
 
 class PendingDocs extends StatefulWidget {
   const PendingDocs({super.key});
