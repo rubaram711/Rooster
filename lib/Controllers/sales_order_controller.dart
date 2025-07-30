@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Backend/PriceListBackend/get_prices_list_items.dart';
@@ -76,6 +75,12 @@ abstract class SalesOrderControllerAbstract extends GetxController {
 }
 
 class SalesOrderController extends SalesOrderControllerAbstract {
+  int salesOrderCounter = 0;
+  setSalesOrderCounter(int val){
+    salesOrderCounter=val;
+    update();
+  }
+
   bool isSubmitAndPreviewClicked = false;
   @override
   setIsSubmitAndPreviewClicked(bool val) {
@@ -309,7 +314,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     cashingMethodsIdsList = [];
     orderLinesSalesOrderList = {};
     rowsInListViewInSalesOrder = {};
-    // itemsList = [];
+    orderedKeys = [];
     itemsCode = [];
     itemsIds = [];
     isSalesOrderInfoFetched = false;
@@ -840,6 +845,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   }
 
   Map newRowMap = {};
+  List<int> orderedKeys = [];
   Map rowsInListViewInSalesOrder = {
     // 0: {
     //    'type': '',
@@ -854,19 +860,21 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   @override
   clearList() {
     rowsInListViewInSalesOrder = {};
+    orderedKeys = [];
     update();
   }
 
   @override
   addToRowsInListViewInSalesOrder(int index, Map p) {
     rowsInListViewInSalesOrder[index] = p;
+    orderedKeys.add(index);
     update();
   }
 
   @override
   removeFromRowsInListViewInSalesOrder(int index) {
     rowsInListViewInSalesOrder.remove(index);
-
+    orderedKeys.remove(index);
     update();
   }
 

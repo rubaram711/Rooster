@@ -77,6 +77,11 @@ abstract class SalesInvoiceControllerAbstract extends GetxController {
 }
 
 class SalesInvoiceController extends SalesInvoiceControllerAbstract {
+  int salesInvoiceCounter = 0;
+  setSalesInvoiceCounter(int val){
+    salesInvoiceCounter=val;
+    update();
+  }
   TextEditingController warehouseMenuController = TextEditingController();
   String selectedWarehouseId = '';
   @override
@@ -116,6 +121,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   Map selectedSalesInvoiceData = {};
   List rowsInListViewInSalesInvoiceData = [];
   Map newRowMap = {};
+  List<int> orderedKeys = [];
   Map rowsInListViewInSalesInvoice = {
     // 0: {
     //    'type': '',
@@ -326,7 +332,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     cashingMethodsIdsList = [];
     orderLinesSalesInvoiceList = {};
     rowsInListViewInSalesInvoice = {};
-    // itemsList = [];
+    orderedKeys = [];
     itemsCode = [];
     itemsIds = [];
     isSalesInvoiceInfoFetched = false;
@@ -828,19 +834,21 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   @override
   clearList() {
     rowsInListViewInSalesInvoice = {};
+    orderedKeys = [];
     update();
   }
 
   @override
   addToRowsInListViewInSalesInvoice(int index, Map p) {
     rowsInListViewInSalesInvoice[index] = p;
+    orderedKeys.add(index);
     update();
   }
 
   @override
   removeFromRowsInListViewInSalesInvoice(int index) {
     rowsInListViewInSalesInvoice.remove(index);
-
+    orderedKeys.remove(index);
     update();
   }
 

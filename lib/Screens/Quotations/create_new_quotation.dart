@@ -2754,10 +2754,10 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                     .removeFromRowsInListViewInQuotation(
                                                       key,
                                                     );
-                                                quotationController
-                                                    .removeFromOrderLinesInQuotationList(
-                                                      key.toString(),
-                                                    );
+                                                // quotationController
+                                                //     .removeFromOrderLinesInQuotationList(
+                                                //       key.toString(),
+                                                //     );
                                               });
                                             },
                                             child: SizedBox(
@@ -3226,19 +3226,6 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                       MediaQuery.of(context).size.width * 0.15,
                                   height: 45,
                                   onTapFunction: () async {
-                                    // quotationController.newRowMap = {};
-                                    // var oldKeys =
-                                    //     quotationController
-                                    //         .rowsInListViewInQuotation
-                                    //         .keys
-                                    //         .toList()
-                                    //       ..sort();
-                                    // for (int i = 0; i < oldKeys.length; i++) {
-                                    //   quotationController.newRowMap[i + 1] =
-                                    //       quotationController
-                                    //           .rowsInListViewInQuotation[oldKeys[i]]!;
-                                    // }
-
                                     bool
                                     hasType1WithEmptyTitle = quotationController
                                         .rowsInListViewInQuotation
@@ -3594,12 +3581,12 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
           'note': '',
           'combo': '',
         });
-    Widget p = ReusableTitleRow(index: quotationController.quotationCounter);
-
-    quotationController.addToOrderLinesInQuotationList(
-      '${quotationController.quotationCounter}',
-      p,
-    );
+    // Widget p = ReusableTitleRow(index: quotationController.quotationCounter);
+    //
+    // quotationController.addToOrderLinesInQuotationList(
+    //   '${quotationController.quotationCounter}',
+    //   p,
+    // );
   }
 
   addNewItem() {
@@ -3630,12 +3617,12 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
     quotationController.addToUnitPriceControllers(
       quotationController.quotationCounter,
     );
-    Widget p = ReusableItemRow(index: quotationController.quotationCounter);
-
-    quotationController.addToOrderLinesInQuotationList(
-      '${quotationController.quotationCounter}',
-      p,
-    );
+    // Widget p = ReusableItemRow(index: quotationController.quotationCounter);
+    //
+    // quotationController.addToOrderLinesInQuotationList(
+    //   '${quotationController.quotationCounter}',
+    //   p,
+    // );
   }
 
   addNewCombo() {
@@ -3665,11 +3652,11 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
       quotationController.quotationCounter,
     );
 
-    Widget p = ReusableComboRow(index: quotationController.quotationCounter);
-    quotationController.addToOrderLinesInQuotationList(
-      '${quotationController.quotationCounter}',
-      p,
-    );
+    // Widget p = ReusableComboRow(index: quotationController.quotationCounter);
+    // quotationController.addToOrderLinesInQuotationList(
+    //   '${quotationController.quotationCounter}',
+    //   p,
+    // );
   }
 
   addNewImage() {
@@ -3696,12 +3683,12 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
           'combo': '',
           'image': Uint8List(0),
         });
-    Widget p = ReusableImageRow(index: quotationController.quotationCounter);
-
-    quotationController.addToOrderLinesInQuotationList(
-      '${quotationController.quotationCounter}',
-      p,
-    );
+    // Widget p = ReusableImageRow(index: quotationController.quotationCounter);
+    //
+    // quotationController.addToOrderLinesInQuotationList(
+    //   '${quotationController.quotationCounter}',
+    //   p,
+    // );
   }
 
   addNewNote() {
@@ -3728,12 +3715,12 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
           'combo': '',
         });
 
-    Widget p = ReusableNoteRow(index: quotationController.quotationCounter);
+    // Widget p = ReusableNoteRow(index: quotationController.quotationCounter);
 
-    quotationController.addToOrderLinesInQuotationList(
-      '${quotationController.quotationCounter}',
-      p,
-    );
+    // quotationController.addToOrderLinesInQuotationList(
+    //   '${quotationController.quotationCounter}',
+    //   p,
+    // );
   }
 
   List<Step> getSteps() => [
@@ -4276,13 +4263,13 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       quotationController.addToUnitPriceControllers(
                         quotationController.quotationCounter,
                       );
-                      Widget p = ReusableItemRow(
-                        index: quotationController.quotationCounter,
-                      );
-                      quotationController.addToOrderLinesInQuotationList(
-                        '${quotationController.quotationCounter}',
-                        p,
-                      );
+                      // Widget p = ReusableItemRow(
+                      //   index: quotationController.quotationCounter,
+                      // );
+                      // quotationController.addToOrderLinesInQuotationList(
+                      //   '${quotationController.quotationCounter}',
+                      //   p,
+                      // );
                     },
                     controller: discountController,
                     cursorColor: Colors.black,
@@ -4419,10 +4406,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                                   .removeFromRowsInListViewInQuotation(
                                     widget.index,
                                   );
-                              quotationController
-                                  .removeFromOrderLinesInQuotationList(
-                                    widget.index.toString(),
-                                  );
+                              // quotationController
+                              //     .removeFromOrderLinesInQuotationList(
+                              //       widget.index.toString(),
+                              //     );
                             });
                             setState(() {
                               cont.totalItems = 0.0;
@@ -4540,10 +4527,10 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                                   .removeFromRowsInListViewInQuotation(
                                     widget.index,
                                   );
-                              quotationController
-                                  .removeFromOrderLinesInQuotationList(
-                                    widget.index.toString(),
-                                  );
+                              // quotationController
+                              //     .removeFromOrderLinesInQuotationList(
+                              //       widget.index.toString(),
+                              //     );
                             });
                           },
                           child: Icon(
@@ -4673,10 +4660,10 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                               .removeFromRowsInListViewInQuotation(
                                 widget.index,
                               );
-                          quotationController
-                              .removeFromOrderLinesInQuotationList(
-                                widget.index.toString(),
-                              );
+                          // quotationController
+                          //     .removeFromOrderLinesInQuotationList(
+                          //       widget.index.toString(),
+                          //     );
                         });
                       },
                       child: Icon(Icons.delete_outline, color: Primary.primary),
@@ -4859,10 +4846,10 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                               .removeFromRowsInListViewInQuotation(
                                 widget.index,
                               );
-                          quotationController
-                              .removeFromOrderLinesInQuotationList(
-                                widget.index.toString(),
-                              );
+                          // quotationController
+                          //     .removeFromOrderLinesInQuotationList(
+                          //       widget.index.toString(),
+                          //     );
                         });
                       },
                       child: Icon(Icons.delete_outline, color: Primary.primary),
@@ -5367,13 +5354,13 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       quotationController.addToCombosPricesControllers(
                         quotationController.quotationCounter,
                       );
-                      Widget p = ReusableComboRow(
-                        index: quotationController.quotationCounter,
-                      );
-                      quotationController.addToOrderLinesInQuotationList(
-                        '${quotationController.quotationCounter}',
-                        p,
-                      );
+                      // Widget p = ReusableComboRow(
+                      //   index: quotationController.quotationCounter,
+                      // );
+                      // quotationController.addToOrderLinesInQuotationList(
+                      //   '${quotationController.quotationCounter}',
+                      //   p,
+                      // );
                       // cont.setEnteredQtyInQuotation(
                       //   quotationController.quotationCounter,
                       //   quantity,
@@ -5484,10 +5471,10 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                                   .removeFromRowsInListViewInQuotation(
                                     widget.index,
                                   );
-                              quotationController
-                                  .removeFromOrderLinesInQuotationList(
-                                    widget.index.toString(),
-                                  );
+                              // quotationController
+                              //     .removeFromOrderLinesInQuotationList(
+                              //       widget.index.toString(),
+                              //     );
                             });
                             setState(() {
                               cont.totalItems = 0.0;

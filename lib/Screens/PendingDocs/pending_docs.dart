@@ -18,7 +18,6 @@ import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Screens/Quotations/print_quotation.dart';
-import 'package:rooster_app/Screens/Quotations/quotation_summary.dart';
 import 'package:rooster_app/Screens/Quotations/tasks.dart';
 import 'package:rooster_app/Screens/SalesInvoice/print_sales_invoice.dart';
 import 'package:rooster_app/Screens/SalesInvoice/sales_invoice_summary.dart';
@@ -34,6 +33,8 @@ import 'package:rooster_app/const/colors.dart';
 import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/const/urls.dart';
+
+import '../Quotations/update_quotation_dialog.dart';
 
 class PendingDocs extends StatefulWidget {
   const PendingDocs({super.key});
@@ -1057,7 +1058,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 //update from back
 
                                 Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                                List<int> orderedKeys = [];
                                 Map<int, dynamic> orderLinesMap = {
                                   for (
                                     int i = 0;
@@ -1068,6 +1069,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
+                                  orderedKeys.add(i+1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -1328,6 +1330,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   'confirmed', // status,
 
                                   orderLines1,
+                                    orderedKeys
                                 );
                                 if (res['success'] == true) {
                                   pendingDocsController.getAllPendingDocs();
@@ -1353,7 +1356,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               onTap: () async {
                                 //update from back
                                 Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                                List<int> orderedKeys = [];
                                 Map<int, dynamic> orderLinesMap = {
                                   for (
                                     int i = 0;
@@ -1364,6 +1367,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
+                                  orderedKeys.add(i+1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -1592,6 +1596,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                   'sent', // status,
                                   orderLines1,
+                                    orderedKeys
                                 );
                                 if (res['success'] == true) {
                                   quotationController
@@ -1621,7 +1626,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                             child: InkWell(
                               onTap: () async {
                                 Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                                List<int> orderedKeys = [];
                                 Map<int, dynamic> orderLinesMap = {
                                   for (
                                     int i = 0;
@@ -1632,6 +1637,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
+                                  orderedKeys.add(i+1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -1860,6 +1866,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   'cancelled', // status,
 
                                   orderLines1,
+                                  orderedKeys
                                 );
                                 if (res['success'] == true) {
                                   // homeController.selectedTab.value =

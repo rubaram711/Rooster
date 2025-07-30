@@ -145,11 +145,11 @@ class QuotationController extends GetxController {
     update();
   }
 
-  Map<String, Widget> orderLinesQuotationList = {};
+  // Map<String, Widget> orderLinesQuotationList = {};
   resetQuotation() {
     cashingMethodsNamesList = [];
     cashingMethodsIdsList = [];
-    orderLinesQuotationList = {};
+    // orderLinesQuotationList = {};
     rowsInListViewInQuotation = {};
     // itemsList = [];
     itemsCode = [];
@@ -491,7 +491,7 @@ class QuotationController extends GetxController {
             getTotalItems();
           } else {
             rowsInListViewInQuotation.remove(keys[i]);
-            orderLinesQuotationList.remove('${keys[i]}');
+            // orderLinesQuotationList.remove('${keys[i]}');
             unitPriceControllers.remove(keys[i]);
             decrementListViewLengthInQuotation(increment);
           }
@@ -501,17 +501,16 @@ class QuotationController extends GetxController {
     update();
   }
 
-  addToOrderLinesInQuotationList(String index, Widget p) {
-    orderLinesQuotationList[index] = p;
-    update();
-  }
+  // addToOrderLinesInQuotationList(String index, Widget p) {
+  //   orderLinesQuotationList[index] = p;
+  //   update();
+  // }
+  //
+  // removeFromOrderLinesInQuotationList(String index) {
+  //   orderLinesQuotationList.remove(index);
+  //   update();
+  // }
 
-  removeFromOrderLinesInQuotationList(String index) {
-    orderLinesQuotationList.remove(index);
-    update();
-  }
-
-  Map newRowMap = {};
   List<int> orderedKeys = [];
   Map rowsInListViewInQuotation = {
     // 0: {
@@ -548,8 +547,6 @@ class QuotationController extends GetxController {
   removeFromRowsInListViewInQuotation(int index) {
     rowsInListViewInQuotation.remove(index);
     orderedKeys.remove(index);
-    // print('orderedKeys');
-    // print(orderedKeys);
     update();
   }
 

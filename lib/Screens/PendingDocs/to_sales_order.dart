@@ -15,7 +15,6 @@ import 'package:rooster_app/Controllers/quotation_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Screens/Quotations/print_quotation.dart';
-import 'package:rooster_app/Screens/Quotations/quotation_summary.dart';
 import 'package:rooster_app/Screens/Quotations/schedule_task_dialog.dart';
 import 'package:rooster_app/Screens/Quotations/tasks.dart';
 import 'package:rooster_app/Widgets/custom_snak_bar.dart';
@@ -28,6 +27,8 @@ import 'package:rooster_app/const/colors.dart';
 import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/const/urls.dart';
+
+import '../Quotations/update_quotation_dialog.dart';
 
 class ToSalesOrder extends StatefulWidget {
   const ToSalesOrder({super.key});
@@ -707,6 +708,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
 
   @override
   void initState() {
+    quotationController.rowsInListViewInQuotation = {};
+    quotationController.orderedKeys=[];
     imageFile = Uint8List(0);
     if (widget.info['cashingMethod'] != null) {
       cashMethodId = '${widget.info['cashingMethod']['id']}';
@@ -727,7 +730,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
     if (widget.info['salesperson'] != null) {
       salespersonId = widget.info['salesperson']['id'].toString();
     }
-    quotationController.orderLinesQuotationList = {};
+    // quotationController.orderLinesQuotationList = {};
     quotationController.rowsInListViewInQuotation = {};
     quotationController.selectedQuotationData['orderLines'] =
         widget.info['orderLines'] ?? '';
@@ -739,43 +742,44 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
       quotationController.rowsInListViewInQuotation[i + 1] =
           quotationController.selectedQuotationData['orderLines'][i];
     }
-    var keys = quotationController.rowsInListViewInQuotation.keys.toList();
+    // var keys = quotationController.rowsInListViewInQuotation.keys.toList();
     for (int i = 0; i < widget.info['orderLines'].length; i++) {
+      quotationController.orderedKeys.add(i+1);
       if (widget.info['orderLines'][i]['line_type_id'] == 2) {
         quotationController.unitPriceControllers[i + 1] =
             TextEditingController();
-        Widget p = ReusableItemRow(
-          index: i + 1,
-          info: quotationController.rowsInListViewInQuotation[keys[i]],
-        );
-
-        quotationController.orderLinesQuotationList['${i + 1}'] = p;
-      } else if (widget.info['orderLines'][i]['line_type_id'] == 1) {
-        Widget p = ReusableTitleRow(
-          index: i + 1,
-          info: quotationController.rowsInListViewInQuotation[keys[i]],
-        );
-        quotationController.orderLinesQuotationList['${i + 1}'] = p;
-      } else if (widget.info['orderLines'][i]['line_type_id'] == 5) {
-        Widget p = ReusableNoteRow(
-          index: i + 1,
-          info: quotationController.rowsInListViewInQuotation[keys[i]],
-        );
-        quotationController.orderLinesQuotationList['${i + 1}'] = p;
-      } else if (widget.info['orderLines'][i]['line_type_id'] == 4) {
-        Widget p = ReusableImageRow(
-          index: i + 1,
-          info: quotationController.rowsInListViewInQuotation[keys[i]],
-        );
-        quotationController.orderLinesQuotationList['${i + 1}'] = p;
+      //   Widget p = ReusableItemRow(
+      //     index: i + 1,
+      //     info: quotationController.rowsInListViewInQuotation[keys[i]],
+      //   );
+      //
+      //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
+      // } else if (widget.info['orderLines'][i]['line_type_id'] == 1) {
+      //   Widget p = ReusableTitleRow(
+      //     index: i + 1,
+      //     info: quotationController.rowsInListViewInQuotation[keys[i]],
+      //   );
+      //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
+      // } else if (widget.info['orderLines'][i]['line_type_id'] == 5) {
+      //   Widget p = ReusableNoteRow(
+      //     index: i + 1,
+      //     info: quotationController.rowsInListViewInQuotation[keys[i]],
+      //   );
+      //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
+      // } else if (widget.info['orderLines'][i]['line_type_id'] == 4) {
+      //   Widget p = ReusableImageRow(
+      //     index: i + 1,
+      //     info: quotationController.rowsInListViewInQuotation[keys[i]],
+      //   );
+      //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
       } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
         quotationController.combosPriceControllers[i + 1] =
             TextEditingController();
-        Widget p = ReusableComboRow(
-          index: i + 1,
-          info: quotationController.rowsInListViewInQuotation[keys[i]],
-        );
-        quotationController.orderLinesQuotationList['${i + 1}'] = p;
+        // Widget p = ReusableComboRow(
+        //   index: i + 1,
+        //   info: quotationController.rowsInListViewInQuotation[keys[i]],
+        // );
+        // quotationController.orderLinesQuotationList['${i + 1}'] = p;
       }
     }
     super.initState();
@@ -1336,7 +1340,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                         child: InkWell(
                           onTap: () async {
                             Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                            List<int> orderedKeys = [];
                             Map<int, dynamic> orderLinesMap = {
                               for (
                                 int i = 0;
@@ -1347,6 +1351,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                             };
 
                             for (int i = 0; i < orderLinesMap.length; i++) {
+                              orderedKeys.add(i+1);
                               Map<String, dynamic> selectedOrderLine =
                                   orderLinesMap[i + 1];
                               orderLines1[i + 1] = {};
@@ -1564,6 +1569,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                               '${widget.info['code'] ?? ''}',
                               'sent', // status,
                               orderLines1,
+                              orderedKeys
                             );
                             if (res['success'] == true) {
                               // homeController.selectedTab.value =
@@ -1590,7 +1596,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                         child: InkWell(
                           onTap: () async {
                             Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                            List<int> orderedKeys = [];
                             Map<int, dynamic> orderLinesMap = {
                               for (
                                 int i = 0;
@@ -1601,6 +1607,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                             };
 
                             for (int i = 0; i < orderLinesMap.length; i++) {
+                              orderedKeys.add(i+1);
                               Map<String, dynamic> selectedOrderLine =
                                   orderLinesMap[i + 1];
                               orderLines1[i + 1] = {};
@@ -1818,6 +1825,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                               '${widget.info['code'] ?? ''}',
                               'cancelled', // status,
                               orderLines1,
+                              orderedKeys
                             );
                             if (res['success'] == true) {
                               // homeController.selectedTab.value =

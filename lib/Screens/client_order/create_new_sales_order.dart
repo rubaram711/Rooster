@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
@@ -253,7 +254,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
   Widget build(BuildContext context) {
     return GetBuilder<SalesOrderController>(
       builder: (salesOrderCont) {
-        var keysList = salesOrderCont.orderLinesSalesOrderList.keys.toList();
         return salesOrderCont.isSalesOrderInfoFetched
             ? Container(
               padding: EdgeInsets.symmetric(
@@ -549,19 +549,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                               text: 'submit_and_preview'.tr,
                               onTap: () async {
                                 _saveContent();
-
-                                var oldKeys =
-                                    salesOrderController
-                                        .rowsInListViewInSalesOrder
-                                        .keys
-                                        .toList()
-                                      ..sort();
-                                for (int i = 0; i < oldKeys.length; i++) {
-                                  salesOrderController.newRowMap[i + 1] =
-                                      salesOrderController
-                                          .rowsInListViewInSalesOrder[oldKeys[i]]!;
-                                }
-
                                 var res = await storeSalesOrder(
                                   refController.text,
                                   selectedCustomerIds,
@@ -600,7 +587,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   salesOrderCont.isBeforeVatPrices ? '0' : '1',
                                   salesOrderCont.isBeforeVatPrices ? '1' : '0',
                                   codeController.text,
-                                  salesOrderController.newRowMap,
+                                  salesOrderController.rowsInListViewInSalesOrder,
+                                  salesOrderCont.orderedKeys,
                                   titleController.text,
                                 );
                                 if (res['success'] == true) {
@@ -2385,8 +2373,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   TableTitle(
                                     text: 'item_code'.tr,
                                     width:
-                                        MediaQuery.of(context).size.width *
-                                        0.10,
+                                    homeController.isOpened.value? MediaQuery.of(context).size.width * 0.10:MediaQuery.of(context).size.width * 0.13,
                                   ),
                                   TableTitle(
                                     text: 'description'.tr,
@@ -2408,9 +2395,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   ),
                                   TableTitle(
                                     text: 'unit_price'.tr,
-                                    width:
-                                        MediaQuery.of(context).size.width *
-                                        0.05,
+                                    width:homeController.isOpened.value? MediaQuery.of(context).size.width * 0.05:MediaQuery.of(context).size.width * 0.1
+
                                   ),
                                   TableTitle(
                                     text: '${'disc'.tr}. %',
@@ -2421,8 +2407,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   TableTitle(
                                     text: 'total'.tr,
                                     width:
-                                        MediaQuery.of(context).size.width *
-                                        0.05,
+                                    homeController.isOpened.value? MediaQuery.of(context).size.width * 0.05:MediaQuery.of(context).size.width * 0.1,
                                   ),
                                   TableTitle(
                                     text: 'more_options'.tr,
@@ -2455,26 +2440,123 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                 children: [
                                   SizedBox(
                                     height:
+                                    salesOrderCont
+                                        .listViewLengthInSalesOrder,
+                                    child: ScrollConfiguration(
+                                      behavior: const MaterialScrollBehavior()
+                                          .copyWith(
+                                        dragDevices: {
+                                          PointerDeviceKind.touch,
+                                          PointerDeviceKind.mouse,
+                                        },
+                                      ),
+                                      child: ReorderableListView.builder(
+                                        itemCount:
                                         salesOrderCont
-                                            .listViewLengthInSalesOrder,
-                                    child: ListView(
-                                      children:
-                                          keysList.map((key) {
-                                            return Dismissible(
-                                              key: Key(
-                                                key,
-                                              ), // Ensure each widget has a unique key
-                                              onDismissed:
-                                                  (direction) => salesOrderCont
-                                                      .removeFromOrderLinesInSalesOrderList(
-                                                        key.toString(),
-                                                      ),
-                                              child:
+                                            .rowsInListViewInSalesOrder
+                                            .keys
+                                            .length,
+                                        buildDefaultDragHandles: false,
+                                        itemBuilder: (context, index) {
+                                          final key =
+                                          salesOrderCont.orderedKeys[index];
+                                          final row =
+                                          salesOrderCont
+                                              .rowsInListViewInSalesOrder[key]!;
+                                          final lineType =
+                                              row['line_type_id'] ?? '';
+
+                                          return Dismissible(
+                                            key: ValueKey(key),
+                                            onDismissed: (direction) {
+                                              setState(() {
+                                                salesOrderCont
+                                                    .decrementListViewLengthInSalesOrder(
                                                   salesOrderCont
-                                                      .orderLinesSalesOrderList[key] ??
-                                                  const SizedBox(),
+                                                      .increment,
+                                                );
+                                                salesOrderCont
+                                                    .removeFromRowsInListViewInSalesOrder(
+                                                  key,
+                                                );
+                                                salesOrderCont
+                                                    .removeFromOrderLinesInSalesOrderList(
+                                                  key.toString(),
+                                                );
+                                              });
+                                            },
+                                            child: SizedBox(
+                                              width:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width,
+                                              child: Row(
+                                                children: [
+                                                  ReorderableDragStartListener(
+                                                    index: index,
+                                                    child: Container(
+                                                      width:
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                          0.02,
+                                                      height: 20,
+                                                      margin:
+                                                      const EdgeInsets.symmetric(
+                                                        vertical: 15,
+                                                      ),
+                                                      decoration: const BoxDecoration(
+                                                        image: DecorationImage(
+                                                          image: AssetImage(
+                                                            'assets/images/newRow.png',
+                                                          ),
+                                                          fit: BoxFit.contain,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child:
+                                                    lineType == '1'
+                                                        ? ReusableTitleRow(
+                                                      index: key,
+                                                    )
+                                                        : lineType == '2'
+                                                        ? ReusableItemRow(
+                                                      index: key,
+                                                    )
+                                                        : lineType == '3'
+                                                        ? ReusableComboRow(
+                                                      index: key,
+                                                    )
+                                                        : lineType == '4'
+                                                        ? ReusableImageRow(
+                                                      index: key,
+                                                    )
+                                                        : ReusableNoteRow(
+                                                      index: key,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        onReorder: (oldIndex, newIndex) {
+                                          setState(() {
+                                            if (newIndex > oldIndex) {
+                                              newIndex -= 1;
+                                            }
+                                            final movedKey = salesOrderCont
+                                                .orderedKeys
+                                                .removeAt(oldIndex);
+                                            salesOrderCont.orderedKeys.insert(
+                                              newIndex,
+                                              movedKey,
                                             );
-                                          }).toList(),
+                                          });
+                                        },
+                                      ),
                                     ),
                                   ),
                                   Row(
@@ -2872,19 +2954,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   height: 45,
                                   onTapFunction: () async {
                                     _saveContent();
-                                    var oldKeys =
-                                        salesOrderCont
-                                            .rowsInListViewInSalesOrder
-                                            .keys
-                                            .toList()
-                                          ..sort();
-                                    for (int i = 0; i < oldKeys.length; i++) {
-                                      salesOrderCont.newRowMap[i + 1] =
-                                          salesOrderCont
-                                              .rowsInListViewInSalesOrder[oldKeys[i]]!;
-                                    }
                                     bool hasType1WithEmptyTitle =
-                                        salesOrderController.newRowMap.values
+                                        salesOrderController.rowsInListViewInSalesOrder.values
                                             .any((map) {
                                               return map['line_type_id'] ==
                                                       '1' &&
@@ -2893,7 +2964,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             });
                                     bool
                                     hasType2WithEmptyId = salesOrderController
-                                        .newRowMap
+                                        .rowsInListViewInSalesOrder
                                         .values
                                         .any((map) {
                                           return map['line_type_id'] == '2' &&
@@ -2901,14 +2972,14 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                         });
                                     bool
                                     hasType3WithEmptyId = salesOrderController
-                                        .newRowMap
+                                        .rowsInListViewInSalesOrder
                                         .values
                                         .any((map) {
                                           return map['line_type_id'] == '3' &&
                                               (map['combo']?.isEmpty ?? true);
                                         });
                                     bool hasType4WithEmptyImage =
-                                        salesOrderController.newRowMap.values
+                                        salesOrderController.rowsInListViewInSalesOrder.values
                                             .any((map) {
                                               return map['line_type_id'] ==
                                                       '4' &&
@@ -2918,14 +2989,14 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             });
                                     bool
                                     hasType5WithEmptyNote = salesOrderController
-                                        .newRowMap
+                                        .rowsInListViewInSalesOrder
                                         .values
                                         .any((map) {
                                           return map['line_type_id'] == '5' &&
                                               (map['note']?.isEmpty ?? true);
                                         });
                                     if (salesOrderController
-                                        .newRowMap
+                                        .rowsInListViewInSalesOrder
                                         .isEmpty) {
                                       CommonWidgets.snackBar(
                                         'error',
@@ -3005,7 +3076,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             ? '1'
                                             : '0',
                                         codeController.text,
-                                        salesOrderController.newRowMap,
+                                        salesOrderController.rowsInListViewInSalesOrder,
+                                        salesOrderCont.orderedKeys,
                                         titleController.text,
                                       );
                                       if (res['success'] == true) {
@@ -3212,15 +3284,14 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
   bool addItem = false;
   TextEditingController titleController = TextEditingController();
   String titleValue = '';
-  int salesOrderCounter = 0;
   addNewTitle() {
     setState(() {
-      salesOrderCounter += 1;
+      salesOrderController.salesOrderCounter += 1;
     });
     salesOrderController.incrementListViewLengthInSalesOrder(
       salesOrderController.increment,
     );
-    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderController.salesOrderCounter, {
       'line_type_id': '1',
       'item_id': '',
       'itemName': '',
@@ -3236,23 +3307,23 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'note': '',
       'combo': '',
     });
-    Widget p = ReusableTitleRow(index: salesOrderCounter);
+    Widget p = ReusableTitleRow(index: salesOrderController.salesOrderCounter);
 
     salesOrderController.addToOrderLinesInSalesOrderList(
-      '$salesOrderCounter',
+      '${salesOrderController.salesOrderCounter}',
       p,
     );
   }
 
   addNewItem() {
     setState(() {
-      salesOrderCounter += 1;
+      salesOrderController.salesOrderCounter += 1;
     });
     salesOrderController.incrementListViewLengthInSalesOrder(
       salesOrderController.increment,
     );
 
-    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderController.salesOrderCounter, {
       'line_type_id': '2',
       'item_id': '',
       'itemName': '',
@@ -3268,24 +3339,24 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'note': '',
       'combo': '',
     });
-    salesOrderController.addToUnitPriceControllers(salesOrderCounter);
-    Widget p = ReusableItemRow(index: salesOrderCounter);
+    salesOrderController.addToUnitPriceControllers(salesOrderController.salesOrderCounter);
+    Widget p = ReusableItemRow(index: salesOrderController.salesOrderCounter);
 
     salesOrderController.addToOrderLinesInSalesOrderList(
-      '$salesOrderCounter',
+      '${salesOrderController.salesOrderCounter}',
       p,
     );
   }
 
   addNewCombo() {
     setState(() {
-      salesOrderCounter += 1;
+      salesOrderController.salesOrderCounter += 1;
     });
     salesOrderController.incrementListViewLengthInSalesOrder(
       salesOrderController.increment,
     );
 
-    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderController.salesOrderCounter, {
       'line_type_id': '3',
       'item_id': '',
       'itemName': '',
@@ -3301,24 +3372,24 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'note': '',
       'combo': '',
     });
-    salesOrderController.addToCombosPricesControllers(salesOrderCounter);
+    salesOrderController.addToCombosPricesControllers(salesOrderController.salesOrderCounter);
 
-    Widget p = ReusableComboRow(index: salesOrderCounter);
+    Widget p = ReusableComboRow(index: salesOrderController.salesOrderCounter);
     salesOrderController.addToOrderLinesInSalesOrderList(
-      '$salesOrderCounter',
+      '${salesOrderController.salesOrderCounter}',
       p,
     );
   }
 
   addNewImage() {
     setState(() {
-      salesOrderCounter += 1;
+      salesOrderController.salesOrderCounter += 1;
     });
     salesOrderController.incrementListViewLengthInSalesOrder(
       salesOrderController.increment + 50,
     );
 
-    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderController.salesOrderCounter, {
       'line_type_id': '4',
       'item_id': '',
       'itemName': '',
@@ -3335,23 +3406,23 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'combo': '',
       'image': Uint8List(0),
     });
-    Widget p = ReusableImageRow(index: salesOrderCounter);
+    Widget p = ReusableImageRow(index: salesOrderController.salesOrderCounter);
 
     salesOrderController.addToOrderLinesInSalesOrderList(
-      '$salesOrderCounter',
+      '${salesOrderController.salesOrderCounter}',
       p,
     );
   }
 
   addNewNote() {
     setState(() {
-      salesOrderCounter += 1;
+      salesOrderController.salesOrderCounter += 1;
     });
     salesOrderController.incrementListViewLengthInSalesOrder(
       salesOrderController.increment,
     );
 
-    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderCounter, {
+    salesOrderController.addToRowsInListViewInSalesOrder(salesOrderController.salesOrderCounter, {
       'line_type_id': '5',
       'item_id': '',
       'itemName': '',
@@ -3368,10 +3439,10 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'combo': '',
     });
 
-    Widget p = ReusableNoteRow(index: salesOrderCounter);
+    Widget p = ReusableNoteRow(index: salesOrderController.salesOrderCounter);
 
     salesOrderController.addToOrderLinesInSalesOrderList(
-      '$salesOrderCounter',
+      '${salesOrderController.salesOrderCounter}',
       p,
     );
   }
@@ -3421,6 +3492,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
   final SalesOrderController salesOrderController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
+  final HomeController homeController = Get.find();
   List<String> itemsList = [];
   String selectedItemId = '';
   int selectedItem = 0;
@@ -3480,164 +3552,153 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.02,
-                  height: 20,
-                  margin: const EdgeInsets.symmetric(vertical: 15),
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/newRow.png'),
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-                ReusableDropDownMenusWithSearch(
-                  list:
-                      cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
-                  text: ''.tr,
-                  hint: 'Item Code'.tr,
-                  controller: itemCodeController,
-                  onSelected: (String? value) async {
-                    itemCodeController.text = value!;
-                    setState(() {
-                      selectedItemId =
-                          '${cont.itemsIds[cont.itemsCode.indexOf(value.split(" | ")[0])]}'; //get the id by the first element of the list.
-                      mainDescriptionVar =
-                          cont.itemsDescription[selectedItemId];
-                      mainCode = cont.itemsCodes[selectedItemId];
-                      itemName = cont.itemsNames[selectedItemId];
-                      descriptionController.text =
-                          cont.itemsDescription[selectedItemId]!;
+             Obx(() =>ReusableDropDownMenusWithSearch(
+               list:
+               cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
+               text: ''.tr,
+               hint: 'Item Code'.tr,
+               controller: itemCodeController,
+               onSelected: (String? value) async {
+                 itemCodeController.text = value!;
+                 setState(() {
+                   selectedItemId =
+                   '${cont.itemsIds[cont.itemsCode.indexOf(value.split(" | ")[0])]}'; //get the id by the first element of the list.
+                   mainDescriptionVar =
+                   cont.itemsDescription[selectedItemId];
+                   mainCode = cont.itemsCodes[selectedItemId];
+                   itemName = cont.itemsNames[selectedItemId];
+                   descriptionController.text =
+                   cont.itemsDescription[selectedItemId]!;
 
-                      if (cont.itemsPricesCurrencies[selectedItemId] ==
-                          cont.selectedCurrencyName) {
-                        cont.unitPriceControllers[widget.index]!.text =
-                            cont.itemUnitPrice[selectedItemId].toString();
-                      } else if (cont.selectedCurrencyName == 'USD' &&
-                          cont.itemsPricesCurrencies[selectedItemId] !=
-                              cont.selectedCurrencyName) {
-                        var result = exchangeRatesController.exchangeRatesList
-                            .firstWhere(
-                              (item) =>
-                                  item["currency"] ==
-                                  cont.itemsPricesCurrencies[selectedItemId],
-                              orElse: () => null,
-                            );
-                        var divider = '1';
-                        if (result != null) {
-                          divider = result["exchange_rate"].toString();
-                        }
-                        cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                      } else if (cont.selectedCurrencyName != 'USD' &&
-                          cont.itemsPricesCurrencies[selectedItemId] == 'USD') {
-                        cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                      } else {
-                        var result = exchangeRatesController.exchangeRatesList
-                            .firstWhere(
-                              (item) =>
-                                  item["currency"] ==
-                                  cont.itemsPricesCurrencies[selectedItemId],
-                              orElse: () => null,
-                            );
-                        var divider = '1';
-                        if (result != null) {
-                          divider = result["exchange_rate"].toString();
-                        }
-                        var usdPrice =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                        cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                      }
-                      if (cont.isBeforeVatPrices) {
-                        taxRate = 1;
-                        taxValue = 0;
-                      } else {
-                        taxRate =
-                            double.parse(cont.itemsVats[selectedItemId]) /
-                            100.0;
-                        taxValue =
-                            taxRate *
-                            double.parse(
-                              cont.unitPriceControllers[widget.index]!.text,
-                            );
-                      }
-                      cont.unitPriceControllers[widget.index]!.text =
-                          '${double.parse(cont.unitPriceControllers[widget.index]!.text) + taxValue}';
-                      qtyController.text = '1';
-                      quantity = '1';
-                      discountController.text = '0';
-                      discount = '0';
-                      cont
-                          .unitPriceControllers[widget.index]!
-                          .text = double.parse(
-                        cont.unitPriceControllers[widget.index]!.text,
-                      ).toStringAsFixed(2);
-                      totalLine =
-                          '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                      cont.setEnteredQtyInSalesOrder(widget.index, quantity);
-                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
-                      cont.getTotalItems();
-                    });
-                    cont.setEnteredUnitPriceInSalesOrder(
-                      widget.index,
-                      cont.unitPriceControllers[widget.index]!.text,
-                    );
-                    cont.setItemIdInSalesOrder(widget.index, selectedItemId);
-                    cont.setItemNameInSalesOrder(
-                      widget.index,
-                      itemName,
-                      // value.split(" | ")[0],
-                    ); // set only first element as name
-                    cont.setMainCodeInSalesOrder(widget.index, mainCode);
-                    cont.setTypeInSalesOrder(widget.index, '2');
-                    cont.setMainDescriptionInSalesOrder(
-                      widget.index,
-                      mainDescriptionVar,
-                    );
-                  },
-                  validationFunc: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'select_option'.tr;
-                    }
-                    return null;
-                  },
-                  rowWidth: MediaQuery.of(context).size.width * 0.10,
-                  textFieldWidth: MediaQuery.of(context).size.width * 0.10,
-                  clickableOptionText: 'create_virtual_item'.tr,
-                  isThereClickableOption: true,
-                  onTappedClickableOption: () {
-                    productController.clearData();
-                    productController.getFieldsForCreateProductFromBack();
-                    productController.setIsItUpdateProduct(false);
-                    showDialog<String>(
-                      context: context,
-                      builder:
-                          (BuildContext context) => const AlertDialog(
-                            backgroundColor: Colors.white,
-                            contentPadding: EdgeInsets.all(0),
-                            titlePadding: EdgeInsets.all(0),
-                            actionsPadding: EdgeInsets.all(0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(9),
-                              ),
-                            ),
-                            elevation: 0,
-                            content: CreateProductDialogContent(),
-                          ),
-                    );
-                  },
-                  columnWidths: [
-                    100.0,
-                    200.0,
-                    550.0,
-                    100.0,
-                  ], // Set column widths
-                  focusNode: dropFocus,
-                  nextFocusNode: quantityFocus,
-                ),
+                   if (cont.itemsPricesCurrencies[selectedItemId] ==
+                       cont.selectedCurrencyName) {
+                     cont.unitPriceControllers[widget.index]!.text =
+                         cont.itemUnitPrice[selectedItemId].toString();
+                   } else if (cont.selectedCurrencyName == 'USD' &&
+                       cont.itemsPricesCurrencies[selectedItemId] !=
+                           cont.selectedCurrencyName) {
+                     var result = exchangeRatesController.exchangeRatesList
+                         .firstWhere(
+                           (item) =>
+                       item["currency"] ==
+                           cont.itemsPricesCurrencies[selectedItemId],
+                       orElse: () => null,
+                     );
+                     var divider = '1';
+                     if (result != null) {
+                       divider = result["exchange_rate"].toString();
+                     }
+                     cont.unitPriceControllers[widget.index]!.text =
+                     '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                   } else if (cont.selectedCurrencyName != 'USD' &&
+                       cont.itemsPricesCurrencies[selectedItemId] == 'USD') {
+                     cont.unitPriceControllers[widget.index]!.text =
+                     '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                   } else {
+                     var result = exchangeRatesController.exchangeRatesList
+                         .firstWhere(
+                           (item) =>
+                       item["currency"] ==
+                           cont.itemsPricesCurrencies[selectedItemId],
+                       orElse: () => null,
+                     );
+                     var divider = '1';
+                     if (result != null) {
+                       divider = result["exchange_rate"].toString();
+                     }
+                     var usdPrice =
+                         '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                     cont.unitPriceControllers[widget.index]!.text =
+                     '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                   }
+                   if (cont.isBeforeVatPrices) {
+                     taxRate = 1;
+                     taxValue = 0;
+                   } else {
+                     taxRate =
+                         double.parse(cont.itemsVats[selectedItemId]) /
+                             100.0;
+                     taxValue =
+                         taxRate *
+                             double.parse(
+                               cont.unitPriceControllers[widget.index]!.text,
+                             );
+                   }
+                   cont.unitPriceControllers[widget.index]!.text =
+                   '${double.parse(cont.unitPriceControllers[widget.index]!.text) + taxValue}';
+                   qtyController.text = '1';
+                   quantity = '1';
+                   discountController.text = '0';
+                   discount = '0';
+                   cont
+                       .unitPriceControllers[widget.index]!
+                       .text = double.parse(
+                     cont.unitPriceControllers[widget.index]!.text,
+                   ).toStringAsFixed(2);
+                   totalLine =
+                   '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                   cont.setEnteredQtyInSalesOrder(widget.index, quantity);
+                   cont.setMainTotalInSalesOrder(widget.index, totalLine);
+                   cont.getTotalItems();
+                 });
+                 cont.setEnteredUnitPriceInSalesOrder(
+                   widget.index,
+                   cont.unitPriceControllers[widget.index]!.text,
+                 );
+                 cont.setItemIdInSalesOrder(widget.index, selectedItemId);
+                 cont.setItemNameInSalesOrder(
+                   widget.index,
+                   itemName,
+                   // value.split(" | ")[0],
+                 ); // set only first element as name
+                 cont.setMainCodeInSalesOrder(widget.index, mainCode);
+                 cont.setTypeInSalesOrder(widget.index, '2');
+                 cont.setMainDescriptionInSalesOrder(
+                   widget.index,
+                   mainDescriptionVar,
+                 );
+               },
+               validationFunc: (value) {
+                 if (value == null || value.isEmpty) {
+                   return 'select_option'.tr;
+                 }
+                 return null;
+               },
+               rowWidth: homeController.isOpened.value? MediaQuery.of(context).size.width * 0.10:MediaQuery.of(context).size.width * 0.13,
+               textFieldWidth: homeController.isOpened.value? MediaQuery.of(context).size.width * 0.10:MediaQuery.of(context).size.width * 0.13,
+               clickableOptionText: 'create_virtual_item'.tr,
+               isThereClickableOption: true,
+               onTappedClickableOption: () {
+                 productController.clearData();
+                 productController.getFieldsForCreateProductFromBack();
+                 productController.setIsItUpdateProduct(false);
+                 showDialog<String>(
+                   context: context,
+                   builder:
+                       (BuildContext context) => const AlertDialog(
+                     backgroundColor: Colors.white,
+                     contentPadding: EdgeInsets.all(0),
+                     titlePadding: EdgeInsets.all(0),
+                     actionsPadding: EdgeInsets.all(0),
+                     shape: RoundedRectangleBorder(
+                       borderRadius: BorderRadius.all(
+                         Radius.circular(9),
+                       ),
+                     ),
+                     elevation: 0,
+                     content: CreateProductDialogContent(),
+                   ),
+                 );
+               },
+               columnWidths: [
+                 100.0,
+                 200.0,
+                 550.0,
+                 100.0,
+               ], // Set column widths
+               focusNode: dropFocus,
+               nextFocusNode: quantityFocus,
+             ) ,),
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.20,
                   child: TextFormField(
@@ -3840,8 +3901,8 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                 ),
 
                 // unitPrice
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.05,
+                Obx(() => SizedBox(
+                  width:homeController.isOpened.value? MediaQuery.of(context).size.width * 0.05:MediaQuery.of(context).size.width * 0.1,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
                       fontSize: 12,
@@ -3900,7 +3961,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         }
                         // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
                         totalLine =
-                            '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
@@ -3909,7 +3970,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       cont.getTotalItems();
                     },
                   ),
-                ),
+                ),),
                 //discount
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.05,
@@ -3919,6 +3980,38 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus1,
+                    onFieldSubmitted: (value){
+                      setState(() {
+                        salesOrderController.salesOrderCounter += 1;
+                      });
+                      salesOrderController.incrementListViewLengthInSalesOrder(
+                        salesOrderController.increment,
+                      );
+
+                      salesOrderController.addToRowsInListViewInSalesOrder(salesOrderController.salesOrderCounter, {
+                        'line_type_id': '2',
+                        'item_id': '',
+                        'itemName': '',
+                        'item_main_code': '',
+                        'item_discount': '0',
+                        'item_description': '',
+                        'item_quantity': '0',
+                        'item_warehouseId': '',
+                        'combo_warehouseId': '',
+                        'item_unit_price': '0',
+                        'item_total': '0',
+                        'title': '',
+                        'note': '',
+                        'combo': '',
+                      });
+                      salesOrderController.addToUnitPriceControllers(salesOrderController.salesOrderCounter);
+                      Widget p = ReusableItemRow(index: salesOrderController.salesOrderCounter);
+
+                      salesOrderController.addToOrderLinesInSalesOrderList(
+                        '${salesOrderController.salesOrderCounter}',
+                        p,
+                      );
+                    },
                     controller: discountController,
                     cursorColor: Colors.black,
                     textAlign: TextAlign.center,
@@ -3984,15 +4077,16 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                 ),
 
                 //total
-                ReusableShowInfoCard(
-                  text: formatDoubleWithCommas(
-                    double.parse(
-                      cont.rowsInListViewInSalesOrder[widget
-                          .index]['item_total'],
-                    ),
-                  ),
-                  width: MediaQuery.of(context).size.width * 0.05,
-                ),
+                Obx(() =>
+                    ReusableShowInfoCard(
+                      text: formatDoubleWithCommas(
+                        double.parse(
+                          cont.rowsInListViewInSalesOrder[widget
+                              .index]['item_total'],
+                        ),
+                      ),
+                      width: homeController.isOpened.value? MediaQuery.of(context).size.width * 0.05:MediaQuery.of(context).size.width * 0.1,
+                    ),),
 
                 //more
                 SizedBox(
@@ -4124,17 +4218,7 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.02,
-                  height: 20,
-                  margin: const EdgeInsets.symmetric(vertical: 15),
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/newRow.png'),
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
+
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.63,
                   child: ReusableTextField(
@@ -4241,18 +4325,7 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            //image
-            Container(
-              width: MediaQuery.of(context).size.width * 0.02,
-              height: 20,
-              margin: const EdgeInsets.symmetric(vertical: 15),
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/newRow.png'),
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
+
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.63,
               child: ReusableTextField(
@@ -4377,20 +4450,6 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            //image
-            Container(
-              width: MediaQuery.of(context).size.width * 0.02,
-              height: 20,
-              margin: const EdgeInsets.symmetric(vertical: 15),
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/newRow.png'),
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-
-            //image
             GetBuilder<SalesOrderController>(
               builder: (cont) {
                 return InkWell(
@@ -4539,6 +4598,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
   String qty = '0';
   final ProductController productController = Get.find();
+  final HomeController homeController = Get.find();
 
   TextEditingController comboCodeController = TextEditingController();
   TextEditingController qtyController = TextEditingController();
@@ -4601,150 +4661,139 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.02,
-                  height: 20,
-                  margin: const EdgeInsets.symmetric(vertical: 15),
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/newRow.png'),
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-                ReusableDropDownMenusWithSearch(
-                  list:
-                      cont.combosMultiPartList, // Assuming multiList is List<List<String>>
-                  text: ''.tr,
-                  hint: 'combo'.tr,
-                  controller: comboCodeController,
-                  onSelected: (String? value) async {
-                    comboCodeController.text = value!;
-                    setState(() {
-                      var ind = cont.combosCodesList.indexOf(
-                        value.split(" | ")[0],
-                      );
-                      selectedComboId = cont.combosIdsList[ind];
-                      descriptionVar = cont.combosDescriptionList[ind];
-                      mainCode = cont.combosCodesList[ind];
-                      comboName = cont.combosNamesList[ind];
-                      descriptionController.text =
-                          cont.combosDescriptionList[ind];
+              Obx(() => ReusableDropDownMenusWithSearch(
+                list:
+                cont.combosMultiPartList, // Assuming multiList is List<List<String>>
+                text: ''.tr,
+                hint: 'combo'.tr,
+                controller: comboCodeController,
+                onSelected: (String? value) async {
+                  comboCodeController.text = value!;
+                  setState(() {
+                    var ind = cont.combosCodesList.indexOf(
+                      value.split(" | ")[0],
+                    );
+                    selectedComboId = cont.combosIdsList[ind];
+                    descriptionVar = cont.combosDescriptionList[ind];
+                    mainCode = cont.combosCodesList[ind];
+                    comboName = cont.combosNamesList[ind];
+                    descriptionController.text =
+                    cont.combosDescriptionList[ind];
 
-                      if (cont.combosPricesCurrencies[selectedComboId] ==
-                          cont.selectedCurrencyName) {
-                        cont.combosPriceControllers[widget.index]!.text =
-                            cont.combosPricesList[ind].toString();
-                      } else if (cont.selectedCurrencyName == 'USD' &&
-                          cont.combosPricesCurrencies[selectedComboId] !=
-                              cont.selectedCurrencyName) {
-                        var result = exchangeRatesController.exchangeRatesList
-                            .firstWhere(
-                              (item) =>
-                                  item["currency"] ==
-                                  cont.combosPricesCurrencies[selectedComboId],
-                              orElse: () => null,
-                            );
-                        var divider = '1';
-                        if (result != null) {
-                          divider = result["exchange_rate"].toString();
-                        }
-                        cont.combosPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                      } else if (cont.selectedCurrencyName != 'USD' &&
-                          cont.combosPricesCurrencies[selectedComboId] ==
-                              'USD') {
-                        cont.combosPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                      } else {
-                        var result = exchangeRatesController.exchangeRatesList
-                            .firstWhere(
-                              (item) =>
-                                  item["currency"] ==
-                                  cont.combosPricesCurrencies[selectedComboId],
-                              orElse: () => null,
-                            );
-                        var divider = '1';
-                        if (result != null) {
-                          divider = result["exchange_rate"].toString();
-                        }
-                        var usdPrice =
-                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                        cont.combosPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                    if (cont.combosPricesCurrencies[selectedComboId] ==
+                        cont.selectedCurrencyName) {
+                      cont.combosPriceControllers[widget.index]!.text =
+                          cont.combosPricesList[ind].toString();
+                    } else if (cont.selectedCurrencyName == 'USD' &&
+                        cont.combosPricesCurrencies[selectedComboId] !=
+                            cont.selectedCurrencyName) {
+                      var result = exchangeRatesController.exchangeRatesList
+                          .firstWhere(
+                            (item) =>
+                        item["currency"] ==
+                            cont.combosPricesCurrencies[selectedComboId],
+                        orElse: () => null,
+                      );
+                      var divider = '1';
+                      if (result != null) {
+                        divider = result["exchange_rate"].toString();
                       }
                       cont.combosPriceControllers[widget.index]!.text =
-                          '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
-                      qtyController.text = '1';
-                      quantity = '1';
-                      discountController.text = '0';
-                      discount = '0';
-                      cont
-                          .combosPriceControllers[widget.index]!
-                          .text = double.parse(
-                        cont.combosPriceControllers[widget.index]!.text,
-                      ).toStringAsFixed(2);
-                      totalLine =
-                          '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                      cont.setEnteredQtyInSalesOrder(widget.index, quantity);
-                      cont.setMainTotalInSalesOrder(widget.index, totalLine);
-                      cont.getTotalItems();
-                    });
-                    cont.setEnteredUnitPriceInSalesOrder(
-                      widget.index,
+                      '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                    } else if (cont.selectedCurrencyName != 'USD' &&
+                        cont.combosPricesCurrencies[selectedComboId] ==
+                            'USD') {
+                      cont.combosPriceControllers[widget.index]!.text =
+                      '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                    } else {
+                      var result = exchangeRatesController.exchangeRatesList
+                          .firstWhere(
+                            (item) =>
+                        item["currency"] ==
+                            cont.combosPricesCurrencies[selectedComboId],
+                        orElse: () => null,
+                      );
+                      var divider = '1';
+                      if (result != null) {
+                        divider = result["exchange_rate"].toString();
+                      }
+                      var usdPrice =
+                          '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                      cont.combosPriceControllers[widget.index]!.text =
+                      '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                    }
+                    cont.combosPriceControllers[widget.index]!.text =
+                    '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
+                    qtyController.text = '1';
+                    quantity = '1';
+                    discountController.text = '0';
+                    discount = '0';
+                    cont
+                        .combosPriceControllers[widget.index]!
+                        .text = double.parse(
                       cont.combosPriceControllers[widget.index]!.text,
-                    );
-                    cont.setComboInSalesOrder(widget.index, selectedComboId);
-                    cont.setItemNameInSalesOrder(
-                      widget.index,
-                      comboName,
-                      // value.split(" | ")[0],
-                    ); // set only first element as name
-                    cont.setMainCodeInSalesOrder(widget.index, mainCode);
-                    cont.setTypeInSalesOrder(widget.index, '3');
-                    cont.setMainDescriptionInSalesOrder(
-                      widget.index,
-                      descriptionVar,
-                    );
-                  },
-                  validationFunc: (value) {
-                    // if (value == null || value.isEmpty) {
-                    //   return 'select_option'.tr;
-                    // }
-                    // return null;
-                  },
-                  rowWidth: MediaQuery.of(context).size.width * 0.10,
-                  textFieldWidth: MediaQuery.of(context).size.width * 0.10,
-                  clickableOptionText: 'create_virtual_combo'.tr,
-                  isThereClickableOption: true,
-                  onTappedClickableOption: () {
-                    showDialog<String>(
-                      context: context,
-                      builder:
-                          (BuildContext context) => const AlertDialog(
-                            backgroundColor: Colors.white,
-                            contentPadding: EdgeInsets.all(0),
-                            titlePadding: EdgeInsets.all(0),
-                            actionsPadding: EdgeInsets.all(0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(9),
-                              ),
-                            ),
-                            elevation: 0,
-                            content: Combo(),
-                          ),
-                    );
-                  },
-                  columnWidths: [
-                    100.0,
-                    200.0,
-                    550.0,
-                    100.0,
-                  ], // Set column widths
-                  focusNode: dropFocus,
-                  nextFocusNode: quantityFocus,
-                ),
+                    ).toStringAsFixed(2);
+                    totalLine =
+                    '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                    cont.setEnteredQtyInSalesOrder(widget.index, quantity);
+                    cont.setMainTotalInSalesOrder(widget.index, totalLine);
+                    cont.getTotalItems();
+                  });
+                  cont.setEnteredUnitPriceInSalesOrder(
+                    widget.index,
+                    cont.combosPriceControllers[widget.index]!.text,
+                  );
+                  cont.setComboInSalesOrder(widget.index, selectedComboId);
+                  cont.setItemNameInSalesOrder(
+                    widget.index,
+                    comboName,
+                    // value.split(" | ")[0],
+                  ); // set only first element as name
+                  cont.setMainCodeInSalesOrder(widget.index, mainCode);
+                  cont.setTypeInSalesOrder(widget.index, '3');
+                  cont.setMainDescriptionInSalesOrder(
+                    widget.index,
+                    descriptionVar,
+                  );
+                },
+                validationFunc: (value) {
+                  // if (value == null || value.isEmpty) {
+                  //   return 'select_option'.tr;
+                  // }
+                  // return null;
+                },
+                rowWidth:homeController.isOpened.value? MediaQuery.of(context).size.width * 0.10:MediaQuery.of(context).size.width * 0.13,
+                textFieldWidth: homeController.isOpened.value? MediaQuery.of(context).size.width * 0.10:MediaQuery.of(context).size.width * 0.13,
+                clickableOptionText: 'create_virtual_combo'.tr,
+                isThereClickableOption: true,
+                onTappedClickableOption: () {
+                  showDialog<String>(
+                    context: context,
+                    builder:
+                        (BuildContext context) => const AlertDialog(
+                      backgroundColor: Colors.white,
+                      contentPadding: EdgeInsets.all(0),
+                      titlePadding: EdgeInsets.all(0),
+                      actionsPadding: EdgeInsets.all(0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(9),
+                        ),
+                      ),
+                      elevation: 0,
+                      content: Combo(),
+                    ),
+                  );
+                },
+                columnWidths: [
+                  100.0,
+                  200.0,
+                  550.0,
+                  100.0,
+                ], // Set column widths
+                focusNode: dropFocus,
+                nextFocusNode: quantityFocus,
+              ),),
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.20,
                   child: TextFormField(
@@ -4870,32 +4919,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       cont.getTotalItems();
                     },
                   ),
-
-                  // ReusableNumberField(
-                  //   textEditingController: qtyController,
-                  //   isPasswordField: false,
-                  //   isCentered: true,
-                  //   hint: '0',
-                  //   onChangedFunc: (val) {
-                  //     setState(() {
-                  //       quantity = val;
-                  //       myTotal =
-                  //           '${int.parse(quantity) * (int.parse(unitPrice) - int.parse(discount))}';
-                  //       // myTotal='${int.parse(cont.quantity) * (int.parse(cont.unitPrice) - int.parse(cont.discount))}';
-                  //     });
-                  //     _formKey.currentState!.validate();
-                  //     cont.setEnteredQtyInQuotation(widget.index, val);
-                  //
-                  //     cont.setMainTotalInQuotation(widget.index, myTotal);
-                  //     cont.getTotalItems();
-                  //   },
-                  //   validationFunc: (String? value) {
-                  //     if (value!.isEmpty || double.parse(value) <= 0) {
-                  //       return 'must be >0';
-                  //     }
-                  //     return null;
-                  //   },
-                  // )
                 ),
                 //warehouse
                 DropdownMenu<String>(
@@ -4945,8 +4968,8 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   },
                 ),
                 // unitPrice
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.05,
+                Obx(() =>SizedBox(
+                  width:homeController.isOpened.value? MediaQuery.of(context).size.width * 0.05:MediaQuery.of(context).size.width * 0.1,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
                       fontSize: 12,
@@ -5005,7 +5028,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         }
                         // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
                         totalLine =
-                            '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
@@ -5014,7 +5037,8 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       cont.getTotalItems();
                     },
                   ),
-                ),
+                ) ,)
+                ,
                 //discount
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.05,
@@ -5024,6 +5048,38 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus1,
+                    onFieldSubmitted: (value){
+                      setState(() {
+                        salesOrderController.salesOrderCounter += 1;
+                      });
+                      salesOrderController.incrementListViewLengthInSalesOrder(
+                        salesOrderController.increment,
+                      );
+
+                      salesOrderController.addToRowsInListViewInSalesOrder(salesOrderController.salesOrderCounter, {
+                        'line_type_id': '3',
+                        'item_id': '',
+                        'itemName': '',
+                        'item_main_code': '',
+                        'item_discount': '0',
+                        'item_description': '',
+                        'item_quantity': '0',
+                        'item_warehouseId': '',
+                        'combo_warehouseId': '',
+                        'item_unit_price': '0',
+                        'item_total': '0',
+                        'title': '',
+                        'note': '',
+                        'combo': '',
+                      });
+                      salesOrderController.addToCombosPricesControllers(salesOrderController.salesOrderCounter);
+
+                      Widget p = ReusableComboRow(index: salesOrderController.salesOrderCounter);
+                      salesOrderController.addToOrderLinesInSalesOrderList(
+                        '${salesOrderController.salesOrderCounter}',
+                        p,
+                      );
+                    },
                     controller: discountController,
                     cursorColor: Colors.black,
                     textAlign: TextAlign.center,
@@ -5089,15 +5145,15 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                 ),
 
                 //total
-                ReusableShowInfoCard(
+                Obx(() => ReusableShowInfoCard(
                   text: formatDoubleWithCommas(
                     double.parse(
                       cont.rowsInListViewInSalesOrder[widget
                           .index]['item_total'],
                     ),
                   ),
-                  width: MediaQuery.of(context).size.width * 0.05,
-                ),
+                  width:homeController.isOpened.value? MediaQuery.of(context).size.width * 0.05:MediaQuery.of(context).size.width * 0.1,
+                ) ,),
 
                 //more
                 SizedBox(

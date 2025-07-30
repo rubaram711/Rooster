@@ -3,37 +3,38 @@ import '../../const/urls.dart';
 import 'package:dio/dio.dart';
 
 Future storeSalesOrder(
-  String manualReference,
-  String clientId,
-  String validity,
-  String inputDate,
-  String paymentTerm,
-  String salesOrderNumber,
-  String priceList,
-  String currency,
-  String termsAndConditions,
-  String salespersonId,
-  String commissionMethodId,
-  String cashingMethodId,
-  String commissionRate,
-  String commissionTotal,
-  String totalBeforeVat,
-  String specialDiscountPercentage,
-  String specialDiscount,
-  String globalDiscountPercentage,
-  String globalDiscount,
-  String vat,
-  String vatLebanese,
-  String total,
-  String vatExempt,
-  String notPrinted,
-  String printedAsVatExempt,
-  String printedAsPercentage,
-  String vatInclusivePrices,
-  String beforeVatPrices,
-  String code,
-  Map orderLines,
-  String title,
+    String manualReference,
+    String clientId,
+    String validity,
+    String inputDate,
+    String paymentTerm,
+    String salesOrderNumber,
+    String priceList,
+    String currency,
+    String termsAndConditions,
+    String salespersonId,
+    String commissionMethodId,
+    String cashingMethodId,
+    String commissionRate,
+    String commissionTotal,
+    String totalBeforeVat,
+    String specialDiscountPercentage,
+    String specialDiscount,
+    String globalDiscountPercentage,
+    String globalDiscount,
+    String vat,
+    String vatLebanese,
+    String total,
+    String vatExempt,
+    String notPrinted,
+    String printedAsVatExempt,
+    String printedAsPercentage,
+    String vatInclusivePrices,
+    String beforeVatPrices,
+    String code,
+    Map orderLines,
+    List<int> orderedKeys ,
+    String title,
 ) async {
   String token = await getAccessTokenFromPref();
   FormData formData = FormData.fromMap({
@@ -69,46 +70,48 @@ Future storeSalesOrder(
     "title": title,
   });
 
-  for (int i = 1; i < orderLines.length + 1; i++) {
+  int i = 1;
+
+  for (var key in orderedKeys) {
     formData.fields.addAll([
-      MapEntry("orderLines[$i][type]", '${orderLines[i]['line_type_id']}'),
+      MapEntry("orderLines[$i][type]", '${orderLines[key]['line_type_id']}'),
 
       MapEntry(
         "orderLines[$i][item]",
-        '${orderLines[i]['item_id']}',
+        '${orderLines[key]['item_id']}',
       ), //item means itemCodeId
       MapEntry(
         "orderLines[$i][mainCode]",
-        '${orderLines[i]['item_main_code']}',
+        '${orderLines[key]['item_main_code']}',
       ),
-      MapEntry("orderLines[$i][itemName]", '${orderLines[i]['itemName']}'),
-      MapEntry("orderLines[$i][discount]", '${orderLines[i]['item_discount']}'),
+      MapEntry("orderLines[$i][itemName]", '${orderLines[key]['itemName']}'),
+      MapEntry("orderLines[$i][discount]", '${orderLines[key]['item_discount']}'),
       MapEntry(
         "orderLines[$i][description]",
-        '${orderLines[i]['item_description']}',
+        '${orderLines[key]['item_description']}',
       ),
-      MapEntry("orderLines[$i][quantity]", '${orderLines[i]['item_quantity']}'),
+      MapEntry("orderLines[$i][quantity]", '${orderLines[key]['item_quantity']}'),
       MapEntry(
         "orderLines[$i][item_warehouse_id]",
-        '${orderLines[i]['item_warehouseId']}',
+        '${orderLines[key]['item_warehouseId']}',
       ),
       MapEntry(
         "orderLines[$i][combo_warehouse_id]",
-        '${orderLines[i]['item_warehouseId']}',
+        '${orderLines[key]['item_warehouseId']}',
       ),
       MapEntry(
         "orderLines[$i][unitPrice]",
-        '${orderLines[i]['item_unit_price']}',
+        '${orderLines[key]['item_unit_price']}',
       ),
-      MapEntry("orderLines[$i][total]", '${orderLines[i]['item_total']}'),
-      MapEntry("orderLines[$i][title]", '${orderLines[i]['title']}'),
-      MapEntry("orderLines[$i][note]", '${orderLines[i]['note']}'),
-      MapEntry("orderLines[$i][combo]", '${orderLines[i]['combo']}'),
+      MapEntry("orderLines[$i][total]", '${orderLines[key]['item_total']}'),
+      MapEntry("orderLines[$i][title]", '${orderLines[key]['title']}'),
+      MapEntry("orderLines[$i][note]", '${orderLines[key]['note']}'),
+      MapEntry("orderLines[$i][combo]", '${orderLines[key]['combo']}'),
       MapEntry(
         "orderLines[$i][comboPrice]",
-        orderLines[i]['combo'] == '' || orderLines[i]['combo'] == null
+        orderLines[key]['combo'] == '' || orderLines[key]['combo'] == null
             ? ''
-            : '${orderLines[i]['item_unit_price']}',
+            : '${orderLines[key]['item_unit_price']}',
       ),
     ]);
 
@@ -116,11 +119,12 @@ Future storeSalesOrder(
       MapEntry(
         "orderLines[$i][image]",
         MultipartFile.fromBytes(
-          orderLines[i]['image'] ?? [],
+          orderLines[key]['image'] ?? [],
           filename: "image[$i].jpg",
         ),
       ),
     ]);
+    i++;
   }
 
   Response response = await Dio()
