@@ -2479,10 +2479,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                     .removeFromRowsInListViewInSalesOrder(
                                                   key,
                                                 );
-                                                salesOrderCont
-                                                    .removeFromOrderLinesInSalesOrderList(
-                                                  key.toString(),
-                                                );
                                               });
                                             },
                                             child: SizedBox(
@@ -3307,12 +3303,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'note': '',
       'combo': '',
     });
-    Widget p = ReusableTitleRow(index: salesOrderController.salesOrderCounter);
-
-    salesOrderController.addToOrderLinesInSalesOrderList(
-      '${salesOrderController.salesOrderCounter}',
-      p,
-    );
   }
 
   addNewItem() {
@@ -3340,12 +3330,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'combo': '',
     });
     salesOrderController.addToUnitPriceControllers(salesOrderController.salesOrderCounter);
-    Widget p = ReusableItemRow(index: salesOrderController.salesOrderCounter);
-
-    salesOrderController.addToOrderLinesInSalesOrderList(
-      '${salesOrderController.salesOrderCounter}',
-      p,
-    );
   }
 
   addNewCombo() {
@@ -3373,12 +3357,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'combo': '',
     });
     salesOrderController.addToCombosPricesControllers(salesOrderController.salesOrderCounter);
-
-    Widget p = ReusableComboRow(index: salesOrderController.salesOrderCounter);
-    salesOrderController.addToOrderLinesInSalesOrderList(
-      '${salesOrderController.salesOrderCounter}',
-      p,
-    );
   }
 
   addNewImage() {
@@ -3406,12 +3384,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'combo': '',
       'image': Uint8List(0),
     });
-    Widget p = ReusableImageRow(index: salesOrderController.salesOrderCounter);
-
-    salesOrderController.addToOrderLinesInSalesOrderList(
-      '${salesOrderController.salesOrderCounter}',
-      p,
-    );
   }
 
   addNewNote() {
@@ -3438,13 +3410,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       'note': '',
       'combo': '',
     });
-
-    Widget p = ReusableNoteRow(index: salesOrderController.salesOrderCounter);
-
-    salesOrderController.addToOrderLinesInSalesOrderList(
-      '${salesOrderController.salesOrderCounter}',
-      p,
-    );
   }
 
   List<Step> getSteps() => [
@@ -4005,12 +3970,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         'combo': '',
                       });
                       salesOrderController.addToUnitPriceControllers(salesOrderController.salesOrderCounter);
-                      Widget p = ReusableItemRow(index: salesOrderController.salesOrderCounter);
-
-                      salesOrderController.addToOrderLinesInSalesOrderList(
-                        '${salesOrderController.salesOrderCounter}',
-                        p,
-                      );
                     },
                     controller: discountController,
                     cursorColor: Colors.black,
@@ -4147,10 +4106,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                                   .removeFromRowsInListViewInSalesOrder(
                                     widget.index,
                                   );
-                              salesOrderController
-                                  .removeFromOrderLinesInSalesOrderList(
-                                    widget.index.toString(),
-                                  );
                             });
                             setState(() {
                               cont.totalItems = 0.0;
@@ -4269,10 +4224,6 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                                   .removeFromRowsInListViewInSalesOrder(
                                     widget.index,
                                   );
-                              salesOrderController
-                                  .removeFromOrderLinesInSalesOrderList(
-                                    widget.index.toString(),
-                                  );
                             });
                           },
                           child: Icon(
@@ -4390,10 +4341,6 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                           salesOrderController
                               .removeFromRowsInListViewInSalesOrder(
                                 widget.index,
-                              );
-                          salesOrderController
-                              .removeFromOrderLinesInSalesOrderList(
-                                widget.index.toString(),
                               );
                         });
                       },
@@ -4564,10 +4511,6 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                           salesOrderController
                               .removeFromRowsInListViewInSalesOrder(
                                 widget.index,
-                              );
-                          salesOrderController
-                              .removeFromOrderLinesInSalesOrderList(
-                                widget.index.toString(),
                               );
                         });
                       },
@@ -5073,12 +5016,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         'combo': '',
                       });
                       salesOrderController.addToCombosPricesControllers(salesOrderController.salesOrderCounter);
-
-                      Widget p = ReusableComboRow(index: salesOrderController.salesOrderCounter);
-                      salesOrderController.addToOrderLinesInSalesOrderList(
-                        '${salesOrderController.salesOrderCounter}',
-                        p,
-                      );
                     },
                     controller: discountController,
                     cursorColor: Colors.black,
@@ -5179,10 +5116,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                               salesOrderController
                                   .removeFromRowsInListViewInSalesOrder(
                                     widget.index,
-                                  );
-                              salesOrderController
-                                  .removeFromOrderLinesInSalesOrderList(
-                                    widget.index.toString(),
                                   );
                             });
                             setState(() {

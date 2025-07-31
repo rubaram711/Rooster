@@ -16,8 +16,6 @@ abstract class SalesInvoiceControllerAbstract extends GetxController {
   resetItemsAfterChangePriceList();
   incrementListViewLengthInSalesInvoice(double val);
   decrementListViewLengthInSalesInvoice(double val);
-  addToOrderLinesInSalesInvoiceList(String index, Widget p);
-  removeFromOrderLinesInSalesInvoiceList(String index);
   setSelectedPriceListId(String value);
   setIsVatExempted(
     bool isPrintedAsVatExemptVal,
@@ -120,7 +118,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
 
   Map selectedSalesInvoiceData = {};
   List rowsInListViewInSalesInvoiceData = [];
-  Map newRowMap = {};
+  // Map newRowMap = {};
   List<int> orderedKeys = [];
   Map rowsInListViewInSalesInvoice = {
     // 0: {
@@ -325,12 +323,10 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     update();
   }
 
-  Map<String, Widget> orderLinesSalesInvoiceList = {};
   @override
   resetSalesInvoice() {
     cashingMethodsNamesList = [];
     cashingMethodsIdsList = [];
-    orderLinesSalesInvoiceList = {};
     rowsInListViewInSalesInvoice = {};
     orderedKeys = [];
     itemsCode = [];
@@ -795,7 +791,6 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
             getTotalItems();
           } else {
             rowsInListViewInSalesInvoice.remove(keys[i]);
-            orderLinesSalesInvoiceList.remove('${keys[i]}');
             unitPriceControllers.remove(keys[i]);
             decrementListViewLengthInSalesInvoice(increment);
           }
@@ -819,17 +814,6 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     update();
   }
 
-  @override
-  addToOrderLinesInSalesInvoiceList(String index, Widget p) {
-    orderLinesSalesInvoiceList[index] = p;
-    update();
-  }
-
-  @override
-  removeFromOrderLinesInSalesInvoiceList(String index) {
-    orderLinesSalesInvoiceList.remove(index);
-    update();
-  }
 
   @override
   clearList() {

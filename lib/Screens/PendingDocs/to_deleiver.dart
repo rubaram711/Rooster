@@ -12,7 +12,6 @@ import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Screens/client_order/print_sales_order.dart';
-import 'package:rooster_app/Screens/client_order/sales_order_summury.dart';
 import 'package:rooster_app/const/urls.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Widgets/custom_snak_bar.dart';
@@ -672,6 +671,9 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
   @override
   void initState() {
+    salesOrderController.orderedKeys = [];
+    salesOrderController.rowsInListViewInSalesOrder = {};
+    salesOrderController.salesOrderCounter = 0;
     imageFile = Uint8List(0);
     if (widget.info['cashingMethod'] != null) {
       cashMethodId = '${widget.info['cashingMethod']['id']}';
@@ -691,8 +693,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
     if (widget.info['salesperson'] != null) {
       salespersonId = widget.info['salesperson']['id'].toString();
     }
-    salesOrderController.orderLinesSalesOrderList = {};
-    salesOrderController.rowsInListViewInSalesOrder = {};
+
     salesOrderController.selectedSalesOrderData['orderLines'] =
         widget.info['orderLines'] ?? '';
     for (
@@ -702,46 +703,14 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
     ) {
       salesOrderController.rowsInListViewInSalesOrder[i + 1] =
           salesOrderController.selectedSalesOrderData['orderLines'][i];
-    }
-    var keys = salesOrderController.rowsInListViewInSalesOrder.keys.toList();
-    for (int i = 0; i < widget.info['orderLines'].length; i++) {
+      salesOrderController.orderedKeys.add(i + 1);
       if (widget.info['orderLines'][i]['line_type_id'] == 2) {
         salesOrderController.unitPriceControllers[i + 1] =
-            TextEditingController();
-        Widget p = ReusableItemRow(
-          index: i + 1,
-          info: salesOrderController.rowsInListViewInSalesOrder[keys[i]],
-        );
-
-        salesOrderController.orderLinesSalesOrderList['${i + 1}'] = p;
-      } else if (widget.info['orderLines'][i]['line_type_id'] == 1) {
-        Widget p = ReusableTitleRow(
-          index: i + 1,
-          info: salesOrderController.rowsInListViewInSalesOrder[keys[i]],
-        );
-        salesOrderController.orderLinesSalesOrderList['${i + 1}'] = p;
-      } else if (widget.info['orderLines'][i]['line_type_id'] == 5) {
-        Widget p = ReusableNoteRow(
-          index: i + 1,
-          info: salesOrderController.rowsInListViewInSalesOrder[keys[i]],
-        );
-        salesOrderController.orderLinesSalesOrderList['${i + 1}'] = p;
-      } else if (widget.info['orderLines'][i]['line_type_id'] == 4) {
-        Widget p = ReusableImageRow(
-          index: i + 1,
-          info: salesOrderController.rowsInListViewInSalesOrder[keys[i]],
-        );
-        salesOrderController.orderLinesSalesOrderList['${i + 1}'] = p;
-      } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
+            TextEditingController();}else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
         salesOrderController.combosPriceControllers[i + 1] =
-            TextEditingController();
-        Widget p = ReusableComboRow(
-          index: i + 1,
-          info: salesOrderController.rowsInListViewInSalesOrder[keys[i]],
-        );
-        salesOrderController.orderLinesSalesOrderList['${i + 1}'] = p;
-      }
+            TextEditingController();}
     }
+
     super.initState();
   }
 
@@ -1195,7 +1164,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                         child: InkWell(
                           onTap: () async {
                             Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                            List<int> orderedKeys = [];
                             Map<int, dynamic> orderLinesMap = {
                               for (
                                 int i = 0;
@@ -1206,6 +1175,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                             };
 
                             for (int i = 0; i < orderLinesMap.length; i++) {
+                              orderedKeys.add(i+1);
                               Map<String, dynamic> selectedOrderLine =
                                   orderLinesMap[i + 1];
                               orderLines1[i + 1] = {};
@@ -1398,7 +1368,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                               }
                             }
 
-                            var res = await updateSalesOrdder(
+                            var res = await updateSalesOrder(
                               '${widget.info['id']}',
                               false,
                               '${widget.info['reference'] ?? ''}',
@@ -1435,6 +1405,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
                               'sent', // status,
                               orderLines1,
+                                orderedKeys
                             );
                             if (res['success'] == true) {
                               // pendingDocsController.getAllPendingDocs();

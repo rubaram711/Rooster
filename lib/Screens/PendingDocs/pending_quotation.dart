@@ -733,6 +733,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
   void initState() {
     quotationController.rowsInListViewInQuotation = {};
     quotationController.orderedKeys=[];
+    quotationController.quotationCounter = 0;
+
     imageFile = Uint8List(0);
     if (widget.info['cashingMethod'] != null) {
       cashMethodId = '${widget.info['cashingMethod']['id']}';

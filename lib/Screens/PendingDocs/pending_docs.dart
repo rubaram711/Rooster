@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:get/get.dart';
@@ -20,9 +19,7 @@ import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Screens/Quotations/print_quotation.dart';
 import 'package:rooster_app/Screens/Quotations/tasks.dart';
 import 'package:rooster_app/Screens/SalesInvoice/print_sales_invoice.dart';
-import 'package:rooster_app/Screens/SalesInvoice/sales_invoice_summary.dart';
 import 'package:rooster_app/Screens/client_order/print_sales_order.dart';
-import 'package:rooster_app/Screens/client_order/sales_order_summury.dart';
 import 'package:rooster_app/Widgets/custom_snak_bar.dart';
 import 'package:rooster_app/Widgets/page_title.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
@@ -33,8 +30,8 @@ import 'package:rooster_app/const/colors.dart';
 import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/const/urls.dart';
-
 import '../Quotations/update_quotation_dialog.dart';
+import '../SalesInvoice/update_sales_invoice_dialog.dart';
 import '../client_order/update_sales_order_dialog.dart';
 
 class PendingDocs extends StatefulWidget {
@@ -2972,7 +2969,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                             child: InkWell(
                               onTap: () async {
                                 Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                                List<int> orderedKeys = [];
                                 Map<int, dynamic> orderLinesMap = {
                                   for (
                                     int i = 0;
@@ -2983,6 +2980,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
+                                  orderedKeys.add(i+1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -3194,7 +3192,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 }
 
 
-                                var res = await updateSalesOrdder(
+                                var res = await updateSalesOrder(
                                   '${widget.info['id']}',
                                   false,
                                   '${widget.info['reference'] ?? ''}',
@@ -3232,6 +3230,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   'confirmed', // status,
 
                                   orderLines1,
+                                    orderedKeys
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -3259,7 +3258,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                             child: InkWell(
                               onTap: () async {
                                 Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                                List<int> orderedKeys = [];
                                 Map<int, dynamic> orderLinesMap = {
                                   for (
                                     int i = 0;
@@ -3270,6 +3269,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
+                                  orderedKeys.add(i+1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -3480,7 +3480,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   }
                                 }
 
-                                var res = await updateSalesOrdder(
+                                var res = await updateSalesOrder(
                                   '${widget.info['id']}',
                                   false,
                                   '${widget.info['reference'] ?? ''}',
@@ -3517,6 +3517,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                   'sent', // status,
                                   orderLines1,
+                                    orderedKeys
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -3546,7 +3547,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                             child: InkWell(
                               onTap: () async {
                                 Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                                List<int> orderedKeys = [];
                                 Map<int, dynamic> orderLinesMap = {
                                   for (
                                     int i = 0;
@@ -3557,6 +3558,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
+                                  orderedKeys.add(i+1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -3767,7 +3769,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   }
                                 }
 
-                                var res = await updateSalesOrdder(
+                                var res = await updateSalesOrder(
                                   '${widget.info['id']}',
                                   false,
                                   '${widget.info['reference'] ?? ''}',
@@ -3803,6 +3805,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   '${widget.info['code'] ?? ''}',
                                   'cancelled', // status,
                                   orderLines1,
+                                    orderedKeys
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -4854,7 +4857,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                             child: InkWell(
                               onTap: () async {
                                 Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                                List<int> orderedKeys = [];
                                 Map<int, dynamic> orderLinesMap = {
                                   for (
                                     int i = 0;
@@ -4865,6 +4868,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
+                                  orderedKeys.add(i+1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -5100,6 +5104,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   orderLines1,
                                   '${widget.info['inputDate'] ?? ''}',
                                   '${widget.info['invoiceDeliveryDate'] ?? ''}',
+                                    orderedKeys
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -5130,7 +5135,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                             child: InkWell(
                               onTap: () async {
                                 Map<int, Map<String, dynamic>> orderLines1 = {};
-
+                                List<int> orderedKeys = [];
                                 Map<int, dynamic> orderLinesMap = {
                                   for (
                                     int i = 0;
@@ -5141,6 +5146,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
+                                  orderedKeys.add(i+1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -5377,6 +5383,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   orderLines1,
                                   '${widget.info['inputDate'] ?? ''}',
                                   '${widget.info['invoiceDeliveryDate'] ?? ''}',
+                                    orderedKeys
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();

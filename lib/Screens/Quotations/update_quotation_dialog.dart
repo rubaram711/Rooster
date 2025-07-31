@@ -220,8 +220,6 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     quotationController.quotationCounter = 0;
     checkVatExempt();
     getCurrency();
-    // quotationController.orderLinesQuotationList = {};
-    quotationController.rowsInListViewInQuotation = {};
     setProgressVar();
 
     if (widget.info['cashingMethod'] != null) {
@@ -3375,9 +3373,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
       totalLine =
           quotationController.rowsInListViewInQuotation[widget
               .index]['item_total'];
-      itemCodeController.text =
-          quotationController.rowsInListViewInQuotation[widget
-              .index]['item_main_code'];
     }
 
     super.initState();
@@ -4456,9 +4451,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
   @override
   void initState() {
-    print('my note  ${widget.index} is ${widget.info}');
-    print(quotationController.rowsInListViewInQuotation[widget.index]);
-
     if (widget.info['combo_quantity']!=null ) {
       qtyController.text = '${widget.info['combo_quantity'] ?? widget.info['item_quantity']}';
       quantity = '${widget.info['combo_quantity'] ?? widget.info['item_quantity']}';
@@ -4923,10 +4915,10 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       quotationController.addToCombosPricesControllers(
                         quotationController.quotationCounter,
                       );
-                      Widget p = ReusableComboRow(
-                        index: quotationController.quotationCounter,
-                        info: {},
-                      );
+                      // Widget p = ReusableComboRow(
+                      //   index: quotationController.quotationCounter,
+                      //   info: {},
+                      // );
                       // quotationController.addToOrderLinesInQuotationList(
                       //   '${quotationController.quotationCounter}',
                       //   p,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/discounts_controller.dart';
 import 'package:rooster_app/Controllers/inventory_controller.dart';
-import 'package:rooster_app/Controllers/sales_order_Controller.dart';
+import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Screens/Configuration/currencies_and_rates.dart';
 import 'package:rooster_app/const/sizes.dart';
 import '../../Controllers/cashing_methods_controller.dart';

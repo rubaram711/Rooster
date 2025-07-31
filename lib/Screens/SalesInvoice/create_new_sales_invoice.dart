@@ -2578,10 +2578,6 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                     .removeFromRowsInListViewInSalesInvoice(
                                                   key,
                                                 );
-                                                salesInvoiceCont
-                                                    .removeFromOrderLinesInSalesInvoiceList(
-                                                  key.toString(),
-                                                );
                                               });
                                             },
                                             child: SizedBox(
@@ -3489,12 +3485,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
           'note': '',
           'combo': '',
         });
-    Widget p = ReusableTitleRow(index: salesInvoiceController.salesInvoiceCounter);
+    // Widget p = ReusableTitleRow(index: salesInvoiceController.salesInvoiceCounter);
 
-    salesInvoiceController.addToOrderLinesInSalesInvoiceList(
-      '${salesInvoiceController.salesInvoiceCounter}',
-      p,
-    );
   }
 
   addNewItem() {
@@ -3524,12 +3516,9 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
       },
     );
     salesInvoiceController.addToUnitPriceControllers(salesInvoiceController.salesInvoiceCounter);
-    Widget p = ReusableItemRow(index: salesInvoiceController.salesInvoiceCounter);
+    // Widget p = ReusableItemRow(index: salesInvoiceController.salesInvoiceCounter);
 
-    salesInvoiceController.addToOrderLinesInSalesInvoiceList(
-      '${salesInvoiceController.salesInvoiceCounter}',
-      p,
-    );
+
   }
 
   addNewCombo() {
@@ -3557,11 +3546,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
         });
     salesInvoiceController.addToCombosPricesControllers(salesInvoiceController.salesInvoiceCounter);
 
-    Widget p = ReusableComboRow(index: salesInvoiceController.salesInvoiceCounter);
-    salesInvoiceController.addToOrderLinesInSalesInvoiceList(
-      '${salesInvoiceController.salesInvoiceCounter}',
-      p,
-    );
+
   }
 
   addNewImage() {
@@ -3588,12 +3573,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
           'combo': '',
           'image': Uint8List(0),
         });
-    Widget p = ReusableImageRow(index: salesInvoiceController.salesInvoiceCounter);
+    // Widget p = ReusableImageRow(index: salesInvoiceController.salesInvoiceCounter);
 
-    salesInvoiceController.addToOrderLinesInSalesInvoiceList(
-      '${salesInvoiceController.salesInvoiceCounter}',
-      p,
-    );
   }
 
   addNewNote() {
@@ -3620,12 +3601,6 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
           'combo': '',
         });
 
-    Widget p = ReusableNoteRow(index: salesInvoiceController.salesInvoiceCounter);
-
-    salesInvoiceController.addToOrderLinesInSalesInvoiceList(
-      '${salesInvoiceController.salesInvoiceCounter}',
-      p,
-    );
   }
 
   List<Step> getSteps() => [
@@ -4201,12 +4176,9 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         },
                       );
                       salesInvoiceController.addToUnitPriceControllers(salesInvoiceController.salesInvoiceCounter);
-                      Widget p = ReusableItemRow(index: salesInvoiceController.salesInvoiceCounter);
+                      // Widget p = ReusableItemRow(index: salesInvoiceController.salesInvoiceCounter);
 
-                      salesInvoiceController.addToOrderLinesInSalesInvoiceList(
-                        '${salesInvoiceController.salesInvoiceCounter}',
-                        p,
-                      );
+
                     },
                     controller: discountController,
                     cursorColor: Colors.black,
@@ -4341,10 +4313,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                                   .removeFromRowsInListViewInSalesInvoice(
                                     widget.index,
                                   );
-                              salesInvoiceController
-                                  .removeFromOrderLinesInSalesInvoiceList(
-                                    widget.index.toString(),
-                                  );
+
                             });
                             setState(() {
                               cont.totalItems = 0.0;
@@ -4462,10 +4431,6 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                               salesInvoiceController
                                   .removeFromRowsInListViewInSalesInvoice(
                                     widget.index,
-                                  );
-                              salesInvoiceController
-                                  .removeFromOrderLinesInSalesInvoiceList(
-                                    widget.index.toString(),
                                   );
                             });
                           },
@@ -4591,10 +4556,7 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                               .removeFromRowsInListViewInSalesInvoice(
                                 widget.index,
                               );
-                          salesInvoiceController
-                              .removeFromOrderLinesInSalesInvoiceList(
-                                widget.index.toString(),
-                              );
+
                         });
                       },
                       child: Icon(Icons.delete_outline, color: Primary.primary),
@@ -4765,10 +4727,6 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                           salesInvoiceController
                               .removeFromRowsInListViewInSalesInvoice(
                                 widget.index,
-                              );
-                          salesInvoiceController
-                              .removeFromOrderLinesInSalesInvoiceList(
-                                widget.index.toString(),
                               );
                         });
                       },
@@ -5253,11 +5211,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       });
                       salesInvoiceController.addToCombosPricesControllers(salesInvoiceController.salesInvoiceCounter);
 
-                      Widget p = ReusableComboRow(index: salesInvoiceController.salesInvoiceCounter);
-                      salesInvoiceController.addToOrderLinesInSalesInvoiceList(
-                        '${salesInvoiceController.salesInvoiceCounter}',
-                        p,
-                      );
                     },
                     controller: discountController,
                     cursorColor: Colors.black,
@@ -5359,10 +5312,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                               salesInvoiceController
                                   .removeFromRowsInListViewInSalesInvoice(
                                     widget.index,
-                                  );
-                              salesInvoiceController
-                                  .removeFromOrderLinesInSalesInvoiceList(
-                                    widget.index.toString(),
                                   );
                             });
                             setState(() {
