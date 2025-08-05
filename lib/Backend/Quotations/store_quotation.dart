@@ -26,6 +26,9 @@ Future oldStoreQuotation(
   String vat,
   String vatLebanese,
   String total,
+  // String cancellationReason,
+  String deliveryTerms,
+  String chance
 ) async
 {
   final uri = Uri.parse(kStoreQuotationUrl);
@@ -54,6 +57,9 @@ Future oldStoreQuotation(
       "vat": vat,
       "vatLebanese": vatLebanese,
       "total": total,
+      // "cancellationReason":cancellationReason,
+      "deliveryTerms":deliveryTerms,
+      "chance":chance
     },
   );
 
@@ -93,6 +99,8 @@ Future storeQuotations(
   Map orderLines,
   List<int> orderedKeys ,
   String title,
+    String deliveryTerms,
+    String chance
 ) async
 {
   String token = await getAccessTokenFromPref();
@@ -126,6 +134,8 @@ Future storeQuotations(
     "beforeVatPrices": beforeVatPrices,
     "code": code,
     "title": title,
+    "deliveryTerms":deliveryTerms,
+    "chance":chance
   });
 
 

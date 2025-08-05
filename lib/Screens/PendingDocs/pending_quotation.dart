@@ -29,6 +29,8 @@ import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/const/urls.dart';
 
+import '../Quotations/add_cancelled_reason_dialog.dart';
+
 class PendingQuotation extends StatefulWidget {
   const PendingQuotation({super.key});
 
@@ -1552,6 +1554,9 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   'confirmed', // status,
                                   orderLines1,
                                   orderedKeys,
+                                  '',
+                                  widget.info['deliveryTerms'] ?? '',
+                                  widget.info['chance'] ?? '',
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -1782,61 +1787,115 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   }
                                 }
 
-                                var res = await updateQuotation(
-                                  '${widget.info['id']}',
-                                  // false,
-                                  '${widget.info['reference'] ?? ''}',
-                                  clientId,
+                                showDialog<String>(
+                                  context: context,
+                                  builder:
+                                      (BuildContext context) => AlertDialog(
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                        elevation: 0,
+                                        content: AddCancelledReasonDialog(
+                                          func: (cancelledReason) async {
+                                            showDialog<String>(
+                                              context: context,
+                                              builder:
+                                                  (
+                                                    BuildContext context,
+                                                  ) => AlertDialog(
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                Radius.circular(
+                                                                  9,
+                                                                ),
+                                                              ),
+                                                        ),
+                                                    elevation: 0,
+                                                    content: AddCancelledReasonDialog(
+                                                      func: (
+                                                        cancelledReason,
+                                                      ) async {
+                                                        var res = await updateQuotation(
+                                                          '${widget.info['id']}',
+                                                          // false,
+                                                          '${widget.info['reference'] ?? ''}',
+                                                          clientId,
 
-                                  '${widget.info['validity'] ?? ''}',
-                                  '${widget.info['inputDate'] ?? ''}',
+                                                          '${widget.info['validity'] ?? ''}',
+                                                          '${widget.info['inputDate'] ?? ''}',
 
-                                  '', //todo paymentTermsController.text,
-                                  pricelistId,
-                                  currencyId,
-                                  '${widget.info['termsAndConditions']}',
-                                  salespersonId,
-                                  commissionMethodId,
-                                  cashMethodId,
-                                  '${widget.info['commissionRate'] ?? ''}',
-                                  '${widget.info['commissionTotal'] ?? ''}',
-                                  '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
-                                  '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
-                                  '${widget.info['specialDiscount'] ?? '0'}', // calculated
-                                  '${widget.info['globalDiscountAmount'] ?? ''}',
-                                  '${widget.info['globalDiscount'] ?? ''}',
-                                  '${widget.info['vat'] ?? ''}', //vat
-                                  '${widget.info['vatLebanese'] ?? ''}',
-                                  '${widget.info['total'] ?? ''}',
-                                  '${widget.info['vatExempt'] ?? ''}',
-                                  '${widget.info['notPrinted'] ?? ''}',
-                                  '${widget.info['printedAsVatExempt'] ?? ''}',
-                                  '${widget.info['printedAsPercentage'] ?? ''}',
-                                  '${widget.info['vatInclusivePrices'] ?? ''}',
-                                  '${widget.info['beforeVatPrices'] ?? ''}',
+                                                          '', //todo paymentTermsController.text,
+                                                          pricelistId,
+                                                          currencyId,
+                                                          '${widget.info['termsAndConditions']}',
+                                                          salespersonId,
+                                                          commissionMethodId,
+                                                          cashMethodId,
+                                                          '${widget.info['commissionRate'] ?? ''}',
+                                                          '${widget.info['commissionTotal'] ?? ''}',
+                                                          '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                                                          '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                                                          '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                                                          '${widget.info['globalDiscountAmount'] ?? ''}',
+                                                          '${widget.info['globalDiscount'] ?? ''}',
+                                                          '${widget.info['vat'] ?? ''}', //vat
+                                                          '${widget.info['vatLebanese'] ?? ''}',
+                                                          '${widget.info['total'] ?? ''}',
+                                                          '${widget.info['vatExempt'] ?? ''}',
+                                                          '${widget.info['notPrinted'] ?? ''}',
+                                                          '${widget.info['printedAsVatExempt'] ?? ''}',
+                                                          '${widget.info['printedAsPercentage'] ?? ''}',
+                                                          '${widget.info['vatInclusivePrices'] ?? ''}',
+                                                          '${widget.info['beforeVatPrices'] ?? ''}',
 
-                                  '${widget.info['code'] ?? ''}',
-                                  'cancelled', // status,
-                                  orderLines1,
-                                  orderedKeys,
+                                                          '${widget.info['code'] ?? ''}',
+                                                          'cancelled', // status,
+
+                                                          orderLines1,
+                                                          orderedKeys,
+                                                          cancelledReason,
+                                                          widget.info['deliveryTerms'] ??
+                                                              '',
+                                                          widget.info['chance'] ??
+                                                              '',
+                                                        );
+                                                        if (res['success'] ==
+                                                            true) {
+                                                          // homeController.selectedTab.value =
+                                                          //     "quotation_summary";
+                                                          Get.back();
+                                                          quotationController
+                                                              .getAllQuotationsFromBack();
+
+                                                          homeController
+                                                                  .selectedTab
+                                                                  .value =
+                                                              "quotation_summary";
+                                                          CommonWidgets.snackBar(
+                                                            'Success',
+                                                            res['message'],
+                                                          );
+                                                        } else {
+                                                          CommonWidgets.snackBar(
+                                                            'error',
+                                                            res['message'],
+                                                          );
+                                                        }
+                                                      },
+                                                    ),
+                                                  ),
+                                            );
+                                          },
+                                        ),
+                                      ),
                                 );
-                                if (res['success'] == true) {
-                                  quotationController
-                                      .getAllQuotationsFromBack();
-
-                                  // pendingDocsController.getAllPendingDocs();
-                                  homeController.selectedTab.value =
-                                      "quotation_summary";
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
-                                  );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
-                                }
                               },
                               child: Icon(
                                 Icons.cancel_outlined,
@@ -2584,6 +2643,9 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   'confirmed', // status,
                                   orderLines1,
                                   orderedKeys,
+                                  '',
+                                  widget.info['deliveryTerms'] ?? '',
+                                  widget.info['chance'] ?? '',
                                 );
                                 if (res['success'] == true) {
                                   // homeController.selectedTab.value =
@@ -2855,6 +2917,9 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   'sent', // status,
                                   orderLines1,
                                   orderedKeys,
+                                  '',
+                                  widget.info['deliveryTerms'] ?? '',
+                                  widget.info['chance'] ?? '',
                                 );
                                 if (res['success'] == true) {
                                   // homeController.selectedTab.value =
@@ -3091,63 +3156,81 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   }
                                 }
 
-                                var res = await updateQuotation(
-                                  '${widget.info['id']}',
-                                  // false,
-                                  '${widget.info['reference'] ?? ''}',
-                                  clientId,
+                                showDialog<String>(
+                                  context: context,
+                                  builder:
+                                      (BuildContext context) => AlertDialog(
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                        elevation: 0,
+                                        content: AddCancelledReasonDialog(
+                                          func: (cancelledReason) async {
+                                            var res = await updateQuotation(
+                                              '${widget.info['id']}',
+                                              // false,
+                                              '${widget.info['reference'] ?? ''}',
+                                              clientId,
 
-                                  '${widget.info['validity'] ?? ''}',
-                                  '${widget.info['inputDate'] ?? ''}',
+                                              '${widget.info['validity'] ?? ''}',
+                                              '${widget.info['inputDate'] ?? ''}',
 
-                                  '', //todo paymentTermsController.text,
-                                  pricelistId,
-                                  currencyId,
-                                  '${widget.info['termsAndConditions']}',
-                                  salespersonId,
-                                  commissionMethodId,
-                                  cashMethodId,
-                                  '${widget.info['commissionRate'] ?? ''}',
-                                  '${widget.info['commissionTotal'] ?? ''}',
-                                  '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
-                                  '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
-                                  '${widget.info['specialDiscount'] ?? '0'}', // calculated
-                                  '${widget.info['globalDiscountAmount'] ?? ''}',
-                                  '${widget.info['globalDiscount'] ?? ''}',
-                                  '${widget.info['vat'] ?? ''}', //vat
-                                  '${widget.info['vatLebanese'] ?? ''}',
-                                  '${widget.info['total'] ?? ''}',
-                                  '${widget.info['vatExempt'] ?? ''}',
-                                  '${widget.info['notPrinted'] ?? ''}',
-                                  '${widget.info['printedAsVatExempt'] ?? ''}',
-                                  '${widget.info['printedAsPercentage'] ?? ''}',
-                                  '${widget.info['vatInclusivePrices'] ?? ''}',
-                                  '${widget.info['beforeVatPrices'] ?? ''}',
+                                              '', //todo paymentTermsController.text,
+                                              pricelistId,
+                                              currencyId,
+                                              '${widget.info['termsAndConditions']}',
+                                              salespersonId,
+                                              commissionMethodId,
+                                              cashMethodId,
+                                              '${widget.info['commissionRate'] ?? ''}',
+                                              '${widget.info['commissionTotal'] ?? ''}',
+                                              '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                                              '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                                              '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                                              '${widget.info['globalDiscountAmount'] ?? ''}',
+                                              '${widget.info['globalDiscount'] ?? ''}',
+                                              '${widget.info['vat'] ?? ''}', //vat
+                                              '${widget.info['vatLebanese'] ?? ''}',
+                                              '${widget.info['total'] ?? ''}',
+                                              '${widget.info['vatExempt'] ?? ''}',
+                                              '${widget.info['notPrinted'] ?? ''}',
+                                              '${widget.info['printedAsVatExempt'] ?? ''}',
+                                              '${widget.info['printedAsPercentage'] ?? ''}',
+                                              '${widget.info['vatInclusivePrices'] ?? ''}',
+                                              '${widget.info['beforeVatPrices'] ?? ''}',
 
-                                  '${widget.info['code'] ?? ''}',
-                                  'cancelled', // status,
-                                  orderLines1,
-                                  orderedKeys,
+                                              '${widget.info['code'] ?? ''}',
+                                              'cancelled', // status,
+                                              orderLines1,
+                                              orderedKeys,
+                                              cancelledReason,
+                                              widget.info['deliveryTerms'] ??
+                                                  '',
+                                              widget.info['chance'] ?? '',
+                                            );
+                                            if (res['success'] == true) {
+                                              Get.back();
+                                              homeController.selectedTab.value =
+                                                  "quotation_summary";
+                                              quotationController
+                                                  .getAllQuotationsFromBack();
+                                              CommonWidgets.snackBar(
+                                                'Success',
+                                                res['message'],
+                                              );
+                                            } else {
+                                              CommonWidgets.snackBar(
+                                                'error',
+                                                res['message'],
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ),
                                 );
-                                if (res['success'] == true) {
-                                  // homeController.selectedTab.value =
-                                  //     "quotation_summary";
-
-                                  // pendingDocsController.getAllPendingDocs();
-                                  homeController.selectedTab.value =
-                                      "quotation_summary";
-                                  quotationController
-                                      .getAllQuotationsFromBack();
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
-                                  );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
-                                }
                               },
                               child: Icon(
                                 Icons.cancel_outlined,

@@ -109,7 +109,7 @@ class _ComboSummaryState extends State<ComboSummary> {
                                   ),
                                 ),
                                 elevation: 0,
-                                content: const Combo(),
+                                content: const Combo(isCombosPageIsLastPage: true,),
                               ),
                         );
                       },

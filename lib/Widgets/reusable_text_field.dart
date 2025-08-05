@@ -293,6 +293,7 @@ class DialogTextField extends StatelessWidget {
               obscureText: isPassword,
               controller: textEditingController,
               decoration: InputDecoration(
+                // isDense: true,
                 hintText: hint,
                 hintStyle: const TextStyle(
                   fontSize: 12,
@@ -304,7 +305,7 @@ class DialogTextField extends StatelessWidget {
                   vertical: 16.0,
                   horizontal: 10.0,
                 )
-                    : const EdgeInsets.fromLTRB(20, 0, 25, 5),
+                    : const EdgeInsets.fromLTRB(20, 15, 25, 15),
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(
                     color: Primary.primary.withAlpha((0.2 * 255).toInt()),

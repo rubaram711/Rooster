@@ -898,6 +898,8 @@ class _CreateNewReturnFromClientState extends State<CreateNewReturnFromClient> {
                             '',
                             '',
                             '',
+                            '',
+                            '',
                             '');
                         if (res['success'] == true) {
                           CommonWidgets.snackBar('Success',
@@ -2314,6 +2316,8 @@ class _MobileCreateNewReturnFromClientState extends State<MobileCreateNewReturnF
                             specialDisc,
                             '',
                             globalDisc,
+                            '',
+                            '',
                             '',
                             '',
                             '',

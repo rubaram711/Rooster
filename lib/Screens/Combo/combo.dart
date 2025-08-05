@@ -23,7 +23,8 @@ import '../../../const/colors.dart';
 import '../../Widgets/reusable_more.dart';
 
 class Combo extends StatefulWidget {
-  const Combo({super.key});
+  const Combo({super.key, this.isCombosPageIsLastPage=false});
+  final bool isCombosPageIsLastPage;
   @override
   State<Combo> createState() => _ComboState();
 }
@@ -67,6 +68,7 @@ class _ComboState extends State<Combo> {
   late Uint8List imageFile;
   @override
   void initState() {
+    comboController.isCombosPageIsLastPage=widget.isCombosPageIsLastPage;
     comboController.orderLinesComboList = {};
     comboController.rowsInListViewInCombo = {};
     comboController.getComboCreatFieldFromBack();

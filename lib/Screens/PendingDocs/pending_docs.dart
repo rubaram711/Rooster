@@ -35,6 +35,9 @@ import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/const/urls.dart';
 
+import '../../Widgets/dialog_title.dart';
+import '../Quotations/add_cancelled_reason_dialog.dart';
+
 class PendingDocs extends StatefulWidget {
   const PendingDocs({super.key});
 
@@ -1336,6 +1339,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                   orderLines1,
                                   orderedKeys,
+                                  '',
+                                  widget.info['deliveryTerms'] ?? '',
+                                  widget.info['chance'] ?? '',
                                 );
                                 if (res['success'] == true) {
                                   quotationController
@@ -1603,6 +1609,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   'sent', // status,
                                   orderLines1,
                                   orderedKeys,
+                                  '',
+                                  widget.info['deliveryTerms'] ?? '',
+                                  widget.info['chance'] ?? '',
                                 );
                                 if (res['success'] == true) {
                                   quotationController
@@ -1835,64 +1844,83 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   }
                                 }
 
-                                var res = await updateQuotation(
-                                  '${widget.info['id']}',
-                                  // false,
-                                  '${widget.info['reference'] ?? ''}',
-                                  clientId,
+                                showDialog<String>(
+                                  context: context,
+                                  builder:
+                                      (BuildContext context) => AlertDialog(
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                        elevation: 0,
+                                        content: AddCancelledReasonDialog(
+                                          func: (cancelledReason) async {
+                                            var res = await updateQuotation(
+                                              '${widget.info['id']}',
+                                              // false,
+                                              '${widget.info['reference'] ?? ''}',
+                                              clientId,
 
-                                  '${widget.info['validity'] ?? ''}',
-                                  '${widget.info['inputDate'] ?? ''}',
+                                              '${widget.info['validity'] ?? ''}',
+                                              '${widget.info['inputDate'] ?? ''}',
 
-                                  '', //todo paymentTermsController.text,
-                                  pricelistId,
-                                  currencyId,
-                                  '${widget.info['termsAndConditions']}',
-                                  salespersonId,
-                                  commissionMethodId,
-                                  cashMethodId,
-                                  '${widget.info['commissionRate'] ?? ''}',
-                                  '${widget.info['commissionTotal'] ?? ''}',
-                                  '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
-                                  '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
-                                  '${widget.info['specialDiscount'] ?? '0'}', // calculated
-                                  '${widget.info['globalDiscountAmount'] ?? ''}',
-                                  '${widget.info['globalDiscount'] ?? ''}',
-                                  '${widget.info['vat'] ?? ''}', //vat
-                                  '${widget.info['vatLebanese'] ?? ''}',
-                                  '${widget.info['total'] ?? ''}',
-                                  '${widget.info['vatExempt'] ?? ''}',
-                                  '${widget.info['notPrinted'] ?? ''}',
-                                  '${widget.info['printedAsVatExempt'] ?? ''}',
-                                  '${widget.info['printedAsPercentage'] ?? ''}',
-                                  '${widget.info['vatInclusivePrices'] ?? ''}',
-                                  '${widget.info['beforeVatPrices'] ?? ''}',
+                                              '', //todo paymentTermsController.text,
+                                              pricelistId,
+                                              currencyId,
+                                              '${widget.info['termsAndConditions']}',
+                                              salespersonId,
+                                              commissionMethodId,
+                                              cashMethodId,
+                                              '${widget.info['commissionRate'] ?? ''}',
+                                              '${widget.info['commissionTotal'] ?? ''}',
+                                              '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                                              '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                                              '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                                              '${widget.info['globalDiscountAmount'] ?? ''}',
+                                              '${widget.info['globalDiscount'] ?? ''}',
+                                              '${widget.info['vat'] ?? ''}', //vat
+                                              '${widget.info['vatLebanese'] ?? ''}',
+                                              '${widget.info['total'] ?? ''}',
+                                              '${widget.info['vatExempt'] ?? ''}',
+                                              '${widget.info['notPrinted'] ?? ''}',
+                                              '${widget.info['printedAsVatExempt'] ?? ''}',
+                                              '${widget.info['printedAsPercentage'] ?? ''}',
+                                              '${widget.info['vatInclusivePrices'] ?? ''}',
+                                              '${widget.info['beforeVatPrices'] ?? ''}',
 
-                                  '${widget.info['code'] ?? ''}',
-                                  'cancelled', // status,
+                                              '${widget.info['code'] ?? ''}',
+                                              'cancelled', // status,
 
-                                  orderLines1,
-                                  orderedKeys,
+                                              orderLines1,
+                                              orderedKeys,
+                                              cancelledReason,
+                                              widget.info['deliveryTerms'] ??
+                                                  '',
+                                              widget.info['chance'] ?? '',
+                                            );
+                                            if (res['success'] == true) {
+                                             Get.back();
+                                              quotationController
+                                                  .getAllQuotationsFromBack();
+
+                                              homeController.selectedTab.value =
+                                                  "quotation_summary";
+                                              CommonWidgets.snackBar(
+                                                'Success',
+                                                res['message'],
+                                              );
+                                            } else {
+                                              CommonWidgets.snackBar(
+                                                'error',
+                                                res['message'],
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ),
                                 );
-                                if (res['success'] == true) {
-                                  // homeController.selectedTab.value =
-                                  //     "quotation_summary";
-
-                                  quotationController
-                                      .getAllQuotationsFromBack();
-
-                                  homeController.selectedTab.value =
-                                      "quotation_summary";
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
-                                  );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
-                                }
                               },
                               child: Icon(
                                 Icons.cancel_outlined,
@@ -3853,546 +3881,6 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               ),
                             ),
                           ),
-
-                          // ReusableMore(
-                          //   itemsList: [
-                          //     PopupMenuItem<String>(
-                          //       value: '1',
-                          //       onTap: () async {
-                          //         itemsInfoPrint = [];
-                          //         quotationItemInfo = {};
-                          //         totalAllItems = 0;
-                          //         cont.totalAllItems = 0;
-                          //         totalAllItems = 0;
-                          //         cont.totalAllItems = 0;
-                          //         totalPriceAfterDiscount = 0;
-                          //         additionalSpecialDiscount = 0;
-                          //         totalPriceAfterSpecialDiscount = 0;
-                          //         totalPriceAfterSpecialDiscountBysalesOrderCurrency =
-                          //             0;
-                          //
-                          //         vatBySalesOrderCurrency = 0;
-                          //         finalPriceBySalesOrderCurrency = 0;
-                          //
-                          //         for (var item in widget.info['orderLines']) {
-                          //           if ('${item['line_type_id']}' == '2') {
-                          //             qty = item['item_quantity'];
-                          //             var map =
-                          //                 cont.itemsMap[item['item_id'].toString()];
-                          //             itemName = map['item_name'];
-                          //             itemPrice = double.parse(
-                          //               '${item['item_unit_price'] ?? '0'}',
-                          //             );
-                          //             //     map['unitPrice'] ?? 0.0;
-                          //             // formatDoubleWithCommas(map['unitPrice']);
-                          //
-                          //             itemDescription = item['item_description'];
-                          //
-                          //             itemImage =
-                          //                 '${map['images']}' != '[]'
-                          //                     ? '$baseImage${map['images'][0]['img_url']}'
-                          //                     : '';
-                          //             // itemCurrencyName = map['currency']['name'];
-                          //             // itemCurrencySymbol = map['currency']['symbol'];
-                          //             // itemCurrencyLatestRate =
-                          //             //     map['currency']['latest_rate'];
-                          //             var firstBrandObject = map['itemGroups']
-                          //                 .firstWhere(
-                          //                   (obj) =>
-                          //                       obj["root_name"]?.toLowerCase() ==
-                          //                       "brand".toLowerCase(),
-                          //                   orElse: () => null,
-                          //                 );
-                          //             brand =
-                          //                 firstBrandObject == null
-                          //                     ? ''
-                          //                     : firstBrandObject['name'] ?? '';
-                          //             itemTotal = double.parse(
-                          //               '${item['item_total']}',
-                          //             );
-                          //             // itemTotal = double.parse(qty) * itemPrice;
-                          //             totalAllItems += itemTotal;
-                          //             quotationItemInfo = {
-                          //               'line_type_id': '2',
-                          //               'item_name': itemName,
-                          //               'item_description': itemDescription,
-                          //               'item_quantity': qty,
-                          //               'item_discount':
-                          //                   item['item_discount'] ?? '0',
-                          //               'item_unit_price': formatDoubleWithCommas(
-                          //                 itemPrice,
-                          //               ),
-                          //               'item_total': formatDoubleWithCommas(
-                          //                 itemTotal,
-                          //               ),
-                          //               'item_image': itemImage,
-                          //               'item_brand': brand,
-                          //               'title': '',
-                          //               'isImageList': false,
-                          //               'note': '',
-                          //               'image': '',
-                          //             };
-                          //             itemsInfoPrint.add(quotationItemInfo);
-                          //           } else if ('${item['line_type_id']}' == '3') {
-                          //             var qty = item['item_quantity'];
-                          //             // var map =
-                          //             // cont
-                          //             //     .combosMap[item['combo_id']
-                          //             //     .toString()];
-                          //             var ind = cont.combosIdsList.indexOf(
-                          //               item['combo_id'].toString(),
-                          //             );
-                          //             var itemName = cont.combosNamesList[ind];
-                          //             var itemPrice = double.parse(
-                          //               '${item['combo_price'] ?? 0.0}',
-                          //             );
-                          //             var itemDescription =
-                          //                 item['combo_description'];
-                          //
-                          //             var itemTotal = double.parse(
-                          //               '${item['combo_total']}',
-                          //             );
-                          //             // double.parse(qty) * itemPrice;
-                          //             var quotationItemInfo = {
-                          //               'line_type_id': '3',
-                          //               'item_name': itemName,
-                          //               'item_description': itemDescription,
-                          //               'item_quantity': qty,
-                          //               'item_unit_price': formatDoubleWithCommas(
-                          //                 itemPrice,
-                          //               ),
-                          //               'item_discount':
-                          //                   item['combo_discount'] ?? '0',
-                          //               'item_total': formatDoubleWithCommas(
-                          //                 itemTotal,
-                          //               ),
-                          //               'note': '',
-                          //               'item_image': '',
-                          //               'item_brand': '',
-                          //               'isImageList': false,
-                          //               'title': '',
-                          //               'image': '',
-                          //             };
-                          //             itemsInfoPrint.add(quotationItemInfo);
-                          //           } else if ('${item['line_type_id']}' == '1') {
-                          //             var quotationItemInfo = {
-                          //               'line_type_id': '1',
-                          //               'item_name': '',
-                          //               'item_description': '',
-                          //               'item_quantity': '',
-                          //               'item_unit_price': '',
-                          //               'item_discount': '0',
-                          //               'item_total': '',
-                          //               'item_image': '',
-                          //               'item_brand': '',
-                          //               'note': '',
-                          //               'isImageList': false,
-                          //               'title': item['title'],
-                          //               'image': '',
-                          //             };
-                          //             itemsInfoPrint.add(quotationItemInfo);
-                          //           } else if ('${item['line_type_id']}' == '5') {
-                          //             var quotationItemInfo = {
-                          //               'line_type_id': '5',
-                          //               'item_name': '',
-                          //               'item_description': '',
-                          //               'item_quantity': '',
-                          //               'item_unit_price': '',
-                          //               'item_discount': '0',
-                          //               'item_total': '',
-                          //               'item_image': '',
-                          //               'item_brand': '',
-                          //               'title': '',
-                          //               'note': item['note'],
-                          //               'isImageList': false,
-                          //               'image': '',
-                          //             };
-                          //             itemsInfoPrint.add(quotationItemInfo);
-                          //           } else if ('${item['line_type_id']}' == '4') {
-                          //             var quotationItemInfo = {
-                          //               'line_type_id': '4',
-                          //               'item_name': '',
-                          //               'item_description': '',
-                          //               'item_quantity': '',
-                          //               'item_unit_price': '',
-                          //               'item_discount': '0',
-                          //               'item_total': '',
-                          //               'item_image': '',
-                          //               'item_brand': '',
-                          //               'title': '',
-                          //               'note': '',
-                          //               'image': '$baseImage${item['image']}',
-                          //               'isImageList': false,
-                          //             };
-                          //             itemsInfoPrint.add(quotationItemInfo);
-                          //           }
-                          //         }
-                          //         // var primaryCurrency = await getCompanyPrimaryCurrencyFromPref();
-                          //         // var result = exchangeRatesController
-                          //         //     .exchangeRatesList
-                          //         //     .firstWhere(
-                          //         //       (item) =>
-                          //         //   item["currency"] == primaryCurrency,
-                          //         //   orElse: () => null,
-                          //         // );
-                          //         // var primaryLatestRate=
-                          //         // result != null
-                          //         //     ? '${result["exchange_rate"]}'
-                          //         //     : '1';
-                          //         // discountOnAllItem =
-                          //         //     totalAllItems *
-                          //         //     double.parse(
-                          //         //       widget.info['globalDiscount'] ?? '0',
-                          //         //     ) /
-                          //         //     100;
-                          //
-                          //         totalPriceAfterDiscount =
-                          //             totalAllItems - discountOnAllItem;
-                          //         additionalSpecialDiscount =
-                          //             totalPriceAfterDiscount *
-                          //             double.parse(
-                          //               widget.info['specialDiscount'] ?? '0',
-                          //             ) /
-                          //             100;
-                          //         totalPriceAfterSpecialDiscount =
-                          //             totalPriceAfterDiscount -
-                          //             additionalSpecialDiscount;
-                          //         totalPriceAfterSpecialDiscountBysalesOrderCurrency =
-                          //             totalPriceAfterSpecialDiscount;
-                          //         vatBySalesOrderCurrency =
-                          //             '${widget.info['vatExempt']}' == '1'
-                          //                 ? 0
-                          //                 : (totalPriceAfterSpecialDiscountBysalesOrderCurrency *
-                          //                         double.parse(
-                          //                           await getCompanyVatFromPref(),
-                          //                         )) /
-                          //                     100;
-                          //         finalPriceBySalesOrderCurrency =
-                          //             totalPriceAfterSpecialDiscountBysalesOrderCurrency;
-                          //         vatBySalesOrderCurrency;
-                          //         Navigator.push(
-                          //           context,
-                          //           MaterialPageRoute(
-                          //             builder: (BuildContext context) {
-                          //               // print('widget.info[ ${widget.info['termsAndConditions']}');
-                          //               return PrintSalesOrder(
-                          //                 isPrintedAs0:
-                          //                     '${widget.info['printedAsPercentage']}' ==
-                          //                             '1'
-                          //                         ? true
-                          //                         : false,
-                          //                 isVatNoPrinted:
-                          //                     '${widget.info['notPrinted']}' == '1'
-                          //                         ? true
-                          //                         : false,
-                          //                 isPrintedAsVatExempt:
-                          //                     '${widget.info['printedAsVatExempt']}' ==
-                          //                             '1'
-                          //                         ? true
-                          //                         : false,
-                          //                 isInSalesOrder: true,
-                          //                 salesOrderNumber:
-                          //                     widget.info['salesOrderNumber'] ?? '',
-                          //                 creationDate:
-                          //                     widget.info['validity'] ?? '',
-                          //                 ref: widget.info['reference'] ?? '',
-                          //                 receivedUser: '',
-                          //                 senderUser: homeController.userName,
-                          //                 status: widget.info['status'] ?? '',
-                          //                 totalBeforeVat:
-                          //                     widget.info['totalBeforeVat'] ?? '',
-                          //                 discountOnAllItem:
-                          //                     discountOnAllItem.toString(),
-                          //                 totalAllItems:
-                          //                 // totalAllItems.toString()  ,
-                          //                 formatDoubleWithCommas(
-                          //                   totalPriceAfterDiscount,
-                          //                 ),
-                          //
-                          //                 globalDiscount:
-                          //                     widget.info['globalDiscount'] ?? '0',
-                          //
-                          //                 totalPriceAfterDiscount:
-                          //                     formatDoubleWithCommas(
-                          //                       totalPriceAfterDiscount,
-                          //                     ),
-                          //                 additionalSpecialDiscount:
-                          //                     additionalSpecialDiscount
-                          //                         .toStringAsFixed(2),
-                          //                 totalPriceAfterSpecialDiscount:
-                          //                     formatDoubleWithCommas(
-                          //                       totalPriceAfterSpecialDiscount,
-                          //                     ),
-                          //                 // itemCurrencyName: itemCurrencyName,
-                          //                 // itemCurrencySymbol: itemCurrencySymbol,
-                          //                 // itemCurrencyLatestRate:
-                          //                 //     itemCurrencyLatestRate,
-                          //                 totalPriceAfterSpecialDiscountBysalesOrderCurrency:
-                          //                     formatDoubleWithCommas(
-                          //                       totalPriceAfterSpecialDiscountBysalesOrderCurrency,
-                          //                     ),
-                          //
-                          //                 vatBySalesOrderCurrency:
-                          //                     formatDoubleWithCommas(
-                          //                       vatBySalesOrderCurrency,
-                          //                     ),
-                          //                 finalPriceBySalesOrderCurrency:
-                          //                     formatDoubleWithCommas(
-                          //                       finalPriceBySalesOrderCurrency,
-                          //                     ),
-                          //                 specialDisc: specialDisc.toString(),
-                          //                 specialDiscount:
-                          //                     widget.info['specialDiscount'] ?? '0',
-                          //                 specialDiscountAmount:
-                          //                     widget
-                          //                         .info['specialDiscountAmount'] ??
-                          //                     '',
-                          //                 salesPerson:
-                          //                     widget.info['salesperson'] != null
-                          //                         ? widget
-                          //                             .info['salesperson']['name']
-                          //                         : '---',
-                          //                 salesOrderCurrency:
-                          //                     widget.info['currency']['name'] ?? '',
-                          //                 salesOrderCurrencySymbol:
-                          //                     widget.info['currency']['symbol'] ??
-                          //                     '',
-                          //                 salesOrderCurrencyLatestRate:
-                          //                     widget
-                          //                         .info['currency']['latest_rate'] ??
-                          //                     '',
-                          //                 clientPhoneNumber:
-                          //                     widget.info['client'] != null
-                          //                         ? widget.info['client']['phoneNumber'] ??
-                          //                             '---'
-                          //                         : "---",
-                          //                 clientName:
-                          //                     widget.info['client']['name'] ?? '',
-                          //                 termsAndConditions:
-                          //                     widget.info['termsAndConditions'] ??
-                          //                     '',
-                          //                 itemsInfoPrint: itemsInfoPrint,
-                          //               );
-                          //             },
-                          //           ),
-                          //         );
-                          //       },
-                          //       child: Text('preview'.tr),
-                          //     ),
-                          //     PopupMenuItem<String>(
-                          //       value: '2',
-                          //       onTap: () async {
-                          //         var oldKeys =
-                          //             cont.rowsInListViewInSalesOrder.keys.toList()
-                          //               ..sort();
-                          //         for (int i = 0; i < oldKeys.length; i++) {
-                          //           cont.newRowMap[i + 1] =
-                          //               cont.rowsInListViewInSalesOrder[oldKeys[i]]!;
-                          //         }
-                          //         String cashMethodId = '';
-                          //         String clientId = '';
-                          //         String pricelistId = '';
-                          //         String salespersonId = ' ';
-                          //         String commissionMethodId = '';
-                          //         String currencyId = ' ';
-                          //
-                          //         if (widget.info['cashingMethod'] != null) {
-                          //           cashMethodId =
-                          //               '${widget.info['cashingMethod']['id']}';
-                          //         }
-                          //         if (widget.info['commissionMethod'] != null) {
-                          //           commissionMethodId =
-                          //               '${widget.info['commissionMethod']['id']}';
-                          //         }
-                          //         if (widget.info['currency'] != null) {
-                          //           currencyId = '${widget.info['currency']['id']}';
-                          //         }
-                          //         if (widget.info['client'] != null) {
-                          //           clientId =
-                          //               widget.info['client']['id'].toString();
-                          //         } else {
-                          //
-                          //         }
-                          //         if (widget.info['pricelist'] != null) {
-                          //           pricelistId =
-                          //               widget.info['pricelist']['id'].toString();
-                          //         }
-                          //         if (widget.info['salesperson'] != null) {
-                          //           salespersonId =
-                          //               widget.info['salesperson']['id'].toString();
-                          //         }
-                          //
-                          //         var res = await updateSalesOrder(
-                          //           '${widget.info['id']}',
-                          //           false,
-                          //           '${widget.info['reference'] ?? ''}',
-                          //           clientId,
-                          //
-                          //           '${widget.info['validity'] ?? ''}',
-                          //           '${widget.info['inputDate'] ?? ''}',
-                          //           '', //todo paymentTermsController.text,
-                          //           pricelistId,
-                          //           currencyId,
-                          //           '${widget.info['termsAndConditions']}',
-                          //           salespersonId,
-                          //           commissionMethodId,
-                          //           cashMethodId,
-                          //           '${widget.info['commissionRate'] ?? ''}',
-                          //           '${widget.info['commissionTotal'] ?? ''}',
-                          //           '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
-                          //           '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
-                          //           '${widget.info['specialDiscount'] ?? '0'}', // calculated
-                          //           '${widget.info['globalDiscountAmount'] ?? ''}',
-                          //           '${widget.info['globalDiscount'] ?? ''}',
-                          //           '${widget.info['vat'] ?? ''}', //vat
-                          //           '${widget.info['vatLebanese'] ?? ''}',
-                          //           '${widget.info['total'] ?? ''}',
-                          //           '${widget.info['vatExempt'] ?? ''}',
-                          //           '${widget.info['notPrinted'] ?? ''}',
-                          //           '${widget.info['printedAsVatExempt'] ?? ''}',
-                          //           '${widget.info['printedAsPercentage'] ?? ''}',
-                          //           '${widget.info['vatInclusivePrices'] ?? ''}',
-                          //           '${widget.info['beforeVatPrices'] ?? ''}',
-                          //
-                          //           '${widget.info['code'] ?? ''}',
-                          //
-                          //           'confirmed', // status,
-                          //           // quotationController.rowsInListViewInQuotation,
-                          //           cont.newRowMap,
-                          //         );
-                          //         if (res['success'] == true) {
-                          //           pendingDocsController.getAllPendingDocs();
-                          //
-                          //           CommonWidgets.snackBar(
-                          //             'Success',
-                          //             res['message'],
-                          //           );
-                          //         } else {
-                          //           print(res['message']);
-                          //           CommonWidgets.snackBar('error', res['message']);
-                          //         }
-                          //       },
-                          //       child: Text('Confirm'.tr),
-                          //     ),
-                          //     PopupMenuItem<String>(
-                          //       value: '3',
-                          //       onTap: () async {
-                          //         var oldKeys =
-                          //             cont.rowsInListViewInSalesOrder.keys.toList()
-                          //               ..sort();
-                          //         for (int i = 0; i < oldKeys.length; i++) {
-                          //           cont.newRowMap[i + 1] =
-                          //               cont.rowsInListViewInSalesOrder[oldKeys[i]]!;
-                          //         }
-                          //         String cashMethodId = '';
-                          //         String clientId = '';
-                          //         String pricelistId = '';
-                          //         String salespersonId = ' ';
-                          //         String commissionMethodId = '';
-                          //         String currencyId = ' ';
-                          //
-                          //         if (widget.info['cashingMethod'] != null) {
-                          //           cashMethodId =
-                          //               '${widget.info['cashingMethod']['id']}';
-                          //         }
-                          //         if (widget.info['commissionMethod'] != null) {
-                          //           commissionMethodId =
-                          //               '${widget.info['commissionMethod']['id']}';
-                          //         }
-                          //         if (widget.info['currency'] != null) {
-                          //           currencyId = '${widget.info['currency']['id']}';
-                          //         }
-                          //         if (widget.info['client'] != null) {
-                          //           clientId =
-                          //               widget.info['client']['id'].toString();
-                          //         } else {
-                          //           print("Empty clientID");
-                          //         }
-                          //         if (widget.info['pricelist'] != null) {
-                          //           pricelistId =
-                          //               widget.info['pricelist']['id'].toString();
-                          //         }
-                          //         if (widget.info['salesperson'] != null) {
-                          //           salespersonId =
-                          //               widget.info['salesperson']['id'].toString();
-                          //         }
-                          //
-                          //         var res = await updateSalesOrder(
-                          //           '${widget.info['id']}',
-                          //           false,
-                          //           '${widget.info['reference'] ?? ''}',
-                          //           clientId,
-                          //
-                          //           '${widget.info['validity'] ?? ''}',
-                          //           '${widget.info['inputDate'] ?? ''}',
-                          //
-                          //           '', //todo paymentTermsController.text,
-                          //           pricelistId,
-                          //           currencyId,
-                          //           '${widget.info['termsAndConditions']}',
-                          //           salespersonId,
-                          //           commissionMethodId,
-                          //           cashMethodId,
-                          //           '${widget.info['commissionRate'] ?? ''}',
-                          //           '${widget.info['commissionTotal'] ?? ''}',
-                          //           '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
-                          //           '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
-                          //           '${widget.info['specialDiscount'] ?? '0'}', // calculated
-                          //           '${widget.info['globalDiscountAmount'] ?? ''}',
-                          //           '${widget.info['globalDiscount'] ?? ''}',
-                          //           '${widget.info['vat'] ?? ''}', //vat
-                          //           '${widget.info['vatLebanese'] ?? ''}',
-                          //           '${widget.info['total'] ?? ''}',
-                          //           '${widget.info['vatExempt'] ?? ''}',
-                          //           '${widget.info['notPrinted'] ?? ''}',
-                          //           '${widget.info['printedAsVatExempt'] ?? ''}',
-                          //           '${widget.info['printedAsPercentage'] ?? ''}',
-                          //           '${widget.info['vatInclusivePrices'] ?? ''}',
-                          //           '${widget.info['beforeVatPrices'] ?? ''}',
-                          //
-                          //           '${widget.info['code'] ?? ''}',
-                          //           'cancelled', // status,
-                          //           // quotationController.rowsInListViewInQuotation,
-                          //           cont.newRowMap,
-                          //         );
-                          //         if (res['success'] == true) {
-                          //           pendingDocsController.getAllPendingDocs();
-                          //           CommonWidgets.snackBar(
-                          //             'Success',
-                          //             res['message'],
-                          //           );
-                          //         } else {
-                          //           print(res['message']);
-                          //           CommonWidgets.snackBar('error', res['message']);
-                          //         }
-                          //       },
-                          //       child: Text('Cancel'.tr),
-                          //     ),
-                          //     PopupMenuItem<String>(
-                          //       value: '4',
-                          //       onTap: () async {
-                          //         showDialog<String>(
-                          //           context: context,
-                          //           builder:
-                          //               (BuildContext context) => AlertDialog(
-                          //                 backgroundColor: Colors.white,
-                          //                 shape: const RoundedRectangleBorder(
-                          //                   borderRadius: BorderRadius.all(
-                          //                     Radius.circular(9),
-                          //                   ),
-                          //                 ),
-                          //                 elevation: 0,
-                          //                 content: UpdateSalesOrderInPendingDocs(
-                          //                   index: widget.index,
-                          //                   info: widget.info,
-                          //                 ),
-                          //               ),
-                          //         );
-                          //       },
-                          //       child: Text('Update'.tr),
-                          //     ),
-                          //   ],
-                          // ),
                         ],
                       ),
                     );
@@ -5451,565 +4939,6 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               ),
                             ),
                           ),
-
-                          // ReusableMore(
-                          //   itemsList: [
-                          //     PopupMenuItem<String>(
-                          //       value: '1',
-                          //       onTap: () async {
-                          //         itemsInfoPrint = [];
-                          //         salesInvoiceItemInfo = {};
-                          //         totalAllItems = 0;
-                          //         cont.totalAllItems = 0;
-                          //         totalAllItems = 0;
-                          //         cont.totalAllItems = 0;
-                          //         totalPriceAfterDiscount = 0;
-                          //         additionalSpecialDiscount = 0;
-                          //         totalPriceAfterSpecialDiscount = 0;
-                          //         totalPriceAfterSpecialDiscountBysalesInvoiceCurrency =
-                          //             0;
-                          //         vatBySalesInvoiceCurrency = 0;
-                          //         vatBySalesInvoiceCurrency = 0;
-                          //         finalPriceBySalesInvoiceCurrency = 0;
-                          //
-                          //         for (var item in widget.info['orderLines']) {
-                          //           if ('${item['line_type_id']}' == '2') {
-                          //             qty = item['item_quantity'];
-                          //             var map =
-                          //                 cont.itemsMap[item['item_id'].toString()];
-                          //             itemName = map['item_name'];
-                          //             itemPrice = double.parse(
-                          //               '${item['item_unit_price'] ?? '0'}',
-                          //             );
-                          //             //     map['unitPrice'] ?? 0.0;
-                          //             // formatDoubleWithCommas(map['unitPrice']);
-                          //
-                          //             itemDescription = item['item_description'];
-                          //
-                          //             itemImage =
-                          //                 '${map['images']}' != '[]'
-                          //                     ? '$baseImage${map['images'][0]['img_url']}'
-                          //                     : '';
-                          //             // itemCurrencyName = map['currency']['name'];
-                          //             // itemCurrencySymbol = map['currency']['symbol'];
-                          //             // itemCurrencyLatestRate =
-                          //             //     map['currency']['latest_rate'];
-                          //             var firstBrandObject = map['itemGroups']
-                          //                 .firstWhere(
-                          //                   (obj) =>
-                          //                       obj["root_name"]?.toLowerCase() ==
-                          //                       "brand".toLowerCase(),
-                          //                   orElse: () => null,
-                          //                 );
-                          //             brand =
-                          //                 firstBrandObject == null
-                          //                     ? ''
-                          //                     : firstBrandObject['name'] ?? '';
-                          //             itemTotal = double.parse(
-                          //               '${item['item_total']}',
-                          //             );
-                          //             // itemTotal = double.parse(qty) * itemPrice;
-                          //             totalAllItems += itemTotal;
-                          //             salesInvoiceItemInfo = {
-                          //               'line_type_id': '2',
-                          //               'item_name': itemName,
-                          //               'item_description': itemDescription,
-                          //               'item_quantity': qty,
-                          //               'item_discount':
-                          //                   item['item_discount'] ?? '0',
-                          //               'item_unit_price': formatDoubleWithCommas(
-                          //                 itemPrice,
-                          //               ),
-                          //               'item_total': formatDoubleWithCommas(
-                          //                 itemTotal,
-                          //               ),
-                          //               'item_image': itemImage,
-                          //               'item_brand': brand,
-                          //               'title': '',
-                          //               'isImageList': false,
-                          //               'note': '',
-                          //               'image': '',
-                          //             };
-                          //             itemsInfoPrint.add(salesInvoiceItemInfo);
-                          //           } else if ('${item['line_type_id']}' == '3') {
-                          //             var qty = item['item_quantity'];
-                          //             // var map =
-                          //             // cont
-                          //             //     .combosMap[item['combo_id']
-                          //             //     .toString()];
-                          //             var ind = cont.combosIdsList.indexOf(
-                          //               item['combo_id'].toString(),
-                          //             );
-                          //             var itemName = cont.combosNamesList[ind];
-                          //             var itemPrice = double.parse(
-                          //               '${item['combo_price'] ?? 0.0}',
-                          //             );
-                          //             var itemDescription =
-                          //                 item['combo_description'];
-                          //
-                          //             var itemTotal = double.parse(
-                          //               '${item['combo_total']}',
-                          //             );
-                          //             // double.parse(qty) * itemPrice;
-                          //             var salesInvoiceItemInfo = {
-                          //               'line_type_id': '3',
-                          //               'item_name': itemName,
-                          //               'item_description': itemDescription,
-                          //               'item_quantity': qty,
-                          //               'item_unit_price': formatDoubleWithCommas(
-                          //                 itemPrice,
-                          //               ),
-                          //               'item_discount':
-                          //                   item['combo_discount'] ?? '0',
-                          //               'item_total': formatDoubleWithCommas(
-                          //                 itemTotal,
-                          //               ),
-                          //               'note': '',
-                          //               'item_image': '',
-                          //               'item_brand': '',
-                          //               'isImageList': false,
-                          //               'title': '',
-                          //               'image': '',
-                          //             };
-                          //             itemsInfoPrint.add(salesInvoiceItemInfo);
-                          //           } else if ('${item['line_type_id']}' == '1') {
-                          //             var salesInvoiceItemInfo = {
-                          //               'line_type_id': '1',
-                          //               'item_name': '',
-                          //               'item_description': '',
-                          //               'item_quantity': '',
-                          //               'item_unit_price': '',
-                          //               'item_discount': '0',
-                          //               'item_total': '',
-                          //               'item_image': '',
-                          //               'item_brand': '',
-                          //               'note': '',
-                          //               'isImageList': false,
-                          //               'title': item['title'],
-                          //               'image': '',
-                          //             };
-                          //             itemsInfoPrint.add(salesInvoiceItemInfo);
-                          //           } else if ('${item['line_type_id']}' == '5') {
-                          //             var salesInvoiceItemInfo = {
-                          //               'line_type_id': '5',
-                          //               'item_name': '',
-                          //               'item_description': '',
-                          //               'item_quantity': '',
-                          //               'item_unit_price': '',
-                          //               'item_discount': '0',
-                          //               'item_total': '',
-                          //               'item_image': '',
-                          //               'item_brand': '',
-                          //               'title': '',
-                          //               'note': item['note'],
-                          //               'isImageList': false,
-                          //               'image': '',
-                          //             };
-                          //             itemsInfoPrint.add(salesInvoiceItemInfo);
-                          //           } else if ('${item['line_type_id']}' == '4') {
-                          //             var salesInvoiceItemInfo = {
-                          //               'line_type_id': '4',
-                          //               'item_name': '',
-                          //               'item_description': '',
-                          //               'item_quantity': '',
-                          //               'item_unit_price': '',
-                          //               'item_discount': '0',
-                          //               'item_total': '',
-                          //               'item_image': '',
-                          //               'item_brand': '',
-                          //               'title': '',
-                          //               'note': '',
-                          //               'image': '$baseImage${item['image']}',
-                          //               'isImageList': false,
-                          //             };
-                          //             itemsInfoPrint.add(salesInvoiceItemInfo);
-                          //           }
-                          //         }
-                          //         // var primaryCurrency = await getCompanyPrimaryCurrencyFromPref();
-                          //         // var result = exchangeRatesController
-                          //         //     .exchangeRatesList
-                          //         //     .firstWhere(
-                          //         //       (item) =>
-                          //         //   item["currency"] == primaryCurrency,
-                          //         //   orElse: () => null,
-                          //         // );
-                          //         // var primaryLatestRate=
-                          //         // result != null
-                          //         //     ? '${result["exchange_rate"]}'
-                          //         //     : '1';
-                          //         // discountOnAllItem =
-                          //         //     totalAllItems *
-                          //         //     double.parse(
-                          //         //       widget.info['globalDiscount'] ?? '0',
-                          //         //     ) /
-                          //         //     100;
-                          //
-                          //         totalPriceAfterDiscount =
-                          //             totalAllItems - discountOnAllItem;
-                          //         additionalSpecialDiscount =
-                          //             totalPriceAfterDiscount *
-                          //             double.parse(
-                          //               widget.info['specialDiscount'] ?? '0',
-                          //             ) /
-                          //             100;
-                          //         totalPriceAfterSpecialDiscount =
-                          //             totalPriceAfterDiscount -
-                          //             additionalSpecialDiscount;
-                          //         totalPriceAfterSpecialDiscountBysalesInvoiceCurrency =
-                          //             totalPriceAfterSpecialDiscount;
-                          //         vatBySalesInvoiceCurrency =
-                          //             '${widget.info['vatExempt']}' == '1'
-                          //                 ? 0
-                          //                 : (totalPriceAfterSpecialDiscountBysalesInvoiceCurrency *
-                          //                         double.parse(
-                          //                           await getCompanyVatFromPref(),
-                          //                         )) /
-                          //                     100;
-                          //         finalPriceBySalesInvoiceCurrency =
-                          //             totalPriceAfterSpecialDiscountBysalesInvoiceCurrency;
-                          //         vatBySalesInvoiceCurrency;
-                          //         Navigator.push(
-                          //           context,
-                          //           MaterialPageRoute(
-                          //             builder: (BuildContext context) {
-                          //               // print('widget.info[ ${widget.info['termsAndConditions']}');
-                          //               return PrintSalesInvoice(
-                          //                 isPrintedAs0:
-                          //                     '${widget.info['printedAsPercentage']}' ==
-                          //                             '1'
-                          //                         ? true
-                          //                         : false,
-                          //                 isVatNoPrinted:
-                          //                     '${widget.info['notPrinted']}' == '1'
-                          //                         ? true
-                          //                         : false,
-                          //                 isPrintedAsVatExempt:
-                          //                     '${widget.info['printedAsVatExempt']}' ==
-                          //                             '1'
-                          //                         ? true
-                          //                         : false,
-                          //                 isInSalesInvoice: true,
-                          //                 salesInvoiceNumber:
-                          //                     widget.info['salesOrderNumber'] ?? '',
-                          //                 creationDate:
-                          //                     widget.info['validity'] ?? '',
-                          //                 ref: widget.info['reference'] ?? '',
-                          //                 receivedUser: '',
-                          //                 senderUser: homeController.userName,
-                          //                 status: widget.info['status'] ?? '',
-                          //                 totalBeforeVat:
-                          //                     widget.info['totalBeforeVat'] ?? '',
-                          //                 discountOnAllItem:
-                          //                     discountOnAllItem.toString(),
-                          //                 totalAllItems:
-                          //                 // totalAllItems.toString()  ,
-                          //                 formatDoubleWithCommas(
-                          //                   totalPriceAfterDiscount,
-                          //                 ),
-                          //
-                          //                 globalDiscount:
-                          //                     widget.info['globalDiscount'] ?? '0',
-                          //
-                          //                 totalPriceAfterDiscount:
-                          //                     formatDoubleWithCommas(
-                          //                       totalPriceAfterDiscount,
-                          //                     ),
-                          //                 additionalSpecialDiscount:
-                          //                     additionalSpecialDiscount
-                          //                         .toStringAsFixed(2),
-                          //                 totalPriceAfterSpecialDiscount:
-                          //                     formatDoubleWithCommas(
-                          //                       totalPriceAfterSpecialDiscount,
-                          //                     ),
-                          //                 // itemCurrencyName: itemCurrencyName,
-                          //                 // itemCurrencySymbol: itemCurrencySymbol,
-                          //                 // itemCurrencyLatestRate:
-                          //                 //     itemCurrencyLatestRate,
-                          //                 totalPriceAfterSpecialDiscountBysalesInvoiceCurrency:
-                          //                     formatDoubleWithCommas(
-                          //                       totalPriceAfterSpecialDiscountBysalesInvoiceCurrency,
-                          //                     ),
-                          //
-                          //                 vatBySalesInvoiceCurrency:
-                          //                     formatDoubleWithCommas(
-                          //                       vatBySalesInvoiceCurrency,
-                          //                     ),
-                          //                 finalPriceBySalesInvoiceCurrency:
-                          //                     formatDoubleWithCommas(
-                          //                       finalPriceBySalesInvoiceCurrency,
-                          //                     ),
-                          //                 specialDisc: specialDisc.toString(),
-                          //                 specialDiscount:
-                          //                     widget.info['specialDiscount'] ?? '0',
-                          //                 specialDiscountAmount:
-                          //                     widget
-                          //                         .info['specialDiscountAmount'] ??
-                          //                     '',
-                          //                 salesPerson:
-                          //                     widget.info['salesperson'] != null
-                          //                         ? widget
-                          //                             .info['salesperson']['name']
-                          //                         : '---',
-                          //                 salesInvoiceCurrency:
-                          //                     widget.info['currency']['name'] ?? '',
-                          //                 salesInvoiceCurrencySymbol:
-                          //                     widget.info['currency']['symbol'] ??
-                          //                     '',
-                          //                 salesInvoiceCurrencyLatestRate:
-                          //                     widget
-                          //                         .info['currency']['latest_rate'] ??
-                          //                     '',
-                          //                 clientPhoneNumber:
-                          //                     widget.info['client'] != null
-                          //                         ? widget.info['client']['phoneNumber'] ??
-                          //                             '---'
-                          //                         : "---",
-                          //                 clientName:
-                          //                     widget.info['client']['name'] ?? '',
-                          //                 termsAndConditions:
-                          //                     widget.info['termsAndConditions'] ??
-                          //                     '',
-                          //                 itemsInfoPrint: itemsInfoPrint,
-                          //               );
-                          //             },
-                          //           ),
-                          //         );
-                          //       },
-                          //       child: Text('preview'.tr),
-                          //     ),
-                          //     PopupMenuItem<String>(
-                          //       value: '2',
-                          //       onTap: () async {
-                          //         var oldKeys =
-                          //             cont.rowsInListViewInSalesInvoice.keys
-                          //                 .toList()
-                          //               ..sort();
-                          //         for (int i = 0; i < oldKeys.length; i++) {
-                          //           cont.newRowMap[i + 1] =
-                          //               cont.rowsInListViewInSalesInvoice[oldKeys[i]]!;
-                          //         }
-                          //         String cashMethodId = '';
-                          //         String clientId = '';
-                          //         String pricelistId = '';
-                          //         String salespersonId = ' ';
-                          //         String commissionMethodId = '';
-                          //         String currencyId = ' ';
-                          //         String warehouseId = ' ';
-                          //
-                          //         if (widget.info['cashingMethod'] != null) {
-                          //           cashMethodId =
-                          //               '${widget.info['cashingMethod']['id']}';
-                          //         }
-                          //         if (widget.info['commissionMethod'] != null) {
-                          //           commissionMethodId =
-                          //               '${widget.info['commissionMethod']['id']}';
-                          //         }
-                          //         if (widget.info['currency'] != null) {
-                          //           currencyId = '${widget.info['currency']['id']}';
-                          //         }
-                          //         if (widget.info['client'] != null) {
-                          //           clientId =
-                          //               widget.info['client']['id'].toString();
-                          //         } else {
-                          //           print("Empty clientID");
-                          //         }
-                          //         if (widget.info['pricelist'] != null) {
-                          //           pricelistId =
-                          //               widget.info['pricelist']['id'].toString();
-                          //         }
-                          //         if (widget.info['salesperson'] != null) {
-                          //           salespersonId =
-                          //               widget.info['salesperson']['id'].toString();
-                          //         }
-                          //         if (widget.info['deliveredFromWarehouse'] !=
-                          //             null) {
-                          //           warehouseId =
-                          //               widget.info['deliveredFromWarehouse']['id']
-                          //                   .toString();
-                          //         }
-                          //
-                          //         var res = await updateSalesInvoice(
-                          //           '${widget.info['id']}',
-                          //           false,
-                          //           '${widget.info['reference'] ?? ''}',
-                          //           clientId,
-                          //
-                          //           '${widget.info['valueDate'] ?? ''}',
-                          //           warehouseId,
-                          //           '', //todo paymentTermsController.text,
-                          //           pricelistId,
-                          //           currencyId,
-                          //           '${widget.info['termsAndConditions']}',
-                          //           salespersonId,
-                          //           commissionMethodId,
-                          //           cashMethodId,
-                          //           '${widget.info['commissionRate'] ?? ''}',
-                          //           '${widget.info['commissionTotal'] ?? ''}',
-                          //           '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
-                          //           '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
-                          //           '${widget.info['specialDiscount'] ?? '0'}', // calculated
-                          //           '${widget.info['globalDiscountAmount'] ?? ''}',
-                          //           '${widget.info['globalDiscount'] ?? ''}',
-                          //           '${widget.info['vat'] ?? ''}', //vat
-                          //           '${widget.info['vatLebanese'] ?? ''}',
-                          //           '${widget.info['total'] ?? ''}',
-                          //           '${widget.info['vatExempt'] ?? ''}',
-                          //           '${widget.info['notPrinted'] ?? ''}',
-                          //           '${widget.info['printedAsVatExempt'] ?? ''}',
-                          //           '${widget.info['printedAsPercentage'] ?? ''}',
-                          //           '${widget.info['vatInclusivePrices'] ?? ''}',
-                          //           '${widget.info['beforeVatPrices'] ?? ''}',
-                          //
-                          //           '${widget.info['code'] ?? ''}',
-                          //
-                          //           'confirmed', // status,
-                          //           cont.newRowMap,
-                          //           '${widget.info['inputDate'] ?? ''}',
-                          //           '${widget.info['invoiceDeliveryDate'] ?? ''}',
-                          //         );
-                          //         if (res['success'] == true) {
-                          //           pendingDocsController.getAllPendingDocs();
-                          //
-                          //           CommonWidgets.snackBar(
-                          //             'Success',
-                          //             res['message'],
-                          //           );
-                          //         } else {
-                          //           print(res['message']);
-                          //           CommonWidgets.snackBar('error', res['message']);
-                          //         }
-                          //       },
-                          //       child: Text('Confirm'.tr),
-                          //     ),
-                          //     PopupMenuItem<String>(
-                          //       value: '3',
-                          //       onTap: () async {
-                          //         var oldKeys =
-                          //             cont.rowsInListViewInSalesInvoice.keys
-                          //                 .toList()
-                          //               ..sort();
-                          //         for (int i = 0; i < oldKeys.length; i++) {
-                          //           cont.newRowMap[i + 1] =
-                          //               cont.rowsInListViewInSalesInvoice[oldKeys[i]]!;
-                          //         }
-                          //         String cashMethodId = '';
-                          //         String clientId = '';
-                          //         String pricelistId = '';
-                          //         String salespersonId = ' ';
-                          //         String commissionMethodId = '';
-                          //         String currencyId = ' ';
-                          //         String warehouseId = ' ';
-                          //
-                          //         if (widget.info['cashingMethod'] != null) {
-                          //           cashMethodId =
-                          //               '${widget.info['cashingMethod']['id']}';
-                          //         }
-                          //         if (widget.info['commissionMethod'] != null) {
-                          //           commissionMethodId =
-                          //               '${widget.info['commissionMethod']['id']}';
-                          //         }
-                          //         if (widget.info['currency'] != null) {
-                          //           currencyId = '${widget.info['currency']['id']}';
-                          //         }
-                          //         if (widget.info['client'] != null) {
-                          //           clientId =
-                          //               widget.info['client']['id'].toString();
-                          //         } else {
-                          //           print("Empty clientID");
-                          //         }
-                          //         if (widget.info['pricelist'] != null) {
-                          //           pricelistId =
-                          //               widget.info['pricelist']['id'].toString();
-                          //         }
-                          //         if (widget.info['salesperson'] != null) {
-                          //           salespersonId =
-                          //               widget.info['salesperson']['id'].toString();
-                          //         }
-                          //
-                          //         if (widget.info['deliveredFromWarehouse'] !=
-                          //             null) {
-                          //           warehouseId =
-                          //               widget.info['deliveredFromWarehouse']['id']
-                          //                   .toString();
-                          //         }
-                          //
-                          //         var res = await updateSalesInvoice(
-                          //           '${widget.info['id']}',
-                          //           false,
-                          //           '${widget.info['reference'] ?? ''}',
-                          //           clientId,
-                          //
-                          //           '${widget.info['valueDate'] ?? ''}',
-                          //           warehouseId,
-                          //           '', //todo paymentTermsController.text,
-                          //           pricelistId,
-                          //           currencyId,
-                          //           '${widget.info['termsAndConditions']}',
-                          //           salespersonId,
-                          //           commissionMethodId,
-                          //           cashMethodId,
-                          //           '${widget.info['commissionRate'] ?? ''}',
-                          //           '${widget.info['commissionTotal'] ?? ''}',
-                          //           '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
-                          //           '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
-                          //           '${widget.info['specialDiscount'] ?? '0'}', // calculated
-                          //           '${widget.info['globalDiscountAmount'] ?? ''}',
-                          //           '${widget.info['globalDiscount'] ?? ''}',
-                          //           '${widget.info['vat'] ?? ''}', //vat
-                          //           '${widget.info['vatLebanese'] ?? ''}',
-                          //           '${widget.info['total'] ?? ''}',
-                          //           '${widget.info['vatExempt'] ?? ''}',
-                          //           '${widget.info['notPrinted'] ?? ''}',
-                          //           '${widget.info['printedAsVatExempt'] ?? ''}',
-                          //           '${widget.info['printedAsPercentage'] ?? ''}',
-                          //           '${widget.info['vatInclusivePrices'] ?? ''}',
-                          //           '${widget.info['beforeVatPrices'] ?? ''}',
-                          //
-                          //           '${widget.info['code'] ?? ''}',
-                          //
-                          //           'cancelled', // status,
-                          //           cont.newRowMap,
-                          //           '${widget.info['inputDate'] ?? ''}',
-                          //           '${widget.info['invoiceDeliveryDate'] ?? ''}',
-                          //         );
-                          //         if (res['success'] == true) {
-                          //           pendingDocsController.getAllPendingDocs();
-                          //           CommonWidgets.snackBar(
-                          //             'Success',
-                          //             res['message'],
-                          //           );
-                          //         } else {
-                          //           print(res['message']);
-                          //           CommonWidgets.snackBar('error', res['message']);
-                          //         }
-                          //       },
-                          //       child: Text('Cancel'.tr),
-                          //     ),
-                          //     PopupMenuItem<String>(
-                          //       value: '4',
-                          //       onTap: () async {
-                          //         showDialog<String>(
-                          //           context: context,
-                          //           builder:
-                          //               (BuildContext context) => AlertDialog(
-                          //                 backgroundColor: Colors.white,
-                          //                 shape: const RoundedRectangleBorder(
-                          //                   borderRadius: BorderRadius.all(
-                          //                     Radius.circular(9),
-                          //                   ),
-                          //                 ),
-                          //                 elevation: 0,
-                          //                 content: SalesInvoiceInPendingDocs(
-                          //                   index: widget.index,
-                          //                   info: widget.info,
-                          //                 ),
-                          //               ),
-                          //         );
-                          //       },
-                          //       child: Text('Update'.tr),
-                          //     ),
-                          //   ],
-                          // ),
                         ],
                       ),
                     );

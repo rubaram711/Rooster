@@ -132,7 +132,7 @@ class _ProductsPageState extends State<ProductsPage> {
                                 ),
                               ),
                               elevation: 0,
-                              content: CreateProductDialogContent(),
+                              content: CreateProductDialogContent(isFromProductsPage: true,),
                             ),
                       );
                     },

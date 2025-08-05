@@ -599,6 +599,7 @@ Map<String, String> en = {
   "pending_quotation": "Pending Quotation",
   "price_conditions": "Price Conditions",
 'chance':'Chance',
-  'delivery_terms':'Delivery Terms'
+  'delivery_terms':'Delivery Terms',
+  'enter_cancelled_reason':'Enter a reason for cancellation'
 };
 

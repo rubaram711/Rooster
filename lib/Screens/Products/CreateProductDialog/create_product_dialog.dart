@@ -66,7 +66,8 @@ List mobileTabsContent = [
 ];
 
 class CreateProductDialogContent extends StatefulWidget {
-  const CreateProductDialogContent({super.key});
+  const CreateProductDialogContent({super.key, this.isFromProductsPage=false,});
+  final bool isFromProductsPage;
   @override
   State<CreateProductDialogContent> createState() =>
       _CreateProductDialogContentState();
@@ -76,6 +77,11 @@ class _CreateProductDialogContentState
     extends State<CreateProductDialogContent> {
   final HomeController homeController = Get.find();
   final ProductController productController = Get.find();
+  @override
+  void initState() {
+    productController.isProductsPageIsLastPage=widget.isFromProductsPage;
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProductController>(builder: (cont) {

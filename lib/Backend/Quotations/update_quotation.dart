@@ -36,7 +36,9 @@ Future updateQuotation(
     String status,
     Map orderLines,
     List<int> orderedKeys ,
-
+    String cancellationReason,
+    String deliveryTerms,
+    String chance
 ) async {
   String token = await getAccessTokenFromPref();
   FormData formData = FormData.fromMap({
@@ -69,6 +71,9 @@ Future updateQuotation(
     "beforeVatPrices": beforeVatPrices,
     "code": code,
     "status": status,
+    "cancellationReason":cancellationReason,
+    "deliveryTerms":deliveryTerms,
+    "chance":chance
   });
 
   int i = 1;

@@ -898,7 +898,10 @@ class _CreateNewPurchaseInvoiceState extends State<CreateNewPurchaseInvoice> {
                             '',
                             '',
                             '',
-                            '');
+                            '',
+                            '',
+                            '',
+                            );
                         if (res['success'] == true) {
                           CommonWidgets.snackBar('Success',
                               res['message']);
@@ -2317,7 +2320,10 @@ class _MobileCreateNewPurchaseInvoiceState extends State<MobileCreateNewPurchase
                             '',
                             '',
                             '',
-                            '');
+                            '',
+                            '',
+                            '',
+                            );
                         if (res['success'] == true) {
                           CommonWidgets.snackBar('Success',
                               res['message']);

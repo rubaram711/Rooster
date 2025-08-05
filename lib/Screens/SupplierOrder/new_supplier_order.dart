@@ -899,6 +899,8 @@ class _CreateNewSupplierOrderState extends State<CreateNewSupplierOrder> {
                             '',
                             '',
                             '',
+                            '',
+                            '',
                             '');
                         if (res['success'] == true) {
                           CommonWidgets.snackBar('Success',
@@ -2318,6 +2320,8 @@ class _MobileCreateNewSupplierOrderState extends State<MobileCreateNewSupplierOr
                             specialDisc,
                             '',
                             globalDisc,
+                            '',
+                            '',
                             '',
                             '',
                             '',

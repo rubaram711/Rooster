@@ -727,7 +727,7 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                     salesOrderController
                                         .getAllSalesOrderFromBackWithoutExcept();
                                     homeController.selectedTab.value =
-                                        'to_deleiver';
+                                        'to_deliver';
                                     CommonWidgets.snackBar(
                                       'Success',
                                       res['message'],

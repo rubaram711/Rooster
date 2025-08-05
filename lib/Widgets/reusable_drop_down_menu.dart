@@ -863,3 +863,198 @@ class _ReusableDropDownMenusWithSearchCodeState
 
 
 
+
+
+class CustomSearchableDropdown extends StatefulWidget {
+  const CustomSearchableDropdown({
+    super.key,
+    required this.hint,
+    required this.items,
+    required this.onSelected,
+    this.controller,
+    this.clickableOptionText,
+    this.onTapClickableOption,
+    required this.width,
+    this.radius = 9,
+  });
+
+  final String hint;
+  final List<String> items;
+  final TextEditingController? controller;
+  final Function(String) onSelected;
+  final String? clickableOptionText;
+  final VoidCallback? onTapClickableOption;
+  final double width;
+  final double radius;
+
+  @override
+  State<CustomSearchableDropdown> createState() => _CustomSearchableDropdownState();
+}
+
+class _CustomSearchableDropdownState extends State<CustomSearchableDropdown> {
+  final LayerLink _layerLink = LayerLink();
+  final FocusNode _focusNode = FocusNode();
+  final GlobalKey _fieldKey = GlobalKey();
+  late TextEditingController _controller;
+
+  OverlayEntry? _overlayEntry;
+  List<String> _filteredItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+    _filteredItems = List.from(widget.items);
+    _controller.addListener(_onSearchChanged);
+    _focusNode.addListener(_onFocusChanged);
+  }
+
+  void _onSearchChanged() {
+    final filter = _controller.text.toLowerCase();
+    setState(() {
+      _filteredItems = widget.items
+          .where((item) => item.toLowerCase().contains(filter))
+          .toList();
+
+      if (widget.clickableOptionText != null &&
+          !_filteredItems.contains(widget.clickableOptionText)) {
+        _filteredItems.add(widget.clickableOptionText!);
+      }
+    });
+
+    _updateOverlay();
+  }
+
+  void _onFocusChanged() {
+    if (_focusNode.hasFocus) {
+      _showOverlay();
+    } else {
+      _removeOverlay();
+    }
+  }
+
+  void _showOverlay() {
+    _overlayEntry = _createOverlay();
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _updateOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = _createOverlay();
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  OverlayEntry _createOverlay() {
+    RenderBox box = _fieldKey.currentContext!.findRenderObject() as RenderBox;
+    final offset = box.localToGlobal(Offset.zero);
+
+    return OverlayEntry(
+      builder: (context) {
+        return Positioned(
+          width: widget.width,
+          left: offset.dx,
+          top: offset.dy + box.size.height + 4,
+          child: CompositedTransformFollower(
+            link: _layerLink,
+            showWhenUnlinked: false,
+            offset: Offset(0, box.size.height + 4),
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(widget.radius),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 200),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _filteredItems.length,
+                  itemBuilder: (context, index) {
+                    final item = _filteredItems[index];
+
+                    final isClickable = widget.clickableOptionText != null &&
+                        item == widget.clickableOptionText;
+
+                    return InkWell(
+                      onTap: () {
+                        if (isClickable && widget.onTapClickableOption != null) {
+                          widget.onTapClickableOption!();
+                        } else {
+                          _controller.text = item;
+                          widget.onSelected(item);
+                          _focusNode.unfocus();
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                        decoration: BoxDecoration(
+                          border: index == _filteredItems.length - 1
+                              ? const Border(
+                            top: BorderSide(color: Colors.grey, width: 0.2),
+                          )
+                              : null,
+                        ),
+                        child: Text(
+                          item,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isClickable ? Colors.blue : Colors.black,
+                            decoration: isClickable ? TextDecoration.underline : null,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onSearchChanged);
+    _focusNode.removeListener(_onFocusChanged);
+    _focusNode.dispose();
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    _removeOverlay();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: SizedBox(
+        width: widget.width,
+        child: TextFormField(
+          key: _fieldKey,
+          controller: _controller,
+          focusNode: _focusNode,
+          style: const TextStyle(fontSize: 12),
+          decoration: InputDecoration(
+            isDense: true,
+            hintText: widget.hint,
+            hintStyle: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(widget.radius),
+              borderSide: const BorderSide(width: 1, color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(widget.radius),
+              borderSide: const BorderSide(width: 2, color: Colors.blue),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

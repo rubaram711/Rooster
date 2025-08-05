@@ -169,6 +169,13 @@ class ProductController extends GetxController {
     update();
   }
 
+  bool isProductsPageIsLastPage = false;
+  setProductsPageIsLastPage(bool val) {
+    isProductsPageIsLastPage = val;
+    update();
+  }
+
+
   int selectedTabIndex = 0;
   setSelectedTabIndex(int val) {
     selectedTabIndex = val;
@@ -866,21 +873,28 @@ class ProductController extends GetxController {
         if (p['success'] == true) {
           Get.back();
           CommonWidgets.snackBar('Success', res['message']);
+          productsList.value=[];
+          currentPage.value=1;
           getAllProductsFromBack();
-          homeController.selectedTab.value = 'items';
+          if(isProductsPageIsLastPage){
+          homeController.selectedTab.value = 'items';}else{Get.back();}
         } else {
           CommonWidgets.snackBar('error', p['message']);
         }
       } else {
+        productsList.value=[];
+        currentPage.value=1;
         getAllProductsFromBack();
         Get.back();
         Get.back();
         CommonWidgets.snackBar('Success', res['message']);
-        homeController.selectedTab.value = 'items';
+        if(isProductsPageIsLastPage){
+        homeController.selectedTab.value = 'items';}else{Get.back();}
       }
     } else {
       CommonWidgets.snackBar('error', res['message']);
     }
+    update();
   }
 
   String oldQuantity = '';

@@ -24,6 +24,7 @@ import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/custom_snak_bar.dart';
+import '../../Widgets/dialog_title.dart';
 import '../../Widgets/page_title.dart';
 import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_drop_down_menu.dart';
@@ -36,6 +37,7 @@ import '../../const/constants.dart';
 import '../../const/functions.dart';
 import '../../const/urls.dart';
 import '../Combo/combo.dart';
+import 'add_cancelled_reason_dialog.dart';
 import 'create_new_quotation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
@@ -82,6 +84,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   TextEditingController priceConditionController = TextEditingController();
   TextEditingController priceListController = TextEditingController();
   TextEditingController deliveryTermsController = TextEditingController();
+  TextEditingController cancelledReasonController = TextEditingController();
 
   String selectedCurrency = '';
 
@@ -228,6 +231,10 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     getCurrency();
     setProgressVar();
 
+    chanceController.text = widget.info['chance'] ?? '';
+    deliveryTermsController.text = widget.info['deliveryTerms'] ?? '';
+    print('widget.info[ ${widget.info['cancellationReason']}');
+    cancelledReasonController.text = widget.info['cancellationReason'] ?? '';
     if (widget.info['cashingMethod'] != null) {
       cashingMethodsController.text =
           '${widget.info['cashingMethod']['title'] ?? ''}';
@@ -664,6 +671,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     quotationController
                                         .rowsInListViewInQuotation,
                                     quotationCont.orderedKeys,
+                                    cancelledReasonController.text,
+                                    deliveryTermsController.text,
+                                    chanceController.text,
                                   );
                                   if (res['success'] == true) {
                                     setState(() {
@@ -700,7 +710,6 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                             // },
                             async {
                               quotationCont.setStatus('cancelled');
-
                               bool hasType1WithEmptyTitle = quotationController
                                   .rowsInListViewInQuotation
                                   .values
@@ -772,72 +781,111 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               } else {
                                 if (_formKey.currentState!.validate()) {
                                   _saveContent();
-                                  var res = await updateQuotation(
-                                    '${widget.info['id']}',
-                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                    refController.text,
-                                    selectedCustomerIds,
-                                    validityController.text,
-                                    inputDateController.text,
-                                    '', //todo paymentTermsController.text,
-                                    quotationCont.selectedPriceListId,
-                                    quotationCont
-                                        .selectedCurrencyId, //selectedCurrency
-                                    termsAndConditionsController.text,
-                                    selectedSalesPersonId.toString(),
-                                    '',
-                                    quotationCont.selectedCashingMethodId,
-                                    commissionController.text,
-                                    totalCommissionController.text,
-                                    quotationController.totalItems
-                                        .toString(), //total before vat
-                                    specialDiscPercentController
-                                        .text, // inserted by user
-                                    quotationController
-                                        .specialDisc, // calculated
-                                    globalDiscPercentController.text,
-                                    quotationController.globalDisc,
-                                    quotationController.vat11.toString(), //vat
-                                    quotationController.vatInPrimaryCurrency
-                                        .toString(),
-                                    quotationController
-                                        .totalQuotation, // quotationController.totalQuotation
+                                  showDialog<String>(
+                                    context: context,
+                                    builder:
+                                        (BuildContext context) => AlertDialog(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(9),
+                                            ),
+                                          ),
+                                          elevation: 0,
+                                          content: AddCancelledReasonDialog(
+                                            func: (cancelledReason) async {
+                                              var res = await updateQuotation(
+                                                '${widget.info['id']}',
+                                                // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                                refController.text,
+                                                selectedCustomerIds,
+                                                validityController.text,
+                                                inputDateController.text,
+                                                '', //todo paymentTermsController.text,
+                                                quotationCont
+                                                    .selectedPriceListId,
+                                                quotationCont
+                                                    .selectedCurrencyId, //selectedCurrency
+                                                termsAndConditionsController
+                                                    .text,
+                                                selectedSalesPersonId
+                                                    .toString(),
+                                                '',
+                                                quotationCont
+                                                    .selectedCashingMethodId,
+                                                commissionController.text,
+                                                totalCommissionController.text,
+                                                quotationController.totalItems
+                                                    .toString(), //total before vat
+                                                specialDiscPercentController
+                                                    .text, // inserted by user
+                                                quotationController
+                                                    .specialDisc, // calculated
+                                                globalDiscPercentController
+                                                    .text,
+                                                quotationController.globalDisc,
+                                                quotationController.vat11
+                                                    .toString(), //vat
+                                                quotationController
+                                                    .vatInPrimaryCurrency
+                                                    .toString(),
+                                                quotationController
+                                                    .totalQuotation, // quotationController.totalQuotation
 
-                                    quotationCont.isVatExemptChecked
-                                        ? '1'
-                                        : '0',
-                                    quotationCont.isVatNoPrinted ? '1' : '0',
-                                    quotationCont.isPrintedAsVatExempt
-                                        ? '1'
-                                        : '0',
-                                    quotationCont.isPrintedAs0 ? '1' : '0',
-                                    quotationCont.isBeforeVatPrices ? '0' : '1',
+                                                quotationCont.isVatExemptChecked
+                                                    ? '1'
+                                                    : '0',
+                                                quotationCont.isVatNoPrinted
+                                                    ? '1'
+                                                    : '0',
+                                                quotationCont
+                                                        .isPrintedAsVatExempt
+                                                    ? '1'
+                                                    : '0',
+                                                quotationCont.isPrintedAs0
+                                                    ? '1'
+                                                    : '0',
+                                                quotationCont.isBeforeVatPrices
+                                                    ? '0'
+                                                    : '1',
 
-                                    quotationCont.isBeforeVatPrices ? '1' : '0',
-                                    codeController.text,
-                                    quotationCont.status, // status,
-                                    // quotationController.rowsInListViewInQuotation,
-                                    quotationController
-                                        .rowsInListViewInQuotation,
-                                    quotationController.orderedKeys,
+                                                quotationCont.isBeforeVatPrices
+                                                    ? '1'
+                                                    : '0',
+                                                codeController.text,
+                                                quotationCont.status, // status,
+                                                // quotationController.rowsInListViewInQuotation,
+                                                quotationController
+                                                    .rowsInListViewInQuotation,
+                                                quotationController.orderedKeys,
+                                                cancelledReason,
+                                                deliveryTermsController.text,
+                                                chanceController.text,
+                                              );
+                                              if (res['success'] == true) {
+                                                Get.back();
+                                                Get.back();
+                                                quotationController
+                                                    .getAllQuotationsWithoutPendingFromBack();
+                                                // homeController.selectedTab.value = 'new_quotation';
+                                                homeController
+                                                        .selectedTab
+                                                        .value =
+                                                    'quotation_summary';
+                                                CommonWidgets.snackBar(
+                                                  'Success',
+                                                  res['message'],
+                                                );
+                                              } else {
+                                                CommonWidgets.snackBar(
+                                                  'error',
+                                                  res['message'],
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ),
                                   );
-                                  if (res['success'] == true) {
-                                    Get.back();
-                                    quotationController
-                                        .getAllQuotationsWithoutPendingFromBack();
-                                    // homeController.selectedTab.value = 'new_quotation';
-                                    homeController.selectedTab.value =
-                                        'quotation_summary';
-                                    CommonWidgets.snackBar(
-                                      'Success',
-                                      res['message'],
-                                    );
-                                  } else {
-                                    CommonWidgets.snackBar(
-                                      'error',
-                                      res['message'],
-                                    );
-                                  }
                                 }
                               }
                             },
@@ -3193,6 +3241,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 quotationCont.status,
                                 quotationController.rowsInListViewInQuotation,
                                 quotationController.orderedKeys,
+                                cancelledReasonController.text,
+                                deliveryTermsController.text,
+                                chanceController.text,
                               );
                               if (res['success'] == true) {
                                 Get.back();

@@ -711,6 +711,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                     // quotationController.newRowMap,
                                     quotationCont.orderedKeys,
                                     titleController.text,
+                                      deliveryTermsController.text,
+                                      chanceController.text
                                   );
                                   if (res['success'] == true) {
                                     CommonWidgets.snackBar(
@@ -1126,7 +1128,378 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                     Text('currency'.tr),
                                     GetBuilder<ExchangeRatesController>(
                                       builder: (cont) {
-                                        return DropdownMenu<String>(
+                                        return
+                                        //   CustomSearchableDropdown(hint: '',width:  homeController.isOpened.value? MediaQuery.of(context).size.width * 0.07:
+                                        //   MediaQuery.of(context).size.width * 0.1, items: cont.currenciesNamesList, onSelected: (String? val) {
+                                        //   setState(() {
+                                        //     selectedCurrency = val!;
+                                        //     var index = cont
+                                        //         .currenciesNamesList
+                                        //         .indexOf(val);
+                                        //     quotationCont.setSelectedCurrency(
+                                        //       cont.currenciesIdsList[index],
+                                        //       val,
+                                        //     );
+                                        //     quotationCont
+                                        //         .setSelectedCurrencySymbol(
+                                        //       cont.currenciesSymbolsList[index],
+                                        //     );
+                                        //     var matchedItems =
+                                        //     exchangeRatesController
+                                        //         .exchangeRatesList
+                                        //         .where(
+                                        //           (item) =>
+                                        //       item["currency"] ==
+                                        //           val,
+                                        //     );
+                                        //
+                                        //     var result =
+                                        //     matchedItems.isNotEmpty
+                                        //         ? matchedItems.reduce(
+                                        //           (a, b) =>
+                                        //       DateTime.parse(
+                                        //         a["start_date"],
+                                        //       ).isAfter(
+                                        //         DateTime.parse(
+                                        //           b["start_date"],
+                                        //         ),
+                                        //       )
+                                        //           ? a
+                                        //           : b,
+                                        //     )
+                                        //         : null;
+                                        //     quotationCont
+                                        //         .setExchangeRateForSelectedCurrency(
+                                        //       result != null
+                                        //           ? '${result["exchange_rate"]}'
+                                        //           : '1',
+                                        //     );
+                                        //   });
+                                        //   var keys =
+                                        //   quotationCont
+                                        //       .unitPriceControllers
+                                        //       .keys
+                                        //       .toList();
+                                        //   for (
+                                        //   int i = 0;
+                                        //   i <
+                                        //       quotationCont
+                                        //           .unitPriceControllers
+                                        //           .length;
+                                        //   i++
+                                        //   ) {
+                                        //     var selectedItemId =
+                                        //         '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
+                                        //     if (selectedItemId != '') {
+                                        //       if (quotationCont
+                                        //           .itemsPricesCurrencies[selectedItemId] ==
+                                        //           val) {
+                                        //         quotationCont
+                                        //             .unitPriceControllers[keys[i]]!
+                                        //             .text = quotationCont
+                                        //             .itemUnitPrice[selectedItemId]
+                                        //             .toString();
+                                        //       } else if (quotationCont
+                                        //           .selectedCurrencyName ==
+                                        //           'USD' &&
+                                        //           quotationCont
+                                        //               .itemsPricesCurrencies[selectedItemId] !=
+                                        //               val) {
+                                        //         var matchedItems =
+                                        //         exchangeRatesController
+                                        //             .exchangeRatesList
+                                        //             .where(
+                                        //               (item) =>
+                                        //           item["currency"] ==
+                                        //               quotationCont
+                                        //                   .itemsPricesCurrencies[selectedItemId],
+                                        //         );
+                                        //
+                                        //         var result =
+                                        //         matchedItems.isNotEmpty
+                                        //             ? matchedItems.reduce(
+                                        //               (a, b) =>
+                                        //           DateTime.parse(
+                                        //             a["start_date"],
+                                        //           ).isAfter(
+                                        //             DateTime.parse(
+                                        //               b["start_date"],
+                                        //             ),
+                                        //           )
+                                        //               ? a
+                                        //               : b,
+                                        //         )
+                                        //             : null;
+                                        //         var divider = '1';
+                                        //         if (result != null) {
+                                        //           divider =
+                                        //               result["exchange_rate"]
+                                        //                   .toString();
+                                        //         }
+                                        //         quotationCont
+                                        //             .unitPriceControllers[keys[i]]!
+                                        //             .text =
+                                        //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                        //       } else if (quotationCont
+                                        //           .selectedCurrencyName !=
+                                        //           'USD' &&
+                                        //           quotationCont
+                                        //               .itemsPricesCurrencies[selectedItemId] ==
+                                        //               'USD') {
+                                        //         quotationCont
+                                        //             .unitPriceControllers[keys[i]]!
+                                        //             .text =
+                                        //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                        //       } else {
+                                        //         var matchedItems =
+                                        //         exchangeRatesController
+                                        //             .exchangeRatesList
+                                        //             .where(
+                                        //               (item) =>
+                                        //           item["currency"] ==
+                                        //               quotationCont
+                                        //                   .itemsPricesCurrencies[selectedItemId],
+                                        //         );
+                                        //
+                                        //         var result =
+                                        //         matchedItems.isNotEmpty
+                                        //             ? matchedItems.reduce(
+                                        //               (a, b) =>
+                                        //           DateTime.parse(
+                                        //             a["start_date"],
+                                        //           ).isAfter(
+                                        //             DateTime.parse(
+                                        //               b["start_date"],
+                                        //             ),
+                                        //           )
+                                        //               ? a
+                                        //               : b,
+                                        //         )
+                                        //             : null;
+                                        //         var divider = '1';
+                                        //         if (result != null) {
+                                        //           divider =
+                                        //               result["exchange_rate"]
+                                        //                   .toString();
+                                        //         }
+                                        //         var usdPrice =
+                                        //             '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                        //         quotationCont
+                                        //             .unitPriceControllers[keys[i]]!
+                                        //             .text =
+                                        //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                        //       }
+                                        //       if (!quotationCont
+                                        //           .isBeforeVatPrices) {
+                                        //         var taxRate =
+                                        //             double.parse(
+                                        //               quotationCont
+                                        //                   .itemsVats[selectedItemId],
+                                        //             ) /
+                                        //                 100.0;
+                                        //         var taxValue =
+                                        //             taxRate *
+                                        //                 double.parse(
+                                        //                   quotationCont
+                                        //                       .unitPriceControllers[keys[i]]!
+                                        //                       .text,
+                                        //                 );
+                                        //
+                                        //         quotationCont
+                                        //             .unitPriceControllers[keys[i]]!
+                                        //             .text =
+                                        //         '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                        //       }
+                                        //       quotationCont
+                                        //           .unitPriceControllers[keys[i]]!
+                                        //           .text = double.parse(
+                                        //         quotationCont
+                                        //             .unitPriceControllers[keys[i]]!
+                                        //             .text,
+                                        //       ).toStringAsFixed(2);
+                                        //       var totalLine =
+                                        //           '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                        //
+                                        //       quotationCont
+                                        //           .setEnteredUnitPriceInQuotation(
+                                        //         keys[i],
+                                        //         quotationCont
+                                        //             .unitPriceControllers[keys[i]]!
+                                        //             .text,
+                                        //       );
+                                        //       quotationCont
+                                        //           .setMainTotalInQuotation(
+                                        //         keys[i],
+                                        //         totalLine,
+                                        //       );
+                                        //       quotationCont.getTotalItems();
+                                        //     }
+                                        //   }
+                                        //   var comboKeys =
+                                        //   quotationCont
+                                        //       .combosPriceControllers
+                                        //       .keys
+                                        //       .toList();
+                                        //   for (
+                                        //   int i = 0;
+                                        //   i <
+                                        //       quotationCont
+                                        //           .combosPriceControllers
+                                        //           .length;
+                                        //   i++
+                                        //   ) {
+                                        //     var selectedComboId =
+                                        //         '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
+                                        //     if (selectedComboId != '') {
+                                        //       var ind = quotationCont
+                                        //           .combosIdsList
+                                        //           .indexOf(selectedComboId);
+                                        //       if (quotationCont
+                                        //           .combosPricesCurrencies[selectedComboId] ==
+                                        //           quotationCont
+                                        //               .selectedCurrencyName) {
+                                        //         quotationCont
+                                        //             .combosPriceControllers[comboKeys[i]]!
+                                        //             .text = quotationCont
+                                        //             .combosPricesList[ind]
+                                        //             .toString();
+                                        //       } else if (quotationCont
+                                        //           .selectedCurrencyName ==
+                                        //           'USD' &&
+                                        //           quotationCont
+                                        //               .combosPricesCurrencies[selectedComboId] !=
+                                        //               quotationCont
+                                        //                   .selectedCurrencyName) {
+                                        //         var matchedItems =
+                                        //         exchangeRatesController
+                                        //             .exchangeRatesList
+                                        //             .where(
+                                        //               (item) =>
+                                        //           item["currency"] ==
+                                        //               quotationCont
+                                        //                   .combosPricesCurrencies[selectedComboId],
+                                        //         );
+                                        //
+                                        //         var result =
+                                        //         matchedItems.isNotEmpty
+                                        //             ? matchedItems.reduce(
+                                        //               (a, b) =>
+                                        //           DateTime.parse(
+                                        //             a["start_date"],
+                                        //           ).isAfter(
+                                        //             DateTime.parse(
+                                        //               b["start_date"],
+                                        //             ),
+                                        //           )
+                                        //               ? a
+                                        //               : b,
+                                        //         )
+                                        //             : null;
+                                        //         var divider = '1';
+                                        //         if (result != null) {
+                                        //           divider =
+                                        //               result["exchange_rate"]
+                                        //                   .toString();
+                                        //         }
+                                        //         quotationCont
+                                        //             .combosPriceControllers[comboKeys[i]]!
+                                        //             .text =
+                                        //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                        //       } else if (quotationCont
+                                        //           .selectedCurrencyName !=
+                                        //           'USD' &&
+                                        //           quotationCont
+                                        //               .combosPricesCurrencies[selectedComboId] ==
+                                        //               'USD') {
+                                        //         quotationCont
+                                        //             .combosPriceControllers[comboKeys[i]]!
+                                        //             .text =
+                                        //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                        //       } else {
+                                        //         var matchedItems =
+                                        //         exchangeRatesController
+                                        //             .exchangeRatesList
+                                        //             .where(
+                                        //               (item) =>
+                                        //           item["currency"] ==
+                                        //               quotationCont
+                                        //                   .combosPricesCurrencies[selectedComboId],
+                                        //         );
+                                        //
+                                        //         var result =
+                                        //         matchedItems.isNotEmpty
+                                        //             ? matchedItems.reduce(
+                                        //               (a, b) =>
+                                        //           DateTime.parse(
+                                        //             a["start_date"],
+                                        //           ).isAfter(
+                                        //             DateTime.parse(
+                                        //               b["start_date"],
+                                        //             ),
+                                        //           )
+                                        //               ? a
+                                        //               : b,
+                                        //         )
+                                        //             : null;
+                                        //         var divider = '1';
+                                        //         if (result != null) {
+                                        //           divider =
+                                        //               result["exchange_rate"]
+                                        //                   .toString();
+                                        //         }
+                                        //         var usdPrice =
+                                        //             '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                        //         quotationCont
+                                        //             .combosPriceControllers[comboKeys[i]]!
+                                        //             .text =
+                                        //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                        //       }
+                                        //       quotationCont
+                                        //           .combosPriceControllers[comboKeys[i]]!
+                                        //           .text =
+                                        //       '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
+                                        //
+                                        //       quotationCont
+                                        //           .combosPriceControllers[comboKeys[i]]!
+                                        //           .text = double.parse(
+                                        //         quotationCont
+                                        //             .combosPriceControllers[comboKeys[i]]!
+                                        //             .text,
+                                        //       ).toStringAsFixed(2);
+                                        //       var totalLine =
+                                        //           '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                        //       quotationCont
+                                        //           .setEnteredQtyInQuotation(
+                                        //         comboKeys[i],
+                                        //         quotationCont
+                                        //             .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
+                                        //       );
+                                        //       quotationCont
+                                        //           .setMainTotalInQuotation(
+                                        //         comboKeys[i],
+                                        //         totalLine,
+                                        //       );
+                                        //       // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                                        //       quotationCont.getTotalItems();
+                                        //
+                                        //       quotationCont
+                                        //           .setEnteredUnitPriceInQuotation(
+                                        //         comboKeys[i],
+                                        //         quotationCont
+                                        //             .combosPriceControllers[comboKeys[i]]!
+                                        //             .text,
+                                        //       );
+                                        //       quotationCont
+                                        //           .setMainTotalInQuotation(
+                                        //         comboKeys[i],
+                                        //         totalLine,
+                                        //       );
+                                        //       quotationCont.getTotalItems();
+                                        //     }
+                                        //   }
+                                        // });
+
+                                          DropdownMenu<String>(
                                           width:
                                           homeController.isOpened.value? MediaQuery.of(context).size.width * 0.07:
                                           MediaQuery.of(context).size.width * 0.1,
@@ -1134,9 +1507,12 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                           enableSearch: true,
                                           controller: currencyController,
                                           hintText: '',
+                                          textStyle: const TextStyle(fontSize: 12),
                                           inputDecorationTheme: InputDecorationTheme(
+                                            isDense: true,
                                             // filled: true,
                                             hintStyle: const TextStyle(
+                                              fontSize: 12,
                                               fontStyle: FontStyle.italic,
                                             ),
                                             contentPadding:
@@ -3475,6 +3851,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         // quotationController.newRowMap,
                                         quotationCont.orderedKeys,
                                         titleController.text,
+                                          deliveryTermsController.text,
+                                          chanceController.text
                                       );
                                       if (res['success'] == true) {
                                         CommonWidgets.snackBar(

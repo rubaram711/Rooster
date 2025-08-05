@@ -898,6 +898,8 @@ class _CreateNewReturnToSupplierState extends State<CreateNewReturnToSupplier> {
                             '',
                             '',
                             '',
+                            '',
+                            '',
                             '');
                         if (res['success'] == true) {
                           CommonWidgets.snackBar('Success',
@@ -2314,6 +2316,8 @@ class _MobileCreateNewReturnToSupplierState extends State<MobileCreateNewReturnT
                             specialDisc,
                             '',
                             globalDisc,
+                            '',
+                            '',
                             '',
                             '',
                             '',

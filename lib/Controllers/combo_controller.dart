@@ -334,6 +334,12 @@ class ComboController extends ComboControllerAbstract {
 
   String resultStorInDB = 'NotSuccess';
 
+
+  bool isCombosPageIsLastPage = false;
+  setIsCombosPageIsLastPage(bool val) {
+    isCombosPageIsLastPage = val;
+    update();
+  }
   @override
   storeComboInDataBase(
     String companyId,
@@ -360,7 +366,9 @@ class ComboController extends ComboControllerAbstract {
       CommonWidgets.snackBar('Success', res['message']);
       resultStorInDB = 'Success';
       getAllCombosFromBackWithSeach('');
+      if(isCombosPageIsLastPage){
       homeController.selectedTab.value = 'combo_summary';
+      }else{Get.back();}
       update();
     } else {
       CommonWidgets.snackBar('error', res['message']);
