@@ -18,7 +18,7 @@ import 'package:rooster_app/Widgets/loading.dart';
 import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/utils/image_picker_helper.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
-import 'package:rooster_app/Screens/Quotations/create_client_dialog.dart';
+import 'package:rooster_app/Screens/Client/create_client_dialog.dart';
 import 'package:rooster_app/Widgets/reusable_drop_down_menu.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
 import '../../../Controllers/home_controller.dart';
@@ -403,30 +403,99 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                 String formattedDateTime = DateFormat(
                                   'yyyy-MM-dd HH:mm:ss',
                                 ).format(dateTime);
-
-                                var res = await storeDelivery(
-                                  refController.text,
-                                  selectedCustomerIds,
-                                  deliveryCont.selectedDriverId.toString(),
-                                  dateController.text,
-                                  formattedDateTime, //timestamp
-
-                                  '',
-                                  '',
-                                  deliveryCont.newRowMap,
-                                );
-                                if (res['success'] == true) {
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
-                                  );
-                                  homeController.selectedTab.value =
-                                      'deliveries_summary';
-                                } else {
+                                bool hasType1WithEmptyTitle = deliveryController
+                                    .rowsInListViewInDelivery
+                                    .values
+                                    .any((map) {
+                                      return map['line_type_id'] == '1' &&
+                                          (map['title']?.isEmpty ?? true);
+                                    });
+                                bool hasType2WithEmptyId = deliveryController
+                                    .rowsInListViewInDelivery
+                                    .values
+                                    .any((map) {
+                                      return map['line_type_id'] == '2' &&
+                                          (map['item_id']?.isEmpty ?? true);
+                                    });
+                                bool hasType3WithEmptyId = deliveryController
+                                    .rowsInListViewInDelivery
+                                    .values
+                                    .any((map) {
+                                      return map['line_type_id'] == '3' &&
+                                          (map['combo']?.isEmpty ?? true);
+                                    });
+                                bool hasType4WithEmptyImage = deliveryController
+                                    .rowsInListViewInDelivery
+                                    .values
+                                    .any((map) {
+                                      return map['line_type_id'] == '4' &&
+                                          (map['image'] == Uint8List(0) ||
+                                              map['image']?.isEmpty);
+                                    });
+                                bool hasType5WithEmptyNote = deliveryController
+                                    .rowsInListViewInDelivery
+                                    .values
+                                    .any((map) {
+                                      return map['line_type_id'] == '5' &&
+                                          (map['note']?.isEmpty ?? true);
+                                    });
+                                if (deliveryController
+                                    .rowsInListViewInDelivery
+                                    .isEmpty) {
                                   CommonWidgets.snackBar(
                                     'error',
-                                    res['message'],
+                                    'Order lines is Empty',
                                   );
+                                } else if (hasType2WithEmptyId) {
+                                  CommonWidgets.snackBar(
+                                    'error',
+                                    'You have an empty item',
+                                  );
+                                } else if (hasType3WithEmptyId) {
+                                  CommonWidgets.snackBar(
+                                    'error',
+                                    'You have an empty combo',
+                                  );
+                                } else if (hasType1WithEmptyTitle) {
+                                  CommonWidgets.snackBar(
+                                    'error',
+                                    'You have an empty title',
+                                  );
+                                } else if (hasType4WithEmptyImage) {
+                                  CommonWidgets.snackBar(
+                                    'error',
+                                    'You have an empty image',
+                                  );
+                                } else if (hasType5WithEmptyNote) {
+                                  CommonWidgets.snackBar(
+                                    'error',
+                                    'You have an empty note',
+                                  );
+                                } else {
+                                  var res = await storeDelivery(
+                                    refController.text,
+                                    selectedCustomerIds,
+                                    deliveryCont.selectedDriverId.toString(),
+                                    dateController.text,
+                                    formattedDateTime, //timestamp
+
+                                    '',
+                                    '',
+                                    deliveryCont.newRowMap,
+                                  );
+                                  if (res['success'] == true) {
+                                    CommonWidgets.snackBar(
+                                      'Success',
+                                      res['message'],
+                                    );
+                                    homeController.selectedTab.value =
+                                        'deliveries_summary';
+                                  } else {
+                                    CommonWidgets.snackBar(
+                                      'error',
+                                      res['message'],
+                                    );
+                                  }
                                 }
                               },
                             ),
@@ -783,10 +852,10 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                       },
                                       rowWidth:
                                           MediaQuery.of(context).size.width *
-                                          0.13,
+                                          0.15,
                                       textFieldWidth:
                                           MediaQuery.of(context).size.width *
-                                          0.1,
+                                          0.12,
                                       clickableOptionText:
                                           'create_new_client'.tr,
                                       isThereClickableOption: true,
@@ -1175,15 +1244,15 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                     child: ListView(
                                       children:
                                           keysList.map((key) {
-                                            return Dismissible(
+                                            return SizedBox(
                                               key: Key(
                                                 key,
                                               ), // Ensure each widget has a unique key
-                                              onDismissed:
-                                                  (direction) => deliveryCont
-                                                      .removeFromOrderLinesInDeliveryList(
-                                                        key.toString(),
-                                                      ),
+                                              // onDismissed:
+                                              //     (direction) => deliveryCont
+                                              //         .removeFromOrderLinesInDeliveryList(
+                                              //           key.toString(),
+                                              //         ),
                                               child:
                                                   deliveryCont
                                                       .orderLinesDeliveryList[key] ??
@@ -1250,7 +1319,6 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                       MediaQuery.of(context).size.width * 0.15,
                                   height: 45,
                                   onTapFunction: () async {
-
                                     var oldKeys =
                                         deliveryController
                                             .rowsInListViewInDelivery
@@ -1285,13 +1353,13 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                     String formattedDateTime = DateFormat(
                                       'yyyy-MM-dd HH:mm:ss',
                                     ).format(dateTime);
-                                    bool hasType1WithEmptyTitle =
-                                        deliveryController.newRowMap.values.any(
-                                          (map) {
-                                            return map['line_type_id'] == '1' &&
-                                                (map['title']?.isEmpty ?? true);
-                                          },
-                                        );
+                                    // bool hasType1WithEmptyTitle =
+                                    //     deliveryController.newRowMap.values.any(
+                                    //       (map) {
+                                    //         return map['line_type_id'] == '1' &&
+                                    //             (map['title']?.isEmpty ?? true);
+                                    //       },
+                                    //     );
                                     bool hasType2WithEmptyId =
                                         deliveryController.newRowMap.values.any(
                                           (map) {
@@ -1300,13 +1368,13 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                                     true);
                                           },
                                         );
-                                    bool hasType3WithEmptyId =
-                                        deliveryController.newRowMap.values.any(
-                                          (map) {
-                                            return map['line_type_id'] == '3' &&
-                                                (map['combo']?.isEmpty ?? true);
-                                          },
-                                        );
+                                    // bool hasType3WithEmptyId =
+                                    //     deliveryController.newRowMap.values.any(
+                                    //       (map) {
+                                    //         return map['line_type_id'] == '3' &&
+                                    //             (map['combo']?.isEmpty ?? true);
+                                    //       },
+                                    //     );
                                     bool hasType4WithEmptyImage =
                                         deliveryController.newRowMap.values.any(
                                           (map) {
@@ -1315,13 +1383,13 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                                     map['image']?.isEmpty);
                                           },
                                         );
-                                    bool hasType5WithEmptyNote =
-                                        deliveryController.newRowMap.values.any(
-                                          (map) {
-                                            return map['line_type_id'] == '5' &&
-                                                (map['note']?.isEmpty ?? true);
-                                          },
-                                        );
+                                    // bool hasType5WithEmptyNote =
+                                    //     deliveryController.newRowMap.values.any(
+                                    //       (map) {
+                                    //         return map['line_type_id'] == '5' &&
+                                    //             (map['note']?.isEmpty ?? true);
+                                    //       },
+                                    //     );
                                     if (deliveryController.newRowMap.isEmpty) {
                                       CommonWidgets.snackBar(
                                         'error',
@@ -1332,26 +1400,26 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                         'error',
                                         'You have an empty item',
                                       );
-                                    } else if (hasType3WithEmptyId) {
-                                      CommonWidgets.snackBar(
-                                        'error',
-                                        'You have an empty combo',
-                                      );
-                                    } else if (hasType1WithEmptyTitle) {
-                                      CommonWidgets.snackBar(
-                                        'error',
-                                        'You have an empty title',
-                                      );
+                                      // } else if (hasType3WithEmptyId) {
+                                      //   CommonWidgets.snackBar(
+                                      //     'error',
+                                      //     'You have an empty combo',
+                                      //   );
+                                      // } else if (hasType1WithEmptyTitle) {
+                                      //   CommonWidgets.snackBar(
+                                      //     'error',
+                                      //     'You have an empty title',
+                                      //   );
                                     } else if (hasType4WithEmptyImage) {
                                       CommonWidgets.snackBar(
                                         'error',
                                         'You have an empty image',
                                       );
-                                    } else if (hasType5WithEmptyNote) {
-                                      CommonWidgets.snackBar(
-                                        'error',
-                                        'You have an empty note',
-                                      );
+                                      // } else if (hasType5WithEmptyNote) {
+                                      //   CommonWidgets.snackBar(
+                                      //     'error',
+                                      //     'You have an empty note',
+                                      //   );
                                     } else {
                                       var res = await storeDelivery(
                                         refController.text,
@@ -1662,7 +1730,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   TextEditingController qtyController = TextEditingController();
   TextEditingController discountController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-  TextEditingController warehouseController = TextEditingController();
+  TextEditingController itemwarehouseController = TextEditingController();
 
   final DeliveryController deliveryController = Get.find();
   // final ExchangeRatesController exchangeRatesController = Get.find();
@@ -1687,9 +1755,31 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
+    print("----------Item");
+    print(
+      deliveryController.rowsInListViewInDelivery[widget
+          .index]['item_warehouseId'],
+    );
+    print("WarehouseNameList-----------------");
+    var inddd = deliveryController.warehouseIds.indexOf(
+      deliveryController.rowsInListViewInDelivery[widget
+          .index]['item_warehouseId'],
+    );
+    print(inddd);
+
+    print(deliveryController.warehousesNameList);
+
+    itemwarehouseController.text =
+        deliveryController.rowsInListViewInDelivery[widget
+                    .index]['item_warehouseId'] !=
+                ''
+            ? deliveryController.warehousesNameList[inddd]
+            : deliveryController.rowsInListViewInDelivery[widget
+                .index]['item_warehouseId'];
     itemCodeController.text =
         deliveryController.rowsInListViewInDelivery[widget
             .index]['item_main_code'];
+
     qtyController.text =
         deliveryController.rowsInListViewInDelivery[widget
             .index]['item_quantity'];
@@ -1929,7 +2019,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   width: MediaQuery.of(context).size.width * 0.16,
                   // requestFocusOnTap: false,
                   enableSearch: true,
-                  controller: warehouseController,
+                  controller: itemwarehouseController,
                   hintText: 'deliver_warehouse'.tr,
                   inputDecorationTheme: InputDecorationTheme(
                     // filled: true,
@@ -1964,7 +2054,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       }).toList(),
                   enableFilter: true,
                   onSelected: (String? value) {
-                    warehouseController.text = value!;
+                    itemwarehouseController.text = value!;
 
                     var index = cont.warehousesNameList.indexOf(value);
                     var val = '${cont.warehouseIds[index]}';
@@ -2339,7 +2429,7 @@ class ReusableImageRow extends StatefulWidget {
 }
 
 class _ReusableImageRowState extends State<ReusableImageRow> {
-  final DeliveryController salesOrderController = Get.find();
+  final DeliveryController deliveryController = Get.find();
   late Uint8List imageFile;
 
   double listViewLength = Sizes.deviceHeight * 0.08;
@@ -2349,7 +2439,7 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
   @override
   void initState() {
     imageFile =
-        salesOrderController.rowsInListViewInDelivery[widget.index]['image'];
+        deliveryController.rowsInListViewInDelivery[widget.index]['image'];
     super.initState();
   }
 
@@ -2388,7 +2478,9 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
               builder: (cont) {
                 return InkWell(
                   onTap: () async {
+                    print("start delivery------");
                     final image = await ImagePickerHelper.pickImage();
+
                     setState(() {
                       imageFile = image!;
                       cont.changeBoolVar(true);
@@ -2491,16 +2583,15 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                     child: InkWell(
                       onTap: () {
                         setState(() {
-                          salesOrderController
-                              .decrementListViewLengthInDelivery(
-                                salesOrderController.increment + 50,
-                              );
-                          salesOrderController
-                              .removeFromRowsInListViewInDelivery(widget.index);
-                          salesOrderController
-                              .removeFromOrderLinesInDeliveryList(
-                                widget.index.toString(),
-                              );
+                          deliveryController.decrementListViewLengthInDelivery(
+                            deliveryController.increment + 50,
+                          );
+                          deliveryController.removeFromRowsInListViewInDelivery(
+                            widget.index,
+                          );
+                          deliveryController.removeFromOrderLinesInDeliveryList(
+                            widget.index.toString(),
+                          );
                         });
                       },
                       child: Icon(Icons.delete_outline, color: Primary.primary),
@@ -2559,6 +2650,29 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
+    print("----------Combo");
+    print(
+      deliveryController.rowsInListViewInDelivery[widget
+          .index]['combo_warehouseId'],
+    );
+    print("WarehouseNameList-----------------");
+    var indd = deliveryController.warehouseIds.indexOf(
+      deliveryController.rowsInListViewInDelivery[widget
+          .index]['combo_warehouseId'],
+    );
+    print(indd);
+    // var indx = deliveryController.warehousesNameList[indd];
+
+    print(deliveryController.warehousesNameList);
+    // print(deliveryController.warehousesNameList[indd]);
+
+    warehouseController.text =
+        deliveryController.rowsInListViewInDelivery[widget
+                    .index]['combo_warehouseId'] !=
+                ''
+            ? deliveryController.warehousesNameList[indd]
+            : deliveryController.rowsInListViewInDelivery[widget
+                .index]['combo_warehouseId'];
     comboCodeController.text =
         deliveryController.rowsInListViewInDelivery[widget
             .index]['item_main_code'];

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,10 @@ import '../../../Controllers/home_controller.dart';
 
 abstract class ComboControllerAbstract extends GetxController {
   //Combo
+  changeBoolVar(bool val);
+  increaseImageSpace(double val);
+  setImageInCombo(int index, Uint8List imageFile);
+  setTypeInCombo(int index, String val);
   incrementlistViewLengthInCombo(double val);
   decrementlistViewLengthInCombo(double val);
   removeFromRowsInListViewInCombo(int index);
@@ -54,6 +59,111 @@ abstract class ComboControllerAbstract extends GetxController {
 }
 
 class ComboController extends ComboControllerAbstract {
+  Map<int, Widget> photosWidgetsMap = {};
+  double photosListWidth = 0;
+  List photosFilesList = [];
+  List imagesUrlsToRemove = [];
+
+  String totalQty = '';
+  List warehousesList = [];
+
+  // addImageToPhotosWidgetsList(Widget widget) {
+  //   photosWidgetsList.add(widget);
+  //   update();
+  // }
+  int counterForImages = 0;
+  incCounter() {
+    counterForImages++;
+  }
+
+  addImageToPhotosWidgetsMap(int index, Widget widget) {
+    photosWidgetsMap[index] = widget;
+    // counterForImages++;
+    update();
+  }
+
+  addImageToPhotosFilesList(Uint8List imageFile) {
+    photosFilesList.add(imageFile);
+    update();
+  }
+
+  removeImageFromPhotosFilesList(Uint8List imageFile) {
+    photosFilesList.remove(imageFile);
+    update();
+  }
+
+  removeFromImagesList(int key) {
+    photosWidgetsMap.remove(key);
+    photosListWidth = photosListWidth - 130;
+    update();
+  }
+
+  resetPhotosFilesList() {
+    photosFilesList = [];
+    update();
+  }
+
+  addImageToImagesUrlsToRemoveList(String imageUrl) {
+    imagesUrlsToRemove.add(imageUrl);
+    update();
+  }
+
+  removeImageFromImagesUrlsToRemoveList(String imageUrl) {
+    imagesUrlsToRemove.remove(imageUrl);
+    update();
+  }
+
+  resetImagesUrlsToRemoveList() {
+    imagesUrlsToRemove = [];
+    update();
+  }
+
+  setPhotosListWidth(double val) {
+    photosListWidth = val;
+    update();
+  }
+
+  // resetPhotosWidgetsList() {
+  //   photosWidgetsList = [];
+  //   update();
+  // }
+
+  resetPhotosWidgetsMap() {
+    photosWidgetsMap = {};
+    update();
+  }
+
+  ///--------------------------------------------------------
+
+  bool imageAvailable = false;
+  double imageSpaceHeight = 90;
+  @override
+  changeBoolVar(bool val) {
+    imageAvailable = val;
+    update();
+  }
+
+  @override
+  setImageInCombo(int index, Uint8List imageFile) {
+    // print(imageFile);
+    rowsInListViewInCombo[index]['image'] = imageFile;
+    update();
+  }
+
+  @override
+  setTypeInCombo(int index, String val) {
+    rowsInListViewInCombo[index]['line_type_id'] = val;
+    update();
+  }
+
+  List<Widget> photosWidgetsList = [];
+
+  @override
+  increaseImageSpace(double val) {
+    imageSpaceHeight = imageSpaceHeight + val;
+    update();
+  }
+
   final HomeController homeController = Get.find();
   Map newRowMap = {};
 

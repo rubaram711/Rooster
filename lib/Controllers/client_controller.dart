@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../Backend/ClientsBackend/get_clients.dart';
 import '../Backend/ClientsBackend/get_transactions.dart';
+import '../Backend/UsersBackend/get_user.dart';
 
 
 class ClientController extends GetxController {
@@ -140,4 +141,41 @@ class ClientController extends GetxController {
      contactsList[index]['internalNote']=newVal;
    }
 
+
+  List salesPersonList = [];
+  List<String> salesPersonListNames = [];
+  List salesPersonListId = [];
+  String salesPersonName = '';
+  int salesPersonId = 0;
+  String selectedSalesPerson = '';
+  int selectedSalesPersonId = 0;
+  TextEditingController salesPersonController = TextEditingController();
+
+  getAllUsersSalesPersonFromBack() async {
+    salesPersonList = [];
+    salesPersonListNames = [];
+    salesPersonName = '';
+    salesPersonId = 0;
+    update();
+    var p = await getAllUsersSalesPerson();
+    if ('$p' != '[]') {
+      salesPersonList = p;
+      for (var salesPerson in salesPersonList) {
+        salesPersonName = salesPerson['name'];
+        salesPersonId = salesPerson['id'];
+        salesPersonListNames.add(salesPersonName);
+        salesPersonListId.add(salesPersonId);
+      }
+      selectedSalesPerson=salesPersonListNames[0];
+      selectedSalesPersonId=salesPersonListId[0];
+      salesPersonController.text=salesPersonListNames[0];
+    }
+    update();
+  }
+
+  setSelectedSalesPerson(String name,int id){
+    selectedSalesPerson=name;
+    selectedSalesPersonId=id;
+    update();
+  }
 }

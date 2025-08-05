@@ -9,10 +9,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Backend/SalesOrderBackend/update_sales_order.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
+import 'package:rooster_app/Controllers/pending_docs_review_controller.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
 import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Screens/Products/CreateProductDialog/create_product_dialog.dart';
-import 'package:rooster_app/Screens/client_order/create_client_dialog.dart';
 import 'package:rooster_app/Screens/client_order/create_new_sales_order.dart';
 import 'package:rooster_app/Widgets/TransferWidgets/reusable_show_info_card.dart';
 import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
@@ -38,14 +38,18 @@ import '../Combo/combo.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 
+import '../Client/create_client_dialog.dart';
+
 class UpdateSalesOrderDialog extends StatefulWidget {
   const UpdateSalesOrderDialog({
     super.key,
     required this.index,
     required this.info,
+    required this.fromPage,
   });
   final int index;
   final Map info;
+  final String fromPage;
 
   @override
   State<UpdateSalesOrderDialog> createState() => _UpdateSalesOrderDialogState();
@@ -86,7 +90,7 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
 
   final HomeController homeController = Get.find();
   final SalesOrderController salesOrderController = Get.find();
-
+  final PendingDocsReviewController pendingDocsController = Get.find();
   String paymentTerm = '',
       priceListSelected = '',
       selectedCountry = '',
@@ -433,71 +437,148 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                 progressVar = 1;
                               });
                               salesOrderCont.setStatus('sent');
-                              if (_formKey.currentState!.validate()) {
-                                _saveContent();
 
-                                var res = await updateSalesOrder(
-                                  '${widget.info['id']}',
-                                  // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                  false,
-                                  refController.text,
-                                  selectedCustomerIds,
-                                  validityController.text,
-                                  inputDateController.text,
-                                  '', //todo paymentTermsController.text,
-                                  salesOrderCont.selectedPriceListId,
-                                  salesOrderCont
-                                      .selectedCurrencyId, //selectedCurrency
-                                  termsAndConditionsController.text,
-                                  selectedSalesPersonId.toString(),
-                                  '',
-                                  salesOrderCont.selectedCashingMethodId,
-                                  commissionController.text,
-                                  totalCommissionController.text,
-                                  salesOrderController.totalItems
-                                      .toString(), //total before vat
-                                  specialDiscPercentController
-                                      .text, // inserted by user
-                                  salesOrderController
-                                      .specialDisc, // calculated
-                                  globalDiscPercentController.text,
-                                  salesOrderController.globalDisc,
-                                  salesOrderController.vat11.toString(), //vat
-                                  salesOrderController.vatInPrimaryCurrency
-                                      .toString(),
-                                  salesOrderController
-                                      .totalSalesOrder, // quotationController.totalQuotation
-
-                                  salesOrderCont.isVatExemptChecked ? '1' : '0',
-                                  salesOrderCont.isVatNoPrinted ? '1' : '0',
-                                  salesOrderCont.isPrintedAsVatExempt
-                                      ? '1'
-                                      : '0',
-                                  salesOrderCont.isPrintedAs0 ? '1' : '0',
-                                  salesOrderCont.isBeforeVatPrices ? '0' : '1',
-
-                                  salesOrderCont.isBeforeVatPrices ? '1' : '0',
-                                  codeController.text,
-                                  salesOrderCont.status, // status,
-                                  salesOrderController.rowsInListViewInSalesOrder,
-                                  salesOrderController.orderedKeys,
+                              bool hasType1WithEmptyTitle = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '1' &&
+                                        (map['title']?.isEmpty ?? true);
+                                  });
+                              bool hasType2WithEmptyId = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '2' &&
+                                        (map['item_id']?.isEmpty ?? true);
+                                  });
+                              bool hasType3WithEmptyId = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '3' &&
+                                        (map['combo']?.isEmpty ?? true);
+                                  });
+                              bool hasType4WithEmptyImage = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '4' &&
+                                        (map['image'] == Uint8List(0) ||
+                                            map['image']?.isEmpty);
+                                  });
+                              bool hasType5WithEmptyNote = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '5' &&
+                                        (map['note']?.isEmpty ?? true);
+                                  });
+                              if (salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .isEmpty) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'Order lines is Empty',
                                 );
-                                if (res['success'] == true) {
-                                  Get.back();
-                                  salesOrderController
-                                      .getAllSalesOrderFromBack();
-                                  // homeController.selectedTab.value = 'new_quotation';
-                                  homeController.selectedTab.value =
-                                      'sales_order_summary';
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
+                              } else if (hasType2WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty item',
+                                );
+                              } else if (hasType3WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty combo',
+                                );
+                              } else if (hasType1WithEmptyTitle) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty title',
+                                );
+                              } else if (hasType4WithEmptyImage) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty image',
+                                );
+                              } else if (hasType5WithEmptyNote) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty note',
+                                );
+                              } else {
+                                if (_formKey.currentState!.validate()) {
+                                  _saveContent();
+
+                                  var res = await updateSalesOrder(
+                                    '${widget.info['id']}',
+                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                    false,
+                                    refController.text,
+                                    selectedCustomerIds,
+                                    validityController.text,
+                                    inputDateController.text,
+                                    '', //todo paymentTermsController.text,
+                                    salesOrderCont.selectedPriceListId,
+                                    salesOrderCont
+                                        .selectedCurrencyId, //selectedCurrency
+                                    termsAndConditionsController.text,
+                                    selectedSalesPersonId.toString(),
+                                    '',
+                                    salesOrderCont.selectedCashingMethodId,
+                                    commissionController.text,
+                                    totalCommissionController.text,
+                                    salesOrderController.totalItems
+                                        .toString(), //total before vat
+                                    specialDiscPercentController
+                                        .text, // inserted by user
+                                    salesOrderController
+                                        .specialDisc, // calculated
+                                    globalDiscPercentController.text,
+                                    salesOrderController.globalDisc,
+                                    salesOrderController.vat11.toString(), //vat
+                                    salesOrderController.vatInPrimaryCurrency
+                                        .toString(),
+                                    salesOrderController
+                                        .totalSalesOrder, // quotationController.totalQuotation
+
+                                    salesOrderCont.isVatExemptChecked
+                                        ? '1'
+                                        : '0',
+                                    salesOrderCont.isVatNoPrinted ? '1' : '0',
+                                    salesOrderCont.isPrintedAsVatExempt
+                                        ? '1'
+                                        : '0',
+                                    salesOrderCont.isPrintedAs0 ? '1' : '0',
+                                    salesOrderCont.isBeforeVatPrices
+                                        ? '0'
+                                        : '1',
+
+                                    salesOrderCont.isBeforeVatPrices
+                                        ? '1'
+                                        : '0',
+                                    codeController.text,
+                                    salesOrderCont.status, // status,
+                                    salesOrderController
+                                        .rowsInListViewInSalesOrder,
+                                    salesOrderController.orderedKeys,
                                   );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
+                                  if (res['success'] == true) {
+                                    Get.back();
+                                    salesOrderController
+                                        .getAllSalesOrderFromBackWithoutExcept();
+                                    homeController.selectedTab.value =
+                                        'to_invoice';
+                                    CommonWidgets.snackBar(
+                                      'Success',
+                                      res['message'],
+                                    );
+                                  } else {
+                                    CommonWidgets.snackBar(
+                                      'error',
+                                      res['message'],
+                                    );
+                                  }
                                 }
                               }
                             },
@@ -517,70 +598,146 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                 progressVar = 2;
                               });
                               salesOrderCont.setStatus('confirmed');
-                              if (_formKey.currentState!.validate()) {
-                                _saveContent();
-                                var res = await updateSalesOrder(
-                                  '${widget.info['id']}',
-                                  // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                  false,
-                                  refController.text,
-                                  selectedCustomerIds,
-                                  validityController.text,
-                                  inputDateController.text,
-                                  '', //todo paymentTermsController.text,
-                                  salesOrderCont.selectedPriceListId,
-                                  salesOrderCont
-                                      .selectedCurrencyId, //selectedCurrency
-                                  termsAndConditionsController.text,
-                                  selectedSalesPersonId.toString(),
-                                  '',
-                                  salesOrderCont.selectedCashingMethodId,
-                                  commissionController.text,
-                                  totalCommissionController.text,
-                                  salesOrderController.totalItems
-                                      .toString(), //total before vat
-                                  specialDiscPercentController
-                                      .text, // inserted by user
-                                  salesOrderController
-                                      .specialDisc, // calculated
-                                  globalDiscPercentController.text,
-                                  salesOrderController.globalDisc,
-                                  salesOrderController.vat11.toString(), //vat
-                                  salesOrderController.vatInPrimaryCurrency
-                                      .toString(),
-                                  salesOrderController
-                                      .totalSalesOrder, // quotationController.totalQuotation
-
-                                  salesOrderCont.isVatExemptChecked ? '1' : '0',
-                                  salesOrderCont.isVatNoPrinted ? '1' : '0',
-                                  salesOrderCont.isPrintedAsVatExempt
-                                      ? '1'
-                                      : '0',
-                                  salesOrderCont.isPrintedAs0 ? '1' : '0',
-                                  salesOrderCont.isBeforeVatPrices ? '0' : '1',
-
-                                  salesOrderCont.isBeforeVatPrices ? '1' : '0',
-                                  codeController.text,
-                                  salesOrderCont.status, // status,
-                                  salesOrderController.rowsInListViewInSalesOrder,
-                                  salesOrderController.orderedKeys,
+                              bool hasType1WithEmptyTitle = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '1' &&
+                                        (map['title']?.isEmpty ?? true);
+                                  });
+                              bool hasType2WithEmptyId = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '2' &&
+                                        (map['item_id']?.isEmpty ?? true);
+                                  });
+                              bool hasType3WithEmptyId = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '3' &&
+                                        (map['combo']?.isEmpty ?? true);
+                                  });
+                              bool hasType4WithEmptyImage = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '4' &&
+                                        (map['image'] == Uint8List(0) ||
+                                            map['image']?.isEmpty);
+                                  });
+                              bool hasType5WithEmptyNote = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '5' &&
+                                        (map['note']?.isEmpty ?? true);
+                                  });
+                              if (salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .isEmpty) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'Order lines is Empty',
                                 );
-                                if (res['success'] == true) {
-                                  Get.back();
-                                  salesOrderController
-                                      .getAllSalesOrderFromBack();
-                                  // homeController.selectedTab.value = 'new_quotation';
-                                  homeController.selectedTab.value =
-                                      'sales_order_summary';
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
+                              } else if (hasType2WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty item',
+                                );
+                              } else if (hasType3WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty combo',
+                                );
+                              } else if (hasType1WithEmptyTitle) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty title',
+                                );
+                              } else if (hasType4WithEmptyImage) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty image',
+                                );
+                              } else if (hasType5WithEmptyNote) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty note',
+                                );
+                              } else {
+                                if (_formKey.currentState!.validate()) {
+                                  _saveContent();
+                                  var res = await updateSalesOrder(
+                                    '${widget.info['id']}',
+                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                    false,
+                                    refController.text,
+                                    selectedCustomerIds,
+                                    validityController.text,
+                                    inputDateController.text,
+                                    '', //todo paymentTermsController.text,
+                                    salesOrderCont.selectedPriceListId,
+                                    salesOrderCont
+                                        .selectedCurrencyId, //selectedCurrency
+                                    termsAndConditionsController.text,
+                                    selectedSalesPersonId.toString(),
+                                    '',
+                                    salesOrderCont.selectedCashingMethodId,
+                                    commissionController.text,
+                                    totalCommissionController.text,
+                                    salesOrderController.totalItems
+                                        .toString(), //total before vat
+                                    specialDiscPercentController
+                                        .text, // inserted by user
+                                    salesOrderController
+                                        .specialDisc, // calculated
+                                    globalDiscPercentController.text,
+                                    salesOrderController.globalDisc,
+                                    salesOrderController.vat11.toString(), //vat
+                                    salesOrderController.vatInPrimaryCurrency
+                                        .toString(),
+                                    salesOrderController
+                                        .totalSalesOrder, // quotationController.totalQuotation
+
+                                    salesOrderCont.isVatExemptChecked
+                                        ? '1'
+                                        : '0',
+                                    salesOrderCont.isVatNoPrinted ? '1' : '0',
+                                    salesOrderCont.isPrintedAsVatExempt
+                                        ? '1'
+                                        : '0',
+                                    salesOrderCont.isPrintedAs0 ? '1' : '0',
+                                    salesOrderCont.isBeforeVatPrices
+                                        ? '0'
+                                        : '1',
+
+                                    salesOrderCont.isBeforeVatPrices
+                                        ? '1'
+                                        : '0',
+                                    codeController.text,
+                                    salesOrderCont.status, // status,
+                                    salesOrderController
+                                        .rowsInListViewInSalesOrder,
+                                    salesOrderController.orderedKeys,
                                   );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
+                                  if (res['success'] == true) {
+                                    Get.back();
+                                    salesOrderController
+                                        .getAllSalesOrderFromBackWithoutExcept();
+                                    homeController.selectedTab.value =
+                                        'to_deleiver';
+                                    CommonWidgets.snackBar(
+                                      'Success',
+                                      res['message'],
+                                    );
+                                  } else {
+                                    CommonWidgets.snackBar(
+                                      'error',
+                                      res['message'],
+                                    );
+                                  }
                                 }
                               }
                             },
@@ -596,70 +753,146 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                             // },
                             async {
                               salesOrderCont.setStatus('cancelled');
-                              if (_formKey.currentState!.validate()) {
-                                _saveContent();
-                                var res = await updateSalesOrder(
-                                  '${widget.info['id']}',
-                                  false,
-                                  // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                  refController.text,
-                                  selectedCustomerIds,
-                                  validityController.text,
-                                  inputDateController.text,
-                                  '', //todo paymentTermsController.text,
-                                  salesOrderCont.selectedPriceListId,
-                                  salesOrderCont
-                                      .selectedCurrencyId, //selectedCurrency
-                                  termsAndConditionsController.text,
-                                  selectedSalesPersonId.toString(),
-                                  '',
-                                  salesOrderCont.selectedCashingMethodId,
-                                  commissionController.text,
-                                  totalCommissionController.text,
-                                  salesOrderController.totalItems
-                                      .toString(), //total before vat
-                                  specialDiscPercentController
-                                      .text, // inserted by user
-                                  salesOrderController
-                                      .specialDisc, // calculated
-                                  globalDiscPercentController.text,
-                                  salesOrderController.globalDisc,
-                                  salesOrderController.vat11.toString(), //vat
-                                  salesOrderController.vatInPrimaryCurrency
-                                      .toString(),
-                                  salesOrderController
-                                      .totalSalesOrder, // quotationController.totalQuotation
-
-                                  salesOrderCont.isVatExemptChecked ? '1' : '0',
-                                  salesOrderCont.isVatNoPrinted ? '1' : '0',
-                                  salesOrderCont.isPrintedAsVatExempt
-                                      ? '1'
-                                      : '0',
-                                  salesOrderCont.isPrintedAs0 ? '1' : '0',
-                                  salesOrderCont.isBeforeVatPrices ? '0' : '1',
-
-                                  salesOrderCont.isBeforeVatPrices ? '1' : '0',
-                                  codeController.text,
-                                  salesOrderCont.status, // status,
-                                  salesOrderController.rowsInListViewInSalesOrder,
-                                  salesOrderController.orderedKeys,
+                              bool hasType1WithEmptyTitle = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '1' &&
+                                        (map['title']?.isEmpty ?? true);
+                                  });
+                              bool hasType2WithEmptyId = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '2' &&
+                                        (map['item_id']?.isEmpty ?? true);
+                                  });
+                              bool hasType3WithEmptyId = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '3' &&
+                                        (map['combo']?.isEmpty ?? true);
+                                  });
+                              bool hasType4WithEmptyImage = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '4' &&
+                                        (map['image'] == Uint8List(0) ||
+                                            map['image']?.isEmpty);
+                                  });
+                              bool hasType5WithEmptyNote = salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '5' &&
+                                        (map['note']?.isEmpty ?? true);
+                                  });
+                              if (salesOrderController
+                                  .rowsInListViewInSalesOrder
+                                  .isEmpty) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'Order lines is Empty',
                                 );
-                                if (res['success'] == true) {
-                                  Get.back();
-                                  salesOrderController
-                                      .getAllSalesOrderFromBack();
-                                  // homeController.selectedTab.value = 'new_quotation';
-                                  homeController.selectedTab.value =
-                                      'sales_order_summary';
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
+                              } else if (hasType2WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty item',
+                                );
+                              } else if (hasType3WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty combo',
+                                );
+                              } else if (hasType1WithEmptyTitle) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty title',
+                                );
+                              } else if (hasType4WithEmptyImage) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty image',
+                                );
+                              } else if (hasType5WithEmptyNote) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty note',
+                                );
+                              } else {
+                                if (_formKey.currentState!.validate()) {
+                                  _saveContent();
+                                  var res = await updateSalesOrder(
+                                    '${widget.info['id']}',
+                                    false,
+                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                    refController.text,
+                                    selectedCustomerIds,
+                                    validityController.text,
+                                    inputDateController.text,
+                                    '', //todo paymentTermsController.text,
+                                    salesOrderCont.selectedPriceListId,
+                                    salesOrderCont
+                                        .selectedCurrencyId, //selectedCurrency
+                                    termsAndConditionsController.text,
+                                    selectedSalesPersonId.toString(),
+                                    '',
+                                    salesOrderCont.selectedCashingMethodId,
+                                    commissionController.text,
+                                    totalCommissionController.text,
+                                    salesOrderController.totalItems
+                                        .toString(), //total before vat
+                                    specialDiscPercentController
+                                        .text, // inserted by user
+                                    salesOrderController
+                                        .specialDisc, // calculated
+                                    globalDiscPercentController.text,
+                                    salesOrderController.globalDisc,
+                                    salesOrderController.vat11.toString(), //vat
+                                    salesOrderController.vatInPrimaryCurrency
+                                        .toString(),
+                                    salesOrderController
+                                        .totalSalesOrder, // quotationController.totalQuotation
+
+                                    salesOrderCont.isVatExemptChecked
+                                        ? '1'
+                                        : '0',
+                                    salesOrderCont.isVatNoPrinted ? '1' : '0',
+                                    salesOrderCont.isPrintedAsVatExempt
+                                        ? '1'
+                                        : '0',
+                                    salesOrderCont.isPrintedAs0 ? '1' : '0',
+                                    salesOrderCont.isBeforeVatPrices
+                                        ? '0'
+                                        : '1',
+
+                                    salesOrderCont.isBeforeVatPrices
+                                        ? '1'
+                                        : '0',
+                                    codeController.text,
+                                    salesOrderCont.status, // status,
+                                    salesOrderController
+                                        .rowsInListViewInSalesOrder,
+                                    salesOrderController.orderedKeys,
                                   );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
+                                  if (res['success'] == true) {
+                                    Get.back();
+                                    salesOrderController
+                                        .getAllSalesOrderFromBackWithoutExcept();
+                                    homeController.selectedTab.value =
+                                        'sales_order_summary';
+                                    CommonWidgets.snackBar(
+                                      'Success',
+                                      res['message'],
+                                    );
+                                  } else {
+                                    CommonWidgets.snackBar(
+                                      'error',
+                                      res['message'],
+                                    );
+                                  }
                                 }
                               }
                             },
@@ -1178,6 +1411,47 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                             salesOrderCont
                                                 .customerNameList[indexNum];
                                       });
+                                      int index = salesOrderCont
+                                          .customerNumberList
+                                          .indexOf(val!);
+                                      if (salesOrderCont
+                                          .customersPricesListsIds[index]
+                                          .isNotEmpty) {
+                                        salesOrderCont.setSelectedPriceListId(
+                                          '${salesOrderCont.customersPricesListsIds[index]}',
+                                        );
+
+                                        priceListController.text =
+                                            salesOrderCont
+                                                .priceListsNames[salesOrderCont
+                                                .priceListsIds
+                                                .indexOf(
+                                                  '${salesOrderCont.customersPricesListsIds[index]}',
+                                                )];
+                                        setState(() {
+                                          salesOrderCont
+                                              .resetItemsAfterChangePriceList();
+                                        });
+                                      }
+                                      if (salesOrderCont
+                                          .customersSalesPersonsIds[index]
+                                          .isNotEmpty) {
+                                        setState(() {
+                                          selectedSalesPersonId = int.parse(
+                                            '${salesOrderCont.customersSalesPersonsIds[index]}',
+                                          );
+                                          selectedSalesPerson =
+                                              salesOrderCont
+                                                  .salesPersonListNames[salesOrderCont
+                                                  .salesPersonListId
+                                                  .indexOf(
+                                                    selectedSalesPersonId,
+                                                  )];
+
+                                          salesPersonController.text =
+                                              selectedSalesPerson;
+                                        });
+                                      }
                                     },
                                   ),
                                   ReusableDropDownMenuWithSearch(
@@ -1201,6 +1475,47 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                         // codeController =
                                         //     quotationController.codeController;
                                       });
+                                      var index = salesOrderCont
+                                          .customerNameList
+                                          .indexOf(val!);
+                                      if (salesOrderCont
+                                          .customersPricesListsIds[index]
+                                          .isNotEmpty) {
+                                        salesOrderCont.setSelectedPriceListId(
+                                          '${salesOrderCont.customersPricesListsIds[index]}',
+                                        );
+
+                                        priceListController.text =
+                                            salesOrderCont
+                                                .priceListsNames[salesOrderCont
+                                                .priceListsIds
+                                                .indexOf(
+                                                  '${salesOrderCont.customersPricesListsIds[index]}',
+                                                )];
+                                        setState(() {
+                                          salesOrderCont
+                                              .resetItemsAfterChangePriceList();
+                                        });
+                                      }
+                                      if (salesOrderCont
+                                          .customersSalesPersonsIds[index]
+                                          .isNotEmpty) {
+                                        setState(() {
+                                          selectedSalesPersonId = int.parse(
+                                            '${salesOrderCont.customersSalesPersonsIds[index]}',
+                                          );
+                                          selectedSalesPerson =
+                                              salesOrderCont
+                                                  .salesPersonListNames[salesOrderCont
+                                                  .salesPersonListId
+                                                  .indexOf(
+                                                    selectedSalesPersonId,
+                                                  )];
+
+                                          salesPersonController.text =
+                                              selectedSalesPerson;
+                                        });
+                                      }
                                     },
                                     validationFunc: (value) {},
                                     rowWidth:
@@ -2007,68 +2322,66 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                               children: [
                                 SizedBox(
                                   height:
-                                  salesOrderCont
-                                      .listViewLengthInSalesOrder +
+                                      salesOrderCont
+                                          .listViewLengthInSalesOrder +
                                       50,
                                   child: ScrollConfiguration(
                                     behavior: const MaterialScrollBehavior()
                                         .copyWith(
-                                      dragDevices: {
-                                        PointerDeviceKind.touch,
-                                        PointerDeviceKind.mouse,
-                                      },
-                                    ),
+                                          dragDevices: {
+                                            PointerDeviceKind.touch,
+                                            PointerDeviceKind.mouse,
+                                          },
+                                        ),
                                     child: ReorderableListView.builder(
                                       itemCount:
-                                      salesOrderCont
-                                          .rowsInListViewInSalesOrder
-                                          .keys
-                                          .length,
+                                          salesOrderCont
+                                              .rowsInListViewInSalesOrder
+                                              .keys
+                                              .length,
                                       buildDefaultDragHandles: false,
                                       itemBuilder: (context, index) {
                                         final key =
-                                        salesOrderCont.orderedKeys[index];
+                                            salesOrderCont.orderedKeys[index];
                                         final row =
-                                        salesOrderCont
-                                            .rowsInListViewInSalesOrder[key]!;
+                                            salesOrderCont
+                                                .rowsInListViewInSalesOrder[key]!;
                                         final lineType =
                                             '${row['line_type_id'] ?? ''}';
-                                        return Dismissible(
+                                        return SizedBox(
                                           key: ValueKey(key),
-                                          onDismissed: (direction) {
-                                            setState(() {
-                                              salesOrderCont
-                                                  .decrementListViewLengthInSalesOrder(
-                                                salesOrderCont
-                                                    .increment,
-                                              );
-                                              salesOrderCont
-                                                  .removeFromRowsInListViewInSalesOrder(
-                                                key,
-                                              );
-
-                                            });
-                                          },
+                                          // onDismissed: (direction) {
+                                          //   setState(() {
+                                          //     salesOrderCont
+                                          //         .decrementListViewLengthInSalesOrder(
+                                          //           salesOrderCont.increment,
+                                          //         );
+                                          //     salesOrderCont
+                                          //         .removeFromRowsInListViewInSalesOrder(
+                                          //           key,
+                                          //         );
+                                          //   });
+                                          // },
                                           child: SizedBox(
                                             width:
-                                            MediaQuery.of(
-                                              context,
-                                            ).size.width,
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width,
                                             child: Row(
                                               children: [
                                                 ReorderableDragStartListener(
                                                   index: index,
                                                   child: Container(
                                                     width:
-                                                    MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
+                                                        MediaQuery.of(
+                                                          context,
+                                                        ).size.width *
                                                         0.02,
                                                     height: 20,
                                                     margin:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 15,
-                                                    ),
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 15,
+                                                        ),
                                                     decoration: const BoxDecoration(
                                                       image: DecorationImage(
                                                         image: AssetImage(
@@ -2081,30 +2394,30 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                                 ),
                                                 Expanded(
                                                   child:
-                                                  lineType == '1'
-                                                      ? ReusableTitleRow(
-                                                    index: key,
-                                                    info: row,
-                                                  )
-                                                      : lineType == '2'
-                                                      ? ReusableItemRow(
-                                                    index: key,
-                                                    info: row,
-                                                  )
-                                                      : lineType == '3'
-                                                      ? ReusableComboRow(
-                                                    index: key,
-                                                    info: row,
-                                                  )
-                                                      : lineType == '4'
-                                                      ? ReusableImageRow(
-                                                    index: key,
-                                                    info: row,
-                                                  )
-                                                      : ReusableNoteRow(
-                                                    index: key,
-                                                    info: row,
-                                                  ),
+                                                      lineType == '1'
+                                                          ? ReusableTitleRow(
+                                                            index: key,
+                                                            info: row,
+                                                          )
+                                                          : lineType == '2'
+                                                          ? ReusableItemRow(
+                                                            index: key,
+                                                            info: row,
+                                                          )
+                                                          : lineType == '3'
+                                                          ? ReusableComboRow(
+                                                            index: key,
+                                                            info: row,
+                                                          )
+                                                          : lineType == '4'
+                                                          ? ReusableImageRow(
+                                                            index: key,
+                                                            info: row,
+                                                          )
+                                                          : ReusableNoteRow(
+                                                            index: key,
+                                                            info: row,
+                                                          ),
                                                 ),
                                               ],
                                             ),
@@ -2738,7 +3051,9 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                 return map['line_type_id'] == '5' &&
                                     (map['note']?.isEmpty ?? true);
                               });
-                          if (salesOrderController.rowsInListViewInSalesOrder.isEmpty) {
+                          if (salesOrderController
+                              .rowsInListViewInSalesOrder
+                              .isEmpty) {
                             CommonWidgets.snackBar(
                               'error',
                               'Order lines is Empty',
@@ -2816,10 +3131,21 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                               );
                               if (res['success'] == true) {
                                 Get.back();
-                                salesOrderController.getAllSalesOrderFromBack();
-                                // homeController.selectedTab.value = 'new_quotation';
-                                homeController.selectedTab.value =
-                                    'sales_order_summary';
+                                if (widget.fromPage == 'pendingDocs') {
+                                  pendingDocsController.getAllPendingDocs();
+                                  homeController.selectedTab.value =
+                                      'pending_docs';
+                                } else {
+                                  salesOrderController
+                                      .getAllSalesOrderFromBackWithoutExcept();
+
+                                  salesOrderCont.status == 'confirmed' ||
+                                          salesOrderCont.status == 'cancelled'
+                                      ? homeController.selectedTab.value =
+                                          'sales_order_summary'
+                                      : homeController.selectedTab.value =
+                                          'to_invoice';
+                                }
                                 CommonWidgets.snackBar(
                                   'Success',
                                   res['message'],
@@ -3111,9 +3437,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
     salesOrderController.unitPriceControllers[widget.index]!.text =
         '${widget.info['item_unit_price'] ?? '1'}';
     selectedItemId = widget.info['item_id'].toString();
-      salesOrderController.unitPriceControllers[widget.index]!.text =
-      '${double.parse(salesOrderController.unitPriceControllers[widget.index]!.text) + taxValue}';
-    salesOrderController.unitPriceControllers[widget.index]!.text = double.parse(
+    salesOrderController.unitPriceControllers[widget.index]!.text =
+        '${double.parse(salesOrderController.unitPriceControllers[widget.index]!.text) + taxValue}';
+    salesOrderController
+        .unitPriceControllers[widget.index]!
+        .text = double.parse(
       salesOrderController.unitPriceControllers[widget.index]!.text,
     ).toStringAsFixed(2);
 
@@ -3126,7 +3454,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
   @override
   void initState() {
-    if (widget.info['item_id']!='') {
+    if (widget.info['item_id'] != '') {
       qtyController.text = '${widget.info['item_quantity'] ?? '1'}';
       quantity = '${widget.info['item_quantity'] ?? '1'}';
 
@@ -3142,7 +3470,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
       descriptionController.text = widget.info['item_description'] ?? '';
 
-      itemCodeController.text = widget.info['item_name'].toString();
+      itemCodeController.text = widget.info['item_main_code'].toString();
       selectedItemId = widget.info['item_id'].toString();
 
       setPrice();
@@ -4283,7 +4611,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
   @override
   void initState() {
-    if (widget.info['combo_quantity']!=null) {
+    if (widget.info['combo_quantity'] != null) {
       qtyController.text = '${widget.info['combo_quantity'] ?? ''}';
       quantity = '${widget.info['combo_quantity'] ?? '0.0'}';
       salesOrderController.rowsInListViewInSalesOrder[widget

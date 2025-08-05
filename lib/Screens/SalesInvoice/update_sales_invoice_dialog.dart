@@ -16,7 +16,6 @@ import 'package:rooster_app/Controllers/sales_invoice_controller.dart';
 import 'package:rooster_app/Controllers/warehouse_controller.dart';
 import 'package:rooster_app/Screens/Products/CreateProductDialog/create_product_dialog.dart';
 import 'package:rooster_app/Screens/SalesInvoice/create_new_sales_invoice.dart';
-import 'package:rooster_app/Screens/client_order/create_client_dialog.dart';
 import 'package:rooster_app/Screens/SalesInvoice/print_sales_invoice.dart';
 import 'package:rooster_app/Widgets/TransferWidgets/reusable_show_info_card.dart';
 import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
@@ -39,20 +38,21 @@ import '../../const/colors.dart';
 import '../../const/constants.dart';
 import '../../const/functions.dart';
 import '../../const/urls.dart';
+import '../Client/create_client_dialog.dart';
 import '../Combo/combo.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
-
-
 
 class UpdateSalesInvoiceDialog extends StatefulWidget {
   const UpdateSalesInvoiceDialog({
     super.key,
     required this.index,
     required this.info,
+    required this.fromPage,
   });
   final int index;
   final Map info;
+  final String fromPage;
 
   @override
   State<UpdateSalesInvoiceDialog> createState() =>
@@ -159,14 +159,14 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
       selectedCurrency,
     );
     salesInvoiceController.selectedCurrencyId =
-    exchangeRatesController.currenciesIdsList[index];
+        exchangeRatesController.currenciesIdsList[index];
     salesInvoiceController.selectedCurrencyName = selectedCurrency;
     var vat = await getCompanyVatFromPref();
     salesInvoiceController.setCompanyVat(double.parse(vat));
     var companyCurrency = await getCompanyPrimaryCurrencyFromPref();
     salesInvoiceController.setCompanyPrimaryCurrency(companyCurrency);
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
-          (item) => item["currency"] == companyCurrency,
+      (item) => item["currency"] == companyCurrency,
       orElse: () => null,
     );
     salesInvoiceController.setLatestRate(
@@ -199,7 +199,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
       vatExemptController.text = 'No printed ';
     }
     salesInvoiceController.isVatExemptChecked =
-    '${widget.info['vatExempt'] ?? ''}' == '1' ? true : false;
+        '${widget.info['vatExempt'] ?? ''}' == '1' ? true : false;
   }
 
   late QuillController _controller;
@@ -240,13 +240,13 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
   setProgressVar() {
     salesInvoiceController.status = widget.info['status'];
     progressVar =
-    widget.info['status'] == "pending"
-        ? 0
-        : widget.info['status'] == 'sent'
-        ? 1
-        : widget.info['status'] == 'confirmed'
-        ? 2
-        : 0;
+        widget.info['status'] == "pending"
+            ? 0
+            : widget.info['status'] == 'sent'
+            ? 1
+            : widget.info['status'] == 'confirmed'
+            ? 2
+            : 0;
   }
 
   String oldTermsAndConditionsString = '';
@@ -259,7 +259,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     getCurrency();
     salesInvoiceController.orderedKeys = [];
     salesInvoiceController.rowsInListViewInSalesInvoice = {};
-    salesInvoiceController.salesInvoiceCounter=0;
+    salesInvoiceController.salesInvoiceCounter = 0;
     setProgressVar();
     if (widget.info['deliveredFromWarehouse'] != null) {
       warehouseName = '${widget.info['deliveredFromWarehouse']['name'] ?? ''}';
@@ -273,15 +273,15 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     inputDateController.text = widget.info['inputDate'] ?? '';
     if (widget.info['cashingMethod'] != null) {
       cashingMethodsController.text =
-      '${widget.info['cashingMethod']['title'] ?? ''}';
+          '${widget.info['cashingMethod']['title'] ?? ''}';
       salesInvoiceController.selectedCashingMethodId =
-      '${widget.info['cashingMethod']['id']}';
+          '${widget.info['cashingMethod']['id']}';
     }
 
     if (widget.info['pricelist'] != null) {
       priceListController.text = '${widget.info['pricelist']['code'] ?? ''}';
       salesInvoiceController.selectedPriceListId =
-      '${widget.info['pricelist']['id']}';
+          '${widget.info['pricelist']['id']}';
     } else {
       priceListController.text = 'STANDARD';
     }
@@ -289,7 +289,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     if (widget.info['salesperson'] != null) {
       selectedSalesPerson = '${widget.info['salesperson']['name'] ?? ''}';
       salesPersonController.text =
-      '${widget.info['salesperson']['name'] ?? ''}';
+          '${widget.info['salesperson']['name'] ?? ''}';
       selectedSalesPersonId = widget.info['salesperson']['id'] ?? 0;
     }
 
@@ -338,20 +338,20 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     );
     // print('isVatZero $isVatZero');
     salesInvoiceController.vat11 =
-    salesInvoiceController.isVatExemptChecked
-        ? '0'
-        : '${widget.info['vat'] ?? ''}';
+        salesInvoiceController.isVatExemptChecked
+            ? '0'
+            : '${widget.info['vat'] ?? ''}';
     salesInvoiceController.vatInPrimaryCurrency =
-    salesInvoiceController.isVatExemptChecked
-        ? '0'
-        : '${widget.info['vatLebanese'] ?? ''}';
+        salesInvoiceController.isVatExemptChecked
+            ? '0'
+            : '${widget.info['vatLebanese'] ?? ''}';
 
     // quotationController.totalQuotation = '${widget.info['total'] ?? ''}';
     salesInvoiceController.totalSalesInvoice = ((salesInvoiceController
-        .totalItems -
-        double.parse(salesInvoiceController.globalDisc) -
-        double.parse(salesInvoiceController.specialDisc)) +
-        double.parse(salesInvoiceController.vat11))
+                    .totalItems -
+                double.parse(salesInvoiceController.globalDisc) -
+                double.parse(salesInvoiceController.specialDisc)) +
+            double.parse(salesInvoiceController.vat11))
         .toStringAsFixed(2);
     salesInvoiceController.city[selectedCustomerIds] =
         widget.info['client']['city'] ?? '';
@@ -364,19 +364,20 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     salesInvoiceController.selectedSalesInvoiceData['orderLines'] =
         widget.info['orderLines'] ?? '';
     for (
-    int i = 0;
-    i < salesInvoiceController.selectedSalesInvoiceData['orderLines'].length;
-    i++
+      int i = 0;
+      i < salesInvoiceController.selectedSalesInvoiceData['orderLines'].length;
+      i++
     ) {
       salesInvoiceController.rowsInListViewInSalesInvoice[i + 1] =
-      salesInvoiceController.selectedSalesInvoiceData['orderLines'][i];
+          salesInvoiceController.selectedSalesInvoiceData['orderLines'][i];
       salesInvoiceController.orderedKeys.add(i + 1);
       if (widget.info['orderLines'][i]['line_type_id'] == 2) {
         salesInvoiceController.unitPriceControllers[i + 1] =
             TextEditingController();
       } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
         salesInvoiceController.combosPriceControllers[i + 1] =
-            TextEditingController();}
+            TextEditingController();
+      }
     }
     // var keys =
     // salesInvoiceController.rowsInListViewInSalesInvoice.keys.toList();
@@ -486,7 +487,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                               additionalSpecialDiscount = 0;
                               totalPriceAfterSpecialDiscount = 0;
                               totalPriceAfterSpecialDiscountBysalesInvoiceCurrency =
-                              0;
+                                  0;
                               vatBySalesInvoiceCurrency = 0;
                               vatBySalesInvoiceCurrency = 0;
                               finalPriceBySalesInvoiceCurrency = 0;
@@ -494,8 +495,8 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                 if ('${item['line_type_id']}' == '2') {
                                   qty = item['item_quantity'];
                                   var map =
-                                  salesInvoiceCont.itemsMap[item['item_id']
-                                      .toString()];
+                                      salesInvoiceCont.itemsMap[item['item_id']
+                                          .toString()];
                                   itemName = map['item_name'];
                                   itemPrice = double.parse(
                                     '${item['item_unit_price'] ?? '0'}',
@@ -504,10 +505,10 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   // formatDoubleWithCommas(map['unitPrice']);
                                   itemDescription = item['item_description'];
                                   itemImage =
-                                  '${map['images']}' != '[]' &&
-                                      map['images'] != null
-                                      ? '$baseImage${map['images'][0]['img_url']}'
-                                      : '';
+                                      '${map['images']}' != '[]' &&
+                                              map['images'] != null
+                                          ? '$baseImage${map['images'][0]['img_url']}'
+                                          : '';
                                   // itemCurrencyName = map['currency']['name'];
                                   // itemCurrencySymbol = map['currency']['symbol'];
                                   // itemCurrencyLatestRate =
@@ -516,14 +517,14 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     var firstBrandObject = map['itemGroups']
                                         .firstWhere(
                                           (obj) =>
-                                      obj["root_name"]?.toLowerCase() ==
-                                          "brand".toLowerCase(),
-                                      orElse: () => null,
-                                    );
+                                              obj["root_name"]?.toLowerCase() ==
+                                              "brand".toLowerCase(),
+                                          orElse: () => null,
+                                        );
                                     brand =
-                                    firstBrandObject == null
-                                        ? ''
-                                        : firstBrandObject['name'] ?? '';
+                                        firstBrandObject == null
+                                            ? ''
+                                            : firstBrandObject['name'] ?? '';
                                   }
                                   itemTotal = double.parse(
                                     '${item['item_total']}',
@@ -536,7 +537,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     'item_description': itemDescription,
                                     'item_quantity': qty,
                                     'item_discount':
-                                    item['item_discount'] ?? '0',
+                                        item['item_discount'] ?? '0',
                                     'item_unit_price': formatDoubleWithCommas(
                                       itemPrice,
                                     ),
@@ -557,12 +558,12 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   var ind = salesInvoiceCont.combosIdsList
                                       .indexOf(item['combo_id'].toString());
                                   var itemName =
-                                  salesInvoiceCont.combosNamesList[ind];
+                                      salesInvoiceCont.combosNamesList[ind];
                                   var itemPrice = double.parse(
                                     '${item['combo_unit_price'] ?? 0.0}',
                                   );
                                   var itemDescription =
-                                  item['combo_description'];
+                                      item['combo_description'];
 
                                   var itemTotal = double.parse(
                                     '${item['combo_total']}',
@@ -577,7 +578,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                       itemPrice,
                                     ),
                                     'item_discount':
-                                    item['combo_discount'] ?? '0',
+                                        item['combo_discount'] ?? '0',
                                     'item_total': formatDoubleWithCommas(
                                       itemTotal,
                                     ),
@@ -647,122 +648,137 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   totalAllItems - discountOnAllItem;
                               additionalSpecialDiscount =
                                   totalPriceAfterDiscount *
-                                      double.parse(
-                                        widget.info['specialDiscount'] ?? '0',
-                                      ) /
-                                      100;
+                                  double.parse(
+                                    widget.info['specialDiscount'] ?? '0',
+                                  ) /
+                                  100;
                               totalPriceAfterSpecialDiscount =
                                   totalPriceAfterDiscount -
-                                      additionalSpecialDiscount;
+                                  additionalSpecialDiscount;
                               totalPriceAfterSpecialDiscountBysalesInvoiceCurrency =
                                   totalPriceAfterSpecialDiscount;
                               vatBySalesInvoiceCurrency =
-                              '${widget.info['vatExempt']}' == '1'
-                                  ? 0
-                                  : (totalPriceAfterSpecialDiscountBysalesInvoiceCurrency *
-                                  double.parse(
-                                    await getCompanyVatFromPref(),
-                                  )) /
-                                  100;
+                                  '${widget.info['vatExempt']}' == '1'
+                                      ? 0
+                                      : (totalPriceAfterSpecialDiscountBysalesInvoiceCurrency *
+                                              double.parse(
+                                                await getCompanyVatFromPref(),
+                                              )) /
+                                          100;
                               finalPriceBySalesInvoiceCurrency =
                                   totalPriceAfterSpecialDiscountBysalesInvoiceCurrency +
-                                      vatBySalesInvoiceCurrency;
+                                  vatBySalesInvoiceCurrency;
+                              var salesOrderNumber = '';
+                              var quotNumber = '';
+                              widget.info['salesorder'] == null
+                                  ? salesOrderNumber = ''
+                                  : salesOrderNumber =
+                                      widget
+                                          .info['salesorder']['salesorderNumber'];
+
+                              salesOrderNumber == ''
+                                  ? quotNumber = ''
+                                  : quotNumber =
+                                      widget
+                                          .info['salesorder']['quotation']['quotationNumber'];
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (BuildContext context) {
                                     // print('widget.info[ ${widget.info['termsAndConditions']}');
                                     return PrintSalesInvoice(
+                                      quotationNumber: quotNumber,
+                                      salesOrderNumber: salesOrderNumber,
                                       isPrintedAs0:
-                                      '${widget.info['printedAsPercentage']}' ==
-                                          '1'
-                                          ? true
-                                          : false,
+                                          '${widget.info['printedAsPercentage']}' ==
+                                                  '1'
+                                              ? true
+                                              : false,
                                       isVatNoPrinted:
-                                      '${widget.info['notPrinted']}' == '1'
-                                          ? true
-                                          : false,
+                                          '${widget.info['notPrinted']}' == '1'
+                                              ? true
+                                              : false,
                                       isPrintedAsVatExempt:
-                                      '${widget.info['printedAsVatExempt']}' ==
-                                          '1'
-                                          ? true
-                                          : false,
+                                          '${widget.info['printedAsVatExempt']}' ==
+                                                  '1'
+                                              ? true
+                                              : false,
                                       isInSalesInvoice: true,
                                       salesInvoiceNumber:
-                                      widget.info['salesInvoiceNumber'] ??
+                                          widget.info['salesInvoiceNumber'] ??
                                           '',
                                       creationDate:
-                                      widget.info['valueDate'] ?? '',
+                                          widget.info['valueDate'] ?? '',
                                       ref: widget.info['reference'] ?? '',
                                       receivedUser: '',
                                       senderUser: homeController.userName,
                                       status: widget.info['status'] ?? '',
                                       totalBeforeVat:
-                                      widget.info['totalBeforeVat'] ?? '',
+                                          widget.info['totalBeforeVat'] ?? '',
                                       discountOnAllItem:
-                                      discountOnAllItem.toString(),
+                                          discountOnAllItem.toString(),
                                       totalAllItems: formatDoubleWithCommas(
                                         totalAllItems,
                                       ),
 
                                       globalDiscount:
-                                      widget.info['globalDiscount'] ?? '0',
+                                          widget.info['globalDiscount'] ?? '0',
 
                                       totalPriceAfterDiscount:
-                                      formatDoubleWithCommas(
-                                        totalPriceAfterDiscount,
-                                      ),
+                                          formatDoubleWithCommas(
+                                            totalPriceAfterDiscount,
+                                          ),
                                       additionalSpecialDiscount:
-                                      additionalSpecialDiscount
-                                          .toStringAsFixed(2),
+                                          additionalSpecialDiscount
+                                              .toStringAsFixed(2),
                                       totalPriceAfterSpecialDiscount:
-                                      formatDoubleWithCommas(
-                                        totalPriceAfterSpecialDiscount,
-                                      ),
+                                          formatDoubleWithCommas(
+                                            totalPriceAfterSpecialDiscount,
+                                          ),
 
                                       totalPriceAfterSpecialDiscountBySalesInvoiceCurrency:
-                                      formatDoubleWithCommas(
-                                        totalPriceAfterSpecialDiscountBysalesInvoiceCurrency,
-                                      ),
+                                          formatDoubleWithCommas(
+                                            totalPriceAfterSpecialDiscountBysalesInvoiceCurrency,
+                                          ),
 
                                       vatBySalesInvoiceCurrency:
-                                      formatDoubleWithCommas(
-                                        vatBySalesInvoiceCurrency,
-                                      ),
+                                          formatDoubleWithCommas(
+                                            vatBySalesInvoiceCurrency,
+                                          ),
                                       finalPriceBySalesInvoiceCurrency:
-                                      formatDoubleWithCommas(
-                                        finalPriceBySalesInvoiceCurrency,
-                                      ),
+                                          formatDoubleWithCommas(
+                                            finalPriceBySalesInvoiceCurrency,
+                                          ),
                                       specialDisc: specialDisc.toString(),
                                       specialDiscount:
-                                      widget.info['specialDiscount'] ?? '0',
+                                          widget.info['specialDiscount'] ?? '0',
                                       specialDiscountAmount:
-                                      widget
-                                          .info['specialDiscountAmount'] ??
+                                          widget
+                                              .info['specialDiscountAmount'] ??
                                           '',
                                       salesPerson:
-                                      widget.info['salesperson'] != null
-                                          ? widget
-                                          .info['salesperson']['name']
-                                          : '---',
+                                          widget.info['salesperson'] != null
+                                              ? widget
+                                                  .info['salesperson']['name']
+                                              : '---',
                                       salesInvoiceCurrency:
-                                      widget.info['currency']['name'] ?? '',
+                                          widget.info['currency']['name'] ?? '',
                                       salesInvoiceCurrencySymbol:
-                                      widget.info['currency']['symbol'] ??
+                                          widget.info['currency']['symbol'] ??
                                           '',
                                       salesInvoiceCurrencyLatestRate:
-                                      widget
-                                          .info['currency']['latest_rate'] ??
+                                          widget
+                                              .info['currency']['latest_rate'] ??
                                           '',
                                       clientPhoneNumber:
-                                      widget.info['client'] != null
-                                          ? widget.info['client']['phoneNumber'] ??
-                                          '---'
-                                          : "---",
+                                          widget.info['client'] != null
+                                              ? widget.info['client']['phoneNumber'] ??
+                                                  '---'
+                                              : "---",
                                       clientName:
-                                      widget.info['client']['name'] ?? '',
+                                          widget.info['client']['name'] ?? '',
                                       termsAndConditions:
-                                      widget.info['termsAndConditions'] ??
+                                          widget.info['termsAndConditions'] ??
                                           '',
                                       itemsInfoPrint: itemsInfoPrint,
                                     );
@@ -778,78 +794,153 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                 progressVar = 2;
                               });
                               salesInvoiceCont.setStatus('sent');
-                              if (_formKey.currentState!.validate()) {
-                                _saveContent();
-                                var res = await updateSalesInvoice(
-                                  '${widget.info['id']}',
-                                  // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                  false,
-                                  refController.text,
-                                  selectedCustomerIds,
-                                  validityController.text,
-                                  selectedWarehouseId,
-                                  '', //todo paymentTermsController.text,
-                                  salesInvoiceCont.selectedPriceListId,
-                                  salesInvoiceCont
-                                      .selectedCurrencyId, //selectedCurrency
-                                  termsAndConditionsController.text,
-                                  selectedSalesPersonId.toString(),
-                                  '',
-                                  salesInvoiceCont.selectedCashingMethodId,
-                                  commissionController.text,
-                                  totalCommissionController.text,
-                                  salesInvoiceController.totalItems
-                                      .toString(), //total before vat
-                                  specialDiscPercentController
-                                      .text, // inserted by user
+                              bool hasType1WithEmptyTitle =
                                   salesInvoiceController
-                                      .specialDisc, // calculated
-                                  globalDiscPercentController.text,
-                                  salesInvoiceController.globalDisc,
-                                  salesInvoiceController.vat11.toString(), //vat
-                                  salesInvoiceController.vatInPrimaryCurrency
-                                      .toString(),
+                                      .rowsInListViewInSalesInvoice
+                                      .values
+                                      .any((map) {
+                                        return map['line_type_id'] == '1' &&
+                                            (map['title']?.isEmpty ?? true);
+                                      });
+                              bool hasType2WithEmptyId = salesInvoiceController
+                                  .rowsInListViewInSalesInvoice
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '2' &&
+                                        (map['item_id']?.isEmpty ?? true);
+                                  });
+                              bool hasType3WithEmptyId = salesInvoiceController
+                                  .rowsInListViewInSalesInvoice
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '3' &&
+                                        (map['combo']?.isEmpty ?? true);
+                                  });
+                              bool hasType4WithEmptyImage =
                                   salesInvoiceController
-                                      .totalSalesInvoice, // salesInvoiceController.totalQuotation
-
-                                  salesInvoiceCont.isVatExemptChecked
-                                      ? '1'
-                                      : '0',
-                                  salesInvoiceCont.isVatNoPrinted ? '1' : '0',
-                                  salesInvoiceCont.isPrintedAsVatExempt
-                                      ? '1'
-                                      : '0',
-                                  salesInvoiceCont.isPrintedAs0 ? '1' : '0',
-                                  salesInvoiceCont.isBeforeVatPrices
-                                      ? '0'
-                                      : '1',
-
-                                  salesInvoiceCont.isBeforeVatPrices
-                                      ? '1'
-                                      : '0',
-                                  codeController.text,
-                                  salesInvoiceCont.status,
-                                  salesInvoiceController.rowsInListViewInSalesInvoice,
-                                  inputDateController.text,
-                                  '${widget.info['invoiceDeliveryDate'] ?? ''}',
-                                  salesInvoiceCont.orderedKeys
+                                      .rowsInListViewInSalesInvoice
+                                      .values
+                                      .any((map) {
+                                        return map['line_type_id'] == '4' &&
+                                            (map['image'] == Uint8List(0) ||
+                                                map['image']?.isEmpty);
+                                      });
+                              bool hasType5WithEmptyNote =
+                                  salesInvoiceController
+                                      .rowsInListViewInSalesInvoice
+                                      .values
+                                      .any((map) {
+                                        return map['line_type_id'] == '5' &&
+                                            (map['note']?.isEmpty ?? true);
+                                      });
+                              if (salesInvoiceController
+                                  .rowsInListViewInSalesInvoice
+                                  .isEmpty) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'Order lines is Empty',
                                 );
-                                if (res['success'] == true) {
-                                  Get.back();
-                                  salesInvoiceController
-                                      .getAllSalesInvoiceFromBackWithoutExcept();
+                              } else if (hasType2WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty item',
+                                );
+                              } else if (hasType3WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty combo',
+                                );
+                              } else if (hasType1WithEmptyTitle) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty title',
+                                );
+                              } else if (hasType4WithEmptyImage) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty image',
+                                );
+                              } else if (hasType5WithEmptyNote) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty note',
+                                );
+                              } else {
+                                if (_formKey.currentState!.validate()) {
+                                  _saveContent();
+                                  var res = await updateSalesInvoice(
+                                    '${widget.info['id']}',
+                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                    false,
+                                    refController.text,
+                                    selectedCustomerIds,
+                                    validityController.text,
+                                    selectedWarehouseId,
+                                    '', //todo paymentTermsController.text,
+                                    salesInvoiceCont.selectedPriceListId,
+                                    salesInvoiceCont
+                                        .selectedCurrencyId, //selectedCurrency
+                                    termsAndConditionsController.text,
+                                    selectedSalesPersonId.toString(),
+                                    '',
+                                    salesInvoiceCont.selectedCashingMethodId,
+                                    commissionController.text,
+                                    totalCommissionController.text,
+                                    salesInvoiceController.totalItems
+                                        .toString(), //total before vat
+                                    specialDiscPercentController
+                                        .text, // inserted by user
+                                    salesInvoiceController
+                                        .specialDisc, // calculated
+                                    globalDiscPercentController.text,
+                                    salesInvoiceController.globalDisc,
+                                    salesInvoiceController.vat11
+                                        .toString(), //vat
+                                    salesInvoiceController.vatInPrimaryCurrency
+                                        .toString(),
+                                    salesInvoiceController
+                                        .totalSalesInvoice, // salesInvoiceController.totalQuotation
 
-                                  homeController.selectedTab.value =
-                                  'sales_invoice_summary';
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
+                                    salesInvoiceCont.isVatExemptChecked
+                                        ? '1'
+                                        : '0',
+                                    salesInvoiceCont.isVatNoPrinted ? '1' : '0',
+                                    salesInvoiceCont.isPrintedAsVatExempt
+                                        ? '1'
+                                        : '0',
+                                    salesInvoiceCont.isPrintedAs0 ? '1' : '0',
+                                    salesInvoiceCont.isBeforeVatPrices
+                                        ? '0'
+                                        : '1',
+
+                                    salesInvoiceCont.isBeforeVatPrices
+                                        ? '1'
+                                        : '0',
+                                    codeController.text,
+                                    salesInvoiceCont.status,
+                                    salesInvoiceController
+                                        .rowsInListViewInSalesInvoice,
+                                    inputDateController.text,
+                                    '${widget.info['invoiceDeliveryDate'] ?? ''}',
+                                    salesInvoiceCont.orderedKeys,
                                   );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
+                                  if (res['success'] == true) {
+                                    Get.back();
+                                    salesInvoiceController
+                                        .getAllSalesInvoiceFromBack();
+
+                                    homeController.selectedTab.value =
+                                        'sales_invoice_summary';
+                                    CommonWidgets.snackBar(
+                                      'Success',
+                                      res['message'],
+                                    );
+                                  } else {
+                                    CommonWidgets.snackBar(
+                                      'error',
+                                      res['message'],
+                                    );
+                                  }
                                 }
                               }
                             },
@@ -861,78 +952,153 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                 progressVar = 3;
                               });
                               salesInvoiceCont.setStatus('sent');
-                              if (_formKey.currentState!.validate()) {
-                                _saveContent();
-                                var res = await updateSalesInvoice(
-                                  '${widget.info['id']}',
-                                  // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                  false,
-                                  refController.text,
-                                  selectedCustomerIds,
-                                  validityController.text,
-                                  selectedWarehouseId,
-                                  '', //todo paymentTermsController.text,
-                                  salesInvoiceCont.selectedPriceListId,
-                                  salesInvoiceCont
-                                      .selectedCurrencyId, //selectedCurrency
-                                  termsAndConditionsController.text,
-                                  selectedSalesPersonId.toString(),
-                                  '',
-                                  salesInvoiceCont.selectedCashingMethodId,
-                                  commissionController.text,
-                                  totalCommissionController.text,
-                                  salesInvoiceController.totalItems
-                                      .toString(), //total before vat
-                                  specialDiscPercentController
-                                      .text, // inserted by user
+                              bool hasType1WithEmptyTitle =
                                   salesInvoiceController
-                                      .specialDisc, // calculated
-                                  globalDiscPercentController.text,
-                                  salesInvoiceController.globalDisc,
-                                  salesInvoiceController.vat11.toString(), //vat
-                                  salesInvoiceController.vatInPrimaryCurrency
-                                      .toString(),
+                                      .rowsInListViewInSalesInvoice
+                                      .values
+                                      .any((map) {
+                                        return map['line_type_id'] == '1' &&
+                                            (map['title']?.isEmpty ?? true);
+                                      });
+                              bool hasType2WithEmptyId = salesInvoiceController
+                                  .rowsInListViewInSalesInvoice
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '2' &&
+                                        (map['item_id']?.isEmpty ?? true);
+                                  });
+                              bool hasType3WithEmptyId = salesInvoiceController
+                                  .rowsInListViewInSalesInvoice
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '3' &&
+                                        (map['combo']?.isEmpty ?? true);
+                                  });
+                              bool hasType4WithEmptyImage =
                                   salesInvoiceController
-                                      .totalSalesInvoice, // salesInvoiceController.totalQuotation
-
-                                  salesInvoiceCont.isVatExemptChecked
-                                      ? '1'
-                                      : '0',
-                                  salesInvoiceCont.isVatNoPrinted ? '1' : '0',
-                                  salesInvoiceCont.isPrintedAsVatExempt
-                                      ? '1'
-                                      : '0',
-                                  salesInvoiceCont.isPrintedAs0 ? '1' : '0',
-                                  salesInvoiceCont.isBeforeVatPrices
-                                      ? '0'
-                                      : '1',
-
-                                  salesInvoiceCont.isBeforeVatPrices
-                                      ? '1'
-                                      : '0',
-                                  codeController.text,
-                                  salesInvoiceCont.status, // status,
-                                  // salesInvoiceController.rowsInListViewInSalesInvoice,
-                                  salesInvoiceController.rowsInListViewInSalesInvoice,
-                                  inputDateController.text,
-                                  '${widget.info['invoiceDeliveryDate'] ?? ''}',
-                                  salesInvoiceCont.orderedKeys
+                                      .rowsInListViewInSalesInvoice
+                                      .values
+                                      .any((map) {
+                                        return map['line_type_id'] == '4' &&
+                                            (map['image'] == Uint8List(0) ||
+                                                map['image']?.isEmpty);
+                                      });
+                              bool hasType5WithEmptyNote =
+                                  salesInvoiceController
+                                      .rowsInListViewInSalesInvoice
+                                      .values
+                                      .any((map) {
+                                        return map['line_type_id'] == '5' &&
+                                            (map['note']?.isEmpty ?? true);
+                                      });
+                              if (salesInvoiceController
+                                  .rowsInListViewInSalesInvoice
+                                  .isEmpty) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'Order lines is Empty',
                                 );
-                                if (res['success'] == true) {
-                                  Get.back();
-                                  salesInvoiceController
-                                      .getAllSalesInvoiceFromBackWithoutExcept();
-                                  homeController.selectedTab.value =
-                                  'sales_invoice_summary';
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
+                              } else if (hasType2WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty item',
+                                );
+                              } else if (hasType3WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty combo',
+                                );
+                              } else if (hasType1WithEmptyTitle) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty title',
+                                );
+                              } else if (hasType4WithEmptyImage) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty image',
+                                );
+                              } else if (hasType5WithEmptyNote) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty note',
+                                );
+                              } else {
+                                if (_formKey.currentState!.validate()) {
+                                  _saveContent();
+                                  var res = await updateSalesInvoice(
+                                    '${widget.info['id']}',
+                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                    false,
+                                    refController.text,
+                                    selectedCustomerIds,
+                                    validityController.text,
+                                    selectedWarehouseId,
+                                    '', //todo paymentTermsController.text,
+                                    salesInvoiceCont.selectedPriceListId,
+                                    salesInvoiceCont
+                                        .selectedCurrencyId, //selectedCurrency
+                                    termsAndConditionsController.text,
+                                    selectedSalesPersonId.toString(),
+                                    '',
+                                    salesInvoiceCont.selectedCashingMethodId,
+                                    commissionController.text,
+                                    totalCommissionController.text,
+                                    salesInvoiceController.totalItems
+                                        .toString(), //total before vat
+                                    specialDiscPercentController
+                                        .text, // inserted by user
+                                    salesInvoiceController
+                                        .specialDisc, // calculated
+                                    globalDiscPercentController.text,
+                                    salesInvoiceController.globalDisc,
+                                    salesInvoiceController.vat11
+                                        .toString(), //vat
+                                    salesInvoiceController.vatInPrimaryCurrency
+                                        .toString(),
+                                    salesInvoiceController
+                                        .totalSalesInvoice, // salesInvoiceController.totalQuotation
+
+                                    salesInvoiceCont.isVatExemptChecked
+                                        ? '1'
+                                        : '0',
+                                    salesInvoiceCont.isVatNoPrinted ? '1' : '0',
+                                    salesInvoiceCont.isPrintedAsVatExempt
+                                        ? '1'
+                                        : '0',
+                                    salesInvoiceCont.isPrintedAs0 ? '1' : '0',
+                                    salesInvoiceCont.isBeforeVatPrices
+                                        ? '0'
+                                        : '1',
+
+                                    salesInvoiceCont.isBeforeVatPrices
+                                        ? '1'
+                                        : '0',
+                                    codeController.text,
+                                    salesInvoiceCont.status, // status,
+                                    // salesInvoiceController.rowsInListViewInSalesInvoice,
+                                    salesInvoiceController
+                                        .rowsInListViewInSalesInvoice,
+                                    inputDateController.text,
+                                    '${widget.info['invoiceDeliveryDate'] ?? ''}',
+                                    salesInvoiceCont.orderedKeys,
                                   );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
+                                  if (res['success'] == true) {
+                                    Get.back();
+                                    salesInvoiceController
+                                        .getAllSalesInvoiceFromBack();
+                                    homeController.selectedTab.value =
+                                        'sales_invoice_summary';
+                                    CommonWidgets.snackBar(
+                                      'Success',
+                                      res['message'],
+                                    );
+                                  } else {
+                                    CommonWidgets.snackBar(
+                                      'error',
+                                      res['message'],
+                                    );
+                                  }
                                 }
                               }
                             },
@@ -944,79 +1110,153 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                 progressVar = 0;
                               });
                               salesInvoiceCont.setStatus('cancelled');
-                              if (_formKey.currentState!.validate()) {
-                                _saveContent();
-                                var res = await updateSalesInvoice(
-                                  '${widget.info['id']}',
-                                  // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                  false,
-                                  refController.text,
-                                  selectedCustomerIds,
-                                  validityController.text,
-                                  selectedWarehouseId,
-                                  '', //todo paymentTermsController.text,
-                                  salesInvoiceCont.selectedPriceListId,
-                                  salesInvoiceCont
-                                      .selectedCurrencyId, //selectedCurrency
-                                  termsAndConditionsController.text,
-                                  selectedSalesPersonId.toString(),
-                                  '',
-                                  salesInvoiceCont.selectedCashingMethodId,
-                                  commissionController.text,
-                                  totalCommissionController.text,
-                                  salesInvoiceController.totalItems
-                                      .toString(), //total before vat
-                                  specialDiscPercentController
-                                      .text, // inserted by user
+                              bool hasType1WithEmptyTitle =
                                   salesInvoiceController
-                                      .specialDisc, // calculated
-                                  globalDiscPercentController.text,
-                                  salesInvoiceController.globalDisc,
-                                  salesInvoiceController.vat11.toString(), //vat
-                                  salesInvoiceController.vatInPrimaryCurrency
-                                      .toString(),
+                                      .rowsInListViewInSalesInvoice
+                                      .values
+                                      .any((map) {
+                                        return map['line_type_id'] == '1' &&
+                                            (map['title']?.isEmpty ?? true);
+                                      });
+                              bool hasType2WithEmptyId = salesInvoiceController
+                                  .rowsInListViewInSalesInvoice
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '2' &&
+                                        (map['item_id']?.isEmpty ?? true);
+                                  });
+                              bool hasType3WithEmptyId = salesInvoiceController
+                                  .rowsInListViewInSalesInvoice
+                                  .values
+                                  .any((map) {
+                                    return map['line_type_id'] == '3' &&
+                                        (map['combo']?.isEmpty ?? true);
+                                  });
+                              bool hasType4WithEmptyImage =
                                   salesInvoiceController
-                                      .totalSalesInvoice, // salesInvoiceController.totalQuotation
-
-                                  salesInvoiceCont.isVatExemptChecked
-                                      ? '1'
-                                      : '0',
-                                  salesInvoiceCont.isVatNoPrinted ? '1' : '0',
-                                  salesInvoiceCont.isPrintedAsVatExempt
-                                      ? '1'
-                                      : '0',
-                                  salesInvoiceCont.isPrintedAs0 ? '1' : '0',
-                                  salesInvoiceCont.isBeforeVatPrices
-                                      ? '0'
-                                      : '1',
-
-                                  salesInvoiceCont.isBeforeVatPrices
-                                      ? '1'
-                                      : '0',
-                                  codeController.text,
-                                  salesInvoiceCont.status, // status,
-                                  // salesInvoiceController.rowsInListViewInSalesInvoice,
-                                  salesInvoiceController.rowsInListViewInSalesInvoice,
-                                  inputDateController.text,
-                                  '${widget.info['invoiceDeliveryDate'] ?? ''}',
-                                    salesInvoiceController.orderedKeys
-
+                                      .rowsInListViewInSalesInvoice
+                                      .values
+                                      .any((map) {
+                                        return map['line_type_id'] == '4' &&
+                                            (map['image'] == Uint8List(0) ||
+                                                map['image']?.isEmpty);
+                                      });
+                              bool hasType5WithEmptyNote =
+                                  salesInvoiceController
+                                      .rowsInListViewInSalesInvoice
+                                      .values
+                                      .any((map) {
+                                        return map['line_type_id'] == '5' &&
+                                            (map['note']?.isEmpty ?? true);
+                                      });
+                              if (salesInvoiceController
+                                  .rowsInListViewInSalesInvoice
+                                  .isEmpty) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'Order lines is Empty',
                                 );
-                                if (res['success'] == true) {
-                                  Get.back();
-                                  salesInvoiceController
-                                      .getAllSalesInvoiceFromBackWithoutExcept();
-                                  homeController.selectedTab.value =
-                                  'sales_invoice_summary';
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
+                              } else if (hasType2WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty item',
+                                );
+                              } else if (hasType3WithEmptyId) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty combo',
+                                );
+                              } else if (hasType1WithEmptyTitle) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty title',
+                                );
+                              } else if (hasType4WithEmptyImage) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty image',
+                                );
+                              } else if (hasType5WithEmptyNote) {
+                                CommonWidgets.snackBar(
+                                  'error',
+                                  'You have an empty note',
+                                );
+                              } else {
+                                if (_formKey.currentState!.validate()) {
+                                  _saveContent();
+                                  var res = await updateSalesInvoice(
+                                    '${widget.info['id']}',
+                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
+                                    false,
+                                    refController.text,
+                                    selectedCustomerIds,
+                                    validityController.text,
+                                    selectedWarehouseId,
+                                    '', //todo paymentTermsController.text,
+                                    salesInvoiceCont.selectedPriceListId,
+                                    salesInvoiceCont
+                                        .selectedCurrencyId, //selectedCurrency
+                                    termsAndConditionsController.text,
+                                    selectedSalesPersonId.toString(),
+                                    '',
+                                    salesInvoiceCont.selectedCashingMethodId,
+                                    commissionController.text,
+                                    totalCommissionController.text,
+                                    salesInvoiceController.totalItems
+                                        .toString(), //total before vat
+                                    specialDiscPercentController
+                                        .text, // inserted by user
+                                    salesInvoiceController
+                                        .specialDisc, // calculated
+                                    globalDiscPercentController.text,
+                                    salesInvoiceController.globalDisc,
+                                    salesInvoiceController.vat11
+                                        .toString(), //vat
+                                    salesInvoiceController.vatInPrimaryCurrency
+                                        .toString(),
+                                    salesInvoiceController
+                                        .totalSalesInvoice, // salesInvoiceController.totalQuotation
+
+                                    salesInvoiceCont.isVatExemptChecked
+                                        ? '1'
+                                        : '0',
+                                    salesInvoiceCont.isVatNoPrinted ? '1' : '0',
+                                    salesInvoiceCont.isPrintedAsVatExempt
+                                        ? '1'
+                                        : '0',
+                                    salesInvoiceCont.isPrintedAs0 ? '1' : '0',
+                                    salesInvoiceCont.isBeforeVatPrices
+                                        ? '0'
+                                        : '1',
+
+                                    salesInvoiceCont.isBeforeVatPrices
+                                        ? '1'
+                                        : '0',
+                                    codeController.text,
+                                    salesInvoiceCont.status, // status,
+                                    // salesInvoiceController.rowsInListViewInSalesInvoice,
+                                    salesInvoiceController
+                                        .rowsInListViewInSalesInvoice,
+                                    inputDateController.text,
+                                    '${widget.info['invoiceDeliveryDate'] ?? ''}',
+                                    salesInvoiceController.orderedKeys,
                                   );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
+                                  if (res['success'] == true) {
+                                    Get.back();
+                                    salesInvoiceController
+                                        .getAllSalesInvoiceFromBack();
+                                    homeController.selectedTab.value =
+                                        'sales_invoice_summary';
+                                    CommonWidgets.snackBar(
+                                      'Success',
+                                      res['message'],
+                                    );
+                                  } else {
+                                    CommonWidgets.snackBar(
+                                      'error',
+                                      res['message'],
+                                    );
+                                  }
                                 }
                               }
                             },
@@ -1093,23 +1333,23 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                               text: '${'ref'.tr}:',
                               hint: 'manual_reference'.tr,
                               rowWidth:
-                              MediaQuery.of(context).size.width * 0.18,
+                                  MediaQuery.of(context).size.width * 0.18,
                               textFieldWidth:
-                              MediaQuery.of(context).size.width * 0.15,
+                                  MediaQuery.of(context).size.width * 0.15,
                               validationFunc: (val) {},
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('currency'.tr),
                                   GetBuilder<ExchangeRatesController>(
                                     builder: (cont) {
                                       return DropdownMenu<String>(
                                         width:
-                                        MediaQuery.of(context).size.width *
+                                            MediaQuery.of(context).size.width *
                                             0.10,
                                         // requestFocusOnTap: false,
                                         enableSearch: true,
@@ -1121,12 +1361,12 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                             fontStyle: FontStyle.italic,
                                           ),
                                           contentPadding:
-                                          const EdgeInsets.fromLTRB(
-                                            20,
-                                            0,
-                                            25,
-                                            5,
-                                          ),
+                                              const EdgeInsets.fromLTRB(
+                                                20,
+                                                0,
+                                                25,
+                                                5,
+                                              ),
                                           // outlineBorder: BorderSide(color: Colors.black,),
                                           enabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -1136,9 +1376,9 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                               width: 1.0,
                                             ),
                                             borderRadius:
-                                            const BorderRadius.all(
-                                              Radius.circular(9),
-                                            ),
+                                                const BorderRadius.all(
+                                                  Radius.circular(9),
+                                                ),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -1148,22 +1388,22 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                               width: 2.0,
                                             ),
                                             borderRadius:
-                                            const BorderRadius.all(
-                                              Radius.circular(9),
-                                            ),
+                                                const BorderRadius.all(
+                                                  Radius.circular(9),
+                                                ),
                                           ),
                                         ),
                                         // menuStyle: ,
                                         menuHeight: 250.0,
                                         dropdownMenuEntries:
-                                        cont.currenciesNamesList.map<
-                                            DropdownMenuEntry<String>
-                                        >((String option) {
-                                          return DropdownMenuEntry<String>(
-                                            value: option,
-                                            label: option,
-                                          );
-                                        }).toList(),
+                                            cont.currenciesNamesList.map<
+                                              DropdownMenuEntry<String>
+                                            >((String option) {
+                                              return DropdownMenuEntry<String>(
+                                                value: option,
+                                                label: option,
+                                              );
+                                            }).toList(),
                                         enableFilter: true,
                                         onSelected: (String? val) {
                                           setState(() {
@@ -1172,59 +1412,59 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                 .indexOf(val);
                                             salesInvoiceCont
                                                 .setSelectedCurrency(
-                                              cont.currenciesIdsList[index],
-                                              val,
-                                            );
+                                                  cont.currenciesIdsList[index],
+                                                  val,
+                                                );
                                             var result = cont.exchangeRatesList
                                                 .firstWhere(
                                                   (item) =>
-                                              item["currency"] == val,
-                                              orElse: () => null,
-                                            );
+                                                      item["currency"] == val,
+                                                  orElse: () => null,
+                                                );
                                             salesInvoiceCont
                                                 .setExchangeRateForSelectedCurrency(
-                                              result != null
-                                                  ? '${result["exchange_rate"]}'
-                                                  : '1',
-                                            );
+                                                  result != null
+                                                      ? '${result["exchange_rate"]}'
+                                                      : '1',
+                                                );
                                           });
                                           var keys =
-                                          salesInvoiceCont
-                                              .unitPriceControllers
-                                              .keys
-                                              .toList();
-                                          for (
-                                          int i = 0;
-                                          i <
                                               salesInvoiceCont
                                                   .unitPriceControllers
-                                                  .length;
-                                          i++
+                                                  .keys
+                                                  .toList();
+                                          for (
+                                            int i = 0;
+                                            i <
+                                                salesInvoiceCont
+                                                    .unitPriceControllers
+                                                    .length;
+                                            i++
                                           ) {
                                             var selectedItemId =
                                                 '${salesInvoiceCont.rowsInListViewInSalesInvoice[keys[i]]['item_id']}';
                                             if (selectedItemId != '') {
                                               if (salesInvoiceCont
-                                                  .itemsPricesCurrencies[selectedItemId] ==
+                                                      .itemsPricesCurrencies[selectedItemId] ==
                                                   val) {
                                                 salesInvoiceCont
                                                     .unitPriceControllers[keys[i]]!
                                                     .text = salesInvoiceCont
-                                                    .itemUnitPrice[selectedItemId]
-                                                    .toString();
+                                                        .itemUnitPrice[selectedItemId]
+                                                        .toString();
                                               } else if (val == 'USD' &&
                                                   salesInvoiceCont
-                                                      .itemsPricesCurrencies[selectedItemId] !=
+                                                          .itemsPricesCurrencies[selectedItemId] !=
                                                       val) {
                                                 var result = exchangeRatesController
                                                     .exchangeRatesList
                                                     .firstWhere(
                                                       (item) =>
-                                                  item["currency"] ==
-                                                      salesInvoiceCont
-                                                          .itemsPricesCurrencies[selectedItemId],
-                                                  orElse: () => null,
-                                                );
+                                                          item["currency"] ==
+                                                          salesInvoiceCont
+                                                              .itemsPricesCurrencies[selectedItemId],
+                                                      orElse: () => null,
+                                                    );
                                                 var divider = '1';
                                                 if (result != null) {
                                                   divider =
@@ -1232,29 +1472,29 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                           .toString();
                                                 }
                                                 salesInvoiceCont
-                                                    .unitPriceControllers[keys[i]]!
-                                                    .text =
-                                                '${double.parse('${(double.parse(salesInvoiceCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                        .unitPriceControllers[keys[i]]!
+                                                        .text =
+                                                    '${double.parse('${(double.parse(salesInvoiceCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
                                               } else if (salesInvoiceCont
-                                                  .selectedCurrencyName !=
-                                                  'USD' &&
+                                                          .selectedCurrencyName !=
+                                                      'USD' &&
                                                   salesInvoiceCont
-                                                      .itemsPricesCurrencies[selectedItemId] ==
+                                                          .itemsPricesCurrencies[selectedItemId] ==
                                                       'USD') {
                                                 salesInvoiceCont
-                                                    .unitPriceControllers[keys[i]]!
-                                                    .text =
-                                                '${double.parse('${(double.parse(salesInvoiceCont.itemUnitPrice[selectedItemId].toString()) * double.parse(salesInvoiceCont.exchangeRateForSelectedCurrency))}')}';
+                                                        .unitPriceControllers[keys[i]]!
+                                                        .text =
+                                                    '${double.parse('${(double.parse(salesInvoiceCont.itemUnitPrice[selectedItemId].toString()) * double.parse(salesInvoiceCont.exchangeRateForSelectedCurrency))}')}';
                                               } else {
                                                 var result = exchangeRatesController
                                                     .exchangeRatesList
                                                     .firstWhere(
                                                       (item) =>
-                                                  item["currency"] ==
-                                                      salesInvoiceCont
-                                                          .itemsPricesCurrencies[selectedItemId],
-                                                  orElse: () => null,
-                                                );
+                                                          item["currency"] ==
+                                                          salesInvoiceCont
+                                                              .itemsPricesCurrencies[selectedItemId],
+                                                      orElse: () => null,
+                                                    );
                                                 var divider = '1';
                                                 if (result != null) {
                                                   divider =
@@ -1264,9 +1504,9 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                 var usdPrice =
                                                     '${double.parse('${(double.parse(salesInvoiceCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
                                                 salesInvoiceCont
-                                                    .unitPriceControllers[keys[i]]!
-                                                    .text =
-                                                '${double.parse('${(double.parse(usdPrice) * double.parse(salesInvoiceCont.exchangeRateForSelectedCurrency))}')}';
+                                                        .unitPriceControllers[keys[i]]!
+                                                        .text =
+                                                    '${double.parse('${(double.parse(usdPrice) * double.parse(salesInvoiceCont.exchangeRateForSelectedCurrency))}')}';
                                               }
                                               if (!salesInvoiceCont
                                                   .isBeforeVatPrices) {
@@ -1275,19 +1515,19 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                       salesInvoiceCont
                                                           .itemsVats[selectedItemId],
                                                     ) /
-                                                        100.0;
+                                                    100.0;
                                                 var taxValue =
                                                     taxRate *
-                                                        double.parse(
-                                                          salesInvoiceCont
-                                                              .unitPriceControllers[keys[i]]!
-                                                              .text,
-                                                        );
+                                                    double.parse(
+                                                      salesInvoiceCont
+                                                          .unitPriceControllers[keys[i]]!
+                                                          .text,
+                                                    );
 
                                                 salesInvoiceCont
-                                                    .unitPriceControllers[keys[i]]!
-                                                    .text =
-                                                '${double.parse(salesInvoiceCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                        .unitPriceControllers[keys[i]]!
+                                                        .text =
+                                                    '${double.parse(salesInvoiceCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
                                               }
                                               salesInvoiceCont
                                                   .unitPriceControllers[keys[i]]!
@@ -1300,16 +1540,16 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                   '${(double.parse(salesInvoiceCont.rowsInListViewInSalesInvoice[keys[i]]['item_quantity']) * double.parse(salesInvoiceCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(salesInvoiceCont.rowsInListViewInSalesInvoice[keys[i]]['item_discount']) / 100)}';
                                               salesInvoiceCont
                                                   .setEnteredUnitPriceInSalesInvoice(
-                                                keys[i],
-                                                salesInvoiceCont
-                                                    .unitPriceControllers[keys[i]]!
-                                                    .text,
-                                              );
+                                                    keys[i],
+                                                    salesInvoiceCont
+                                                        .unitPriceControllers[keys[i]]!
+                                                        .text,
+                                                  );
                                               salesInvoiceCont
                                                   .setMainTotalInSalesInvoice(
-                                                keys[i],
-                                                totalLine,
-                                              );
+                                                    keys[i],
+                                                    totalLine,
+                                                  );
                                               salesInvoiceCont.getTotalItems();
                                             }
                                           }
@@ -1325,14 +1565,14 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('value_date'.tr),
                                   DialogDateTextField(
                                     textEditingController: validityController,
                                     text: '',
                                     textFieldWidth:
-                                    MediaQuery.of(context).size.width *
+                                        MediaQuery.of(context).size.width *
                                         0.10,
                                     // MediaQuery.of(context).size.width * 0.25,
                                     validationFunc: (val) {},
@@ -1356,12 +1596,12 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('Pricelist'.tr),
                                   DropdownMenu<String>(
                                     width:
-                                    MediaQuery.of(context).size.width *
+                                        MediaQuery.of(context).size.width *
                                         0.10,
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
@@ -1405,16 +1645,16 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     // menuStyle: ,
                                     menuHeight: 250,
                                     dropdownMenuEntries:
-                                    salesInvoiceCont.priceListsCodes
-                                        .map<DropdownMenuEntry<String>>((
-                                        String option,
-                                        ) {
-                                      return DropdownMenuEntry<String>(
-                                        value: option,
-                                        label: option,
-                                      );
-                                    })
-                                        .toList(),
+                                        salesInvoiceCont.priceListsCodes
+                                            .map<DropdownMenuEntry<String>>((
+                                              String option,
+                                            ) {
+                                              return DropdownMenuEntry<String>(
+                                                value: option,
+                                                label: option,
+                                              );
+                                            })
+                                            .toList(),
                                     enableFilter: true,
                                     onSelected: (String? val) {
                                       var index = salesInvoiceCont
@@ -1442,14 +1682,14 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('input_date'.tr),
                                   DialogDateTextField(
                                     textEditingController: inputDateController,
                                     text: '',
                                     textFieldWidth:
-                                    MediaQuery.of(context).size.width *
+                                        MediaQuery.of(context).size.width *
                                         0.10,
                                     // MediaQuery.of(context).size.width * 0.25,
                                     validationFunc: (val) {},
@@ -1479,7 +1719,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   Text('code'.tr),
                                   DropdownMenu<String>(
                                     width:
-                                    MediaQuery.of(context).size.width *
+                                        MediaQuery.of(context).size.width *
                                         0.13,
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
@@ -1521,16 +1761,16 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     ),
                                     menuHeight: 250.0,
                                     dropdownMenuEntries:
-                                    salesInvoiceCont.customerNumberList
-                                        .map<DropdownMenuEntry<String>>((
-                                        option,
-                                        ) {
-                                      return DropdownMenuEntry<String>(
-                                        value: option,
-                                        label: option,
-                                      );
-                                    })
-                                        .toList(),
+                                        salesInvoiceCont.customerNumberList
+                                            .map<DropdownMenuEntry<String>>((
+                                              option,
+                                            ) {
+                                              return DropdownMenuEntry<String>(
+                                                value: option,
+                                                label: option,
+                                              );
+                                            })
+                                            .toList(),
                                     enableFilter: true,
                                     onSelected: (String? val) {
                                       setState(() {
@@ -1539,12 +1779,53 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                             .customerNumberList
                                             .indexOf(selectedItemCode);
                                         selectedCustomerIds =
-                                        salesInvoiceCont
-                                            .customerIdsList[indexNum];
+                                            salesInvoiceCont
+                                                .customerIdsList[indexNum];
                                         searchController.text =
-                                        salesInvoiceCont
-                                            .customerNameList[indexNum];
+                                            salesInvoiceCont
+                                                .customerNameList[indexNum];
                                       });
+                                      int index = salesInvoiceCont
+                                          .customerNumberList
+                                          .indexOf(val!);
+                                      if (salesInvoiceCont
+                                          .customersPricesListsIds[index]
+                                          .isNotEmpty) {
+                                        salesInvoiceCont.setSelectedPriceListId(
+                                          '${salesInvoiceCont.customersPricesListsIds[index]}',
+                                        );
+
+                                        priceListController.text =
+                                            salesInvoiceCont
+                                                .priceListsNames[salesInvoiceCont
+                                                .priceListsIds
+                                                .indexOf(
+                                                  '${salesInvoiceCont.customersPricesListsIds[index]}',
+                                                )];
+                                        setState(() {
+                                          salesInvoiceCont
+                                              .resetItemsAfterChangePriceList();
+                                        });
+                                      }
+                                      if (salesInvoiceCont
+                                          .customersSalesPersonsIds[index]
+                                          .isNotEmpty) {
+                                        setState(() {
+                                          selectedSalesPersonId = int.parse(
+                                            '${salesInvoiceCont.customersSalesPersonsIds[index]}',
+                                          );
+                                          selectedSalesPerson =
+                                              salesInvoiceCont
+                                                  .salesPersonListNames[salesInvoiceCont
+                                                  .salesPersonListId
+                                                  .indexOf(
+                                                    selectedSalesPersonId,
+                                                  )];
+
+                                          salesPersonController.text =
+                                              selectedSalesPerson;
+                                        });
+                                      }
                                     },
                                   ),
                                   ReusableDropDownMenuWithSearch(
@@ -1559,22 +1840,63 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                             .customerNameList
                                             .indexOf(selectedItem);
                                         selectedCustomerIds =
-                                        salesInvoiceCont
-                                            .customerIdsList[index];
+                                            salesInvoiceCont
+                                                .customerIdsList[index];
                                         codeController.text =
-                                        salesInvoiceCont
-                                            .customerNumberList[index];
+                                            salesInvoiceCont
+                                                .customerNumberList[index];
 
                                         // codeController =
                                         //     salesInvoiceController.codeController;
                                       });
+                                      var index = salesInvoiceCont
+                                          .customerNameList
+                                          .indexOf(val!);
+                                      if (salesInvoiceCont
+                                          .customersPricesListsIds[index]
+                                          .isNotEmpty) {
+                                        salesInvoiceCont.setSelectedPriceListId(
+                                          '${salesInvoiceCont.customersPricesListsIds[index]}',
+                                        );
+
+                                        priceListController.text =
+                                            salesInvoiceCont
+                                                .priceListsNames[salesInvoiceCont
+                                                .priceListsIds
+                                                .indexOf(
+                                                  '${salesInvoiceCont.customersPricesListsIds[index]}',
+                                                )];
+                                        setState(() {
+                                          salesInvoiceCont
+                                              .resetItemsAfterChangePriceList();
+                                        });
+                                      }
+                                      if (salesInvoiceCont
+                                          .customersSalesPersonsIds[index]
+                                          .isNotEmpty) {
+                                        setState(() {
+                                          selectedSalesPersonId = int.parse(
+                                            '${salesInvoiceCont.customersSalesPersonsIds[index]}',
+                                          );
+                                          selectedSalesPerson =
+                                              salesInvoiceCont
+                                                  .salesPersonListNames[salesInvoiceCont
+                                                  .salesPersonListId
+                                                  .indexOf(
+                                                    selectedSalesPersonId,
+                                                  )];
+
+                                          salesPersonController.text =
+                                              selectedSalesPerson;
+                                        });
+                                      }
                                     },
                                     validationFunc: (value) {},
                                     rowWidth:
-                                    MediaQuery.of(context).size.width *
+                                        MediaQuery.of(context).size.width *
                                         0.15,
                                     textFieldWidth:
-                                    MediaQuery.of(context).size.width *
+                                        MediaQuery.of(context).size.width *
                                         0.14,
                                     clickableOptionText: 'create_new_client'.tr,
                                     isThereClickableOption: true,
@@ -1583,17 +1905,17 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                         context: context,
                                         builder:
                                             (BuildContext context) =>
-                                        const AlertDialog(
-                                          backgroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                            BorderRadius.all(
-                                              Radius.circular(9),
-                                            ),
-                                          ),
-                                          elevation: 0,
-                                          content: CreateClientDialog(),
-                                        ),
+                                                const AlertDialog(
+                                                  backgroundColor: Colors.white,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                          Radius.circular(9),
+                                                        ),
+                                                  ),
+                                                  elevation: 0,
+                                                  content: CreateClientDialog(),
+                                                ),
                                       );
                                     },
                                   ),
@@ -1605,9 +1927,9 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                               text: 'payment_terms'.tr,
                               hint: '',
                               rowWidth:
-                              MediaQuery.of(context).size.width * 0.24,
+                                  MediaQuery.of(context).size.width * 0.24,
                               textFieldWidth:
-                              MediaQuery.of(context).size.width * 0.15,
+                                  MediaQuery.of(context).size.width * 0.15,
                               validationFunc: (val) {},
                             ),
                             // SizedBox(
@@ -1719,10 +2041,10 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                       ),
                                       Text(
                                         salesInvoiceCont.floorAndBuilding[selectedCustomerIds] ==
-                                            '' ||
-                                            salesInvoiceCont
-                                                .floorAndBuilding[selectedCustomerIds] ==
-                                                null
+                                                    '' ||
+                                                salesInvoiceCont
+                                                        .floorAndBuilding[selectedCustomerIds] ==
+                                                    null
                                             ? ''
                                             : ',',
                                       ),
@@ -1755,23 +2077,23 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                               width: MediaQuery.of(context).size.width * 0.24,
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'price'.tr,
                                     style:
-                                    salesInvoiceCont.isVatExemptChecked
-                                        ? TextStyle(color: Others.divider)
-                                        : TextStyle(),
+                                        salesInvoiceCont.isVatExemptChecked
+                                            ? TextStyle(color: Others.divider)
+                                            : TextStyle(),
                                   ),
                                   GetBuilder<ExchangeRatesController>(
                                     builder: (cont) {
                                       return DropdownMenu<String>(
                                         enabled:
-                                        !salesInvoiceCont
-                                            .isVatExemptChecked,
+                                            !salesInvoiceCont
+                                                .isVatExemptChecked,
                                         width:
-                                        MediaQuery.of(context).size.width *
+                                            MediaQuery.of(context).size.width *
                                             0.15,
                                         // requestFocusOnTap: false,
                                         enableSearch: true,
@@ -1787,12 +2109,12 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                             fontStyle: FontStyle.italic,
                                           ),
                                           contentPadding:
-                                          const EdgeInsets.fromLTRB(
-                                            20,
-                                            0,
-                                            25,
-                                            5,
-                                          ),
+                                              const EdgeInsets.fromLTRB(
+                                                20,
+                                                0,
+                                                25,
+                                                5,
+                                              ),
                                           // outlineBorder: BorderSide(color: Colors.black,),
                                           disabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -1800,9 +2122,9 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                               width: 1,
                                             ),
                                             borderRadius:
-                                            const BorderRadius.all(
-                                              Radius.circular(9),
-                                            ),
+                                                const BorderRadius.all(
+                                                  Radius.circular(9),
+                                                ),
                                           ),
                                           enabledBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -1812,9 +2134,9 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                               width: 1.0,
                                             ),
                                             borderRadius:
-                                            const BorderRadius.all(
-                                              Radius.circular(9),
-                                            ),
+                                                const BorderRadius.all(
+                                                  Radius.circular(9),
+                                                ),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderSide: BorderSide(
@@ -1824,22 +2146,22 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                               width: 2.0,
                                             ),
                                             borderRadius:
-                                            const BorderRadius.all(
-                                              Radius.circular(9.0),
-                                            ),
+                                                const BorderRadius.all(
+                                                  Radius.circular(9.0),
+                                                ),
                                           ),
                                         ),
                                         // menuStyle: ,
                                         menuHeight: 250.0,
                                         dropdownMenuEntries:
-                                        pricesVatConditions.map<
-                                            DropdownMenuEntry<String>
-                                        >((String option) {
-                                          return DropdownMenuEntry<String>(
-                                            value: option,
-                                            label: option,
-                                          );
-                                        }).toList(),
+                                            pricesVatConditions.map<
+                                              DropdownMenuEntry<String>
+                                            >((String option) {
+                                              return DropdownMenuEntry<String>(
+                                                value: option,
+                                                label: option,
+                                              );
+                                            }).toList(),
                                         enableFilter: true,
                                         onSelected: (String? value) {
                                           setState(() {
@@ -1852,44 +2174,44 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                   .setIsBeforeVatPrices(false);
                                             }
                                             var keys =
-                                            salesInvoiceCont
-                                                .unitPriceControllers
-                                                .keys
-                                                .toList();
-                                            for (
-                                            int i = 0;
-                                            i <
                                                 salesInvoiceCont
                                                     .unitPriceControllers
-                                                    .length;
-                                            i++
+                                                    .keys
+                                                    .toList();
+                                            for (
+                                              int i = 0;
+                                              i <
+                                                  salesInvoiceCont
+                                                      .unitPriceControllers
+                                                      .length;
+                                              i++
                                             ) {
                                               var selectedItemId =
                                                   '${salesInvoiceCont.rowsInListViewInSalesInvoice[keys[i]]['item_id']}';
                                               if (selectedItemId != '') {
                                                 if (salesInvoiceCont
-                                                    .itemsPricesCurrencies[selectedItemId] ==
+                                                        .itemsPricesCurrencies[selectedItemId] ==
                                                     selectedCurrency) {
                                                   salesInvoiceCont
                                                       .unitPriceControllers[keys[i]]!
                                                       .text = salesInvoiceCont
-                                                      .itemUnitPrice[selectedItemId]
-                                                      .toString();
+                                                          .itemUnitPrice[selectedItemId]
+                                                          .toString();
                                                 } else if (salesInvoiceCont
-                                                    .selectedCurrencyName ==
-                                                    'USD' &&
+                                                            .selectedCurrencyName ==
+                                                        'USD' &&
                                                     salesInvoiceCont
-                                                        .itemsPricesCurrencies[selectedItemId] !=
+                                                            .itemsPricesCurrencies[selectedItemId] !=
                                                         selectedCurrency) {
                                                   var result = exchangeRatesController
                                                       .exchangeRatesList
                                                       .firstWhere(
                                                         (item) =>
-                                                    item["currency"] ==
-                                                        salesInvoiceCont
-                                                            .itemsPricesCurrencies[selectedItemId],
-                                                    orElse: () => null,
-                                                  );
+                                                            item["currency"] ==
+                                                            salesInvoiceCont
+                                                                .itemsPricesCurrencies[selectedItemId],
+                                                        orElse: () => null,
+                                                      );
                                                   var divider = '1';
                                                   if (result != null) {
                                                     divider =
@@ -1897,29 +2219,29 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                             .toString();
                                                   }
                                                   salesInvoiceCont
-                                                      .unitPriceControllers[keys[i]]!
-                                                      .text =
-                                                  '${double.parse('${(double.parse(salesInvoiceCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                          .unitPriceControllers[keys[i]]!
+                                                          .text =
+                                                      '${double.parse('${(double.parse(salesInvoiceCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
                                                 } else if (salesInvoiceCont
-                                                    .selectedCurrencyName !=
-                                                    'USD' &&
+                                                            .selectedCurrencyName !=
+                                                        'USD' &&
                                                     salesInvoiceCont
-                                                        .itemsPricesCurrencies[selectedItemId] ==
+                                                            .itemsPricesCurrencies[selectedItemId] ==
                                                         'USD') {
                                                   salesInvoiceCont
-                                                      .unitPriceControllers[keys[i]]!
-                                                      .text =
-                                                  '${double.parse('${(double.parse(salesInvoiceCont.itemUnitPrice[selectedItemId].toString()) * double.parse(salesInvoiceCont.exchangeRateForSelectedCurrency))}')}';
+                                                          .unitPriceControllers[keys[i]]!
+                                                          .text =
+                                                      '${double.parse('${(double.parse(salesInvoiceCont.itemUnitPrice[selectedItemId].toString()) * double.parse(salesInvoiceCont.exchangeRateForSelectedCurrency))}')}';
                                                 } else {
                                                   var result = exchangeRatesController
                                                       .exchangeRatesList
                                                       .firstWhere(
                                                         (item) =>
-                                                    item["currency"] ==
-                                                        salesInvoiceCont
-                                                            .itemsPricesCurrencies[selectedItemId],
-                                                    orElse: () => null,
-                                                  );
+                                                            item["currency"] ==
+                                                            salesInvoiceCont
+                                                                .itemsPricesCurrencies[selectedItemId],
+                                                        orElse: () => null,
+                                                      );
                                                   var divider = '1';
                                                   if (result != null) {
                                                     divider =
@@ -1929,9 +2251,9 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                   var usdPrice =
                                                       '${double.parse('${(double.parse(salesInvoiceCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
                                                   salesInvoiceCont
-                                                      .unitPriceControllers[keys[i]]!
-                                                      .text =
-                                                  '${double.parse('${(double.parse(usdPrice) * double.parse(salesInvoiceCont.exchangeRateForSelectedCurrency))}')}';
+                                                          .unitPriceControllers[keys[i]]!
+                                                          .text =
+                                                      '${double.parse('${(double.parse(usdPrice) * double.parse(salesInvoiceCont.exchangeRateForSelectedCurrency))}')}';
                                                 }
                                                 if (!salesInvoiceCont
                                                     .isBeforeVatPrices) {
@@ -1940,19 +2262,19 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                         salesInvoiceCont
                                                             .itemsVats[selectedItemId],
                                                       ) /
-                                                          100.0;
+                                                      100.0;
                                                   var taxValue =
                                                       taxRate *
-                                                          double.parse(
-                                                            salesInvoiceCont
-                                                                .unitPriceControllers[keys[i]]!
-                                                                .text,
-                                                          );
+                                                      double.parse(
+                                                        salesInvoiceCont
+                                                            .unitPriceControllers[keys[i]]!
+                                                            .text,
+                                                      );
 
                                                   salesInvoiceCont
-                                                      .unitPriceControllers[keys[i]]!
-                                                      .text =
-                                                  '${double.parse(salesInvoiceCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                          .unitPriceControllers[keys[i]]!
+                                                          .text =
+                                                      '${double.parse(salesInvoiceCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
                                                 }
                                                 salesInvoiceCont
                                                     .unitPriceControllers[keys[i]]!
@@ -1966,16 +2288,16 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
 
                                                 salesInvoiceCont
                                                     .setEnteredUnitPriceInSalesInvoice(
-                                                  keys[i],
-                                                  salesInvoiceCont
-                                                      .unitPriceControllers[keys[i]]!
-                                                      .text,
-                                                );
+                                                      keys[i],
+                                                      salesInvoiceCont
+                                                          .unitPriceControllers[keys[i]]!
+                                                          .text,
+                                                    );
                                                 salesInvoiceCont
                                                     .setMainTotalInSalesInvoice(
-                                                  keys[i],
-                                                  totalLine,
-                                                );
+                                                      keys[i],
+                                                      totalLine,
+                                                    );
                                                 salesInvoiceCont
                                                     .getTotalItems();
                                               }
@@ -2002,18 +2324,18 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                 children: [
                                   //vat
                                   salesInvoiceCont
-                                      .isVatExemptCheckBoxShouldAppear
+                                          .isVatExemptCheckBoxShouldAppear
                                       ? Row(
-                                    children: [
-                                      Text(
-                                        'vat#'.tr,
-                                        style: const TextStyle(
-                                          fontSize: 12.0,
-                                        ),
-                                      ),
-                                      gapW10,
-                                    ],
-                                  )
+                                        children: [
+                                          Text(
+                                            'vat#'.tr,
+                                            style: const TextStyle(
+                                              fontSize: 12.0,
+                                            ),
+                                          ),
+                                          gapW10,
+                                        ],
+                                      )
                                       : SizedBox(),
                                 ],
                               ),
@@ -2028,97 +2350,97 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                 children: [
                                   Row(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text('delivered_from'.tr),
                                       GetBuilder<WarehouseController>(
                                         builder: (cont) {
                                           return cont.isWarehousesFetched
                                               ? DropdownMenu<String>(
-                                            width:
-                                            MediaQuery.of(
-                                              context,
-                                            ).size.width *
-                                                0.16,
-                                            // requestFocusOnTap: false,
-                                            enableSearch: true,
-                                            controller:
-                                            salesInvoiceCont
-                                                .warehouseMenuController,
-                                            hintText:
-                                            'deliver_warehouse'.tr,
-                                            inputDecorationTheme: InputDecorationTheme(
-                                              // filled: true,
-                                              hintStyle: const TextStyle(
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                              contentPadding:
-                                              const EdgeInsets.fromLTRB(
-                                                20,
-                                                0,
-                                                25,
-                                                5,
-                                              ),
-                                              // outlineBorder: BorderSide(color: Colors.black,),
-                                              enabledBorder:
-                                              OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Primary.primary
-                                                      .withAlpha(
-                                                    (0.2 * 255)
-                                                        .toInt(),
+                                                width:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.16,
+                                                // requestFocusOnTap: false,
+                                                enableSearch: true,
+                                                controller:
+                                                    salesInvoiceCont
+                                                        .warehouseMenuController,
+                                                hintText:
+                                                    'deliver_warehouse'.tr,
+                                                inputDecorationTheme: InputDecorationTheme(
+                                                  // filled: true,
+                                                  hintStyle: const TextStyle(
+                                                    fontStyle: FontStyle.italic,
                                                   ),
-                                                  width: 1,
+                                                  contentPadding:
+                                                      const EdgeInsets.fromLTRB(
+                                                        20,
+                                                        0,
+                                                        25,
+                                                        5,
+                                                      ),
+                                                  // outlineBorder: BorderSide(color: Colors.black,),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.2 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 1,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.4 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 2,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
+                                                      ),
                                                 ),
-                                                borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(
-                                                    9,
-                                                  ),
-                                                ),
-                                              ),
-                                              focusedBorder:
-                                              OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Primary.primary
-                                                      .withAlpha(
-                                                    (0.4 * 255)
-                                                        .toInt(),
-                                                  ),
-                                                  width: 2,
-                                                ),
-                                                borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(
-                                                    9,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            // menuStyle: ,
-                                            menuHeight: 250,
-                                            dropdownMenuEntries:
-                                            cont.warehousesNameList.map<
-                                                DropdownMenuEntry<String>
-                                            >((String option) {
-                                              return DropdownMenuEntry<
-                                                  String
-                                              >(
-                                                value: option,
-                                                label: option,
-                                              );
-                                            }).toList(),
-                                            enableFilter: true,
-                                            onSelected: (String? val) {
-                                              var index = cont
-                                                  .warehousesNameList
-                                                  .indexOf(val!);
-                                              salesInvoiceCont
-                                                  .setSelectedWarehouseId(
-                                                '${cont.warehouseIdsList[index]}',
-                                              );
-                                            },
-                                          )
+                                                // menuStyle: ,
+                                                menuHeight: 250,
+                                                dropdownMenuEntries:
+                                                    cont.warehousesNameList.map<
+                                                      DropdownMenuEntry<String>
+                                                    >((String option) {
+                                                      return DropdownMenuEntry<
+                                                        String
+                                                      >(
+                                                        value: option,
+                                                        label: option,
+                                                      );
+                                                    }).toList(),
+                                                enableFilter: true,
+                                                onSelected: (String? val) {
+                                                  var index = cont
+                                                      .warehousesNameList
+                                                      .indexOf(val!);
+                                                  salesInvoiceCont
+                                                      .setSelectedWarehouseId(
+                                                        '${cont.warehouseIdsList[index]}',
+                                                      );
+                                                },
+                                              )
                                               : loading();
                                         },
                                       ),
@@ -2132,230 +2454,230 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                             //vat exempt
                             salesInvoiceCont.isVatExemptCheckBoxShouldAppear
                                 ? SizedBox(
-                              width:
-                              MediaQuery.of(context).size.width * 0.28,
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: ListTile(
-                                      title: Text(
-                                        'vat_exempt'.tr,
-                                        style: const TextStyle(
-                                          fontSize: 12.0,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.28,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: ListTile(
+                                          title: Text(
+                                            'vat_exempt'.tr,
+                                            style: const TextStyle(
+                                              fontSize: 12.0,
+                                            ),
+                                          ),
+                                          leading: Checkbox(
+                                            value:
+                                                salesInvoiceCont
+                                                    .isVatExemptChecked,
+                                            onChanged: (bool? value) {
+                                              salesInvoiceCont
+                                                  .setIsVatExemptChecked(
+                                                    value!,
+                                                  );
+                                              if (value) {
+                                                priceConditionController.text =
+                                                    'Prices are before vat';
+                                                salesInvoiceCont
+                                                    .setIsBeforeVatPrices(true);
+                                                vatExemptController.text =
+                                                    vatExemptList[0];
+                                                salesInvoiceCont
+                                                    .setIsVatExempted(
+                                                      true,
+                                                      false,
+                                                      false,
+                                                    );
+                                              } else {
+                                                vatExemptController.clear();
+                                                salesInvoiceCont
+                                                    .setIsVatExempted(
+                                                      false,
+                                                      false,
+                                                      false,
+                                                    );
+                                              }
+                                              // setState(() {
+                                              //   isVatExemptChecked = value!;
+                                              // });
+                                            },
+                                          ),
                                         ),
                                       ),
-                                      leading: Checkbox(
-                                        value:
-                                        salesInvoiceCont
-                                            .isVatExemptChecked,
-                                        onChanged: (bool? value) {
-                                          salesInvoiceCont
-                                              .setIsVatExemptChecked(
-                                            value!,
-                                          );
-                                          if (value) {
-                                            priceConditionController.text =
-                                            'Prices are before vat';
-                                            salesInvoiceCont
-                                                .setIsBeforeVatPrices(true);
-                                            vatExemptController.text =
-                                            vatExemptList[0];
-                                            salesInvoiceCont
-                                                .setIsVatExempted(
-                                              true,
-                                              false,
-                                              false,
-                                            );
-                                          } else {
-                                            vatExemptController.clear();
-                                            salesInvoiceCont
-                                                .setIsVatExempted(
-                                              false,
-                                              false,
-                                              false,
-                                            );
-                                          }
-                                          // setState(() {
-                                          //   isVatExemptChecked = value!;
-                                          // });
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                  salesInvoiceCont.isVatExemptChecked ==
-                                      false
-                                      ? DropdownMenu<String>(
-                                    width:
-                                    MediaQuery.of(
-                                      context,
-                                    ).size.width *
-                                        0.15,
-                                    enableSearch: true,
-                                    controller: vatExemptController,
-                                    hintText: '',
+                                      salesInvoiceCont.isVatExemptChecked ==
+                                              false
+                                          ? DropdownMenu<String>(
+                                            width:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.15,
+                                            enableSearch: true,
+                                            controller: vatExemptController,
+                                            hintText: '',
 
-                                    textStyle: const TextStyle(
-                                      fontSize: 12.0,
-                                    ),
-                                    inputDecorationTheme:
-                                    InputDecorationTheme(
-                                      hintStyle: const TextStyle(
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                      enabledBorder:
-                                      OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Primary.primary
-                                              .withAlpha(
-                                            (0.2 * 255)
-                                                .toInt(),
-                                          ),
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                        const BorderRadius.all(
-                                          Radius.circular(
-                                            9.0,
-                                          ),
-                                        ),
-                                      ),
-                                      focusedBorder:
-                                      OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Primary.primary
-                                              .withAlpha(
-                                            (0.4 * 255)
-                                                .toInt(),
-                                          ),
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                        const BorderRadius.all(
-                                          Radius.circular(
-                                            9.0,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    // menuStyle: ,
-                                    menuHeight: 250.0,
-                                    dropdownMenuEntries:
-                                    termsList.map<
-                                        DropdownMenuEntry<String>
-                                    >((String option) {
-                                      return DropdownMenuEntry<
-                                          String
-                                      >(
-                                        value: option,
-                                        label: option,
-                                      );
-                                    }).toList(),
-                                    enableFilter: true,
-                                    onSelected: (String? val) {},
-                                  )
-                                      : DropdownMenu<String>(
-                                    width:
-                                    MediaQuery.of(
-                                      context,
-                                    ).size.width *
-                                        0.15,
-                                    // requestFocusOnTap: false,
-                                    enableSearch: true,
-                                    controller: vatExemptController,
-                                    hintText: '',
+                                            textStyle: const TextStyle(
+                                              fontSize: 12.0,
+                                            ),
+                                            inputDecorationTheme:
+                                                InputDecorationTheme(
+                                                  hintStyle: const TextStyle(
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.2 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 1.0,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9.0,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.4 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 2.0,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9.0,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                ),
+                                            // menuStyle: ,
+                                            menuHeight: 250.0,
+                                            dropdownMenuEntries:
+                                                termsList.map<
+                                                  DropdownMenuEntry<String>
+                                                >((String option) {
+                                                  return DropdownMenuEntry<
+                                                    String
+                                                  >(
+                                                    value: option,
+                                                    label: option,
+                                                  );
+                                                }).toList(),
+                                            enableFilter: true,
+                                            onSelected: (String? val) {},
+                                          )
+                                          : DropdownMenu<String>(
+                                            width:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.15,
+                                            // requestFocusOnTap: false,
+                                            enableSearch: true,
+                                            controller: vatExemptController,
+                                            hintText: '',
 
-                                    textStyle: const TextStyle(
-                                      fontSize: 12.0,
-                                    ),
-                                    inputDecorationTheme:
-                                    InputDecorationTheme(
-                                      // filled: true,
-                                      hintStyle: const TextStyle(
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                      enabledBorder:
-                                      OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Primary.primary
-                                              .withAlpha(
-                                            (0.2 * 255)
-                                                .toInt(),
+                                            textStyle: const TextStyle(
+                                              fontSize: 12.0,
+                                            ),
+                                            inputDecorationTheme:
+                                                InputDecorationTheme(
+                                                  // filled: true,
+                                                  hintStyle: const TextStyle(
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.2 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 1.0,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9.0,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.4 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 2.0,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9.0,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                ),
+                                            // menuStyle: ,
+                                            menuHeight: 250.0,
+                                            dropdownMenuEntries:
+                                                vatExemptList.map<
+                                                  DropdownMenuEntry<String>
+                                                >((String option) {
+                                                  return DropdownMenuEntry<
+                                                    String
+                                                  >(
+                                                    value: option,
+                                                    label: option,
+                                                  );
+                                                }).toList(),
+                                            enableFilter: true,
+                                            onSelected: (String? val) {
+                                              setState(() {
+                                                if (val ==
+                                                    'Printed as "vat exempted"') {
+                                                  salesInvoiceCont
+                                                      .setIsVatExempted(
+                                                        true,
+                                                        false,
+                                                        false,
+                                                      );
+                                                } else if (val ==
+                                                    'Printed as "vat 0 % = 0"') {
+                                                  salesInvoiceCont
+                                                      .setIsVatExempted(
+                                                        false,
+                                                        true,
+                                                        false,
+                                                      );
+                                                } else {
+                                                  salesInvoiceCont
+                                                      .setIsVatExempted(
+                                                        false,
+                                                        false,
+                                                        true,
+                                                      );
+                                                }
+                                              });
+                                            },
                                           ),
-                                          width: 1.0,
-                                        ),
-                                        borderRadius:
-                                        const BorderRadius.all(
-                                          Radius.circular(
-                                            9.0,
-                                          ),
-                                        ),
-                                      ),
-                                      focusedBorder:
-                                      OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Primary.primary
-                                              .withAlpha(
-                                            (0.4 * 255)
-                                                .toInt(),
-                                          ),
-                                          width: 2.0,
-                                        ),
-                                        borderRadius:
-                                        const BorderRadius.all(
-                                          Radius.circular(
-                                            9.0,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    // menuStyle: ,
-                                    menuHeight: 250.0,
-                                    dropdownMenuEntries:
-                                    vatExemptList.map<
-                                        DropdownMenuEntry<String>
-                                    >((String option) {
-                                      return DropdownMenuEntry<
-                                          String
-                                      >(
-                                        value: option,
-                                        label: option,
-                                      );
-                                    }).toList(),
-                                    enableFilter: true,
-                                    onSelected: (String? val) {
-                                      setState(() {
-                                        if (val ==
-                                            'Printed as "vat exempted"') {
-                                          salesInvoiceCont
-                                              .setIsVatExempted(
-                                            true,
-                                            false,
-                                            false,
-                                          );
-                                        } else if (val ==
-                                            'Printed as "vat 0 % = 0"') {
-                                          salesInvoiceCont
-                                              .setIsVatExempted(
-                                            false,
-                                            true,
-                                            false,
-                                          );
-                                        } else {
-                                          salesInvoiceCont
-                                              .setIsVatExempted(
-                                            false,
-                                            false,
-                                            true,
-                                          );
-                                        }
-                                      });
-                                    },
+                                    ],
                                   ),
-                                ],
-                              ),
-                            )
+                                )
                                 : SizedBox(),
                           ],
                         ),
@@ -2371,84 +2693,337 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                         spacing: 0.0,
                         direction: Axis.horizontal,
                         children:
-                        tabsList
-                            .map(
-                              (element) => _buildTabChipItem(
-                            element,
-                            // element['id'],
-                            // element['name'],
-                            tabsList.indexOf(element),
-                          ),
-                        )
-                            .toList(),
+                            tabsList
+                                .map(
+                                  (element) => _buildTabChipItem(
+                                    element,
+                                    // element['id'],
+                                    // element['name'],
+                                    tabsList.indexOf(element),
+                                  ),
+                                )
+                                .toList(),
                       ),
                     ],
                   ),
 
                   selectedTabIndex == 0
                       ? Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          // horizontal:
-                          //     MediaQuery.of(context).size.width * 0.01,
-                          vertical: 15.0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Primary.primary,
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(6.0),
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              // horizontal:
+                              //     MediaQuery.of(context).size.width * 0.01,
+                              vertical: 15.0,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Primary.primary,
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(6.0),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.02,
+                                ),
+                                TableTitle(
+                                  text: 'item_code'.tr,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.15,
+                                ),
+                                TableTitle(
+                                  text: 'description'.tr,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                ),
+                                TableTitle(
+                                  text: 'quantity'.tr,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.04,
+                                ),
+                                TableTitle(
+                                  text: 'unit_price'.tr,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.05,
+                                ),
+                                TableTitle(
+                                  text: '${'disc'.tr}. %',
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.05,
+                                ),
+                                TableTitle(
+                                  text: 'total'.tr,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.06,
+                                ),
+                                TableTitle(
+                                  text: 'more_options'.tr,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.07,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            SizedBox(
-                              width:
-                              MediaQuery.of(context).size.width * 0.02,
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal:
+                                  MediaQuery.of(context).size.width * 0.01,
                             ),
-                            TableTitle(
-                              text: 'item_code'.tr,
-                              width:
-                              MediaQuery.of(context).size.width * 0.15,
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(6),
+                                bottomRight: Radius.circular(6),
+                              ),
+                              color: Colors.white,
                             ),
-                            TableTitle(
-                              text: 'description'.tr,
-                              width:
-                              MediaQuery.of(context).size.width * 0.3,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  height:
+                                      salesInvoiceCont
+                                          .listViewLengthInSalesInvoice +
+                                      50,
+                                  child: ScrollConfiguration(
+                                    behavior: const MaterialScrollBehavior()
+                                        .copyWith(
+                                          dragDevices: {
+                                            PointerDeviceKind.touch,
+                                            PointerDeviceKind.mouse,
+                                          },
+                                        ),
+                                    child: ReorderableListView.builder(
+                                      itemCount:
+                                          salesInvoiceCont
+                                              .rowsInListViewInSalesInvoice
+                                              .keys
+                                              .length,
+                                      buildDefaultDragHandles: false,
+                                      itemBuilder: (context, index) {
+                                        final key =
+                                            salesInvoiceCont.orderedKeys[index];
+                                        final row =
+                                            salesInvoiceCont
+                                                .rowsInListViewInSalesInvoice[key]!;
+                                        final lineType =
+                                            '${row['line_type_id'] ?? ''}';
+                                        return SizedBox(
+                                          key: ValueKey(key),
+                                          // onDismissed: (direction) {
+                                          //   setState(() {
+                                          //     salesInvoiceCont
+                                          //         .decrementListViewLengthInSalesInvoice(
+                                          //           salesInvoiceCont.increment,
+                                          //         );
+                                          //     salesInvoiceCont
+                                          //         .removeFromRowsInListViewInSalesInvoice(
+                                          //           key,
+                                          //         );
+                                          //     // quotationController
+                                          //     //     .removeFromOrderLinesInQuotationList(
+                                          //     //   key.toString(),
+                                          //     // );
+                                          //   });
+                                          // },
+                                          child: SizedBox(
+                                            width:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width,
+                                            child: Row(
+                                              children: [
+                                                ReorderableDragStartListener(
+                                                  index: index,
+                                                  child: Container(
+                                                    width:
+                                                        MediaQuery.of(
+                                                          context,
+                                                        ).size.width *
+                                                        0.02,
+                                                    height: 20,
+                                                    margin:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 15,
+                                                        ),
+                                                    decoration: const BoxDecoration(
+                                                      image: DecorationImage(
+                                                        image: AssetImage(
+                                                          'assets/images/newRow.png',
+                                                        ),
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child:
+                                                      lineType == '1'
+                                                          ? ReusableTitleRow(
+                                                            index: key,
+                                                            info: row,
+                                                          )
+                                                          : lineType == '2'
+                                                          ? ReusableItemRow(
+                                                            index: key,
+                                                            info: row,
+                                                          )
+                                                          : lineType == '3'
+                                                          ? ReusableComboRow(
+                                                            index: key,
+                                                            info: row,
+                                                          )
+                                                          : lineType == '4'
+                                                          ? ReusableImageRow(
+                                                            index: key,
+                                                            info: row,
+                                                          )
+                                                          : ReusableNoteRow(
+                                                            index: key,
+                                                            info: row,
+                                                          ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      onReorder: (oldIndex, newIndex) {
+                                        setState(() {
+                                          if (newIndex > oldIndex) {
+                                            newIndex -= 1;
+                                          }
+                                          final movedKey = salesInvoiceCont
+                                              .orderedKeys
+                                              .removeAt(oldIndex);
+                                          salesInvoiceCont.orderedKeys.insert(
+                                            newIndex,
+                                            movedKey,
+                                          );
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+
+                                Row(
+                                  children: [
+                                    ReusableAddCard(
+                                      text: 'title'.tr,
+                                      onTap: () {
+                                        addNewTitle();
+                                      },
+                                    ),
+                                    gapW32,
+                                    ReusableAddCard(
+                                      text: 'item'.tr,
+                                      onTap: () {
+                                        addNewItem();
+                                      },
+                                    ),
+                                    gapW32,
+                                    ReusableAddCard(
+                                      text: 'combo'.tr,
+                                      onTap: () {
+                                        addNewCombo();
+                                      },
+                                    ),
+                                    gapW32,
+                                    ReusableAddCard(
+                                      text: 'image'.tr,
+                                      onTap: () {
+                                        addNewImage();
+                                      },
+                                    ),
+                                    gapW32,
+                                    ReusableAddCard(
+                                      text: 'note'.tr,
+                                      onTap: () {
+                                        addNewNote();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                            TableTitle(
-                              text: 'quantity'.tr,
-                              width:
-                              MediaQuery.of(context).size.width * 0.04,
-                            ),
-                            TableTitle(
-                              text: 'unit_price'.tr,
-                              width:
-                              MediaQuery.of(context).size.width * 0.05,
-                            ),
-                            TableTitle(
-                              text: '${'disc'.tr}. %',
-                              width:
-                              MediaQuery.of(context).size.width * 0.05,
-                            ),
-                            TableTitle(
-                              text: 'total'.tr,
-                              width:
-                              MediaQuery.of(context).size.width * 0.06,
-                            ),
-                            TableTitle(
-                              text: 'more_options'.tr,
-                              width:
-                              MediaQuery.of(context).size.width * 0.07,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
+                          ),
+                          gapH24,
+                        ],
+                      )
+                      // : selectedTabIndex == 1
+                      // ? Container(
+                      //   padding: EdgeInsets.symmetric(
+                      //     horizontal: MediaQuery.of(context).size.width * 0.04,
+                      //     vertical: 15,
+                      //   ),
+                      //   decoration: const BoxDecoration(
+                      //     borderRadius: BorderRadius.only(
+                      //       bottomLeft: Radius.circular(6),
+                      //       bottomRight: Radius.circular(6),
+                      //     ),
+                      //     color: Colors.white,
+                      //   ),
+                      //   child: GetBuilder<PendingDocsReviewController>(
+                      //     builder: (cont) {
+                      //       return Container(
+                      //         height: MediaQuery.of(context).size.height * 0.85,
+                      //         child: SingleChildScrollView(
+                      //           child: Column(
+                      //             crossAxisAlignment: CrossAxisAlignment.start,
+                      //             children: [
+                      //               Column(
+                      //                 crossAxisAlignment:
+                      //                     CrossAxisAlignment.start,
+                      //                 children: [
+                      //                   gapH20,
+                      //                   PageTitle(text: 'sales_invoices'.tr),
+                      //                   cont.isPendingDocsFetched
+                      //                       ? Container(
+                      //                         color: Colors.white,
+                      //                         // height: listViewLength,
+                      //                         height:
+                      //                             MediaQuery.of(
+                      //                               context,
+                      //                             ).size.height *
+                      //                             0.80, //listViewLength
+                      //                         child: ListView.builder(
+                      //                           scrollDirection: Axis.vertical,
+                      //                           itemCount:
+                      //                               cont
+                      //                                   .salesInvoicesPendingDocs
+                      //                                   .length,
+                      //                           itemBuilder:
+                      //                               (context, index) => Column(
+                      //                                 crossAxisAlignment:
+                      //                                     CrossAxisAlignment
+                      //                                         .start,
+                      //                                 children: [
+                      //                                   PendingAsRowInTableLinks(
+                      //                                     info:
+                      //                                         cont.salesInvoicesPendingDocs[index],
+                      //                                     index: index,
+                      //                                   ),
+                      //                                   const Divider(),
+                      //                                 ],
+                      //                               ),
+                      //                         ),
+                      //                       )
+                      //                       : const CircularProgressIndicator(),
+                      //                 ],
+                      //               ),
+                      //             ],
+                      //           ),
+                      //         ),
+                      //       );
+                      //     },
+                      //   ),
+                      // )
+                      : Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal:
-                          MediaQuery.of(context).size.width * 0.01,
+                          horizontal: MediaQuery.of(context).size.width * 0.04,
+                          vertical: 15.0,
                         ),
                         decoration: const BoxDecoration(
                           borderRadius: BorderRadius.only(
@@ -2457,364 +3032,110 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                           ),
                           color: Colors.white,
                         ),
-                        child: Column(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(
-                              height:
-                              salesInvoiceCont
-                                  .listViewLengthInSalesInvoice +
-                                  50,
-                              child: ScrollConfiguration(
-                                behavior: const MaterialScrollBehavior()
-                                    .copyWith(
-                                  dragDevices: {
-                                    PointerDeviceKind.touch,
-                                    PointerDeviceKind.mouse,
-                                  },
-                                ),
-                                child: ReorderableListView.builder(
-                                  itemCount:
-                                  salesInvoiceCont
-                                      .rowsInListViewInSalesInvoice
-                                      .keys
-                                      .length,
-                                  buildDefaultDragHandles: false,
-                                  itemBuilder: (context, index) {
-                                    final key =
-                                    salesInvoiceCont.orderedKeys[index];
-                                    final row =
-                                    salesInvoiceCont
-                                        .rowsInListViewInSalesInvoice[key]!;
-                                    final lineType =
-                                        '${row['line_type_id'] ?? ''}';
-                                    return Dismissible(
-                                      key: ValueKey(key),
-                                      onDismissed: (direction) {
-                                        setState(() {
-                                          salesInvoiceCont
-                                              .decrementListViewLengthInSalesInvoice(
+                              width: MediaQuery.of(context).size.width * 0.35,
+                              child: Column(
+                                children: [
+                                  DialogDropMenu(
+                                    controller: salesPersonController,
+                                    optionsList:
+                                        salesInvoiceController
+                                            .salesPersonListNames,
+                                    text: 'sales_person'.tr,
+                                    hint: 'search'.tr,
+                                    rowWidth:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    textFieldWidth:
+                                        MediaQuery.of(context).size.width *
+                                        0.15,
+                                    onSelected: (String? val) {
+                                      setState(() {
+                                        selectedSalesPerson = val!;
+                                        var index = salesInvoiceController
+                                            .salesPersonListNames
+                                            .indexOf(val);
+                                        selectedSalesPersonId =
+                                            salesInvoiceController
+                                                .salesPersonListId[index];
+                                      });
+                                    },
+                                  ),
+                                  gapH16,
+                                  DialogDropMenu(
+                                    optionsList: const [''],
+                                    text: 'commission_method'.tr,
+                                    hint: '',
+                                    rowWidth:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    textFieldWidth:
+                                        MediaQuery.of(context).size.width *
+                                        0.15,
+                                    onSelected: () {},
+                                  ),
+                                  gapH16,
+                                  DialogDropMenu(
+                                    controller: cashingMethodsController,
+                                    optionsList:
+                                        salesInvoiceCont
+                                            .cashingMethodsNamesList,
+                                    text: 'cashing_method'.tr,
+                                    hint: '',
+                                    rowWidth:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    textFieldWidth:
+                                        MediaQuery.of(context).size.width *
+                                        0.15,
+                                    onSelected: (value) {
+                                      var index = salesInvoiceCont
+                                          .cashingMethodsNamesList
+                                          .indexOf(value);
+                                      salesInvoiceCont
+                                          .setSelectedCashingMethodId(
                                             salesInvoiceCont
-                                                .increment,
+                                                .cashingMethodsIdsList[index],
                                           );
-                                          salesInvoiceCont
-                                              .removeFromRowsInListViewInSalesInvoice(
-                                            key,
-                                          );
-                                          // quotationController
-                                          //     .removeFromOrderLinesInQuotationList(
-                                          //   key.toString(),
-                                          // );
-                                        });
-                                      },
-                                      child: SizedBox(
-                                        width:
-                                        MediaQuery.of(
-                                          context,
-                                        ).size.width,
-                                        child: Row(
-                                          children: [
-                                            ReorderableDragStartListener(
-                                              index: index,
-                                              child: Container(
-                                                width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
-                                                    0.02,
-                                                height: 20,
-                                                margin:
-                                                const EdgeInsets.symmetric(
-                                                  vertical: 15,
-                                                ),
-                                                decoration: const BoxDecoration(
-                                                  image: DecorationImage(
-                                                    image: AssetImage(
-                                                      'assets/images/newRow.png',
-                                                    ),
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child:
-                                              lineType == '1'
-                                                  ? ReusableTitleRow(
-                                                index: key,
-                                                info: row,
-                                              )
-                                                  : lineType == '2'
-                                                  ? ReusableItemRow(
-                                                index: key,
-                                                info: row,
-                                              )
-                                                  : lineType == '3'
-                                                  ? ReusableComboRow(
-                                                index: key,
-                                                info: row,
-                                              )
-                                                  : lineType == '4'
-                                                  ? ReusableImageRow(
-                                                index: key,
-                                                info: row,
-                                              )
-                                                  : ReusableNoteRow(
-                                                index: key,
-                                                info: row,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  onReorder: (oldIndex, newIndex) {
-                                    setState(() {
-                                      if (newIndex > oldIndex) {
-                                        newIndex -= 1;
-                                      }
-                                      final movedKey = salesInvoiceCont
-                                          .orderedKeys
-                                          .removeAt(oldIndex);
-                                      salesInvoiceCont.orderedKeys.insert(
-                                        newIndex,
-                                        movedKey,
-                                      );
-                                    });
-                                  },
-                                ),
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
-
-                            Row(
-                              children: [
-                                ReusableAddCard(
-                                  text: 'title'.tr,
-                                  onTap: () {
-                                    addNewTitle();
-                                  },
-                                ),
-                                gapW32,
-                                ReusableAddCard(
-                                  text: 'item'.tr,
-                                  onTap: () {
-                                    addNewItem();
-                                  },
-                                ),
-                                gapW32,
-                                ReusableAddCard(
-                                  text: 'combo'.tr,
-                                  onTap: () {
-                                    addNewCombo();
-                                  },
-                                ),
-                                gapW32,
-                                ReusableAddCard(
-                                  text: 'image'.tr,
-                                  onTap: () {
-                                    addNewImage();
-                                  },
-                                ),
-                                gapW32,
-                                ReusableAddCard(
-                                  text: 'note'.tr,
-                                  onTap: () {
-                                    addNewNote();
-                                  },
-                                ),
-                              ],
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  DialogTextField(
+                                    textEditingController: commissionController,
+                                    text: 'commission'.tr,
+                                    rowWidth:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    textFieldWidth:
+                                        MediaQuery.of(context).size.width *
+                                        0.15,
+                                    validationFunc: (val) {},
+                                  ),
+                                  gapH16,
+                                  DialogTextField(
+                                    textEditingController:
+                                        totalCommissionController,
+                                    text: 'total_commission'.tr,
+                                    rowWidth:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    textFieldWidth:
+                                        MediaQuery.of(context).size.width *
+                                        0.15,
+                                    validationFunc: (val) {},
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      gapH24,
-                    ],
-                  )
-                  // : selectedTabIndex == 1
-                  // ? Container(
-                  //   padding: EdgeInsets.symmetric(
-                  //     horizontal: MediaQuery.of(context).size.width * 0.04,
-                  //     vertical: 15,
-                  //   ),
-                  //   decoration: const BoxDecoration(
-                  //     borderRadius: BorderRadius.only(
-                  //       bottomLeft: Radius.circular(6),
-                  //       bottomRight: Radius.circular(6),
-                  //     ),
-                  //     color: Colors.white,
-                  //   ),
-                  //   child: GetBuilder<PendingDocsReviewController>(
-                  //     builder: (cont) {
-                  //       return Container(
-                  //         height: MediaQuery.of(context).size.height * 0.85,
-                  //         child: SingleChildScrollView(
-                  //           child: Column(
-                  //             crossAxisAlignment: CrossAxisAlignment.start,
-                  //             children: [
-                  //               Column(
-                  //                 crossAxisAlignment:
-                  //                     CrossAxisAlignment.start,
-                  //                 children: [
-                  //                   gapH20,
-                  //                   PageTitle(text: 'sales_invoices'.tr),
-                  //                   cont.isPendingDocsFetched
-                  //                       ? Container(
-                  //                         color: Colors.white,
-                  //                         // height: listViewLength,
-                  //                         height:
-                  //                             MediaQuery.of(
-                  //                               context,
-                  //                             ).size.height *
-                  //                             0.80, //listViewLength
-                  //                         child: ListView.builder(
-                  //                           scrollDirection: Axis.vertical,
-                  //                           itemCount:
-                  //                               cont
-                  //                                   .salesInvoicesPendingDocs
-                  //                                   .length,
-                  //                           itemBuilder:
-                  //                               (context, index) => Column(
-                  //                                 crossAxisAlignment:
-                  //                                     CrossAxisAlignment
-                  //                                         .start,
-                  //                                 children: [
-                  //                                   PendingAsRowInTableLinks(
-                  //                                     info:
-                  //                                         cont.salesInvoicesPendingDocs[index],
-                  //                                     index: index,
-                  //                                   ),
-                  //                                   const Divider(),
-                  //                                 ],
-                  //                               ),
-                  //                         ),
-                  //                       )
-                  //                       : const CircularProgressIndicator(),
-                  //                 ],
-                  //               ),
-                  //             ],
-                  //           ),
-                  //         ),
-                  //       );
-                  //     },
-                  //   ),
-                  // )
-                      : Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.04,
-                      vertical: 15.0,
-                    ),
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(6),
-                        bottomRight: Radius.circular(6),
-                      ),
-                      color: Colors.white,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.35,
-                          child: Column(
-                            children: [
-                              DialogDropMenu(
-                                controller: salesPersonController,
-                                optionsList:
-                                salesInvoiceController
-                                    .salesPersonListNames,
-                                text: 'sales_person'.tr,
-                                hint: 'search'.tr,
-                                rowWidth:
-                                MediaQuery.of(context).size.width * 0.3,
-                                textFieldWidth:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
-                                onSelected: (String? val) {
-                                  setState(() {
-                                    selectedSalesPerson = val!;
-                                    var index = salesInvoiceController
-                                        .salesPersonListNames
-                                        .indexOf(val);
-                                    selectedSalesPersonId =
-                                    salesInvoiceController
-                                        .salesPersonListId[index];
-                                  });
-                                },
-                              ),
-                              gapH16,
-                              DialogDropMenu(
-                                optionsList: const [''],
-                                text: 'commission_method'.tr,
-                                hint: '',
-                                rowWidth:
-                                MediaQuery.of(context).size.width * 0.3,
-                                textFieldWidth:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
-                                onSelected: () {},
-                              ),
-                              gapH16,
-                              DialogDropMenu(
-                                controller: cashingMethodsController,
-                                optionsList:
-                                salesInvoiceCont
-                                    .cashingMethodsNamesList,
-                                text: 'cashing_method'.tr,
-                                hint: '',
-                                rowWidth:
-                                MediaQuery.of(context).size.width * 0.3,
-                                textFieldWidth:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
-                                onSelected: (value) {
-                                  var index = salesInvoiceCont
-                                      .cashingMethodsNamesList
-                                      .indexOf(value);
-                                  salesInvoiceCont
-                                      .setSelectedCashingMethodId(
-                                    salesInvoiceCont
-                                        .cashingMethodsIdsList[index],
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              DialogTextField(
-                                textEditingController: commissionController,
-                                text: 'commission'.tr,
-                                rowWidth:
-                                MediaQuery.of(context).size.width * 0.3,
-                                textFieldWidth:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
-                                validationFunc: (val) {},
-                              ),
-                              gapH16,
-                              DialogTextField(
-                                textEditingController:
-                                totalCommissionController,
-                                text: 'total_commission'.tr,
-                                rowWidth:
-                                MediaQuery.of(context).size.width * 0.3,
-                                textFieldWidth:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
-                                validationFunc: (val) {},
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
 
                   gapH10,
 
@@ -2923,7 +3244,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                 children: [
                                   Row(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text('total_before_vat'.tr),
                                       ReusableShowInfoCard(
@@ -2931,7 +3252,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                           2,
                                         ),
                                         width:
-                                        MediaQuery.of(context).size.width *
+                                            MediaQuery.of(context).size.width *
                                             0.1,
                                       ),
                                     ],
@@ -2939,20 +3260,20 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   gapH6,
                                   Row(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text('global_disc'.tr),
                                       Row(
                                         children: [
                                           SizedBox(
                                             width:
-                                            MediaQuery.of(
-                                              context,
-                                            ).size.width *
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
                                                 0.1,
                                             child: ReusableNumberField(
                                               textEditingController:
-                                              globalDiscPercentController,
+                                                  globalDiscPercentController,
                                               isPasswordField: false,
                                               isCentered: true,
                                               hint: '0',
@@ -2966,7 +3287,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                     globalDiscPercentController
                                                         .text = '0';
                                                     globalDiscountPercentage =
-                                                    '0';
+                                                        '0';
                                                   } else {
                                                     globalDiscountPercentage =
                                                         val;
@@ -2984,9 +3305,9 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                           ReusableShowInfoCard(
                                             text: cont.globalDisc,
                                             width:
-                                            MediaQuery.of(
-                                              context,
-                                            ).size.width *
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
                                                 0.1,
                                           ),
                                         ],
@@ -2996,20 +3317,20 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   gapH6,
                                   Row(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text('special_disc'.tr),
                                       Row(
                                         children: [
                                           SizedBox(
                                             width:
-                                            MediaQuery.of(
-                                              context,
-                                            ).size.width *
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
                                                 0.1,
                                             child: ReusableNumberField(
                                               textEditingController:
-                                              specialDiscPercentController,
+                                                  specialDiscPercentController,
                                               isPasswordField: false,
                                               isCentered: true,
                                               hint: '0',
@@ -3019,7 +3340,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                                     specialDiscPercentController
                                                         .text = '0';
                                                     specialDiscountPercentage =
-                                                    '0';
+                                                        '0';
                                                   } else {
                                                     specialDiscountPercentage =
                                                         val;
@@ -3036,9 +3357,9 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                           ReusableShowInfoCard(
                                             text: cont.specialDisc,
                                             width:
-                                            MediaQuery.of(
-                                              context,
-                                            ).size.width *
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
                                                 0.1,
                                           ),
                                         ],
@@ -3047,42 +3368,42 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   ),
                                   gapH6,
                                   salesInvoiceCont
-                                      .isVatExemptCheckBoxShouldAppear
+                                          .isVatExemptCheckBoxShouldAppear
                                       ? Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('vat'.tr),
-                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          ReusableShowInfoCard(
-                                            text: cont.vatInPrimaryCurrency,
-                                            // .toString(),
-                                            width:
-                                            MediaQuery.of(
-                                              context,
-                                            ).size.width *
-                                                0.1,
-                                          ),
-                                          gapW10,
-                                          ReusableShowInfoCard(
-                                            text: cont.vat11,
-                                            // .toString(),
-                                            width:
-                                            MediaQuery.of(
-                                              context,
-                                            ).size.width *
-                                                0.1,
+                                          Text('vat'.tr),
+                                          Row(
+                                            children: [
+                                              ReusableShowInfoCard(
+                                                text: cont.vatInPrimaryCurrency,
+                                                // .toString(),
+                                                width:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.1,
+                                              ),
+                                              gapW10,
+                                              ReusableShowInfoCard(
+                                                text: cont.vat11,
+                                                // .toString(),
+                                                width:
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.1,
+                                              ),
+                                            ],
                                           ),
                                         ],
-                                      ),
-                                    ],
-                                  )
+                                      )
                                       : SizedBox(),
                                   gapH10,
                                   Row(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'total_amount'.tr,
@@ -3123,63 +3444,147 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                           if (_formKey.currentState!.validate()) {
                             _saveContent();
                             var invoiceDeliveryDate =
-                            widget.info['invoiceDeliveryDate'] == null
-                                ? ''
-                                : '${widget.info['invoiceDeliveryDate']}';
-                            var res = await updateSalesInvoice(
-                              '${widget.info['id']}',
-                              false,
-                              refController.text,
-                              selectedCustomerIds,
-                              validityController.text,
-                              salesInvoiceController.selectedWarehouseId,
-                              '', //todo paymentTermsController.text,
-                              salesInvoiceCont.selectedPriceListId,
-                              salesInvoiceController
-                                  .selectedCurrencyId, //selectedCurrency
-                              termsAndConditionsController.text,
-                              selectedSalesPersonId.toString(),
-                              '',
-                              salesInvoiceCont.selectedCashingMethodId,
-                              commissionController.text,
-                              totalCommissionController.text,
-                              salesInvoiceController.totalItems
-                                  .toString(), //total before vat
-                              specialDiscPercentController
-                                  .text, // inserted by user
-                              salesInvoiceController.specialDisc, // calculated
-                              globalDiscPercentController.text,
-                              salesInvoiceController.globalDisc,
-                              salesInvoiceController.vat11.toString(), //vat
-                              salesInvoiceController.vatInPrimaryCurrency
-                                  .toString(),
-                              salesInvoiceController
-                                  .totalSalesInvoice, // salesInvoiceController.totalQuotation
-
-                              salesInvoiceCont.isVatExemptChecked ? '1' : '0',
-                              salesInvoiceCont.isVatNoPrinted ? '1' : '0',
-                              salesInvoiceCont.isPrintedAsVatExempt ? '1' : '0',
-                              salesInvoiceCont.isPrintedAs0 ? '1' : '0',
-                              salesInvoiceCont.isBeforeVatPrices ? '0' : '1',
-
-                              salesInvoiceCont.isBeforeVatPrices ? '1' : '0',
-                              codeController.text,
-                              salesInvoiceCont.status,
-                              salesInvoiceController.rowsInListViewInSalesInvoice,
-                              inputDateController.text,
-                              invoiceDeliveryDate,
-                              salesInvoiceCont.orderedKeys
-                            );
-                            if (res['success'] == true) {
-                              Get.back();
-                              salesInvoiceController
-                                  .getAllSalesInvoiceFromBackWithoutExcept();
-                              // homeController.selectedTab.value = 'new_quotation';
-                              homeController.selectedTab.value =
-                              'sales_invoice_summary';
-                              CommonWidgets.snackBar('Success', res['message']);
+                                widget.info['invoiceDeliveryDate'] == null
+                                    ? ''
+                                    : '${widget.info['invoiceDeliveryDate']}';
+                            bool hasType1WithEmptyTitle = salesInvoiceController
+                                .rowsInListViewInSalesInvoice
+                                .values
+                                .any((map) {
+                                  return map['line_type_id'] == '1' &&
+                                      (map['title']?.isEmpty ?? true);
+                                });
+                            bool hasType2WithEmptyId = salesInvoiceController
+                                .rowsInListViewInSalesInvoice
+                                .values
+                                .any((map) {
+                                  return map['line_type_id'] == '2' &&
+                                      (map['item_id']?.isEmpty ?? true);
+                                });
+                            bool hasType3WithEmptyId = salesInvoiceController
+                                .rowsInListViewInSalesInvoice
+                                .values
+                                .any((map) {
+                                  return map['line_type_id'] == '3' &&
+                                      (map['combo']?.isEmpty ?? true);
+                                });
+                            bool hasType4WithEmptyImage = salesInvoiceController
+                                .rowsInListViewInSalesInvoice
+                                .values
+                                .any((map) {
+                                  return map['line_type_id'] == '4' &&
+                                      (map['image'] == Uint8List(0) ||
+                                          map['image']?.isEmpty);
+                                });
+                            bool hasType5WithEmptyNote = salesInvoiceController
+                                .rowsInListViewInSalesInvoice
+                                .values
+                                .any((map) {
+                                  return map['line_type_id'] == '5' &&
+                                      (map['note']?.isEmpty ?? true);
+                                });
+                            if (salesInvoiceController
+                                .rowsInListViewInSalesInvoice
+                                .isEmpty) {
+                              CommonWidgets.snackBar(
+                                'error',
+                                'Order lines is Empty',
+                              );
+                            } else if (hasType2WithEmptyId) {
+                              CommonWidgets.snackBar(
+                                'error',
+                                'You have an empty item',
+                              );
+                            } else if (hasType3WithEmptyId) {
+                              CommonWidgets.snackBar(
+                                'error',
+                                'You have an empty combo',
+                              );
+                            } else if (hasType1WithEmptyTitle) {
+                              CommonWidgets.snackBar(
+                                'error',
+                                'You have an empty title',
+                              );
+                            } else if (hasType4WithEmptyImage) {
+                              CommonWidgets.snackBar(
+                                'error',
+                                'You have an empty image',
+                              );
+                            } else if (hasType5WithEmptyNote) {
+                              CommonWidgets.snackBar(
+                                'error',
+                                'You have an empty note',
+                              );
                             } else {
-                              CommonWidgets.snackBar('error', res['message']);
+                              var res = await updateSalesInvoice(
+                                '${widget.info['id']}',
+                                false,
+                                refController.text,
+                                selectedCustomerIds,
+                                validityController.text,
+                                salesInvoiceController.selectedWarehouseId,
+                                '', //todo paymentTermsController.text,
+                                salesInvoiceCont.selectedPriceListId,
+                                salesInvoiceController
+                                    .selectedCurrencyId, //selectedCurrency
+                                termsAndConditionsController.text,
+                                selectedSalesPersonId.toString(),
+                                '',
+                                salesInvoiceCont.selectedCashingMethodId,
+                                commissionController.text,
+                                totalCommissionController.text,
+                                salesInvoiceController.totalItems
+                                    .toString(), //total before vat
+                                specialDiscPercentController
+                                    .text, // inserted by user
+                                salesInvoiceController
+                                    .specialDisc, // calculated
+                                globalDiscPercentController.text,
+                                salesInvoiceController.globalDisc,
+                                salesInvoiceController.vat11.toString(), //vat
+                                salesInvoiceController.vatInPrimaryCurrency
+                                    .toString(),
+                                salesInvoiceController
+                                    .totalSalesInvoice, // salesInvoiceController.totalQuotation
+
+                                salesInvoiceCont.isVatExemptChecked ? '1' : '0',
+                                salesInvoiceCont.isVatNoPrinted ? '1' : '0',
+                                salesInvoiceCont.isPrintedAsVatExempt
+                                    ? '1'
+                                    : '0',
+                                salesInvoiceCont.isPrintedAs0 ? '1' : '0',
+                                salesInvoiceCont.isBeforeVatPrices ? '0' : '1',
+
+                                salesInvoiceCont.isBeforeVatPrices ? '1' : '0',
+                                codeController.text,
+                                salesInvoiceCont.status,
+                                salesInvoiceController
+                                    .rowsInListViewInSalesInvoice,
+                                inputDateController.text,
+                                invoiceDeliveryDate,
+                                salesInvoiceCont.orderedKeys,
+                              );
+                              if (res['success'] == true) {
+                                Get.back();
+
+                                if (widget.fromPage == 'pendingDocs') {
+                                  pendingDocsController.getAllPendingDocs();
+                                  homeController.selectedTab.value =
+                                      'pending_docs';
+                                } else {
+                                  salesInvoiceController
+                                      .getAllSalesInvoiceFromBack();
+                                  homeController.selectedTab.value =
+                                      'sales_invoice_summary';
+                                }
+
+                                CommonWidgets.snackBar(
+                                  'Success',
+                                  res['message'],
+                                );
+                              } else {
+                                CommonWidgets.snackBar('error', res['message']);
+                              }
                             }
                           }
                         },
@@ -3220,9 +3625,9 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
           decoration: BoxDecoration(
             color: selectedTabIndex == index ? Primary.p20 : Colors.white,
             border:
-            selectedTabIndex == index
-                ? Border(top: BorderSide(color: Primary.primary, width: 3))
-                : null,
+                selectedTabIndex == index
+                    ? Border(top: BorderSide(color: Primary.primary, width: 3))
+                    : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withAlpha((0.5 * 255).toInt()),
@@ -3257,22 +3662,23 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     salesInvoiceController.incrementListViewLengthInSalesInvoice(
       salesInvoiceController.increment,
     );
-    salesInvoiceController
-        .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-      'line_type_id': '1',
-      'item_id': '',
-      'itemName': '',
-      'item_main_code': '',
-      'item_discount': '0',
-      'item_description': '',
-      'item_quantity': '0',
-      'item_unit_price': '0',
-      'item_total': '0',
-      'title': '',
-      'note': '',
-    });
+    salesInvoiceController.addToRowsInListViewInSalesInvoice(
+      salesInvoiceController.salesInvoiceCounter,
+      {
+        'line_type_id': '1',
+        'item_id': '',
+        'itemName': '',
+        'item_main_code': '',
+        'item_discount': '0',
+        'item_description': '',
+        'item_quantity': '0',
+        'item_unit_price': '0',
+        'item_total': '0',
+        'title': '',
+        'note': '',
+      },
+    );
   }
-
 
   addNewItem() {
     setState(() {
@@ -3281,22 +3687,25 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     salesInvoiceController.incrementListViewLengthInSalesInvoice(
       salesInvoiceController.increment,
     );
-    salesInvoiceController
-        .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-      'line_type_id': '2',
-      'item_id': '',
-      'itemName': '',
-      'item_main_code': '',
-      'item_discount': '0',
-      'item_description': '',
-      'item_quantity': '0',
-      'item_unit_price': '0',
-      'item_total': '0',
-      'title': '',
-      'note': '',
-    });
-    salesInvoiceController.addToUnitPriceControllers(salesInvoiceController.salesInvoiceCounter);
-
+    salesInvoiceController.addToRowsInListViewInSalesInvoice(
+      salesInvoiceController.salesInvoiceCounter,
+      {
+        'line_type_id': '2',
+        'item_id': '',
+        'itemName': '',
+        'item_main_code': '',
+        'item_discount': '0',
+        'item_description': '',
+        'item_quantity': '0',
+        'item_unit_price': '0',
+        'item_total': '0',
+        'title': '',
+        'note': '',
+      },
+    );
+    salesInvoiceController.addToUnitPriceControllers(
+      salesInvoiceController.salesInvoiceCounter,
+    );
   }
 
   addNewCombo() {
@@ -3306,23 +3715,26 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     salesInvoiceController.incrementListViewLengthInSalesInvoice(
       salesInvoiceController.increment,
     );
-    salesInvoiceController
-        .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-      'line_type_id': '3',
-      'item_id': '',
-      'itemName': '',
-      'item_main_code': '',
-      'item_discount': '0',
-      'item_description': '',
-      'item_quantity': '0',
-      'item_unit_price': '0',
-      'item_total': '0',
-      'title': '',
-      'note': '',
-      'combo': '',
-    });
-    salesInvoiceController.addToCombosPricesControllers(salesInvoiceController.salesInvoiceCounter);
-
+    salesInvoiceController.addToRowsInListViewInSalesInvoice(
+      salesInvoiceController.salesInvoiceCounter,
+      {
+        'line_type_id': '3',
+        'item_id': '',
+        'itemName': '',
+        'item_main_code': '',
+        'item_discount': '0',
+        'item_description': '',
+        'item_quantity': '0',
+        'item_unit_price': '0',
+        'item_total': '0',
+        'title': '',
+        'note': '',
+        'combo': '',
+      },
+    );
+    salesInvoiceController.addToCombosPricesControllers(
+      salesInvoiceController.salesInvoiceCounter,
+    );
   }
 
   addNewImage() {
@@ -3333,23 +3745,23 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
       salesInvoiceController.increment,
     );
 
-    salesInvoiceController
-        .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-      'line_type_id': '4',
-      'item_id': '',
-      'itemName': '',
-      'item_main_code': '',
-      'item_discount': '0',
-      'item_description': '',
-      'item_quantity': '0',
-      'item_unit_price': '0',
-      'item_total': '0',
-      'title': '',
-      'note': '',
-      'image': Uint8List(0),
-    });
-
-
+    salesInvoiceController.addToRowsInListViewInSalesInvoice(
+      salesInvoiceController.salesInvoiceCounter,
+      {
+        'line_type_id': '4',
+        'item_id': '',
+        'itemName': '',
+        'item_main_code': '',
+        'item_discount': '0',
+        'item_description': '',
+        'item_quantity': '0',
+        'item_unit_price': '0',
+        'item_total': '0',
+        'title': '',
+        'note': '',
+        'image': Uint8List(0),
+      },
+    );
   }
 
   addNewNote() {
@@ -3360,21 +3772,22 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
       salesInvoiceController.increment,
     );
 
-    salesInvoiceController
-        .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-      'line_type_id': '5',
-      'item_id': '',
-      'itemName': '',
-      'item_main_code': '',
-      'item_discount': '0',
-      'item_description': '',
-      'item_quantity': '0',
-      'item_unit_price': '0',
-      'item_total': '0',
-      'title': '',
-      'note': '',
-    });
-
+    salesInvoiceController.addToRowsInListViewInSalesInvoice(
+      salesInvoiceController.salesInvoiceCounter,
+      {
+        'line_type_id': '5',
+        'item_id': '',
+        'itemName': '',
+        'item_main_code': '',
+        'item_discount': '0',
+        'item_description': '',
+        'item_quantity': '0',
+        'item_unit_price': '0',
+        'item_total': '0',
+        'title': '',
+        'note': '',
+      },
+    );
   }
 
   List<Step> getSteps() => [
@@ -3437,19 +3850,17 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
   setPrice() {
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
-          (item) => item["currency"] == salesInvoiceController.selectedCurrencyName,
+      (item) => item["currency"] == salesInvoiceController.selectedCurrencyName,
       orElse: () => null,
     );
     salesInvoiceController.exchangeRateForSelectedCurrency =
-    result != null ? '${result["exchange_rate"]}' : '1';
+        result != null ? '${result["exchange_rate"]}' : '1';
     salesInvoiceController.unitPriceControllers[widget.index]!.text =
-    '${widget.info['item_unit_price'] ?? ''}';
+        '${widget.info['item_unit_price'] ?? ''}';
     selectedItemId = widget.info['item_id'].toString();
 
-
-
     salesInvoiceController.unitPriceControllers[widget.index]!.text =
-    '${double.parse(salesInvoiceController.unitPriceControllers[widget.index]!.text) + taxValue}';
+        '${double.parse(salesInvoiceController.unitPriceControllers[widget.index]!.text) + taxValue}';
     salesInvoiceController
         .unitPriceControllers[widget.index]!
         .text = double.parse(
@@ -3457,16 +3868,16 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
     ).toStringAsFixed(2);
 
     salesInvoiceController.rowsInListViewInSalesInvoice[widget
-        .index]['item_unit_price'] =
+            .index]['item_unit_price'] =
         salesInvoiceController.unitPriceControllers[widget.index]!.text;
     salesInvoiceController.rowsInListViewInSalesInvoice[widget
-        .index]['itemName'] =
-    salesInvoiceController.itemsNames[selectedItemId];
+            .index]['itemName'] =
+        salesInvoiceController.itemsNames[selectedItemId];
   }
 
   @override
   void initState() {
-    if (widget.info['item_id']!='') {
+    if (widget.info['item_id'] != '') {
       qtyController.text = '${widget.info['item_quantity'] ?? ''}';
       quantity = '${widget.info['item_quantity'] ?? '0.0'}';
 
@@ -3478,7 +3889,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
       mainCode = widget.info['item_main_code'] ?? '';
       descriptionController.text = widget.info['item_description'] ?? '';
 
-      itemCodeController.text = widget.info['item_name'].toString();
+      itemCodeController.text = widget.info['item_main_code'].toString();
       selectedItemId = widget.info['item_id'].toString();
 
       setPrice();
@@ -3489,23 +3900,23 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
       // quantity = '0';
       // salesInvoiceController.unitPriceControllers[widget.index]!.text = '0';
       itemCodeController.text =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_main_code'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_main_code'];
       qtyController.text =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_quantity'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_quantity'];
       discountController.text =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_discount'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_discount'];
       descriptionController.text =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_description'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_description'];
       totalLine =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_total'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_total'];
       itemCodeController.text =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_main_code'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_main_code'];
     }
 
     super.initState();
@@ -3525,8 +3936,8 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
               children: [
                 ReusableDropDownMenusWithSearch(
                   list:
-                  salesInvoiceController
-                      .itemsMultiPartList, // Assuming multiList is List<List<String>>
+                      salesInvoiceController
+                          .itemsMultiPartList, // Assuming multiList is List<List<String>>
                   text: ''.tr,
                   hint: 'item_code'.tr,
                   controller: itemCodeController,
@@ -3534,9 +3945,9 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     itemCodeController.text = value!;
                     setState(() {
                       selectedItemId =
-                      '${cont.itemsIds[cont.itemsCode.indexOf(value.split(" | ")[0])]}'; //get the id by the first element of the list.
+                          '${cont.itemsIds[cont.itemsCode.indexOf(value.split(" | ")[0])]}'; //get the id by the first element of the list.
                       mainDescriptionVar =
-                      cont.itemsDescription[selectedItemId];
+                          cont.itemsDescription[selectedItemId];
                       mainCode = cont.itemsCodes[selectedItemId];
                       itemName = cont.itemsNames[selectedItemId];
                       // Map warehouseMapId = {};
@@ -3544,7 +3955,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
                       // warehouseId = warehouseMapId['w'][0]['id'].toString();
                       descriptionController.text =
-                      cont.itemsDescription[selectedItemId]!;
+                          cont.itemsDescription[selectedItemId]!;
                       if (cont.itemsPricesCurrencies[selectedItemId] ==
                           cont.selectedCurrencyName) {
                         cont.unitPriceControllers[widget.index]!.text =
@@ -3555,28 +3966,28 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
-                          item["currency"] ==
-                              cont.itemsPricesCurrencies[selectedItemId],
-                          orElse: () => null,
-                        );
+                                  item["currency"] ==
+                                  cont.itemsPricesCurrencies[selectedItemId],
+                              orElse: () => null,
+                            );
                         var divider = '1';
                         if (result != null) {
                           divider = result["exchange_rate"].toString();
                         }
                         cont.unitPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
                       } else if (cont.selectedCurrencyName != 'USD' &&
                           cont.itemsPricesCurrencies[selectedItemId] == 'USD') {
                         cont.unitPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       } else {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
-                          item["currency"] ==
-                              cont.itemsPricesCurrencies[selectedItemId],
-                          orElse: () => null,
-                        );
+                                  item["currency"] ==
+                                  cont.itemsPricesCurrencies[selectedItemId],
+                              orElse: () => null,
+                            );
                         var divider = '1';
                         if (result != null) {
                           divider = result["exchange_rate"].toString();
@@ -3584,7 +3995,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         var usdPrice =
                             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
                         cont.unitPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                            '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       }
                       if (cont.isBeforeVatPrices) {
                         taxRate = 1;
@@ -3592,21 +4003,21 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       } else {
                         taxRate =
                             double.parse(cont.itemsVats[selectedItemId]) /
-                                100.0;
+                            100.0;
                         taxValue =
                             taxRate *
-                                double.parse(
-                                  cont.unitPriceControllers[widget.index]!.text,
-                                );
+                            double.parse(
+                              cont.unitPriceControllers[widget.index]!.text,
+                            );
                       }
                       cont.unitPriceControllers[widget.index]!.text =
-                      '${double.parse(cont.unitPriceControllers[widget.index]!.text) + taxValue}';
+                          '${double.parse(cont.unitPriceControllers[widget.index]!.text) + taxValue}';
                       qtyController.text = '1';
                       quantity = '1';
                       discountController.text = '0';
                       discount = '0';
                       totalLine =
-                      '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                          '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       cont.setEnteredQtyInSalesInvoice(widget.index, quantity);
                       cont.setMainTotalInSalesInvoice(widget.index, totalLine);
                       cont.getTotalItems();
@@ -3650,18 +4061,18 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       context: context,
                       builder:
                           (BuildContext context) => const AlertDialog(
-                        backgroundColor: Colors.white,
-                        contentPadding: EdgeInsets.all(0),
-                        titlePadding: EdgeInsets.all(0),
-                        actionsPadding: EdgeInsets.all(0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(9),
+                            backgroundColor: Colors.white,
+                            contentPadding: EdgeInsets.all(0),
+                            titlePadding: EdgeInsets.all(0),
+                            actionsPadding: EdgeInsets.all(0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(9),
+                              ),
+                            ),
+                            elevation: 0,
+                            content: CreateProductDialogContent(),
                           ),
-                        ),
-                        elevation: 0,
-                        content: CreateProductDialogContent(),
-                      ),
                     );
                   },
                   columnWidths: [
@@ -3793,7 +4204,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       setState(() {
                         quantity = val;
                         totalLine =
-                        '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                            '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
 
                       _formKey.currentState!.validate();
@@ -3871,7 +4282,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         }
                         // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
                         totalLine =
-                        '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                            '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
@@ -3892,29 +4303,33 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     ),
                     focusNode: focus1,
                     onFieldSubmitted: (value) {
-                setState(() {
-                salesInvoiceController.salesInvoiceCounter += 1;
-                });
-                salesInvoiceController.incrementListViewLengthInSalesInvoice(
-                salesInvoiceController.increment,
-                );
-                salesInvoiceController
-                    .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-                'line_type_id': '2',
-                'item_id': '',
-                'itemName': '',
-                'item_main_code': '',
-                'item_discount': '0',
-                'item_description': '',
-                'item_quantity': '0',
-                'item_unit_price': '0',
-                'item_total': '0',
-                'title': '',
-                'note': '',
-                });
-                salesInvoiceController.addToUnitPriceControllers(salesInvoiceController.salesInvoiceCounter);
-
-                },
+                      setState(() {
+                        salesInvoiceController.salesInvoiceCounter += 1;
+                      });
+                      salesInvoiceController
+                          .incrementListViewLengthInSalesInvoice(
+                            salesInvoiceController.increment,
+                          );
+                      salesInvoiceController.addToRowsInListViewInSalesInvoice(
+                        salesInvoiceController.salesInvoiceCounter,
+                        {
+                          'line_type_id': '2',
+                          'item_id': '',
+                          'itemName': '',
+                          'item_main_code': '',
+                          'item_discount': '0',
+                          'item_description': '',
+                          'item_quantity': '0',
+                          'item_unit_price': '0',
+                          'item_total': '0',
+                          'title': '',
+                          'note': '',
+                        },
+                      );
+                      salesInvoiceController.addToUnitPriceControllers(
+                        salesInvoiceController.salesInvoiceCounter,
+                      );
+                    },
                     controller: discountController,
                     cursorColor: Colors.black,
                     textAlign: TextAlign.center,
@@ -3970,7 +4385,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           discount = val;
                         }
                         totalLine =
-                        '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                            '${(double.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
 
@@ -4000,32 +4415,32 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   width: MediaQuery.of(context).size.width * 0.02,
                   child: ReusableMore(
                     itemsList:
-                    selectedItemId.isEmpty
-                        ? []
-                        : [
-                      PopupMenuItem<String>(
-                        value: '1',
-                        onTap: () async {
-                          showDialog<String>(
-                            context: context,
-                            builder:
-                                (BuildContext context) => AlertDialog(
-                              backgroundColor: Colors.white,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(9),
-                                ),
+                        selectedItemId.isEmpty
+                            ? []
+                            : [
+                              PopupMenuItem<String>(
+                                value: '1',
+                                onTap: () async {
+                                  showDialog<String>(
+                                    context: context,
+                                    builder:
+                                        (BuildContext context) => AlertDialog(
+                                          backgroundColor: Colors.white,
+                                          shape: const RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(9),
+                                            ),
+                                          ),
+                                          elevation: 0,
+                                          content: ShowItemQuantitiesDialog(
+                                            selectedItemId: selectedItemId,
+                                          ),
+                                        ),
+                                  );
+                                },
+                                child: Text('Show Quantity'),
                               ),
-                              elevation: 0,
-                              content: ShowItemQuantitiesDialog(
-                                selectedItemId: selectedItemId,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Text('Show Quantity'),
-                      ),
-                    ],
+                            ],
                   ),
                 ),
 
@@ -4036,11 +4451,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     onTap: () {
                       salesInvoiceController
                           .decrementListViewLengthInSalesInvoice(
-                        salesInvoiceController.increment,
-                      );
+                            salesInvoiceController.increment,
+                          );
                       salesInvoiceController
                           .removeFromRowsInListViewInSalesInvoice(widget.index);
-
 
                       setState(() {
                         cont.totalItems = 0.0;
@@ -4090,8 +4504,8 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
   void initState() {
     // titleController.text = widget.info['title'] ?? '';
     titleController.text =
-    salesInvoiceController.rowsInListViewInSalesInvoice[widget
-        .index]['title'];
+        salesInvoiceController.rowsInListViewInSalesInvoice[widget
+            .index]['title'];
     super.initState();
   }
 
@@ -4145,8 +4559,8 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                     onTap: () {
                       salesInvoiceController
                           .decrementListViewLengthInSalesInvoice(
-                        salesInvoiceController.increment,
-                      );
+                            salesInvoiceController.increment,
+                          );
                       salesInvoiceController
                           .removeFromRowsInListViewInSalesInvoice(widget.index);
                     },
@@ -4179,8 +4593,8 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
   @override
   void initState() {
     noteController.text =
-    salesInvoiceController.rowsInListViewInSalesInvoice[widget
-        .index]['note'];
+        salesInvoiceController.rowsInListViewInSalesInvoice[widget
+            .index]['note'];
     super.initState();
   }
 
@@ -4256,8 +4670,8 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                   setState(() {
                     salesInvoiceController
                         .decrementListViewLengthInSalesInvoice(
-                      salesInvoiceController.increment,
-                    );
+                          salesInvoiceController.increment,
+                        );
                     salesInvoiceController
                         .removeFromRowsInListViewInSalesInvoice(widget.index);
                   });
@@ -4362,44 +4776,44 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                             width: MediaQuery.of(context).size.width * 0.72,
                             height: cont.imageSpaceHeight,
                             child:
-                            imageFile.isNotEmpty
-                                ? Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.start,
-                              children: [
-                                Image.memory(
-                                  imageFile,
-                                  height: cont.imageSpaceHeight,
-                                ),
-                              ],
-                            )
-                                : Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.start,
-                              crossAxisAlignment:
-                              CrossAxisAlignment.center,
-                              children: [
-                                gapW20,
-                                Icon(
-                                  Icons.cloud_upload_outlined,
-                                  color: Others.iconColor,
-                                  size: 32,
-                                ),
-                                gapW20,
-                                Text(
-                                  'drag_drop_image'.tr,
-                                  style: TextStyle(
-                                    color: TypographyColor.textTable,
-                                  ),
-                                ),
-                                Text(
-                                  'browse'.tr,
-                                  style: TextStyle(
-                                    color: Primary.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
+                                imageFile.isNotEmpty
+                                    ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Image.memory(
+                                          imageFile,
+                                          height: cont.imageSpaceHeight,
+                                        ),
+                                      ],
+                                    )
+                                    : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        gapW20,
+                                        Icon(
+                                          Icons.cloud_upload_outlined,
+                                          color: Others.iconColor,
+                                          size: 32,
+                                        ),
+                                        gapW20,
+                                        Text(
+                                          'drag_drop_image'.tr,
+                                          style: TextStyle(
+                                            color: TypographyColor.textTable,
+                                          ),
+                                        ),
+                                        Text(
+                                          'browse'.tr,
+                                          style: TextStyle(
+                                            color: Primary.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                           ),
                         ),
                       ),
@@ -4445,12 +4859,12 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                       setState(() {
                         salesInvoiceController
                             .decrementListViewLengthInSalesInvoice(
-                          salesInvoiceController.increment + 50,
-                        );
+                              salesInvoiceController.increment + 50,
+                            );
                         salesInvoiceController
                             .removeFromRowsInListViewInSalesInvoice(
-                          widget.index,
-                        );
+                              widget.index,
+                            );
                       });
                     },
                     child: Icon(Icons.delete_outline, color: Primary.primary),
@@ -4502,15 +4916,15 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
   setPrice() {
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
-          (item) => item["currency"] == salesInvoiceController.selectedCurrencyName,
+      (item) => item["currency"] == salesInvoiceController.selectedCurrencyName,
       orElse: () => null,
     );
 
     salesInvoiceController.exchangeRateForSelectedCurrency =
-    result != null ? '${result["exchange_rate"]}' : '1';
+        result != null ? '${result["exchange_rate"]}' : '1';
 
     salesInvoiceController.combosPriceControllers[widget.index]!.text =
-    '${widget.info['combo_unit_price'] ?? ''}';
+        '${widget.info['combo_unit_price'] ?? ''}';
 
     selectedComboId = widget.info['combo_id'].toString();
     // var ind=salesInvoiceController.combosIdsList.indexOf(selectedComboId);
@@ -4572,28 +4986,28 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
     // qtyController.text = '1';
     salesInvoiceController.rowsInListViewInSalesInvoice[widget
-        .index]['item_unit_price'] =
+            .index]['item_unit_price'] =
         salesInvoiceController.combosPriceControllers[widget.index]!.text;
     salesInvoiceController.rowsInListViewInSalesInvoice[widget
-        .index]['item_total'] =
-    '${widget.info['combo_total']}';
+            .index]['item_total'] =
+        '${widget.info['combo_total']}';
     salesInvoiceController.rowsInListViewInSalesInvoice[widget.index]['combo'] =
         widget.info['combo_id'].toString();
   }
 
   @override
   void initState() {
-    if (widget.info['combo_quantity']!=null) {
+    if (widget.info['combo_quantity'] != null) {
       qtyController.text = '${widget.info['combo_quantity'] ?? ''}';
       quantity = '${widget.info['combo_quantity'] ?? '0.0'}';
       salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_quantity'] =
-      '${widget.info['combo_quantity'] ?? '0.0'}';
+              .index]['item_quantity'] =
+          '${widget.info['combo_quantity'] ?? '0.0'}';
 
       discountController.text = widget.info['combo_discount'] ?? '';
       discount = widget.info['combo_discount'] ?? '0.0';
       salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_discount'] =
+              .index]['item_discount'] =
           widget.info['combo_discount'] ?? '0.0';
 
       totalLine = widget.info['combo_total'] ?? '';
@@ -4603,7 +5017,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
       descriptionController.text = widget.info['combo_description'] ?? '';
 
       salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_description'] =
+              .index]['item_description'] =
           widget.info['combo_description'] ?? '';
 
       comboCodeController.text = widget.info['combo_code'].toString();
@@ -4617,23 +5031,23 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
       // quantity = '0';
       // salesInvoiceController.combosPriceControllers[widget.index]!.text = '0';
       comboCodeController.text =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_main_code'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_main_code'];
       qtyController.text =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_quantity'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_quantity'];
       discountController.text =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_discount'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_discount'];
       descriptionController.text =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_description'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_description'];
       totalLine =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_total'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_total'];
       comboCodeController.text =
-      salesInvoiceController.rowsInListViewInSalesInvoice[widget
-          .index]['item_main_code'];
+          salesInvoiceController.rowsInListViewInSalesInvoice[widget
+              .index]['item_main_code'];
     }
 
     super.initState();
@@ -4653,8 +5067,8 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
               children: [
                 ReusableDropDownMenusWithSearch(
                   list:
-                  salesInvoiceController
-                      .combosMultiPartList, // Assuming multiList is List<List<String>>
+                      salesInvoiceController
+                          .combosMultiPartList, // Assuming multiList is List<List<String>>
                   text: ''.tr,
                   hint: 'combo'.tr,
                   controller: comboCodeController,
@@ -4669,7 +5083,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       mainCode = cont.combosCodesList[ind];
                       comboName = cont.combosNamesList[ind];
                       descriptionController.text =
-                      cont.combosDescriptionList[ind];
+                          cont.combosDescriptionList[ind];
                       if (cont.combosPricesCurrencies[selectedComboId] ==
                           cont.selectedCurrencyName) {
                         cont.combosPriceControllers[widget.index]!.text =
@@ -4680,29 +5094,29 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
-                          item["currency"] ==
-                              cont.combosPricesCurrencies[selectedComboId],
-                          orElse: () => null,
-                        );
+                                  item["currency"] ==
+                                  cont.combosPricesCurrencies[selectedComboId],
+                              orElse: () => null,
+                            );
                         var divider = '1';
                         if (result != null) {
                           divider = result["exchange_rate"].toString();
                         }
                         cont.combosPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
                       } else if (cont.selectedCurrencyName != 'USD' &&
                           cont.combosPricesCurrencies[selectedComboId] ==
                               'USD') {
                         cont.combosPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       } else {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
-                          item["currency"] ==
-                              cont.combosPricesCurrencies[selectedComboId],
-                          orElse: () => null,
-                        );
+                                  item["currency"] ==
+                                  cont.combosPricesCurrencies[selectedComboId],
+                              orElse: () => null,
+                            );
                         var divider = '1';
                         if (result != null) {
                           divider = result["exchange_rate"].toString();
@@ -4710,17 +5124,17 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         var usdPrice =
                             '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
                         cont.combosPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                            '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       }
 
                       cont.combosPriceControllers[widget.index]!.text =
-                      '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
+                          '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
                       qtyController.text = '1';
                       quantity = '1';
                       discountController.text = '0';
                       discount = '0';
                       totalLine =
-                      '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                          '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       cont.setEnteredQtyInSalesInvoice(widget.index, quantity);
                       cont.setMainTotalInSalesInvoice(widget.index, totalLine);
                       cont.getTotalItems();
@@ -4757,18 +5171,18 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       context: context,
                       builder:
                           (BuildContext context) => const AlertDialog(
-                        backgroundColor: Colors.white,
-                        contentPadding: EdgeInsets.all(0),
-                        titlePadding: EdgeInsets.all(0),
-                        actionsPadding: EdgeInsets.all(0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(9),
+                            backgroundColor: Colors.white,
+                            contentPadding: EdgeInsets.all(0),
+                            titlePadding: EdgeInsets.all(0),
+                            actionsPadding: EdgeInsets.all(0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(9),
+                              ),
+                            ),
+                            elevation: 0,
+                            content: Combo(),
                           ),
-                        ),
-                        elevation: 0,
-                        content: Combo(),
-                      ),
                     );
                   },
                   columnWidths: [
@@ -4900,7 +5314,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       setState(() {
                         quantity = val;
                         totalLine =
-                        '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                            '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
 
                       _formKey.currentState!.validate();
@@ -4978,7 +5392,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         }
                         // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
                         totalLine =
-                        '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                            '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
@@ -4999,30 +5413,34 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                     ),
                     focusNode: focus1,
                     onFieldSubmitted: (value) {
-                setState(() {
-                salesInvoiceController.salesInvoiceCounter += 1;
-                });
-                salesInvoiceController.incrementListViewLengthInSalesInvoice(
-                salesInvoiceController.increment,
-                );
-                salesInvoiceController
-                    .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-                'line_type_id': '3',
-                'item_id': '',
-                'itemName': '',
-                'item_main_code': '',
-                'item_discount': '0',
-                'item_description': '',
-                'item_quantity': '0',
-                'item_unit_price': '0',
-                'item_total': '0',
-                'title': '',
-                'note': '',
-                'combo': '',
-                });
-                salesInvoiceController.addToCombosPricesControllers(salesInvoiceController.salesInvoiceCounter);
-
-                },
+                      setState(() {
+                        salesInvoiceController.salesInvoiceCounter += 1;
+                      });
+                      salesInvoiceController
+                          .incrementListViewLengthInSalesInvoice(
+                            salesInvoiceController.increment,
+                          );
+                      salesInvoiceController.addToRowsInListViewInSalesInvoice(
+                        salesInvoiceController.salesInvoiceCounter,
+                        {
+                          'line_type_id': '3',
+                          'item_id': '',
+                          'itemName': '',
+                          'item_main_code': '',
+                          'item_discount': '0',
+                          'item_description': '',
+                          'item_quantity': '0',
+                          'item_unit_price': '0',
+                          'item_total': '0',
+                          'title': '',
+                          'note': '',
+                          'combo': '',
+                        },
+                      );
+                      salesInvoiceController.addToCombosPricesControllers(
+                        salesInvoiceController.salesInvoiceCounter,
+                      );
+                    },
                     controller: discountController,
                     cursorColor: Colors.black,
                     textAlign: TextAlign.center,
@@ -5078,7 +5496,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                           discount = val;
                         }
                         totalLine =
-                        '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                            '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
                       _formKey.currentState!.validate();
 
@@ -5108,32 +5526,32 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   width: MediaQuery.of(context).size.width * 0.02,
                   child: ReusableMore(
                     itemsList:
-                    selectedComboId.isEmpty
-                        ? []
-                        : [
-                      // PopupMenuItem<String>(
-                      //   value: '1',
-                      //   onTap: () async {
-                      //     showDialog<String>(
-                      //       context: context,
-                      //       builder:
-                      //           (BuildContext context) => AlertDialog(
-                      //         backgroundColor: Colors.white,
-                      //         shape: const RoundedRectangleBorder(
-                      //           borderRadius: BorderRadius.all(
-                      //             Radius.circular(9),
-                      //           ),
-                      //         ),
-                      //         elevation: 0,
-                      //         content: ShowItemQuantitiesDialog(
-                      //           selectedItemId: selectedComboId,
-                      //         ),
-                      //       ),
-                      //     );
-                      //   },
-                      //   child: Text('Show Quantity'),
-                      // ),
-                    ],
+                        selectedComboId.isEmpty
+                            ? []
+                            : [
+                              // PopupMenuItem<String>(
+                              //   value: '1',
+                              //   onTap: () async {
+                              //     showDialog<String>(
+                              //       context: context,
+                              //       builder:
+                              //           (BuildContext context) => AlertDialog(
+                              //         backgroundColor: Colors.white,
+                              //         shape: const RoundedRectangleBorder(
+                              //           borderRadius: BorderRadius.all(
+                              //             Radius.circular(9),
+                              //           ),
+                              //         ),
+                              //         elevation: 0,
+                              //         content: ShowItemQuantitiesDialog(
+                              //           selectedItemId: selectedComboId,
+                              //         ),
+                              //       ),
+                              //     );
+                              //   },
+                              //   child: Text('Show Quantity'),
+                              // ),
+                            ],
                   ),
                 ),
 
@@ -5144,11 +5562,10 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                     onTap: () {
                       salesInvoiceController
                           .decrementListViewLengthInSalesInvoice(
-                        salesInvoiceController.increment,
-                      );
+                            salesInvoiceController.increment,
+                          );
                       salesInvoiceController
                           .removeFromRowsInListViewInSalesInvoice(widget.index);
-
 
                       setState(() {
                         cont.totalItems = 0.0;

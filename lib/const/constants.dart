@@ -7,3 +7,8 @@ List<String> vatExemptList = [
 ];
 
 
+List<String> chanceLevels=[
+   'HIGH',
+   'MEDIUM',
+   'LOW'
+];

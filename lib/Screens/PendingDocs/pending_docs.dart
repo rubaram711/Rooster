@@ -16,10 +16,14 @@ import 'package:rooster_app/Controllers/sales_invoice_controller.dart';
 import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
+
 import 'package:rooster_app/Screens/Quotations/print_quotation.dart';
 import 'package:rooster_app/Screens/Quotations/tasks.dart';
+import 'package:rooster_app/Screens/Quotations/update_quotation_dialog.dart';
 import 'package:rooster_app/Screens/SalesInvoice/print_sales_invoice.dart';
+import 'package:rooster_app/Screens/SalesInvoice/update_sales_invoice_dialog.dart';
 import 'package:rooster_app/Screens/client_order/print_sales_order.dart';
+import 'package:rooster_app/Screens/client_order/update_sales_order_dialog.dart';
 import 'package:rooster_app/Widgets/custom_snak_bar.dart';
 import 'package:rooster_app/Widgets/page_title.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
@@ -30,9 +34,6 @@ import 'package:rooster_app/const/colors.dart';
 import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/const/urls.dart';
-import '../Quotations/update_quotation_dialog.dart';
-import '../SalesInvoice/update_sales_invoice_dialog.dart';
-import '../client_order/update_sales_order_dialog.dart';
 
 class PendingDocs extends StatefulWidget {
   const PendingDocs({super.key});
@@ -161,6 +162,7 @@ class _PendingDocsState extends State<PendingDocs> {
     salesOrderController.getFieldsForCreateSalesOrderFromBack();
     salesInvoiceController.getFieldsForCreateSalesInvoiceFromBack();
     pendingDocsController.getAllPendingDocs();
+
     super.initState();
   }
 
@@ -1042,7 +1044,12 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                         content: UpdateQuotationDialog(
                                           index: widget.index,
                                           info: widget.info,
+                                          fromPage: 'pendingDocs',
                                         ),
+                                        // content: UpdateQuotationInPendingDocs(
+                                        //   index: widget.index,
+                                        //   info: widget.info,
+                                        // ),
                                       ),
                                 );
                               },
@@ -1067,7 +1074,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -1328,12 +1335,13 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   'confirmed', // status,
 
                                   orderLines1,
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
-                                  pendingDocsController.getAllPendingDocs();
+                                  quotationController
+                                      .getAllQuotationsFromBack();
                                   homeController.selectedTab.value =
-                                      "quotation_summary";
+                                      "to_sales_order";
                                   CommonWidgets.snackBar(
                                     'Success',
                                     res['message'],
@@ -1365,7 +1373,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -1594,7 +1602,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                   'sent', // status,
                                   orderLines1,
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   quotationController
@@ -1635,7 +1643,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -1864,13 +1872,15 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   'cancelled', // status,
 
                                   orderLines1,
-                                  orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // homeController.selectedTab.value =
                                   //     "quotation_summary";
 
-                                  pendingDocsController.getAllPendingDocs();
+                                  quotationController
+                                      .getAllQuotationsFromBack();
+
                                   homeController.selectedTab.value =
                                       "quotation_summary";
                                   CommonWidgets.snackBar(
@@ -2441,7 +2451,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           //                   ),
                           //                 ),
                           //                 elevation: 0,
-                          //                 content: UpdateQuotationDialog(
+                          //                 content: UpdateQuotationInPendingDocs(
                           //                   index: widget.index,
                           //                   info: widget.info,
                           //                 ),
@@ -2822,12 +2832,21 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 finalPriceBySalesOrderCurrency =
                                     totalPriceAfterSpecialDiscountBysalesOrderCurrency +
                                     vatBySalesOrderCurrency;
+                                var quotNumber = '';
+                                widget.info['quotation'] == null
+                                    ? quotNumber = ''
+                                    : quotNumber =
+                                        widget
+                                            .info['quotation']['quotationNumber'];
+                                print("--------------quotNumber");
+                                print(quotNumber);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
                                       return PrintSalesOrder(
+                                        quotationNumber: quotNumber,
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
                                                     '1'
@@ -2957,7 +2976,12 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                         content: UpdateSalesOrderDialog(
                                           index: widget.index,
                                           info: widget.info,
+                                          fromPage: 'pendingDocs',
                                         ),
+                                        // content: UpdateSalesOrderInPendingDocs(
+                                        //   index: widget.index,
+                                        //   info: widget.info,
+                                        // ),
                                       ),
                                 );
                               },
@@ -2980,7 +3004,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -3191,7 +3215,6 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   }
                                 }
 
-
                                 var res = await updateSalesOrder(
                                   '${widget.info['id']}',
                                   false,
@@ -3230,7 +3253,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   'confirmed', // status,
 
                                   orderLines1,
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -3269,7 +3292,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -3517,7 +3540,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                   'sent', // status,
                                   orderLines1,
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -3558,7 +3581,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -3805,7 +3828,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   '${widget.info['code'] ?? ''}',
                                   'cancelled', // status,
                                   orderLines1,
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -4359,7 +4382,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           //                   ),
                           //                 ),
                           //                 elevation: 0,
-                          //                 content: UpdateSalesOrderDialog(
+                          //                 content: UpdateSalesOrderInPendingDocs(
                           //                   index: widget.index,
                           //                   info: widget.info,
                           //                 ),
@@ -4715,7 +4738,22 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
+                                      var salesOrderNumber = '';
+                                      var quotNumber = '';
+                                      widget.info['salesorder'] == null
+                                          ? salesOrderNumber = ''
+                                          : salesOrderNumber =
+                                              widget
+                                                  .info['salesorder']['salesorderNumber'];
+
+                                      salesOrderNumber == ''
+                                          ? quotNumber = ''
+                                          : quotNumber =
+                                              widget
+                                                  .info['salesorder']['quotation']['quotationNumber'];
                                       return PrintSalesInvoice(
+                                        quotationNumber: quotNumber,
+                                        salesOrderNumber: salesOrderNumber,
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
                                                     '1'
@@ -4844,7 +4882,12 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                         content: UpdateSalesInvoiceDialog(
                                           index: widget.index,
                                           info: widget.info,
+                                          fromPage: 'pendingDocs',
                                         ),
+                                        // content: SalesInvoiceInPendingDocs(
+                                        //   index: widget.index,
+                                        //   info: widget.info,
+                                        // ),
                                       ),
                                 );
                               },
@@ -4868,7 +4911,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -5104,12 +5147,12 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   orderLines1,
                                   '${widget.info['inputDate'] ?? ''}',
                                   '${widget.info['invoiceDeliveryDate'] ?? ''}',
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
                                   salesInvoiceController
-                                      .getAllSalesInvoiceFromBackWithoutExcept();
+                                      .getAllSalesInvoiceFromBack();
                                   homeController.selectedTab.value =
                                       "sales_invoice_summary";
                                   CommonWidgets.snackBar(
@@ -5146,7 +5189,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -5383,12 +5426,12 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   orderLines1,
                                   '${widget.info['inputDate'] ?? ''}',
                                   '${widget.info['invoiceDeliveryDate'] ?? ''}',
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
                                   salesInvoiceController
-                                      .getAllSalesInvoiceFromBackWithoutExcept();
+                                      .getAllSalesInvoiceFromBack();
                                   homeController.selectedTab.value =
                                       "sales_invoice_summary";
                                   CommonWidgets.snackBar(
@@ -5956,7 +5999,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           //                   ),
                           //                 ),
                           //                 elevation: 0,
-                          //                 content: UpdateSalesInvoiceDialog(
+                          //                 content: SalesInvoiceInPendingDocs(
                           //                   index: widget.index,
                           //                   info: widget.info,
                           //                 ),

@@ -148,22 +148,40 @@ class _ReusableDropDownMenuWithSearchState
     super.dispose();
   }
 
+  // void _handleSearch() {
+  //   final filter = widget.controller.text.toLowerCase();
+  //   setState(() {
+  //     // Filter the list based on the user's input
+  //     _filteredOptions = widget.list
+  //         .where((option) => option.toLowerCase().contains(filter))
+  //         .toList();
+  //
+  //     // If no options match or always add the clickable option at the end
+  //     if (widget.isThereClickableOption) {
+  //       if (_filteredOptions.isEmpty || !_filteredOptions.contains(widget.clickableOptionText)) {
+  //         _filteredOptions.add(widget.clickableOptionText);
+  //       }
+  //     }
+  //   });
+  // }
   void _handleSearch() {
     final filter = widget.controller.text.toLowerCase();
-    setState(() {
-      // Filter the list based on the user's input
-      _filteredOptions = widget.list
-          .where((option) => option.toLowerCase().contains(filter))
-          .toList();
 
-      // If no options match or always add the clickable option at the end
-      if (widget.isThereClickableOption) {
-        if (_filteredOptions.isEmpty || !_filteredOptions.contains(widget.clickableOptionText)) {
-          _filteredOptions.add(widget.clickableOptionText);
-        }
-      }
+    final List<String> filtered = widget.list
+        .where((option) =>
+    option.toLowerCase().contains(filter) &&
+        option != widget.clickableOptionText)
+        .toList();
+
+    if (widget.isThereClickableOption) {
+      filtered.add(widget.clickableOptionText);
+    }
+
+    setState(() {
+      _filteredOptions = filtered;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -517,42 +535,29 @@ class _ReusableDropDownMenusWithSearchState
     widget.controller.removeListener(_handleSearch);
     super.dispose();
   }
-  // search for first element in dropDown
-  // void _handleSearch() {
-  //   final filter = widget.controller.text.toLowerCase();
-  //   setState(() {
-  //     _filteredOptions = widget.list
-  //         .where((option) => option[0].toLowerCase().contains(filter))
-  //         .toList();
-  //
-  //     if (widget.isThereClickableOption) {
-  //       if (_filteredOptions.isEmpty || !_filteredOptions.any((option) => option[0] == widget.clickableOptionText)) {
-  //         _filteredOptions.add([widget.clickableOptionText]);
-  //       }
-  //     }
-  //
-  //
-  //   });
-  // }
+
 
   // search for any element in dropDown
   void _handleSearch() {
     final filter = widget.controller.text.toLowerCase();
-    setState(() {
-      _filteredOptions = widget.list.where((option) {
-        // Search in all elements of the option list
-        return option.any((element) => element.toLowerCase().contains(filter));
-      }).toList();
 
-      if (widget.isThereClickableOption) {
-        if (_filteredOptions.isEmpty ||
-            !_filteredOptions.any(
-                    (option) => option[0] == widget.clickableOptionText)) {
-          _filteredOptions.add([widget.clickableOptionText]);
-        }
-      }
+
+    final List<List<String>> filtered = widget.list
+        .where((option) =>
+    option.any((element) => element.toLowerCase().contains(filter)) &&
+        option[0] != widget.clickableOptionText)
+        .toList();
+
+
+    if (widget.isThereClickableOption) {
+      filtered.add([widget.clickableOptionText]);
+    }
+
+    setState(() {
+      _filteredOptions = filtered;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -719,23 +724,43 @@ class _ReusableDropDownMenusWithSearchCodeState
     super.dispose();
   }
 
+  // void _handleSearch() {
+  //   final filter = widget.controller.text.toLowerCase();
+  //   setState(() {
+  //     _filteredOptions = widget.list.where((option) {
+  //       // Search in all elements of the option list
+  //       return option.any((element) => element.toLowerCase().contains(filter));
+  //     }).toList();
+  //
+  //     if (widget.isThereClickableOption) {
+  //       if (_filteredOptions.isEmpty ||
+  //           !_filteredOptions.any(
+  //                   (option) => option[0] == widget.clickableOptionText)) {
+  //         _filteredOptions.add([widget.clickableOptionText]);
+  //       }
+  //     }
+  //   });
+  // }
   void _handleSearch() {
     final filter = widget.controller.text.toLowerCase();
-    setState(() {
-      _filteredOptions = widget.list.where((option) {
-        // Search in all elements of the option list
-        return option.any((element) => element.toLowerCase().contains(filter));
-      }).toList();
 
-      if (widget.isThereClickableOption) {
-        if (_filteredOptions.isEmpty ||
-            !_filteredOptions.any(
-                    (option) => option[0] == widget.clickableOptionText)) {
-          _filteredOptions.add([widget.clickableOptionText]);
-        }
+    final List<List<String>> filtered = widget.list.where((option) {
+      return option.any((element) => element.toLowerCase().contains(filter));
+    }).toList();
+
+    if (widget.isThereClickableOption) {
+      final clickable = [widget.clickableOptionText];
+      final alreadyExists = filtered.any((option) => option[0] == widget.clickableOptionText);
+      if (!alreadyExists) {
+        filtered.add(clickable);
       }
+    }
+
+    setState(() {
+      _filteredOptions = filtered;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(

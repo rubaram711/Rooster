@@ -503,6 +503,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   List<String> customerTitleList = [];
   List<String> customerNumberList = [];
   List customersPricesListsIds = [];
+  List customersSalesPersonsIds = [];
   List customerIdsList = [];
   List<List<String>> customersMultiPartList = [];
   String salesOrderNumber = '';
@@ -563,6 +564,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     salesOrderNumber = '';
     customersMap = {};
     customersPricesListsIds = [];
+    customersSalesPersonsIds = [];
     customerNameList = [];
     customersMultiPartList = [];
     customerIdsList = [];
@@ -634,6 +636,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     for (var client in p['clients']) {
       customersMap['${client['id']}'] = client;
       customersPricesListsIds.add('${client['pricelist_id'] ?? ''}');
+      customersSalesPersonsIds.add('${client['salesperson_id'] ?? ''}');
       customerNameList.add('${client['name']}');
       customerNumberList.add('${client['client_number']}');
       customerIdsList.add('${client['id']}');

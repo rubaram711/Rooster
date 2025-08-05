@@ -1,6 +1,6 @@
 // const String baseUrl='https://theravenstyle.com/api';
 const String baseUrl='https://theravenstyle.com/rooster-backend/public/api';
-// const String baseUrl='https://demo.theravenstyle.com/mail/public/api';//test version
+// const String baseUrl='https://demo.theravenstyle.com/rooster-backend-local/public/api';//test version
 const String baseImage='https://theravenstyle.com/rooster-backend/public/';
 
 

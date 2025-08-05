@@ -105,7 +105,6 @@ Future storeClient(
     body.remove('clientNumber');
   }
   FormData formData = FormData.fromMap(body);
-// print('contacts $contacts');
   for (int i = 0; i < contacts.length; i++) {
     formData.fields.addAll([
       MapEntry("addresses[$i][type]", '${contacts[i]['type']}'),
@@ -137,8 +136,6 @@ Future storeClient(
     ),
   )
       .catchError((err) {
-    // print('100');
-    // print(err.response);
     return err.response;
     // if (err is DioError) {
     //   print(err.response);

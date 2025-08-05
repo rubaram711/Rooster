@@ -102,6 +102,8 @@ class _AccountsPageState extends State<AccountsPage> {
   }
   @override
   void initState() {
+    clientController.getAllUsersSalesPersonFromBack();
+
     getCurrency();
     // generalListViewLength = accounts.length < 10
     //     ? Sizes.deviceHeight * (0.09 * accounts.length)
@@ -2303,6 +2305,7 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
   TextEditingController internalNoteController = TextEditingController();
   TextEditingController grantedDiscountController = TextEditingController();
   final HomeController homeController = Get.find();
+
   String paymentTerm = '',
       selectedPriceListId = '',
       selectedCountry = '',
@@ -2409,6 +2412,10 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
     if(widget.info['pricelist']!=null){
       selectedPriceListId='${widget.info['pricelist']['id']}';
       priceListController.text=widget.info['pricelist']['code'];
+    }
+    if(widget.info['salesperson']!=null){
+      clientController.selectedSalesPersonId=widget.info['salesperson']['id'];
+      clientController.salesPersonController.text=widget.info['salesperson']['name'];
     }
     selectedClientType = widget.info['type'] == 'company' ? 2 : 1;
     clientNameController.text = widget.info['name'] ?? '';
@@ -3120,17 +3127,34 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                                 MediaQuery.of(context).size.width * 0.3,
                                 child: Column(
                                   children: [
-                                    DialogDropMenu(
-                                      optionsList: const [''],
-                                      text: '${'sales_person'.tr}*',
-                                      hint: '',
-                                      rowWidth:
-                                      MediaQuery.of(context).size.width *
-                                          0.3,
-                                      textFieldWidth:
-                                      MediaQuery.of(context).size.width *
-                                          0.17,
-                                      onSelected: () {},
+                                    GetBuilder<ClientController>(
+                                        builder: (cont) {
+                                          return DialogDropMenu(
+                                            controller: cont.salesPersonController,
+                                            optionsList:
+                                            clientController
+                                                .salesPersonListNames,
+                                            text: 'sales_person'.tr,
+                                            hint: 'search'.tr,
+                                            rowWidth:
+                                            MediaQuery.of(context).size.width *
+                                                0.3,
+                                            textFieldWidth:
+                                            MediaQuery.of(context).size.width *
+                                                0.17,
+                                            onSelected: (String? val) {
+                                              setState(() {
+                                                var index = clientController
+                                                    .salesPersonListNames
+                                                    .indexOf(val!);
+                                                clientController.setSelectedSalesPerson
+                                                  (val,
+                                                    clientController
+                                                        .salesPersonListId[index]);
+                                              });
+                                            },
+                                          );
+                                        }
                                     ),
                                     gapH16,
                                     DialogDropMenu(
@@ -3293,7 +3317,7 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                         '',
                         '',
                         '',
-                        '',
+                        clientController.selectedSalesPersonId.toString(),
                         paymentTerm,
                         selectedPriceListId,
                         internalNoteController.text,

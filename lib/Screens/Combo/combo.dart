@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Widgets/TransferWidgets/reusable_show_info_card.dart';
+import 'package:rooster_app/Widgets/add_photo_circle.dart';
 import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
 import 'package:rooster_app/Widgets/reusable_add_card.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
@@ -14,6 +16,7 @@ import 'package:rooster_app/Widgets/reusable_text_field.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
 import 'package:rooster_app/Widgets/table_title.dart';
 import 'package:rooster_app/const/functions.dart';
+import 'package:rooster_app/utils/image_picker_helper.dart';
 import '../../../Widgets/dialog_title.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
@@ -34,32 +37,12 @@ class _ComboState extends State<Combo> {
   final TextEditingController comboPriceController = TextEditingController();
   final TextEditingController comboCurrenceController = TextEditingController();
   TextEditingController comboCodeController = TextEditingController();
+  TextEditingController brandController = TextEditingController();
   final TextEditingController comboMainDescriptionController =
       TextEditingController();
 
   int comboCounter = 0;
   String selectedCurrency = '';
-
-  addNewItem() {
-    comboController.incrementlistViewLengthInCombo(comboController.increment);
-    var pp = {
-      'item_id': '0',
-      'item_name': 'Item Name',
-      'description': 'Description',
-      'quantity': '0',
-      'unit_price': '0',
-      'discount': '0',
-      'total': '0',
-    };
-    comboController.addToUnitPriceControllers(comboCounter);
-    comboController.addToRowsInListViewInCombo(comboCounter, pp);
-    Widget p = ReusableItemRow(index: comboCounter);
-
-    comboController.addToOrderLinesInComboList('$comboCounter', p);
-    setState(() {
-      comboCounter += 1;
-    });
-  }
 
   getCurrency() async {
     await exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
@@ -81,9 +64,9 @@ class _ComboState extends State<Combo> {
     );
   }
 
+  late Uint8List imageFile;
   @override
   void initState() {
-    super.initState();
     comboController.orderLinesComboList = {};
     comboController.rowsInListViewInCombo = {};
     comboController.getComboCreatFieldFromBack();
@@ -92,6 +75,7 @@ class _ComboState extends State<Combo> {
     setState(() {
       comboCodeController.text = comboController.code!;
     });
+    super.initState();
   }
 
   @override
@@ -132,6 +116,51 @@ class _ComboState extends State<Combo> {
                   ),
                 ],
               ),
+              GetBuilder<ComboController>(
+                builder: (cont) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 150,
+                        width:
+                            cont.photosListWidth >
+                                    MediaQuery.of(context).size.width * 0.1
+                                ? MediaQuery.of(context).size.width * 0.1
+                                : cont.photosListWidth,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: cont.photosWidgetsMap.values.toList(),
+                        ),
+                      ),
+                      ReusableAddPhotoCircle(
+                        onTapCircle: () async {
+                          final image = await ImagePickerHelper.pickImage();
+                          setState(() {
+                            imageFile = image!;
+                            var index = 1;
+                            cont.addImageToPhotosWidgetsMap(
+                              index,
+                              ReusablePhotoCircleInProduct(
+                                imageFilePassed: imageFile,
+                                func: () {
+                                  cont.removeFromImagesList(index);
+                                },
+                              ),
+                            );
+                            cont.addImageToPhotosFilesList(imageFile);
+                            cont.photosListWidth == 0
+                                ? cont.setPhotosListWidth(
+                                  cont.photosListWidth + 130,
+                                )
+                                : cont.setPhotosListWidth(cont.photosListWidth);
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
               gapH16,
               Text(
                 "Combo's Name",
@@ -169,7 +198,7 @@ class _ComboState extends State<Combo> {
                   ),
                   DialogNumericTextField(
                     validationFunc: () {},
-                    text: "Price",
+                    text: "total".tr,
                     rowWidth: MediaQuery.of(context).size.width * 0.30,
                     textFieldWidth: MediaQuery.of(context).size.width * 0.20,
                     textEditingController: comboPriceController,
@@ -381,7 +410,14 @@ class _ComboState extends State<Combo> {
 
                   DialogTextField(
                     validationFunc: () {},
-                    text: "Main Description",
+                    text: "brand".tr,
+                    rowWidth: MediaQuery.of(context).size.width * 0.20,
+                    textFieldWidth: MediaQuery.of(context).size.width * 0.17,
+                    textEditingController: brandController,
+                  ),
+                  DialogTextField(
+                    validationFunc: () {},
+                    text: "main_description".tr,
                     rowWidth: MediaQuery.of(context).size.width * 0.30,
                     textFieldWidth: MediaQuery.of(context).size.width * 0.20,
                     textEditingController: comboMainDescriptionController,
@@ -458,110 +494,113 @@ class _ComboState extends State<Combo> {
                           ),
                           color: Colors.white,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            //+++++++++++++++++Rows in table With SingleScrollView+++++++++++++++++++++++++++++++
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.3,
-                              child: ListView(
-                                children:
-                                    keysList.map((key) {
-                                      return Dismissible(
-                                        key: Key(
-                                          key,
-                                        ), // Ensure each widget has a unique key
-                                        onDismissed:
-                                            (direction) => cont
-                                                .removeFromOrderLinesInComboList(
-                                                  key.toString(),
-                                                ),
-                                        child:
-                                            cont.orderLinesComboList[key] ??
-                                            const SizedBox(),
-                                      );
-                                    }).toList(),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              //+++++++++++++++++Rows in table With SingleScrollView+++++++++++++++++++++++++++++++
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.2,
+                                child: ListView(
+                                  children:
+                                      keysList.map((key) {
+                                        return SizedBox(
+                                          key: Key(
+                                            key,
+                                          ), // Ensure each widget has a unique key
+                                          // onDismissed:
+                                          //     (direction) => cont
+                                          //         .removeFromOrderLinesInComboList(
+                                          //           key.toString(),
+                                          //         ),
+                                          child:
+                                              cont.orderLinesComboList[key] ??
+                                              const SizedBox(),
+                                        );
+                                      }).toList(),
+                                ),
                               ),
-                            ),
 
-                            //++++++++++++++++++++++++++++++++++++++++++++++++
-                            gapH10,
-                            Row(
-                              children: [
-                                ReusableAddCard(
-                                  text: 'create_new_combo'.tr,
-                                  onTap: () {
-                                    addNewItem();
-                                  },
-                                ),
-                                gapW32,
-                                ReusableAddCard(
-                                  text: 'create_append'.tr,
-                                  onTap: () {
-                                    // addNewItem();
-                                  },
-                                ),
-                              ],
-                            ),
+                              //++++++++++++++++++++++++++++++++++++++++++++++++
+                              gapH10,
+                              Row(
+                                children: [
+                                  ReusableAddCard(
+                                    text: 'items'.tr,
+                                    onTap: () {
+                                      addNewItem();
+                                    },
+                                  ),
+                                  gapW32,
+                                  // ReusableAddCard(
+                                  //   text: 'image'.tr,
+                                  //   onTap: () {
+                                  //     addNewImage();
+                                  //   },
+                                  // ),
+                                ],
+                              ),
 
-                            //++++++++++++++Save Discard+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                            gapH10,
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      comboNameController.clear();
-                                      comboPriceController.clear();
-                                      comboMainDescriptionController.clear();
-                                      cont.resetCombo();
-                                    });
-                                  },
-                                  child: Text(
-                                    'discard'.tr,
-                                    style: TextStyle(
-                                      decoration: TextDecoration.underline,
-                                      color: Primary.primary,
+                              //++++++++++++++Save Discard+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                              gapH10,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        comboNameController.clear();
+                                        comboPriceController.clear();
+                                        comboMainDescriptionController.clear();
+                                        cont.resetCombo();
+                                      });
+                                    },
+                                    child: Text(
+                                      'discard'.tr,
+                                      style: TextStyle(
+                                        decoration: TextDecoration.underline,
+                                        color: Primary.primary,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                gapW24,
-                                ReusableButtonWithColor(
-                                  btnText: 'save'.tr,
-                                  onTapFunction: () async {
-                                    var oldKeys =
-                                        comboController
-                                            .rowsInListViewInCombo
-                                            .keys
-                                            .toList()
-                                          ..sort();
-                                    for (int i = 0; i < oldKeys.length; i++) {
-                                      comboController.newRowMap[i + 1] =
+                                  gapW24,
+                                  ReusableButtonWithColor(
+                                    btnText: 'save'.tr,
+                                    onTapFunction: () async {
+                                      var oldKeys =
                                           comboController
-                                              .rowsInListViewInCombo[oldKeys[i]]!;
-                                    }
+                                              .rowsInListViewInCombo
+                                              .keys
+                                              .toList()
+                                            ..sort();
+                                      for (int i = 0; i < oldKeys.length; i++) {
+                                        comboController.newRowMap[i + 1] =
+                                            comboController
+                                                .rowsInListViewInCombo[oldKeys[i]]!;
+                                      }
 
-                                    var companyid =
-                                        await getCompanyIdFromPref();
+                                      var companyid =
+                                          await getCompanyIdFromPref();
 
-                                    cont.storeComboInDataBase(
-                                      companyid,
-                                      comboNameController.text,
-                                      comboCodeController.text,
-                                      comboMainDescriptionController.text,
-                                      comboController.selectedCurrencyId,
-                                      comboPriceController.text,
-                                      '1',
-                                      comboController.newRowMap,
-                                    );
-                                  },
-                                  width: 100,
-                                  height: 35,
-                                ),
-                              ],
-                            ),
-                          ],
+                                      cont.storeComboInDataBase(
+                                        companyid,
+                                        comboNameController.text,
+                                        comboCodeController.text,
+                                        comboMainDescriptionController.text,
+                                        comboController.selectedCurrencyId,
+                                        comboPriceController.text,
+                                        '1',
+                                        comboController.newRowMap,
+                                      );
+                                    },
+                                    width: 100,
+                                    height: 35,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -574,6 +613,27 @@ class _ComboState extends State<Combo> {
         );
       },
     );
+  }
+
+  addNewItem() {
+    comboController.incrementlistViewLengthInCombo(comboController.increment);
+    var pp = {
+      'item_id': '0',
+      'item_name': 'Item Name',
+      'description': 'Description',
+      'quantity': '0',
+      'unit_price': '0',
+      'discount': '0',
+      'total': '0',
+    };
+    comboController.addToUnitPriceControllers(comboCounter);
+    comboController.addToRowsInListViewInCombo(comboCounter, pp);
+    Widget p = ReusableItemRow(index: comboCounter);
+
+    comboController.addToOrderLinesInComboList('$comboCounter', p);
+    setState(() {
+      comboCounter += 1;
+    });
   }
 }
 
@@ -678,7 +738,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           cont.items[cont.itemsName.indexOf(
                             value,
                           )]['mainDescription'];
-
+                      cont.setTypeInCombo(widget.index, '2');
                       // **************************Currency***********************************************************************************
                       if (cont.priceCurrency[selectedItemId] ==
                           cont.selectedCurrencyName) {
@@ -760,7 +820,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       );
                       cont.getTotalItems();
                     });
-
 
                     cont.setEnteredUnitPriceInCombo(
                       widget.index,

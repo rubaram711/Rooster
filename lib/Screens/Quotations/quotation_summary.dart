@@ -1191,6 +1191,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     content: UpdateQuotationDialog(
                                       index: widget.index,
                                       info: widget.info,
+                                      fromPage: 'quotationSummary',
                                     ),
                                   ),
                             );
@@ -1558,7 +1559,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                   var p = json.decode(res.body);
                   if (res.statusCode == 200) {
                     CommonWidgets.snackBar('Success', p['message']);
-                    quotationController.getAllQuotationsWithoutPendingFromBack();
+                    quotationController
+                        .getAllQuotationsWithoutPendingFromBack();
                   } else {
                     CommonWidgets.snackBar('error', p['message']);
                   }

@@ -447,7 +447,7 @@ Map<String, String> en = {
   'print_qty':'Print quantity on hand',
   'cost_options':'Cost Options',
   'pos_options':'POS Options',
-  'schedule_task':'Schedule An Task',
+  'schedule_task':'Schedule A Task',
   'update_task':'Update Task',
   'task_types':'Task Types',
   'todo':'To Do',
@@ -598,6 +598,7 @@ Map<String, String> en = {
   "add_items": "Add Items",
   "pending_quotation": "Pending Quotation",
   "price_conditions": "Price Conditions",
-
+'chance':'Chance',
+  'delivery_terms':'Delivery Terms'
 };
 

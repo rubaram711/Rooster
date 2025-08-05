@@ -11,6 +11,7 @@ import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Screens/client_order/print_sales_order.dart';
+import 'package:rooster_app/Screens/client_order/update_sales_order_dialog.dart';
 import 'package:rooster_app/const/urls.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Widgets/custom_snak_bar.dart';
@@ -22,7 +23,6 @@ import '../../Widgets/table_title.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
 import '../../const/functions.dart';
-import '../client_order/update_sales_order_dialog.dart';
 
 class ToInvoice extends StatefulWidget {
   const ToInvoice({super.key});
@@ -643,7 +643,6 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
   late Uint8List imageFile;
   bool isLoading = false; // Add loading state
 
-
   @override
   void initState() {
     salesOrderController.orderedKeys = [];
@@ -682,9 +681,11 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
       salesOrderController.orderedKeys.add(i + 1);
       if (widget.info['orderLines'][i]['line_type_id'] == 2) {
         salesOrderController.unitPriceControllers[i + 1] =
-            TextEditingController();}else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
+            TextEditingController();
+      } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
         salesOrderController.combosPriceControllers[i + 1] =
-            TextEditingController();}
+            TextEditingController();
+      }
     }
 
     super.initState();
@@ -1006,13 +1007,21 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 finalPriceBySalesOrderCurrency =
                                     totalPriceAfterSpecialDiscountBysalesOrderCurrency +
                                     vatBySalesOrderCurrency;
-
+                                var quotNumber = '';
+                                widget.info['quotation'] == null
+                                    ? quotNumber = ''
+                                    : quotNumber =
+                                        widget
+                                            .info['quotation']['quotationNumber'];
+                                print("--------------quotNumber");
+                                print(quotNumber);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
                                       return PrintSalesOrder(
+                                        quotationNumber: quotNumber,
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
                                                     '1'
@@ -1142,7 +1151,12 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                         content: UpdateSalesOrderDialog(
                                           index: widget.index,
                                           info: widget.info,
+                                          fromPage: 'toInvoice',
                                         ),
+                                        // content: UpdatePendingSalesOrderDialog(
+                                        //   index: widget.index,
+                                        //   info: widget.info,
+                                        // ),
                                       ),
                                 );
                               },
@@ -1166,7 +1180,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -1415,7 +1429,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   'confirmed', // status,
 
                                   orderLines1,
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -1453,7 +1467,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -1699,7 +1713,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   '${widget.info['code'] ?? ''}',
                                   'cancelled', // status,
                                   orderLines1,
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -2154,7 +2168,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                           //                   ),
                           //                 ),
                           //                 elevation: 0,
-                          //                 content: UpdateSalesOrderDialog(
+                          //                 content: UpdatePendingSalesOrderDialog(
                           //                   index: widget.index,
                           //                   info: widget.info,
                           //                 ),
@@ -2372,13 +2386,21 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 finalPriceBySalesOrderCurrency =
                                     totalPriceAfterSpecialDiscountBysalesOrderCurrency +
                                     vatBySalesOrderCurrency;
-
+                                var quotNumber = '';
+                                widget.info['quotation'] == null
+                                    ? quotNumber = ''
+                                    : quotNumber =
+                                        widget
+                                            .info['quotation']['quotationNumber'];
+                                print("--------------quotNumber");
+                                print(quotNumber);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
                                       return PrintSalesOrder(
+                                        quotationNumber: quotNumber,
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
                                                     '1'
@@ -2508,6 +2530,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                         content: UpdateSalesOrderDialog(
                                           index: widget.index,
                                           info: widget.info,
+                                          fromPage: "toInvoice",
                                         ),
                                       ),
                                 );
@@ -2532,7 +2555,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -2743,7 +2766,6 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   }
                                 }
 
-
                                 var res = await updateSalesOrder(
                                   '${widget.info['id']}',
                                   false,
@@ -2782,7 +2804,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   'confirmed', // status,
 
                                   orderLines1,
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -2821,7 +2843,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -3069,7 +3091,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
                                   'sent', // status,
                                   orderLines1,
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -3110,7 +3132,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 };
 
                                 for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i+1);
+                                  orderedKeys.add(i + 1);
                                   Map<String, dynamic> selectedOrderLine =
                                       orderLinesMap[i + 1];
                                   orderLines1[i + 1] = {};
@@ -3357,7 +3379,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   '${widget.info['code'] ?? ''}',
                                   'cancelled', // status,
                                   orderLines1,
-                                    orderedKeys
+                                  orderedKeys,
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();

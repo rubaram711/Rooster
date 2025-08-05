@@ -217,6 +217,7 @@ class QuotationController extends GetxController {
   List<String> customerTitleList = [];
   List<String> customerNumberList = [];
   List customersPricesListsIds = [];
+  List customersSalesPersonsIds = [];
   List customerIdsList = [];
   List<List<String>> customersMultiPartList = [];
   String quotationNumber = '';
@@ -262,6 +263,7 @@ class QuotationController extends GetxController {
     quotationNumber = '';
     customersMap = {};
     customersPricesListsIds = [];
+    customersSalesPersonsIds = [];
     customerNameList = [];
     customersMultiPartList = [];
     customerIdsList = [];
@@ -318,6 +320,7 @@ class QuotationController extends GetxController {
     for (var client in p['clients']) {
       customersMap['${client['id']}'] = client;
       customersPricesListsIds.add('${client['pricelist_id'] ?? ''}');
+      customersSalesPersonsIds.add('${client['salesperson_id'] ?? ''}');
       customerNameList.add('${client['name']}');
       customerNumberList.add('${client['client_number']}');
       customerIdsList.add('${client['id']}');
@@ -835,8 +838,10 @@ class QuotationController extends GetxController {
   String salesPersonName = '';
   int salesPersonId = 0;
   getAllUsersSalesPersonFromBack() async {
-    quotationsList = [];
-    isQuotationsFetched = false;
+    salesPersonList = [];
+    salesPersonListNames = [];
+    salesPersonName = '';
+    salesPersonId = 0;
     update();
     var p = await getAllUsersSalesPerson();
     if ('$p' != '[]') {
@@ -848,7 +853,6 @@ class QuotationController extends GetxController {
         salesPersonListId.add(salesPersonId);
       }
     }
-    isQuotationsFetched = true;
     update();
   }
 

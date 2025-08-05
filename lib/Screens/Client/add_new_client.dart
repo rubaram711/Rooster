@@ -46,6 +46,7 @@ class _AddNewClientState extends State<AddNewClient> {
   TextEditingController internalNoteController = TextEditingController();
   TextEditingController grantedDiscountController = TextEditingController();
   final HomeController homeController = Get.find();
+
   String paymentTerm = '',
       selectedPriceListId = '',
       selectedCountry = '',
@@ -79,6 +80,10 @@ class _AddNewClientState extends State<AddNewClient> {
         copyOfClientNumber = data['clientNumber'];
       });
       for (var priceList in p['pricelists']) {
+        if (priceList['code'] == 'STANDARD') {
+          selectedPriceListId = '${priceList['id']}';
+          priceListController.text = priceList['code'];
+        }
         pricesListsNames.add(priceList['title']);
         pricesListsIds.add('${priceList['id']}');
         pricesListsCodes.add('${priceList['code']}');
@@ -126,6 +131,8 @@ class _AddNewClientState extends State<AddNewClient> {
   @override
   void initState() {
     clientController.contactsList=[];
+    clientController.salesPersonController.clear();
+    clientController.getAllUsersSalesPersonFromBack();
     getFieldsForCreateClientsFromBack();
     getCountriesFromBack();
     super.initState();
@@ -898,17 +905,34 @@ class _AddNewClientState extends State<AddNewClient> {
                                       MediaQuery.of(context).size.width * 0.3,
                                   child: Column(
                                     children: [
-                                      DialogDropMenu(
-                                        optionsList: const [''],
-                                        text: '${'sales_person'.tr}*',
-                                        hint: '',
-                                        rowWidth:
-                                            MediaQuery.of(context).size.width *
-                                            0.3,
-                                        textFieldWidth:
-                                            MediaQuery.of(context).size.width *
-                                            0.17,
-                                        onSelected: () {},
+                                      GetBuilder<ClientController>(
+                                          builder: (cont) {
+                                            return DialogDropMenu(
+                                              controller: cont.salesPersonController,
+                                              optionsList:
+                                              clientController
+                                                  .salesPersonListNames,
+                                              text: 'sales_person'.tr,
+                                              hint: 'search'.tr,
+                                              rowWidth:
+                                              MediaQuery.of(context).size.width *
+                                                  0.3,
+                                              textFieldWidth:
+                                              MediaQuery.of(context).size.width *
+                                                  0.17,
+                                              onSelected: (String? val) {
+                                                setState(() {
+                                                  var index = clientController
+                                                      .salesPersonListNames
+                                                      .indexOf(val!);
+                                                  clientController.setSelectedSalesPerson
+                                                    (val,
+                                                      clientController
+                                                          .salesPersonListId[index]);
+                                                });
+                                              },
+                                            );
+                                          }
                                       ),
                                       gapH16,
                                       DialogDropMenu(
@@ -1051,7 +1075,7 @@ class _AddNewClientState extends State<AddNewClient> {
                                     '',
                                     '',
                                     '',
-                                    '',
+                                    clientController.selectedSalesPersonId.toString(),
                                     paymentTerm,
                                     selectedPriceListId,
                                     internalNoteController.text,
@@ -1219,7 +1243,7 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
   @override
   void initState() {
 
-      selectedContactAndAddressType=int.parse('${clientController.contactsList[widget.index]['type']??1}');
+      // selectedContactAndAddressType=int.parse('${clientController.contactsList[widget.index]['type']??1}');
       selectedContactsPhoneCode=clientController.contactsList[widget.index]['phoneCode']??'+961';
       selectedContactsMobileCode=clientController.contactsList[widget.index]['mobileCode']??'+961';
       contactsNameController.text=clientController.contactsList[widget.index]['name'];
@@ -1249,49 +1273,49 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.15,
-                    child: ListTile(
-                      title: Text(
-                        'contact'.tr,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      leading: Radio(
-                        value: 1,
-                        groupValue: selectedContactAndAddressType,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedContactAndAddressType = value!;
-                          });
-                          cont.updateContactType(widget.index,'${value!}');
-                        },
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.15,
-                    child: ListTile(
-                      title: Text(
-                        'delivery_address'.tr,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      leading: Radio(
-                        value: 2,
-                        groupValue: selectedContactAndAddressType,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedContactAndAddressType = value!;
-                          });
-                          cont.updateContactType(widget.index,'${value!}');
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              gapH10,
+              // Row(
+              //   children: [
+              //     SizedBox(
+              //       width: MediaQuery.of(context).size.width * 0.15,
+              //       child: ListTile(
+              //         title: Text(
+              //           'contact'.tr,
+              //           style: const TextStyle(fontSize: 12),
+              //         ),
+              //         leading: Radio(
+              //           value: 1,
+              //           groupValue: selectedContactAndAddressType,
+              //           onChanged: (value) {
+              //             setState(() {
+              //               selectedContactAndAddressType = value!;
+              //             });
+              //             cont.updateContactType(widget.index,'${value!}');
+              //           },
+              //         ),
+              //       ),
+              //     ),
+              //     SizedBox(
+              //       width: MediaQuery.of(context).size.width * 0.15,
+              //       child: ListTile(
+              //         title: Text(
+              //           'delivery_address'.tr,
+              //           style: const TextStyle(fontSize: 12),
+              //         ),
+              //         leading: Radio(
+              //           value: 2,
+              //           groupValue: selectedContactAndAddressType,
+              //           onChanged: (value) {
+              //             setState(() {
+              //               selectedContactAndAddressType = value!;
+              //             });
+              //             cont.updateContactType(widget.index,'${value!}');
+              //           },
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // gapH10,
               Text(
                 'Contact Selection used to add the contact information of personnel within the company (e.g., CEO, CFO, ...).',
               ),
@@ -1438,8 +1462,7 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                       cont.updateContactMobileNumber(widget.index,'${value!}');
                     },
                   ),
-                  selectedContactAndAddressType==2
-                      ? DialogTextField(
+                  DialogTextField(
                     textEditingController: contactsAddressController,
                     text: 'address'.tr,
                     rowWidth: MediaQuery.of(context).size.width * 0.19,
@@ -1449,7 +1472,6 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                       cont.updateContactDeliveryAddress(widget.index,val);
                     },
                   )
-                      :SizedBox(width: MediaQuery.of(context).size.width * 0.19),
                 ],
               ),
               gapH10,
@@ -2382,8 +2404,8 @@ ClientController clientController=Get.find();
                                     '',
                                     '',
                                     '',
-                                    '',
-                                    paymentTerm,
+                                      clientController.selectedSalesPersonId.toString(),
+                                      paymentTerm,
                                     priceListSelected,
                                     internalNoteController.text,
                                     '',

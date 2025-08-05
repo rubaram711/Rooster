@@ -572,7 +572,6 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
   late Uint8List imageFile;
   bool isLoading = false; // Add loading state
 
-
   @override
   void initState() {
     imageFile = Uint8List(0);
@@ -924,12 +923,30 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                             finalPriceBySalesInvoiceCurrency =
                                 totalPriceAfterSpecialDiscountBysalesInvoiceCurrency +
                                 vatBySalesInvoiceCurrency;
+                            print("--------------SalesInvoice");
+
+                            var salesOrderNumber = '';
+                            var quotNumber = '';
+                            widget.info['salesorder'] == null
+                                ? salesOrderNumber = ''
+                                : salesOrderNumber =
+                                    widget
+                                        .info['salesorder']['salesorderNumber'];
+
+                            salesOrderNumber == ''
+                                ? quotNumber = ''
+                                : quotNumber =
+                                    widget
+                                        .info['salesorder']['quotation']['quotationNumber'];
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
                                   // print('widget.info[ ${widget.info['termsAndConditions']}');
                                   return PrintSalesInvoice(
+                                    quotationNumber: quotNumber,
+                                    salesOrderNumber: salesOrderNumber,
                                     isPrintedAs0:
                                         '${widget.info['printedAsPercentage']}' ==
                                                 '1'
@@ -1049,6 +1066,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                     content: UpdateSalesInvoiceDialog(
                                       index: widget.index,
                                       info: widget.info,
+                                      fromPage: 'salesInvoiceSummary',
                                     ),
                                   ),
                             );
@@ -1073,7 +1091,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                             };
 
                             for (int i = 0; i < orderLinesMap.length; i++) {
-                              orderedKeys.add(i+1);
+                              orderedKeys.add(i + 1);
                               Map<String, dynamic> selectedOrderLine =
                                   orderLinesMap[i + 1];
                               orderLines1[i + 1] = {};
@@ -1294,7 +1312,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                               orderLines1,
                               '${widget.info['inputDate'] ?? ''}',
                               '${widget.info['invoiceDeliveryDate'] ?? ''}',
-                                orderedKeys
+                              orderedKeys,
                             );
                             if (res['success'] == true) {
                               // pendingDocsController.getAllPendingDocs();
@@ -1330,7 +1348,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                             };
 
                             for (int i = 0; i < orderLinesMap.length; i++) {
-                              orderedKeys.add(i+1);
+                              orderedKeys.add(i + 1);
                               Map<String, dynamic> selectedOrderLine =
                                   orderLinesMap[i + 1];
                               orderLines1[i + 1] = {};
@@ -1551,7 +1569,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                               orderLines1,
                               '${widget.info['inputDate'] ?? ''}',
                               '${widget.info['invoiceDeliveryDate'] ?? ''}',
-                                orderedKeys
+                              orderedKeys,
                             );
                             if (res['success'] == true) {
                               // pendingDocsController.getAllPendingDocs();

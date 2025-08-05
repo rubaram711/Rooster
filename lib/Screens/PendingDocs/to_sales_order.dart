@@ -17,6 +17,7 @@ import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Screens/Quotations/print_quotation.dart';
 import 'package:rooster_app/Screens/Quotations/schedule_task_dialog.dart';
 import 'package:rooster_app/Screens/Quotations/tasks.dart';
+import 'package:rooster_app/Screens/Quotations/update_quotation_dialog.dart';
 import 'package:rooster_app/Widgets/custom_snak_bar.dart';
 import 'package:rooster_app/Widgets/page_title.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
@@ -27,8 +28,6 @@ import 'package:rooster_app/const/colors.dart';
 import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/const/urls.dart';
-
-import '../Quotations/update_quotation_dialog.dart';
 
 class ToSalesOrder extends StatefulWidget {
   const ToSalesOrder({super.key});
@@ -705,11 +704,10 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
   late Uint8List imageFile;
   bool isLoading = false; // Add loading state
 
-
   @override
   void initState() {
     quotationController.rowsInListViewInQuotation = {};
-    quotationController.orderedKeys=[];
+    quotationController.orderedKeys = [];
     quotationController.quotationCounter = 0;
 
     imageFile = Uint8List(0);
@@ -724,8 +722,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
     }
     if (widget.info['client'] != null) {
       clientId = widget.info['client']['id'].toString();
-    } else {
-    }
+    } else {}
     if (widget.info['pricelist'] != null) {
       pricelistId = widget.info['pricelist']['id'].toString();
     }
@@ -743,14 +740,19 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
     ) {
       quotationController.rowsInListViewInQuotation[i + 1] =
           quotationController.selectedQuotationData['orderLines'][i];
-      quotationController.orderedKeys.add(i+1);
-      if (quotationController.selectedQuotationData['orderLines'][i]['line_type_id'] == 2) {
+      quotationController.orderedKeys.add(i + 1);
+      if (quotationController
+              .selectedQuotationData['orderLines'][i]['line_type_id'] ==
+          2) {
         quotationController.unitPriceControllers[i + 1] =
             TextEditingController();
-      } else if (quotationController.selectedQuotationData['orderLines'][i]['line_type_id'] == 3) {
+      } else if (quotationController
+              .selectedQuotationData['orderLines'][i]['line_type_id'] ==
+          3) {
         quotationController.combosPriceControllers[i + 1] =
             TextEditingController();
-    }}
+      }
+    }
     // var keys = quotationController.rowsInListViewInQuotation.keys.toList();
     // for (int i = 0; i < widget.info['orderLines'].length; i++) {
     //   quotationController.orderedKeys.add(i+1);
@@ -1254,7 +1256,12 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     content: UpdateQuotationDialog(
                                       index: widget.index,
                                       info: widget.info,
+                                      fromPage: 'toSalesOrder',
                                     ),
+                                    // UpdatePendingQuotationInToSalesOrderDialog(
+                                    //   index: widget.index,
+                                    //   info: widget.info,
+                                    // ),
                                   ),
                             );
                           },
@@ -1360,7 +1367,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                             };
 
                             for (int i = 0; i < orderLinesMap.length; i++) {
-                              orderedKeys.add(i+1);
+                              orderedKeys.add(i + 1);
                               Map<String, dynamic> selectedOrderLine =
                                   orderLinesMap[i + 1];
                               orderLines1[i + 1] = {};
@@ -1578,7 +1585,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                               '${widget.info['code'] ?? ''}',
                               'sent', // status,
                               orderLines1,
-                              orderedKeys
+                              orderedKeys,
                             );
                             if (res['success'] == true) {
                               // homeController.selectedTab.value =
@@ -1616,7 +1623,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                             };
 
                             for (int i = 0; i < orderLinesMap.length; i++) {
-                              orderedKeys.add(i+1);
+                              orderedKeys.add(i + 1);
                               Map<String, dynamic> selectedOrderLine =
                                   orderLinesMap[i + 1];
                               orderLines1[i + 1] = {};
@@ -1834,7 +1841,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                               '${widget.info['code'] ?? ''}',
                               'cancelled', // status,
                               orderLines1,
-                              orderedKeys
+                              orderedKeys,
                             );
                             if (res['success'] == true) {
                               // homeController.selectedTab.value =
@@ -1981,7 +1988,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                       //                   ),
                       //                 ),
                       //                 elevation: 0,
-                      //                 content: UpdateQuotationDialog(
+                      //                 content: UpdatePendingQuotationInToSalesOrderDialog(
                       //                   index: widget.index,
                       //                   info: widget.info,
                       //                 ),

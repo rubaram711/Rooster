@@ -10,10 +10,11 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Backend/Quotations/send_by_email.dart';
 import 'package:rooster_app/Backend/Quotations/update_quotation.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
+import 'package:rooster_app/Controllers/pending_docs_review_controller.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
 import 'package:rooster_app/Screens/Products/CreateProductDialog/create_product_dialog.dart';
-import 'package:rooster_app/Screens/Quotations/create_client_dialog.dart';
+import 'package:rooster_app/Screens/Client/create_client_dialog.dart';
 import 'package:rooster_app/Widgets/TransferWidgets/reusable_show_info_card.dart';
 import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
 import 'package:rooster_app/Widgets/reusable_add_card.dart';
@@ -44,9 +45,11 @@ class UpdateQuotationDialog extends StatefulWidget {
     super.key,
     required this.index,
     required this.info,
+    required this.fromPage,
   });
   final int index;
   final Map info;
+  final String fromPage;
 
   @override
   State<UpdateQuotationDialog> createState() => _UpdateQuotationDialogState();
@@ -62,6 +65,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   TextEditingController searchController = TextEditingController();
   TextEditingController refController = TextEditingController();
   TextEditingController validityController = TextEditingController();
+  TextEditingController chanceController = TextEditingController();
   TextEditingController inputDateController = TextEditingController();
   TextEditingController currencyController = TextEditingController();
   TextEditingController codeController = TextEditingController();
@@ -77,6 +81,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   TextEditingController paymentTermsController = TextEditingController();
   TextEditingController priceConditionController = TextEditingController();
   TextEditingController priceListController = TextEditingController();
+  TextEditingController deliveryTermsController = TextEditingController();
 
   String selectedCurrency = '';
 
@@ -87,6 +92,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
 
   final HomeController homeController = Get.find();
   final QuotationController quotationController = Get.find();
+  final PendingDocsReviewController pendingDocsController = Get.find();
 
   String paymentTerm = '',
       priceListSelected = '',
@@ -325,10 +331,14 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
       quotationController.rowsInListViewInQuotation[i + 1] =
           quotationController.selectedQuotationData['orderLines'][i];
       quotationController.orderedKeys.add(i + 1);
-      if (quotationController.selectedQuotationData['orderLines'][i]['line_type_id'] == 2) {
+      if (quotationController
+              .selectedQuotationData['orderLines'][i]['line_type_id'] ==
+          2) {
         quotationController.unitPriceControllers[i + 1] =
             TextEditingController();
-      } else if (quotationController.selectedQuotationData['orderLines'][i]['line_type_id'] == 3) {
+      } else if (quotationController
+              .selectedQuotationData['orderLines'][i]['line_type_id'] ==
+          3) {
         quotationController.combosPriceControllers[i + 1] =
             TextEditingController();
       }
@@ -506,7 +516,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                       .getAllQuotationsWithoutPendingFromBack();
                                   // homeController.selectedTab.value = 'new_quotation';
                                   homeController.selectedTab.value =
-                                      'quotation_summary';
+                                      'pending_quotation';
                                   CommonWidgets.snackBar(
                                     'Success',
                                     res['message'],
@@ -664,7 +674,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                         .getAllQuotationsWithoutPendingFromBack();
                                     // homeController.selectedTab.value = 'new_quotation';
                                     homeController.selectedTab.value =
-                                        'quotation_summary';
+                                        'to_sales_order';
                                     CommonWidgets.snackBar(
                                       'Success',
                                       res['message'],
@@ -1155,6 +1165,97 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               ),
                             ),
                             SizedBox(
+                              width:
+                                  homeController.isOpened.value
+                                      ? MediaQuery.of(context).size.width * 0.10
+                                      : MediaQuery.of(context).size.width *
+                                          0.14,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('chance'.tr),
+                                  DropdownMenu<String>(
+                                    width:
+                                        homeController.isOpened.value
+                                            ? MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.07
+                                            : MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.1,
+                                    // requestFocusOnTap: false,
+                                    enableSearch: true,
+                                    controller: chanceController,
+                                    hintText: '',
+                                    inputDecorationTheme: InputDecorationTheme(
+                                      // filled: true,
+                                      hintStyle: const TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                      contentPadding: const EdgeInsets.fromLTRB(
+                                        20,
+                                        0,
+                                        25,
+                                        5,
+                                      ),
+                                      // outlineBorder: BorderSide(color: Colors.black,),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Primary.primary.withAlpha(
+                                            (0.2 * 255).toInt(),
+                                          ),
+                                          width: 1,
+                                        ),
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(9),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Primary.primary.withAlpha(
+                                            (0.4 * 255).toInt(),
+                                          ),
+                                          width: 2,
+                                        ),
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(9),
+                                        ),
+                                      ),
+                                    ),
+                                    // menuStyle: ,
+                                    menuHeight: 250,
+                                    dropdownMenuEntries:
+                                        chanceLevels
+                                            .map<DropdownMenuEntry<String>>((
+                                              String option,
+                                            ) {
+                                              return DropdownMenuEntry<String>(
+                                                value: option,
+                                                label: option,
+                                              );
+                                            })
+                                            .toList(),
+                                    enableFilter: true,
+                                    onSelected: (String? val) {
+                                      //   var index = quotationCont
+                                      //       .priceListsCodes
+                                      //       .indexOf(val!);
+                                      //   quotationCont.setSelectedPriceListId(
+                                      //     quotationCont.priceListsIds[index],
+                                      //   );
+                                      //   setState(() {
+                                      //     quotationCont
+                                      //         .resetItemsAfterChangePriceList();
+                                      //   });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Row(
                                 mainAxisAlignment:
@@ -1347,6 +1448,47 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                             quotationCont
                                                 .customerNameList[indexNum];
                                       });
+                                      int index = quotationCont
+                                          .customerNumberList
+                                          .indexOf(val!);
+                                      if (quotationCont
+                                          .customersPricesListsIds[index]
+                                          .isNotEmpty) {
+                                        quotationCont.setSelectedPriceListId(
+                                          '${quotationCont.customersPricesListsIds[index]}',
+                                        );
+
+                                        priceListController.text =
+                                            quotationCont
+                                                .priceListsNames[quotationCont
+                                                .priceListsIds
+                                                .indexOf(
+                                                  '${quotationCont.customersPricesListsIds[index]}',
+                                                )];
+                                        setState(() {
+                                          quotationCont
+                                              .resetItemsAfterChangePriceList();
+                                        });
+                                      }
+                                      if (quotationCont
+                                          .customersSalesPersonsIds[index]
+                                          .isNotEmpty) {
+                                        setState(() {
+                                          selectedSalesPersonId = int.parse(
+                                            '${quotationCont.customersSalesPersonsIds[index]}',
+                                          );
+                                          selectedSalesPerson =
+                                              quotationCont
+                                                  .salesPersonListNames[quotationCont
+                                                  .salesPersonListId
+                                                  .indexOf(
+                                                    selectedSalesPersonId,
+                                                  )];
+
+                                          salesPersonController.text =
+                                              selectedSalesPerson;
+                                        });
+                                      }
                                     },
                                   ),
                                   ReusableDropDownMenuWithSearch(
@@ -1370,6 +1512,46 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                         // codeController =
                                         //     quotationController.codeController;
                                       });
+                                      var index = quotationCont.customerNameList
+                                          .indexOf(val!);
+                                      if (quotationCont
+                                          .customersPricesListsIds[index]
+                                          .isNotEmpty) {
+                                        quotationCont.setSelectedPriceListId(
+                                          '${quotationCont.customersPricesListsIds[index]}',
+                                        );
+
+                                        priceListController.text =
+                                            quotationCont
+                                                .priceListsNames[quotationCont
+                                                .priceListsIds
+                                                .indexOf(
+                                                  '${quotationCont.customersPricesListsIds[index]}',
+                                                )];
+                                        setState(() {
+                                          quotationCont
+                                              .resetItemsAfterChangePriceList();
+                                        });
+                                      }
+                                      if (quotationCont
+                                          .customersSalesPersonsIds[index]
+                                          .isNotEmpty) {
+                                        setState(() {
+                                          selectedSalesPersonId = int.parse(
+                                            '${quotationCont.customersSalesPersonsIds[index]}',
+                                          );
+                                          selectedSalesPerson =
+                                              quotationCont
+                                                  .salesPersonListNames[quotationCont
+                                                  .salesPersonListId
+                                                  .indexOf(
+                                                    selectedSalesPersonId,
+                                                  )];
+
+                                          salesPersonController.text =
+                                              selectedSalesPerson;
+                                        });
+                                      }
                                     },
                                     validationFunc: (value) {},
                                     rowWidth:
@@ -1553,6 +1735,64 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               ),
                             ),
                             gapW16,
+                            DialogTextField(
+                              textEditingController: deliveryTermsController,
+                              text: '${'delivery_terms'.tr}:',
+                              hint: '',
+                              rowWidth:
+                                  MediaQuery.of(context).size.width * 0.24,
+                              textFieldWidth:
+                                  MediaQuery.of(context).size.width * 0.15,
+                              validationFunc: (val) {},
+                            ),
+                          ],
+                        ),
+                        gapH10,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.15,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'email'.tr,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                      gapW10,
+                                      GetBuilder<QuotationController>(
+                                        builder: (cont) {
+                                          return Text(
+                                            "${cont.email[selectedCustomerIds] ?? ''}",
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  gapH6,
+                                  quotationCont.isVatExemptCheckBoxShouldAppear
+                                      ? Row(
+                                        children: [
+                                          Text(
+                                            'vat'.tr,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          gapW10,
+                                        ],
+                                      )
+                                      : SizedBox(),
+                                ],
+                              ),
+                            ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.24,
                               child: Row(
@@ -1785,54 +2025,6 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                       );
                                     },
                                   ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        gapH10,
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.3,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'email'.tr,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      gapW10,
-                                      GetBuilder<QuotationController>(
-                                        builder: (cont) {
-                                          return Text(
-                                            "${cont.email[selectedCustomerIds] ?? ''}",
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  gapH6,
-                                  quotationCont.isVatExemptCheckBoxShouldAppear
-                                      ? Row(
-                                        children: [
-                                          Text(
-                                            'vat'.tr,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          gapW10,
-                                        ],
-                                      )
-                                      : SizedBox(),
                                 ],
                               ),
                             ),
@@ -2192,25 +2384,25 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                 .rowsInListViewInQuotation[key]!;
                                         final lineType =
                                             '${row['line_type_id'] ?? ''}';
-                                        return Dismissible(
+                                        return SizedBox(
                                           key: ValueKey(key),
-                                          onDismissed: (direction) {
-                                            setState(() {
-                                              quotationController
-                                                  .decrementListViewLengthInQuotation(
-                                                    quotationController
-                                                        .increment,
-                                                  );
-                                              quotationController
-                                                  .removeFromRowsInListViewInQuotation(
-                                                    key,
-                                                  );
-                                              // quotationController
-                                              //     .removeFromOrderLinesInQuotationList(
-                                              //   key.toString(),
-                                              // );
-                                            });
-                                          },
+                                          // onDismissed: (direction) {
+                                          //   setState(() {
+                                          //     quotationController
+                                          //         .decrementListViewLengthInQuotation(
+                                          //           quotationController
+                                          //               .increment,
+                                          //         );
+                                          //     quotationController
+                                          //         .removeFromRowsInListViewInQuotation(
+                                          //           key,
+                                          //         );
+                                          //     // quotationController
+                                          //     //     .removeFromOrderLinesInQuotationList(
+                                          //     //   key.toString(),
+                                          //     // );
+                                          //   });
+                                          // },
                                           child: SizedBox(
                                             width:
                                                 MediaQuery.of(
@@ -2298,7 +2490,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 //   child: ListView(
                                 //     children:
                                 //     keysList.map((key) {
-                                //       return Dismissible(
+                                //       return SizedBox(
                                 //         key: Key(
                                 //           key,
                                 //         ), // Ensure each widget has a unique key
@@ -3004,11 +3196,35 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               );
                               if (res['success'] == true) {
                                 Get.back();
-                                quotationController
-                                    .getAllQuotationsFromBack();
-                                // homeController.selectedTab.value = 'new_quotation';
-                                homeController.selectedTab.value =
-                                    'quotation_summary';
+
+                                if (widget.fromPage == 'pendingDocs') {
+                                  pendingDocsController.getAllPendingDocs();
+                                  homeController.selectedTab.value =
+                                      'pending_docs';
+                                } else if (quotationCont.status ==
+                                    'confirmed') {
+                                  quotationController
+                                      .getAllQuotationsFromBack();
+                                  homeController.selectedTab.value =
+                                      'to_sales_order';
+                                } else if (quotationCont.status ==
+                                    'cancelled') {
+                                  quotationController
+                                      .getAllQuotationsFromBack();
+                                  homeController.selectedTab.value =
+                                      'quotation_summary';
+                                } else if (quotationCont.status == 'sent') {
+                                  quotationController
+                                      .getAllQuotationsFromBack();
+                                  homeController.selectedTab.value =
+                                      'pending_quotation';
+                                } else {
+                                  quotationController
+                                      .getAllQuotationsFromBack();
+                                  homeController.selectedTab.value =
+                                      'pending_quotation';
+                                }
+
                                 CommonWidgets.snackBar(
                                   'Success',
                                   res['message'],
@@ -4451,9 +4667,11 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
   @override
   void initState() {
-    if (widget.info['combo_quantity']!=null ) {
-      qtyController.text = '${widget.info['combo_quantity'] ?? widget.info['item_quantity']}';
-      quantity = '${widget.info['combo_quantity'] ?? widget.info['item_quantity']}';
+    if (widget.info['combo_quantity'] != null) {
+      qtyController.text =
+          '${widget.info['combo_quantity'] ?? widget.info['item_quantity']}';
+      quantity =
+          '${widget.info['combo_quantity'] ?? widget.info['item_quantity']}';
       quotationController.rowsInListViewInQuotation[widget
               .index]['item_quantity'] =
           '${widget.info['combo_quantity'] ?? widget.info['item_quantity']}';

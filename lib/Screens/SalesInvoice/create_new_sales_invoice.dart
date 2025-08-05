@@ -14,7 +14,6 @@ import 'package:rooster_app/Controllers/pending_docs_review_controller.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
 import 'package:rooster_app/Controllers/sales_invoice_controller.dart';
-import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Controllers/warehouse_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Screens/Combo/combo.dart';
@@ -25,7 +24,7 @@ import 'package:rooster_app/Widgets/loading.dart';
 import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/utils/image_picker_helper.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
-import 'package:rooster_app/Screens/Quotations/create_client_dialog.dart';
+import 'package:rooster_app/Screens/Client/create_client_dialog.dart';
 import 'package:rooster_app/Widgets/reusable_drop_down_menu.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
 import '../../../Controllers/home_controller.dart';
@@ -46,6 +45,7 @@ import '../../Widgets/TransferWidgets/reusable_show_info_card.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 import '../../const/constants.dart';
+import 'package:flutter_quill/quill_delta.dart';
 
 class CreateNewSalesInvoice extends StatefulWidget {
   const CreateNewSalesInvoice({super.key});
@@ -80,6 +80,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
   TextEditingController globalDiscPercentController = TextEditingController();
   TextEditingController specialDiscPercentController = TextEditingController();
   TextEditingController controller = TextEditingController();
+  TextEditingController salesPersonController = TextEditingController();
   TextEditingController commissionController = TextEditingController();
   TextEditingController currencyController = TextEditingController();
 
@@ -222,8 +223,6 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
     termsAndConditionsController.text = jsonString;
   }
 
-
-
   void _saveTermsAndConditions() async {
     final deltaJson = _controller.document.toDelta().toJson();
     final jsonString = jsonEncode(deltaJson);
@@ -247,13 +246,33 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
     var res = await getTermsAndConditions();
     if (res['success'] == true) {
       termsAndConditionsList = res['data'];
+      termsAndConditionsList = termsAndConditionsList.reversed.toList();
     }
+  }
+
+  void _loadContent() {
+    if (_savedContent == null) return;
+
+    final delta = Delta.fromJson(jsonDecode(_savedContent!));
+    final doc = Document.fromDelta(delta);
+
+    setState(() {
+      _controller = QuillController(
+        document: doc,
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    });
   }
 
   showLastTermsAndConditionsList() {
     setState(() {
       if (currentIndex < termsAndConditionsList.length) {
-        _savedContent = termsAndConditionsList[currentIndex];
+        _savedContent =
+            '${termsAndConditionsList[currentIndex]['terms_and_conditions']}'
+                    .startsWith('[{')
+                ? termsAndConditionsList[currentIndex]['terms_and_conditions']
+                : '[{"insert":"\n"}]';
+        _loadContent();
         currentIndex++;
       } else {
         CommonWidgets.snackBar('error', 'The list is over');
@@ -517,6 +536,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                           }
 
                                           return PrintSalesInvoice(
+                                            quotationNumber: '',
+                                            salesOrderNumber: '',
                                             isPrintedAs0:
                                                 salesInvoiceCont.isPrintedAs0,
                                             isVatNoPrinted:
@@ -640,73 +661,156 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                       progressVar = 2;
                                     });
                                     salesInvoiceCont.setStatus('sent');
-                                    var res = await storeSalesInvoice(
-                                      refController.text,
-                                      selectedCustomerIds,
-                                      validityController.text,
-                                      inputDateController.text,
-                                      salesInvoiceCont.selectedWarehouseId,
-                                      // 'payment term', //todo paymentTermsController.text,
-                                      salesInvoiceCont.salesInvoiceNumber,
-                                      salesInvoiceCont.selectedPriceListId,
-                                      salesInvoiceCont
-                                          .selectedCurrencyId, //selectedCurrency
-                                      termsAndConditionsController.text,
-                                      selectedSalesPersonId.toString(),
-                                      '', // commission method id
-                                      salesInvoiceCont.selectedCashingMethodId,
-                                      commissionController.text,
-                                      totalCommissionController.text,
-                                      salesInvoiceController.totalItems
-                                          .toString(), //total before vat
-                                      specialDiscPercentController
-                                          .text, // inserted by user
-                                      salesInvoiceController
-                                          .specialDisc, // calculated
-                                      globalDiscPercentController.text,
-                                      salesInvoiceController.globalDisc,
-                                      salesInvoiceController.vat11
-                                          .toString(), //vat
-                                      salesInvoiceController
-                                          .vatInPrimaryCurrency
-                                          .toString(), //vatLebanese
-                                      salesInvoiceController
-                                          .totalSalesInvoice, //total
-
-                                      salesInvoiceCont.isVatExemptChecked
-                                          ? '1'
-                                          : '0',
-                                      salesInvoiceCont.isVatNoPrinted
-                                          ? '1'
-                                          : '0', //not printed
-                                      salesInvoiceCont.isPrintedAsVatExempt
-                                          ? '1'
-                                          : '0', //printedAsVatExempt
-                                      salesInvoiceCont.isPrintedAs0
-                                          ? '1'
-                                          : '0', //printedAsPercentage
-                                      salesInvoiceCont.isBeforeVatPrices
-                                          ? '0'
-                                          : '1', //vatInclusivePrices
-                                      salesInvoiceCont.isBeforeVatPrices
-                                          ? '1'
-                                          : '0', //beforeVatPrices
-                                      codeController.text, //code
-                                      salesInvoiceController.rowsInListViewInSalesInvoice,
-                                      salesInvoiceController.orderedKeys
-                                    );
-                                    if (res['success'] == true) {
-                                      CommonWidgets.snackBar(
-                                        'Success',
-                                        res['message'],
-                                      );
-                                      homeController.selectedTab.value =
-                                          'to_deliver';
-                                    } else {
+                                    bool hasType1WithEmptyTitle =
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '1' &&
+                                                  (map['title']?.isEmpty ??
+                                                      true);
+                                            });
+                                    bool
+                                    hasType2WithEmptyId = salesInvoiceController
+                                        .rowsInListViewInSalesInvoice
+                                        .values
+                                        .any((map) {
+                                          return map['line_type_id'] == '2' &&
+                                              (map['item_id']?.isEmpty ?? true);
+                                        });
+                                    bool
+                                    hasType3WithEmptyId = salesInvoiceController
+                                        .rowsInListViewInSalesInvoice
+                                        .values
+                                        .any((map) {
+                                          return map['line_type_id'] == '3' &&
+                                              (map['combo']?.isEmpty ?? true);
+                                        });
+                                    bool hasType4WithEmptyImage =
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '4' &&
+                                                  (map['image'] ==
+                                                          Uint8List(0) ||
+                                                      map['image']?.isEmpty);
+                                            });
+                                    bool hasType5WithEmptyNote =
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '5' &&
+                                                  (map['note']?.isEmpty ??
+                                                      true);
+                                            });
+                                    if (salesInvoiceController
+                                        .rowsInListViewInSalesInvoice
+                                        .isEmpty) {
                                       CommonWidgets.snackBar(
                                         'error',
-                                        res['message'],
+                                        'Order lines is Empty',
                                       );
+                                    } else if (hasType2WithEmptyId) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty item',
+                                      );
+                                    } else if (hasType3WithEmptyId) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty combo',
+                                      );
+                                    } else if (hasType1WithEmptyTitle) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty title',
+                                      );
+                                    } else if (hasType4WithEmptyImage) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty image',
+                                      );
+                                    } else if (hasType5WithEmptyNote) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty note',
+                                      );
+                                    } else {
+                                      var res = await storeSalesInvoice(
+                                        refController.text,
+                                        selectedCustomerIds,
+                                        validityController.text,
+                                        inputDateController.text,
+                                        salesInvoiceCont.selectedWarehouseId,
+                                        // 'payment term', //todo paymentTermsController.text,
+                                        salesInvoiceCont.salesInvoiceNumber,
+                                        salesInvoiceCont.selectedPriceListId,
+                                        salesInvoiceCont
+                                            .selectedCurrencyId, //selectedCurrency
+                                        termsAndConditionsController.text,
+                                        selectedSalesPersonId.toString(),
+                                        '', // commission method id
+                                        salesInvoiceCont
+                                            .selectedCashingMethodId,
+                                        commissionController.text,
+                                        totalCommissionController.text,
+                                        salesInvoiceController.totalItems
+                                            .toString(), //total before vat
+                                        specialDiscPercentController
+                                            .text, // inserted by user
+                                        salesInvoiceController
+                                            .specialDisc, // calculated
+                                        globalDiscPercentController.text,
+                                        salesInvoiceController.globalDisc,
+                                        salesInvoiceController.vat11
+                                            .toString(), //vat
+                                        salesInvoiceController
+                                            .vatInPrimaryCurrency
+                                            .toString(), //vatLebanese
+                                        salesInvoiceController
+                                            .totalSalesInvoice, //total
+
+                                        salesInvoiceCont.isVatExemptChecked
+                                            ? '1'
+                                            : '0',
+                                        salesInvoiceCont.isVatNoPrinted
+                                            ? '1'
+                                            : '0', //not printed
+                                        salesInvoiceCont.isPrintedAsVatExempt
+                                            ? '1'
+                                            : '0', //printedAsVatExempt
+                                        salesInvoiceCont.isPrintedAs0
+                                            ? '1'
+                                            : '0', //printedAsPercentage
+                                        salesInvoiceCont.isBeforeVatPrices
+                                            ? '0'
+                                            : '1', //vatInclusivePrices
+                                        salesInvoiceCont.isBeforeVatPrices
+                                            ? '1'
+                                            : '0', //beforeVatPrices
+                                        codeController.text, //code
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice,
+                                        salesInvoiceController.orderedKeys,
+                                      );
+                                      if (res['success'] == true) {
+                                        CommonWidgets.snackBar(
+                                          'Success',
+                                          res['message'],
+                                        );
+                                        homeController.selectedTab.value =
+                                            'to_deliver';
+                                      } else {
+                                        CommonWidgets.snackBar(
+                                          'error',
+                                          res['message'],
+                                        );
+                                      }
                                     }
                                   },
                                 ),
@@ -717,73 +821,156 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                       progressVar = 3;
                                     });
                                     salesInvoiceCont.setStatus('sent');
-                                    var res = await storeSalesInvoice(
-                                      refController.text,
-                                      selectedCustomerIds,
-                                      validityController.text,
-                                      inputDateController.text,
-                                      salesInvoiceCont.selectedWarehouseId,
-                                      // 'payment term', //todo paymentTermsController.text,
-                                      salesInvoiceCont.salesInvoiceNumber,
-                                      salesInvoiceCont.selectedPriceListId,
-                                      salesInvoiceCont
-                                          .selectedCurrencyId, //selectedCurrency
-                                      termsAndConditionsController.text,
-                                      selectedSalesPersonId.toString(),
-                                      '', // commission method id
-                                      salesInvoiceCont.selectedCashingMethodId,
-                                      commissionController.text,
-                                      totalCommissionController.text,
-                                      salesInvoiceController.totalItems
-                                          .toString(), //total before vat
-                                      specialDiscPercentController
-                                          .text, // inserted by user
-                                      salesInvoiceController
-                                          .specialDisc, // calculated
-                                      globalDiscPercentController.text,
-                                      salesInvoiceController.globalDisc,
-                                      salesInvoiceController.vat11
-                                          .toString(), //vat
-                                      salesInvoiceController
-                                          .vatInPrimaryCurrency
-                                          .toString(), //vatLebanese
-                                      salesInvoiceController
-                                          .totalSalesInvoice, //total
-
-                                      salesInvoiceCont.isVatExemptChecked
-                                          ? '1'
-                                          : '0', //vat
-                                      salesInvoiceCont.isVatNoPrinted
-                                          ? '1'
-                                          : '0', //not printed
-                                      salesInvoiceCont.isPrintedAsVatExempt
-                                          ? '1'
-                                          : '0', //printedAsVatExempt
-                                      salesInvoiceCont.isPrintedAs0
-                                          ? '1'
-                                          : '0', //printedAsPercentage
-                                      salesInvoiceCont.isBeforeVatPrices
-                                          ? '0'
-                                          : '1', //vatInclusivePrices
-                                      salesInvoiceCont.isBeforeVatPrices
-                                          ? '1'
-                                          : '0', //beforeVatPrices
-                                      codeController.text, //code
-                                        salesInvoiceController.rowsInListViewInSalesInvoice,
-                                        salesInvoiceController.orderedKeys
-                                    );
-                                    if (res['success'] == true) {
-                                      CommonWidgets.snackBar(
-                                        'Success',
-                                        res['message'],
-                                      );
-                                      homeController.selectedTab.value =
-                                          'to_deliver';
-                                    } else {
+                                    bool hasType1WithEmptyTitle =
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '1' &&
+                                                  (map['title']?.isEmpty ??
+                                                      true);
+                                            });
+                                    bool
+                                    hasType2WithEmptyId = salesInvoiceController
+                                        .rowsInListViewInSalesInvoice
+                                        .values
+                                        .any((map) {
+                                          return map['line_type_id'] == '2' &&
+                                              (map['item_id']?.isEmpty ?? true);
+                                        });
+                                    bool
+                                    hasType3WithEmptyId = salesInvoiceController
+                                        .rowsInListViewInSalesInvoice
+                                        .values
+                                        .any((map) {
+                                          return map['line_type_id'] == '3' &&
+                                              (map['combo']?.isEmpty ?? true);
+                                        });
+                                    bool hasType4WithEmptyImage =
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '4' &&
+                                                  (map['image'] ==
+                                                          Uint8List(0) ||
+                                                      map['image']?.isEmpty);
+                                            });
+                                    bool hasType5WithEmptyNote =
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '5' &&
+                                                  (map['note']?.isEmpty ??
+                                                      true);
+                                            });
+                                    if (salesInvoiceController
+                                        .rowsInListViewInSalesInvoice
+                                        .isEmpty) {
                                       CommonWidgets.snackBar(
                                         'error',
-                                        res['message'],
+                                        'Order lines is Empty',
                                       );
+                                    } else if (hasType2WithEmptyId) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty item',
+                                      );
+                                    } else if (hasType3WithEmptyId) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty combo',
+                                      );
+                                    } else if (hasType1WithEmptyTitle) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty title',
+                                      );
+                                    } else if (hasType4WithEmptyImage) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty image',
+                                      );
+                                    } else if (hasType5WithEmptyNote) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty note',
+                                      );
+                                    } else {
+                                      var res = await storeSalesInvoice(
+                                        refController.text,
+                                        selectedCustomerIds,
+                                        validityController.text,
+                                        inputDateController.text,
+                                        salesInvoiceCont.selectedWarehouseId,
+                                        // 'payment term', //todo paymentTermsController.text,
+                                        salesInvoiceCont.salesInvoiceNumber,
+                                        salesInvoiceCont.selectedPriceListId,
+                                        salesInvoiceCont
+                                            .selectedCurrencyId, //selectedCurrency
+                                        termsAndConditionsController.text,
+                                        selectedSalesPersonId.toString(),
+                                        '', // commission method id
+                                        salesInvoiceCont
+                                            .selectedCashingMethodId,
+                                        commissionController.text,
+                                        totalCommissionController.text,
+                                        salesInvoiceController.totalItems
+                                            .toString(), //total before vat
+                                        specialDiscPercentController
+                                            .text, // inserted by user
+                                        salesInvoiceController
+                                            .specialDisc, // calculated
+                                        globalDiscPercentController.text,
+                                        salesInvoiceController.globalDisc,
+                                        salesInvoiceController.vat11
+                                            .toString(), //vat
+                                        salesInvoiceController
+                                            .vatInPrimaryCurrency
+                                            .toString(), //vatLebanese
+                                        salesInvoiceController
+                                            .totalSalesInvoice, //total
+
+                                        salesInvoiceCont.isVatExemptChecked
+                                            ? '1'
+                                            : '0', //vat
+                                        salesInvoiceCont.isVatNoPrinted
+                                            ? '1'
+                                            : '0', //not printed
+                                        salesInvoiceCont.isPrintedAsVatExempt
+                                            ? '1'
+                                            : '0', //printedAsVatExempt
+                                        salesInvoiceCont.isPrintedAs0
+                                            ? '1'
+                                            : '0', //printedAsPercentage
+                                        salesInvoiceCont.isBeforeVatPrices
+                                            ? '0'
+                                            : '1', //vatInclusivePrices
+                                        salesInvoiceCont.isBeforeVatPrices
+                                            ? '1'
+                                            : '0', //beforeVatPrices
+                                        codeController.text, //code
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice,
+                                        salesInvoiceController.orderedKeys,
+                                      );
+                                      if (res['success'] == true) {
+                                        CommonWidgets.snackBar(
+                                          'Success',
+                                          res['message'],
+                                        );
+                                        homeController.selectedTab.value =
+                                            'to_deliver';
+                                      } else {
+                                        CommonWidgets.snackBar(
+                                          'error',
+                                          res['message'],
+                                        );
+                                      }
                                     }
                                   },
                                 ),
@@ -794,74 +981,156 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                       progressVar = 1;
                                     });
                                     salesInvoiceCont.setStatus('cancelled');
-
-                                    var res = await storeSalesInvoice(
-                                      refController.text,
-                                      selectedCustomerIds,
-                                      validityController.text,
-                                      inputDateController.text,
-                                      salesInvoiceCont.selectedWarehouseId,
-                                      // 'payment term', //todo paymentTermsController.text,
-                                      salesInvoiceCont.salesInvoiceNumber,
-                                      salesInvoiceCont.selectedPriceListId,
-                                      salesInvoiceCont
-                                          .selectedCurrencyId, //selectedCurrency
-                                      termsAndConditionsController.text,
-                                      selectedSalesPersonId.toString(),
-                                      '', // commission method id
-                                      salesInvoiceCont.selectedCashingMethodId,
-                                      commissionController.text,
-                                      totalCommissionController.text,
-                                      salesInvoiceController.totalItems
-                                          .toString(), //total before vat
-                                      specialDiscPercentController
-                                          .text, // inserted by user
-                                      salesInvoiceController
-                                          .specialDisc, // calculated
-                                      globalDiscPercentController.text,
-                                      salesInvoiceController.globalDisc,
-                                      salesInvoiceController.vat11
-                                          .toString(), //vat
-                                      salesInvoiceController
-                                          .vatInPrimaryCurrency
-                                          .toString(), //vatLebanese
-                                      salesInvoiceController
-                                          .totalSalesInvoice, //total
-
-                                      salesInvoiceCont.isVatExemptChecked
-                                          ? '1'
-                                          : '0',
-                                      salesInvoiceCont.isVatNoPrinted
-                                          ? '1'
-                                          : '0', //not printed
-                                      salesInvoiceCont.isPrintedAsVatExempt
-                                          ? '1'
-                                          : '0', //printedAsVatExempt
-                                      salesInvoiceCont.isPrintedAs0
-                                          ? '1'
-                                          : '0', //printedAsPercentage
-                                      salesInvoiceCont.isBeforeVatPrices
-                                          ? '0'
-                                          : '1', //vatInclusivePrices
-                                      salesInvoiceCont.isBeforeVatPrices
-                                          ? '1'
-                                          : '0', //beforeVatPrices
-                                      codeController.text, //code
-                                        salesInvoiceController.rowsInListViewInSalesInvoice,
-                                        salesInvoiceController.orderedKeys
-                                    );
-                                    if (res['success'] == true) {
-                                      CommonWidgets.snackBar(
-                                        'Success',
-                                        res['message'],
-                                      );
-                                      homeController.selectedTab.value =
-                                          'sales_invoice_summary';
-                                    } else {
+                                    bool hasType1WithEmptyTitle =
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '1' &&
+                                                  (map['title']?.isEmpty ??
+                                                      true);
+                                            });
+                                    bool
+                                    hasType2WithEmptyId = salesInvoiceController
+                                        .rowsInListViewInSalesInvoice
+                                        .values
+                                        .any((map) {
+                                          return map['line_type_id'] == '2' &&
+                                              (map['item_id']?.isEmpty ?? true);
+                                        });
+                                    bool
+                                    hasType3WithEmptyId = salesInvoiceController
+                                        .rowsInListViewInSalesInvoice
+                                        .values
+                                        .any((map) {
+                                          return map['line_type_id'] == '3' &&
+                                              (map['combo']?.isEmpty ?? true);
+                                        });
+                                    bool hasType4WithEmptyImage =
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '4' &&
+                                                  (map['image'] ==
+                                                          Uint8List(0) ||
+                                                      map['image']?.isEmpty);
+                                            });
+                                    bool hasType5WithEmptyNote =
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
+                                            .any((map) {
+                                              return map['line_type_id'] ==
+                                                      '5' &&
+                                                  (map['note']?.isEmpty ??
+                                                      true);
+                                            });
+                                    if (salesInvoiceController
+                                        .rowsInListViewInSalesInvoice
+                                        .isEmpty) {
                                       CommonWidgets.snackBar(
                                         'error',
-                                        res['message'],
+                                        'Order lines is Empty',
                                       );
+                                    } else if (hasType2WithEmptyId) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty item',
+                                      );
+                                    } else if (hasType3WithEmptyId) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty combo',
+                                      );
+                                    } else if (hasType1WithEmptyTitle) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty title',
+                                      );
+                                    } else if (hasType4WithEmptyImage) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty image',
+                                      );
+                                    } else if (hasType5WithEmptyNote) {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        'You have an empty note',
+                                      );
+                                    } else {
+                                      var res = await storeSalesInvoice(
+                                        refController.text,
+                                        selectedCustomerIds,
+                                        validityController.text,
+                                        inputDateController.text,
+                                        salesInvoiceCont.selectedWarehouseId,
+                                        // 'payment term', //todo paymentTermsController.text,
+                                        salesInvoiceCont.salesInvoiceNumber,
+                                        salesInvoiceCont.selectedPriceListId,
+                                        salesInvoiceCont
+                                            .selectedCurrencyId, //selectedCurrency
+                                        termsAndConditionsController.text,
+                                        selectedSalesPersonId.toString(),
+                                        '', // commission method id
+                                        salesInvoiceCont
+                                            .selectedCashingMethodId,
+                                        commissionController.text,
+                                        totalCommissionController.text,
+                                        salesInvoiceController.totalItems
+                                            .toString(), //total before vat
+                                        specialDiscPercentController
+                                            .text, // inserted by user
+                                        salesInvoiceController
+                                            .specialDisc, // calculated
+                                        globalDiscPercentController.text,
+                                        salesInvoiceController.globalDisc,
+                                        salesInvoiceController.vat11
+                                            .toString(), //vat
+                                        salesInvoiceController
+                                            .vatInPrimaryCurrency
+                                            .toString(), //vatLebanese
+                                        salesInvoiceController
+                                            .totalSalesInvoice, //total
+
+                                        salesInvoiceCont.isVatExemptChecked
+                                            ? '1'
+                                            : '0',
+                                        salesInvoiceCont.isVatNoPrinted
+                                            ? '1'
+                                            : '0', //not printed
+                                        salesInvoiceCont.isPrintedAsVatExempt
+                                            ? '1'
+                                            : '0', //printedAsVatExempt
+                                        salesInvoiceCont.isPrintedAs0
+                                            ? '1'
+                                            : '0', //printedAsPercentage
+                                        salesInvoiceCont.isBeforeVatPrices
+                                            ? '0'
+                                            : '1', //vatInclusivePrices
+                                        salesInvoiceCont.isBeforeVatPrices
+                                            ? '1'
+                                            : '0', //beforeVatPrices
+                                        codeController.text, //code
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice,
+                                        salesInvoiceController.orderedKeys,
+                                      );
+                                      if (res['success'] == true) {
+                                        CommonWidgets.snackBar(
+                                          'Success',
+                                          res['message'],
+                                        );
+                                        homeController.selectedTab.value =
+                                            'sales_invoice_summary';
+                                      } else {
+                                        CommonWidgets.snackBar(
+                                          'error',
+                                          res['message'],
+                                        );
+                                      }
                                     }
                                   },
                                 ),
@@ -1503,6 +1772,25 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                   .resetItemsAfterChangePriceList();
                                             });
                                           }
+                                          if (salesInvoiceCont
+                                              .customersSalesPersonsIds[index]
+                                              .isNotEmpty) {
+                                            setState(() {
+                                              selectedSalesPersonId = int.parse(
+                                                '${salesInvoiceCont.customersSalesPersonsIds[index]}',
+                                              );
+                                              selectedSalesPerson =
+                                                  salesInvoiceCont
+                                                      .salesPersonListNames[salesInvoiceCont
+                                                      .salesPersonListId
+                                                      .indexOf(
+                                                        selectedSalesPersonId,
+                                                      )];
+
+                                              salesPersonController.text =
+                                                  selectedSalesPerson;
+                                            });
+                                          }
                                         });
                                       },
                                       validationFunc: (value) {
@@ -1513,10 +1801,10 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                       },
                                       rowWidth:
                                           MediaQuery.of(context).size.width *
-                                          0.13,
+                                          0.15,
                                       textFieldWidth:
                                           MediaQuery.of(context).size.width *
-                                          0.1,
+                                          0.12,
                                       clickableOptionText:
                                           'create_new_client'.tr,
                                       isThereClickableOption: true,
@@ -1574,6 +1862,25 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             setState(() {
                                               salesInvoiceCont
                                                   .resetItemsAfterChangePriceList();
+                                            });
+                                          }
+                                          if (salesInvoiceCont
+                                              .customersSalesPersonsIds[index]
+                                              .isNotEmpty) {
+                                            setState(() {
+                                              selectedSalesPersonId = int.parse(
+                                                '${salesInvoiceCont.customersSalesPersonsIds[index]}',
+                                              );
+                                              selectedSalesPerson =
+                                                  salesInvoiceCont
+                                                      .salesPersonListNames[salesInvoiceCont
+                                                      .salesPersonListId
+                                                      .indexOf(
+                                                        selectedSalesPersonId,
+                                                      )];
+
+                                              salesPersonController.text =
+                                                  selectedSalesPerson;
                                             });
                                           }
                                         });
@@ -2471,56 +2778,82 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                   Radius.circular(6),
                                 ),
                               ),
-                              child:Padding(
+                              child: Padding(
                                 padding: EdgeInsets.only(
                                   left:
-                                  MediaQuery.of(context).size.width * 0.02,
+                                      MediaQuery.of(context).size.width * 0.02,
                                 ),
-                                child: Obx(() =>  Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    TableTitle(
-                                      text: 'item_code'.tr,
-                                      width:
-                                      homeController.isOpened.value?MediaQuery.of(context).size.width * 0.13: MediaQuery.of(context).size.width * 0.16,
-                                    ),
-                                    TableTitle(
-                                      text: 'description'.tr,
-                                      width:
-                                      MediaQuery.of(context).size.width *
-                                          0.28,
-                                    ),
-                                    TableTitle(
-                                      text: 'quantity'.tr,
-                                      width:
-                                      MediaQuery.of(context).size.width *
-                                          0.04,
-                                    ),
-                                    TableTitle(
-                                      text: 'unit_price'.tr,
-                                      width:
-                                      homeController.isOpened.value?MediaQuery.of(context).size.width * 0.05: MediaQuery.of(context).size.width * 0.1,
-                                    ),
-                                    TableTitle(
-                                      text: '${'disc'.tr}. %',
-                                      width:
-                                      MediaQuery.of(context).size.width *
-                                          0.05,
-                                    ),
-                                    TableTitle(
-                                      text: 'total'.tr,
-                                      width:
-                                      homeController.isOpened.value?MediaQuery.of(context).size.width * 0.07: MediaQuery.of(context).size.width * 0.1,
-                                    ),
-                                    TableTitle(
-                                      text: 'more_options'.tr,
-                                      width:
-                                      MediaQuery.of(context).size.width *
-                                          0.07,
-                                    ),
-                                  ],
-                                ),),
+                                child: Obx(
+                                  () => Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      TableTitle(
+                                        text: 'item_code'.tr,
+                                        width:
+                                            homeController.isOpened.value
+                                                ? MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.13
+                                                : MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.16,
+                                      ),
+                                      TableTitle(
+                                        text: 'description'.tr,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.28,
+                                      ),
+                                      TableTitle(
+                                        text: 'quantity'.tr,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.04,
+                                      ),
+                                      TableTitle(
+                                        text: 'unit_price'.tr,
+                                        width:
+                                            homeController.isOpened.value
+                                                ? MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.05
+                                                : MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.1,
+                                      ),
+                                      TableTitle(
+                                        text: '${'disc'.tr}. %',
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.05,
+                                      ),
+                                      TableTitle(
+                                        text: 'total'.tr,
+                                        width:
+                                            homeController.isOpened.value
+                                                ? MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.07
+                                                : MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.1,
+                                      ),
+                                      TableTitle(
+                                        text: 'more_options'.tr,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.07,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                             Container(
@@ -2540,66 +2873,68 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                 children: [
                                   SizedBox(
                                     height:
-                                    salesInvoiceCont.listViewLengthInSalesInvoice,
+                                        salesInvoiceCont
+                                            .listViewLengthInSalesInvoice,
                                     child: ScrollConfiguration(
                                       behavior: const MaterialScrollBehavior()
                                           .copyWith(
-                                        dragDevices: {
-                                          PointerDeviceKind.touch,
-                                          PointerDeviceKind.mouse,
-                                        },
-                                      ),
+                                            dragDevices: {
+                                              PointerDeviceKind.touch,
+                                              PointerDeviceKind.mouse,
+                                            },
+                                          ),
                                       child: ReorderableListView.builder(
                                         itemCount:
-                                        salesInvoiceCont
-                                            .rowsInListViewInSalesInvoice
-                                            .keys
-                                            .length,
+                                            salesInvoiceCont
+                                                .rowsInListViewInSalesInvoice
+                                                .keys
+                                                .length,
                                         buildDefaultDragHandles: false,
                                         itemBuilder: (context, index) {
                                           final key =
-                                          salesInvoiceCont.orderedKeys[index];
+                                              salesInvoiceCont
+                                                  .orderedKeys[index];
                                           final row =
-                                          salesInvoiceCont
-                                              .rowsInListViewInSalesInvoice[key]!;
+                                              salesInvoiceCont
+                                                  .rowsInListViewInSalesInvoice[key]!;
                                           final lineType =
                                               row['line_type_id'] ?? '';
 
-                                          return Dismissible(
+                                          return SizedBox(
                                             key: ValueKey(key),
-                                            onDismissed: (direction) {
-                                              setState(() {
-                                                salesInvoiceCont
-                                                    .decrementListViewLengthInSalesInvoice(
-                                                  salesInvoiceCont
-                                                      .increment,
-                                                );
-                                                salesInvoiceCont
-                                                    .removeFromRowsInListViewInSalesInvoice(
-                                                  key,
-                                                );
-                                              });
-                                            },
+                                            // onDismissed: (direction) {
+                                            //   setState(() {
+                                            //     salesInvoiceCont
+                                            //         .decrementListViewLengthInSalesInvoice(
+                                            //           salesInvoiceCont
+                                            //               .increment,
+                                            //         );
+                                            //     salesInvoiceCont
+                                            //         .removeFromRowsInListViewInSalesInvoice(
+                                            //           key,
+                                            //         );
+                                            //   });
+                                            // },
                                             child: SizedBox(
                                               width:
-                                              MediaQuery.of(
-                                                context,
-                                              ).size.width,
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width,
                                               child: Row(
                                                 children: [
                                                   ReorderableDragStartListener(
                                                     index: index,
                                                     child: Container(
                                                       width:
-                                                      MediaQuery.of(
-                                                        context,
-                                                      ).size.width *
+                                                          MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
                                                           0.02,
                                                       height: 20,
                                                       margin:
-                                                      const EdgeInsets.symmetric(
-                                                        vertical: 15,
-                                                      ),
+                                                          const EdgeInsets.symmetric(
+                                                            vertical: 15,
+                                                          ),
                                                       decoration: const BoxDecoration(
                                                         image: DecorationImage(
                                                           image: AssetImage(
@@ -2612,25 +2947,25 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                   ),
                                                   Expanded(
                                                     child:
-                                                    lineType == '1'
-                                                        ? ReusableTitleRow(
-                                                      index: key,
-                                                    )
-                                                        : lineType == '2'
-                                                        ? ReusableItemRow(
-                                                      index: key,
-                                                    )
-                                                        : lineType == '3'
-                                                        ? ReusableComboRow(
-                                                      index: key,
-                                                    )
-                                                        : lineType == '4'
-                                                        ? ReusableImageRow(
-                                                      index: key,
-                                                    )
-                                                        : ReusableNoteRow(
-                                                      index: key,
-                                                    ),
+                                                        lineType == '1'
+                                                            ? ReusableTitleRow(
+                                                              index: key,
+                                                            )
+                                                            : lineType == '2'
+                                                            ? ReusableItemRow(
+                                                              index: key,
+                                                            )
+                                                            : lineType == '3'
+                                                            ? ReusableComboRow(
+                                                              index: key,
+                                                            )
+                                                            : lineType == '4'
+                                                            ? ReusableImageRow(
+                                                              index: key,
+                                                            )
+                                                            : ReusableNoteRow(
+                                                              index: key,
+                                                            ),
                                                   ),
                                                 ],
                                               ),
@@ -3053,7 +3388,9 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                   onTapFunction: () async {
                                     _saveContent();
                                     bool hasType1WithEmptyTitle =
-                                        salesInvoiceController.rowsInListViewInSalesInvoice.values
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
                                             .any((map) {
                                               return map['line_type_id'] ==
                                                       '1' &&
@@ -3077,7 +3414,9 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                               (map['combo']?.isEmpty ?? true);
                                         });
                                     bool hasType4WithEmptyImage =
-                                        salesInvoiceController.rowsInListViewInSalesInvoice.values
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
                                             .any((map) {
                                               return map['line_type_id'] ==
                                                       '4' &&
@@ -3086,7 +3425,9 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                       map['image']?.isEmpty);
                                             });
                                     bool hasType5WithEmptyNote =
-                                        salesInvoiceController.rowsInListViewInSalesInvoice.values
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice
+                                            .values
                                             .any((map) {
                                               return map['line_type_id'] ==
                                                       '5' &&
@@ -3179,8 +3520,9 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             ? '1'
                                             : '0', //beforeVatPrices
                                         codeController.text, //code
-                                          salesInvoiceController.rowsInListViewInSalesInvoice,
-                                          salesInvoiceController.orderedKeys
+                                        salesInvoiceController
+                                            .rowsInListViewInSalesInvoice,
+                                        salesInvoiceController.orderedKeys,
                                       );
                                       if (res['success'] == true) {
                                         CommonWidgets.snackBar(
@@ -3302,6 +3644,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                 child: Column(
                                   children: [
                                     DialogDropMenu(
+                                      controller: salesPersonController,
                                       optionsList:
                                           salesInvoiceCont.salesPersonListNames,
                                       text: 'sales_person'.tr,
@@ -3470,23 +3813,24 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
     salesInvoiceController.incrementListViewLengthInSalesInvoice(
       salesInvoiceController.increment,
     );
-    salesInvoiceController
-        .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-          'line_type_id': '1',
-          'item_id': '',
-          'itemName': '',
-          'item_main_code': '',
-          'item_discount': '0',
-          'item_description': '',
-          'item_quantity': '0',
-          'item_unit_price': '0',
-          'item_total': '0',
-          'title': '',
-          'note': '',
-          'combo': '',
-        });
+    salesInvoiceController.addToRowsInListViewInSalesInvoice(
+      salesInvoiceController.salesInvoiceCounter,
+      {
+        'line_type_id': '1',
+        'item_id': '',
+        'itemName': '',
+        'item_main_code': '',
+        'item_discount': '0',
+        'item_description': '',
+        'item_quantity': '0',
+        'item_unit_price': '0',
+        'item_total': '0',
+        'title': '',
+        'note': '',
+        'combo': '',
+      },
+    );
     // Widget p = ReusableTitleRow(index: salesInvoiceController.salesInvoiceCounter);
-
   }
 
   addNewItem() {
@@ -3515,10 +3859,10 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
         'combo': '',
       },
     );
-    salesInvoiceController.addToUnitPriceControllers(salesInvoiceController.salesInvoiceCounter);
+    salesInvoiceController.addToUnitPriceControllers(
+      salesInvoiceController.salesInvoiceCounter,
+    );
     // Widget p = ReusableItemRow(index: salesInvoiceController.salesInvoiceCounter);
-
-
   }
 
   addNewCombo() {
@@ -3529,24 +3873,26 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
       salesInvoiceController.increment,
     );
 
-    salesInvoiceController
-        .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-          'line_type_id': '3',
-          'item_id': '',
-          'itemName': '',
-          'item_main_code': '',
-          'item_discount': '0',
-          'item_description': '',
-          'item_quantity': '0',
-          'item_unit_price': '0',
-          'item_total': '0',
-          'title': '',
-          'note': '',
-          'combo': '',
-        });
-    salesInvoiceController.addToCombosPricesControllers(salesInvoiceController.salesInvoiceCounter);
-
-
+    salesInvoiceController.addToRowsInListViewInSalesInvoice(
+      salesInvoiceController.salesInvoiceCounter,
+      {
+        'line_type_id': '3',
+        'item_id': '',
+        'itemName': '',
+        'item_main_code': '',
+        'item_discount': '0',
+        'item_description': '',
+        'item_quantity': '0',
+        'item_unit_price': '0',
+        'item_total': '0',
+        'title': '',
+        'note': '',
+        'combo': '',
+      },
+    );
+    salesInvoiceController.addToCombosPricesControllers(
+      salesInvoiceController.salesInvoiceCounter,
+    );
   }
 
   addNewImage() {
@@ -3557,24 +3903,25 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
       salesInvoiceController.increment + 50,
     );
 
-    salesInvoiceController
-        .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-          'line_type_id': '4',
-          'item_id': '',
-          'itemName': '',
-          'item_main_code': '',
-          'item_discount': '0',
-          'item_description': '',
-          'item_quantity': '0',
-          'item_unit_price': '0',
-          'item_total': '0',
-          'title': '',
-          'note': '',
-          'combo': '',
-          'image': Uint8List(0),
-        });
+    salesInvoiceController.addToRowsInListViewInSalesInvoice(
+      salesInvoiceController.salesInvoiceCounter,
+      {
+        'line_type_id': '4',
+        'item_id': '',
+        'itemName': '',
+        'item_main_code': '',
+        'item_discount': '0',
+        'item_description': '',
+        'item_quantity': '0',
+        'item_unit_price': '0',
+        'item_total': '0',
+        'title': '',
+        'note': '',
+        'combo': '',
+        'image': Uint8List(0),
+      },
+    );
     // Widget p = ReusableImageRow(index: salesInvoiceController.salesInvoiceCounter);
-
   }
 
   addNewNote() {
@@ -3585,22 +3932,23 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
       salesInvoiceController.increment,
     );
 
-    salesInvoiceController
-        .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-          'line_type_id': '5',
-          'item_id': '',
-          'itemName': '',
-          'item_main_code': '',
-          'item_discount': '0',
-          'item_description': '',
-          'item_quantity': '0',
-          'item_unit_price': '0',
-          'item_total': '0',
-          'title': '',
-          'note': '',
-          'combo': '',
-        });
-
+    salesInvoiceController.addToRowsInListViewInSalesInvoice(
+      salesInvoiceController.salesInvoiceCounter,
+      {
+        'line_type_id': '5',
+        'item_id': '',
+        'itemName': '',
+        'item_main_code': '',
+        'item_discount': '0',
+        'item_description': '',
+        'item_quantity': '0',
+        'item_unit_price': '0',
+        'item_total': '0',
+        'title': '',
+        'note': '',
+        'combo': '',
+      },
+    );
   }
 
   List<Step> getSteps() => [
@@ -3788,162 +4136,180 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Obx(() => ReusableDropDownMenusWithSearch(
-                  list:
-                  cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
-                  text: ''.tr,
-                  hint: 'Item Code'.tr,
-                  controller: itemCodeController,
-                  onSelected: (String? value) async {
-                    itemCodeController.text = value!;
-                    setState(() {
-                      selectedItemId =
-                      '${cont.itemsIds[cont.itemsCode.indexOf(value.split(" | ")[0])]}'; //get the id by the first element of the list.
-                      mainDescriptionVar =
-                      cont.itemsDescription[selectedItemId];
-                      mainCode = cont.itemsCodes[selectedItemId];
-                      itemName = cont.itemsNames[selectedItemId];
-                      // Map warehouseMapId = {};
-                      // warehouseMapId['w'] = cont.warehousesInfo[selectedItemId];
+                Obx(
+                  () => ReusableDropDownMenusWithSearch(
+                    list:
+                        cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
+                    text: ''.tr,
+                    hint: 'Item Code'.tr,
+                    controller: itemCodeController,
+                    onSelected: (String? value) async {
+                      itemCodeController.text = value!;
+                      setState(() {
+                        selectedItemId =
+                            '${cont.itemsIds[cont.itemsCode.indexOf(value.split(" | ")[0])]}'; //get the id by the first element of the list.
+                        mainDescriptionVar =
+                            cont.itemsDescription[selectedItemId];
+                        mainCode = cont.itemsCodes[selectedItemId];
+                        itemName = cont.itemsNames[selectedItemId];
+                        // Map warehouseMapId = {};
+                        // warehouseMapId['w'] = cont.warehousesInfo[selectedItemId];
 
-                      // warehouseId = warehouseMapId['w'][0]['id'].toString();
+                        // warehouseId = warehouseMapId['w'][0]['id'].toString();
 
-                      descriptionController.text =
-                      cont.itemsDescription[selectedItemId]!;
+                        descriptionController.text =
+                            cont.itemsDescription[selectedItemId]!;
 
-                      if (cont.itemsPricesCurrencies[selectedItemId] ==
-                          cont.selectedCurrencyName) {
-                        cont.unitPriceControllers[widget.index]!.text =
-                            cont.itemUnitPrice[selectedItemId].toString();
-                      } else if (cont.selectedCurrencyName == 'USD' &&
-                          cont.itemsPricesCurrencies[selectedItemId] !=
-                              cont.selectedCurrencyName) {
-                        var result = exchangeRatesController.exchangeRatesList
-                            .firstWhere(
-                              (item) =>
-                          item["currency"] ==
-                              cont.itemsPricesCurrencies[selectedItemId],
-                          orElse: () => null,
-                        );
-                        var divider = '1';
-                        if (result != null) {
-                          divider = result["exchange_rate"].toString();
+                        if (cont.itemsPricesCurrencies[selectedItemId] ==
+                            cont.selectedCurrencyName) {
+                          cont.unitPriceControllers[widget.index]!.text =
+                              cont.itemUnitPrice[selectedItemId].toString();
+                        } else if (cont.selectedCurrencyName == 'USD' &&
+                            cont.itemsPricesCurrencies[selectedItemId] !=
+                                cont.selectedCurrencyName) {
+                          var result = exchangeRatesController.exchangeRatesList
+                              .firstWhere(
+                                (item) =>
+                                    item["currency"] ==
+                                    cont.itemsPricesCurrencies[selectedItemId],
+                                orElse: () => null,
+                              );
+                          var divider = '1';
+                          if (result != null) {
+                            divider = result["exchange_rate"].toString();
+                          }
+                          cont.unitPriceControllers[widget.index]!.text =
+                              '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                        } else if (cont.selectedCurrencyName != 'USD' &&
+                            cont.itemsPricesCurrencies[selectedItemId] ==
+                                'USD') {
+                          cont.unitPriceControllers[widget.index]!.text =
+                              '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                        } else {
+                          var result = exchangeRatesController.exchangeRatesList
+                              .firstWhere(
+                                (item) =>
+                                    item["currency"] ==
+                                    cont.itemsPricesCurrencies[selectedItemId],
+                                orElse: () => null,
+                              );
+                          var divider = '1';
+                          if (result != null) {
+                            divider = result["exchange_rate"].toString();
+                          }
+                          var usdPrice =
+                              '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                          cont.unitPriceControllers[widget.index]!.text =
+                              '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                        }
+                        if (cont.isBeforeVatPrices) {
+                          taxRate = 1;
+                          taxValue = 0;
+                        } else {
+                          taxRate =
+                              double.parse(cont.itemsVats[selectedItemId]) /
+                              100.0;
+                          taxValue =
+                              taxRate *
+                              double.parse(
+                                cont.unitPriceControllers[widget.index]!.text,
+                              );
                         }
                         cont.unitPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                      } else if (cont.selectedCurrencyName != 'USD' &&
-                          cont.itemsPricesCurrencies[selectedItemId] == 'USD') {
-                        cont.unitPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                      } else {
-                        var result = exchangeRatesController.exchangeRatesList
-                            .firstWhere(
-                              (item) =>
-                          item["currency"] ==
-                              cont.itemsPricesCurrencies[selectedItemId],
-                          orElse: () => null,
+                            '${double.parse(cont.unitPriceControllers[widget.index]!.text) + taxValue}';
+                        qtyController.text = '1';
+                        quantity = '1';
+                        discountController.text = '0';
+                        discount = '0';
+                        cont
+                            .unitPriceControllers[widget.index]!
+                            .text = double.parse(
+                          cont.unitPriceControllers[widget.index]!.text,
+                        ).toStringAsFixed(2);
+                        totalLine =
+                            '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        cont.setEnteredQtyInSalesInvoice(
+                          widget.index,
+                          quantity,
                         );
-                        var divider = '1';
-                        if (result != null) {
-                          divider = result["exchange_rate"].toString();
-                        }
-                        var usdPrice =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                        cont.unitPriceControllers[widget.index]!.text =
-                        '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                      }
-                      if (cont.isBeforeVatPrices) {
-                        taxRate = 1;
-                        taxValue = 0;
-                      } else {
-                        taxRate =
-                            double.parse(cont.itemsVats[selectedItemId]) /
-                                100.0;
-                        taxValue =
-                            taxRate *
-                                double.parse(
-                                  cont.unitPriceControllers[widget.index]!.text,
-                                );
-                      }
-                      cont.unitPriceControllers[widget.index]!.text =
-                      '${double.parse(cont.unitPriceControllers[widget.index]!.text) + taxValue}';
-                      qtyController.text = '1';
-                      quantity = '1';
-                      discountController.text = '0';
-                      discount = '0';
-                      cont
-                          .unitPriceControllers[widget.index]!
-                          .text = double.parse(
+                        cont.setMainTotalInSalesInvoice(
+                          widget.index,
+                          totalLine,
+                        );
+                        cont.getTotalItems();
+                      });
+                      cont.setEnteredUnitPriceInSalesInvoice(
+                        widget.index,
                         cont.unitPriceControllers[widget.index]!.text,
-                      ).toStringAsFixed(2);
-                      totalLine =
-                      '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                      cont.setEnteredQtyInSalesInvoice(widget.index, quantity);
-                      cont.setMainTotalInSalesInvoice(widget.index, totalLine);
-                      cont.getTotalItems();
-                    });
-                    cont.setEnteredUnitPriceInSalesInvoice(
-                      widget.index,
-                      cont.unitPriceControllers[widget.index]!.text,
-                    );
-                    cont.setItemIdInSalesInvoice(widget.index, selectedItemId);
-                    cont.setItemNameInSalesInvoice(
-                      widget.index,
-                      itemName,
-                      // value.split(" | ")[0],
-                    ); // set only first element as name
-                    cont.setMainCodeInSalesInvoice(widget.index, mainCode);
-                    cont.setTypeInSalesInvoice(widget.index, '2');
-                    cont.setMainDescriptionInSalesInvoice(
-                      widget.index,
-                      mainDescriptionVar,
-                    );
-                    // cont.setItemWareHouseInSalesInvoice(
-                    //   widget.index,
-                    //   warehouseId,
-                    // );
-                  },
-                  validationFunc: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'select_option'.tr;
-                    }
-                    return null;
-                  },
-                  rowWidth:homeController.isOpened.value?MediaQuery.of(context).size.width * 0.13: MediaQuery.of(context).size.width * 0.16,
-                  textFieldWidth: homeController.isOpened.value?MediaQuery.of(context).size.width * 0.13: MediaQuery.of(context).size.width * 0.16,
-                  clickableOptionText: 'create_virtual_item'.tr,
-                  isThereClickableOption: true,
-                  onTappedClickableOption: () {
-                    productController.clearData();
-                    productController.getFieldsForCreateProductFromBack();
-                    productController.setIsItUpdateProduct(false);
-                    showDialog<String>(
-                      context: context,
-                      builder:
-                          (BuildContext context) => const AlertDialog(
-                        backgroundColor: Colors.white,
-                        contentPadding: EdgeInsets.all(0),
-                        titlePadding: EdgeInsets.all(0),
-                        actionsPadding: EdgeInsets.all(0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(9),
-                          ),
-                        ),
-                        elevation: 0,
-                        content: CreateProductDialogContent(),
-                      ),
-                    );
-                  },
-                  columnWidths: [
-                    100.0,
-                    200.0,
-                    550.0,
-                    100.0,
-                  ], // Set column widths
-                  focusNode: dropFocus,
-                  nextFocusNode: quantityFocus,
-                ),),
+                      );
+                      cont.setItemIdInSalesInvoice(
+                        widget.index,
+                        selectedItemId,
+                      );
+                      cont.setItemNameInSalesInvoice(
+                        widget.index,
+                        itemName,
+                        // value.split(" | ")[0],
+                      ); // set only first element as name
+                      cont.setMainCodeInSalesInvoice(widget.index, mainCode);
+                      cont.setTypeInSalesInvoice(widget.index, '2');
+                      cont.setMainDescriptionInSalesInvoice(
+                        widget.index,
+                        mainDescriptionVar,
+                      );
+                      // cont.setItemWareHouseInSalesInvoice(
+                      //   widget.index,
+                      //   warehouseId,
+                      // );
+                    },
+                    validationFunc: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'select_option'.tr;
+                      }
+                      return null;
+                    },
+                    rowWidth:
+                        homeController.isOpened.value
+                            ? MediaQuery.of(context).size.width * 0.13
+                            : MediaQuery.of(context).size.width * 0.16,
+                    textFieldWidth:
+                        homeController.isOpened.value
+                            ? MediaQuery.of(context).size.width * 0.13
+                            : MediaQuery.of(context).size.width * 0.16,
+                    clickableOptionText: 'create_virtual_item'.tr,
+                    isThereClickableOption: true,
+                    onTappedClickableOption: () {
+                      productController.clearData();
+                      productController.getFieldsForCreateProductFromBack();
+                      productController.setIsItUpdateProduct(false);
+                      showDialog<String>(
+                        context: context,
+                        builder:
+                            (BuildContext context) => const AlertDialog(
+                              backgroundColor: Colors.white,
+                              contentPadding: EdgeInsets.all(0),
+                              titlePadding: EdgeInsets.all(0),
+                              actionsPadding: EdgeInsets.all(0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(9),
+                                ),
+                              ),
+                              elevation: 0,
+                              content: CreateProductDialogContent(),
+                            ),
+                      );
+                    },
+                    columnWidths: [
+                      100.0,
+                      200.0,
+                      550.0,
+                      100.0,
+                    ], // Set column widths
+                    focusNode: dropFocus,
+                    nextFocusNode: quantityFocus,
+                  ),
+                ),
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.27,
                   child: TextFormField(
@@ -4070,76 +4436,87 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   ),
                 ),
                 // unitPrice
-                Obx(() => SizedBox(
-                  width: homeController.isOpened.value?MediaQuery.of(context).size.width * 0.05: MediaQuery.of(context).size.width * 0.1,
-                  child: TextFormField(
-                    style: GoogleFonts.openSans(
-                      fontSize: 12,
-                      // fontWeight: FontWeight.w500,
-                    ),
-                    focusNode: focus,
-                    onFieldSubmitted: (value) {
-                      FocusScope.of(context).requestFocus(focus1);
-                    },
-                    textAlign: TextAlign.center,
-                    controller: cont.unitPriceControllers[widget.index],
-                    cursorColor: Colors.black,
-                    decoration: InputDecoration(
-                      hintText: "".tr,
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                          width: 1,
+                Obx(
+                  () => SizedBox(
+                    width:
+                        homeController.isOpened.value
+                            ? MediaQuery.of(context).size.width * 0.05
+                            : MediaQuery.of(context).size.width * 0.1,
+                    child: TextFormField(
+                      style: GoogleFonts.openSans(
+                        fontSize: 12,
+                        // fontWeight: FontWeight.w500,
+                      ),
+                      focusNode: focus,
+                      onFieldSubmitted: (value) {
+                        FocusScope.of(context).requestFocus(focus1);
+                      },
+                      textAlign: TextAlign.center,
+                      controller: cont.unitPriceControllers[widget.index],
+                      cursorColor: Colors.black,
+                      decoration: InputDecoration(
+                        hintText: "".tr,
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                            width: 1,
+                          ),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(6),
+                          ),
                         ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                            width: 1,
+                          ),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(6),
+                          ),
+                        ),
+                        errorStyle: const TextStyle(fontSize: 10.0),
+                        focusedErrorBorder: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+                          borderSide: BorderSide(width: 1, color: Colors.red),
                         ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                          width: 1,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
-                        ),
+                      validator: (String? value) {
+                        return null;
+                      },
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: false,
+                        signed: true,
                       ),
-                      errorStyle: const TextStyle(fontSize: 10.0),
-                      focusedErrorBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(6)),
-                        borderSide: BorderSide(width: 1, color: Colors.red),
-                      ),
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                        // WhitelistingTextInputFormatter.digitsOnly
+                      ],
+                      onChanged: (val) {
+                        setState(() {
+                          if (val == '') {
+                            cont.unitPriceControllers[widget.index]!.text = '0';
+                          } else {
+                            // cont.unitPriceControllers[widget.index]!.text = val;
+                          }
+                          // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
+                          totalLine =
+                              '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        });
+                        _formKey.currentState!.validate();
+                        // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
+                        cont.setEnteredUnitPriceInSalesInvoice(
+                          widget.index,
+                          val,
+                        );
+                        cont.setMainTotalInSalesInvoice(
+                          widget.index,
+                          totalLine,
+                        );
+                        cont.getTotalItems();
+                      },
                     ),
-                    validator: (String? value) {
-                      return null;
-                    },
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: false,
-                      signed: true,
-                    ),
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
-                      // WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (val) {
-                      setState(() {
-                        if (val == '') {
-                          cont.unitPriceControllers[widget.index]!.text = '0';
-                        } else {
-                          // cont.unitPriceControllers[widget.index]!.text = val;
-                        }
-                        // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
-                        totalLine =
-                        '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                      });
-                      _formKey.currentState!.validate();
-                      // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                      cont.setEnteredUnitPriceInSalesInvoice(widget.index, val);
-                      cont.setMainTotalInSalesInvoice(widget.index, totalLine);
-                      cont.getTotalItems();
-                    },
                   ),
-                ),),
+                ),
                 //discount
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.05,
@@ -4153,9 +4530,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       setState(() {
                         salesInvoiceController.salesInvoiceCounter += 1;
                       });
-                      salesInvoiceController.incrementListViewLengthInSalesInvoice(
-                        salesInvoiceController.increment,
-                      );
+                      salesInvoiceController
+                          .incrementListViewLengthInSalesInvoice(
+                            salesInvoiceController.increment,
+                          );
 
                       salesInvoiceController.addToRowsInListViewInSalesInvoice(
                         salesInvoiceController.salesInvoiceCounter,
@@ -4175,10 +4553,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           'combo': '',
                         },
                       );
-                      salesInvoiceController.addToUnitPriceControllers(salesInvoiceController.salesInvoiceCounter);
+                      salesInvoiceController.addToUnitPriceControllers(
+                        salesInvoiceController.salesInvoiceCounter,
+                      );
                       // Widget p = ReusableItemRow(index: salesInvoiceController.salesInvoiceCounter);
-
-
                     },
                     controller: discountController,
                     cursorColor: Colors.black,
@@ -4245,15 +4623,20 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                 ),
 
                 //total
-                Obx(() =>ReusableShowInfoCard(
-                  text: formatDoubleWithCommas(
-                    double.parse(
-                      cont.rowsInListViewInSalesInvoice[widget
-                          .index]['item_total'],
+                Obx(
+                  () => ReusableShowInfoCard(
+                    text: formatDoubleWithCommas(
+                      double.parse(
+                        cont.rowsInListViewInSalesInvoice[widget
+                            .index]['item_total'],
+                      ),
                     ),
+                    width:
+                        homeController.isOpened.value
+                            ? MediaQuery.of(context).size.width * 0.07
+                            : MediaQuery.of(context).size.width * 0.1,
                   ),
-                  width: homeController.isOpened.value?MediaQuery.of(context).size.width * 0.07: MediaQuery.of(context).size.width * 0.1,
-                ) ,),
+                ),
                 //more
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.07,
@@ -4313,7 +4696,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                                   .removeFromRowsInListViewInSalesInvoice(
                                     widget.index,
                                   );
-
                             });
                             setState(() {
                               cont.totalItems = 0.0;
@@ -4556,7 +4938,6 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                               .removeFromRowsInListViewInSalesInvoice(
                                 widget.index,
                               );
-
                         });
                       },
                       child: Icon(Icons.delete_outline, color: Primary.primary),
@@ -4820,140 +5201,156 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-              Obx(() => ReusableDropDownMenusWithSearch(
-                list:
-                cont.combosMultiPartList, // Assuming multiList is List<List<String>>
-                text: ''.tr,
-                hint: 'combo'.tr,
-                controller: comboCodeController,
-                onSelected: (String? value) async {
-                  comboCodeController.text = value!;
-                  setState(() {
-                    var ind = cont.combosCodesList.indexOf(
-                      value.split(" | ")[0],
-                    );
-                    selectedComboId = cont.combosIdsList[ind];
-                    descriptionVar = cont.combosDescriptionList[ind];
-                    mainCode = cont.combosCodesList[ind];
-                    comboName = cont.combosNamesList[ind];
-                    descriptionController.text =
-                    cont.combosDescriptionList[ind];
+                Obx(
+                  () => ReusableDropDownMenusWithSearch(
+                    list:
+                        cont.combosMultiPartList, // Assuming multiList is List<List<String>>
+                    text: ''.tr,
+                    hint: 'combo'.tr,
+                    controller: comboCodeController,
+                    onSelected: (String? value) async {
+                      comboCodeController.text = value!;
+                      setState(() {
+                        var ind = cont.combosCodesList.indexOf(
+                          value.split(" | ")[0],
+                        );
+                        selectedComboId = cont.combosIdsList[ind];
+                        descriptionVar = cont.combosDescriptionList[ind];
+                        mainCode = cont.combosCodesList[ind];
+                        comboName = cont.combosNamesList[ind];
+                        descriptionController.text =
+                            cont.combosDescriptionList[ind];
 
-                    if (cont.combosPricesCurrencies[selectedComboId] ==
-                        cont.selectedCurrencyName) {
-                      cont.combosPriceControllers[widget.index]!.text =
-                          cont.combosPricesList[ind].toString();
-                    } else if (cont.selectedCurrencyName == 'USD' &&
-                        cont.combosPricesCurrencies[selectedComboId] !=
+                        if (cont.combosPricesCurrencies[selectedComboId] ==
                             cont.selectedCurrencyName) {
-                      var result = exchangeRatesController.exchangeRatesList
-                          .firstWhere(
-                            (item) =>
-                        item["currency"] ==
-                            cont.combosPricesCurrencies[selectedComboId],
-                        orElse: () => null,
+                          cont.combosPriceControllers[widget.index]!.text =
+                              cont.combosPricesList[ind].toString();
+                        } else if (cont.selectedCurrencyName == 'USD' &&
+                            cont.combosPricesCurrencies[selectedComboId] !=
+                                cont.selectedCurrencyName) {
+                          var result = exchangeRatesController.exchangeRatesList
+                              .firstWhere(
+                                (item) =>
+                                    item["currency"] ==
+                                    cont.combosPricesCurrencies[selectedComboId],
+                                orElse: () => null,
+                              );
+                          var divider = '1';
+                          if (result != null) {
+                            divider = result["exchange_rate"].toString();
+                          }
+                          cont.combosPriceControllers[widget.index]!.text =
+                              '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                        } else if (cont.selectedCurrencyName != 'USD' &&
+                            cont.combosPricesCurrencies[selectedComboId] ==
+                                'USD') {
+                          cont.combosPriceControllers[widget.index]!.text =
+                              '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                        } else {
+                          var result = exchangeRatesController.exchangeRatesList
+                              .firstWhere(
+                                (item) =>
+                                    item["currency"] ==
+                                    cont.combosPricesCurrencies[selectedComboId],
+                                orElse: () => null,
+                              );
+                          var divider = '1';
+                          if (result != null) {
+                            divider = result["exchange_rate"].toString();
+                          }
+                          var usdPrice =
+                              '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                          cont.combosPriceControllers[widget.index]!.text =
+                              '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                        }
+                        cont.combosPriceControllers[widget.index]!.text =
+                            '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
+                        qtyController.text = '1';
+                        quantity = '1';
+                        discountController.text = '0';
+                        discount = '0';
+                        cont
+                            .combosPriceControllers[widget.index]!
+                            .text = double.parse(
+                          cont.combosPriceControllers[widget.index]!.text,
+                        ).toStringAsFixed(2);
+                        totalLine =
+                            '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        cont.setEnteredQtyInSalesInvoice(
+                          widget.index,
+                          quantity,
+                        );
+                        cont.setMainTotalInSalesInvoice(
+                          widget.index,
+                          totalLine,
+                        );
+                        cont.getTotalItems();
+                      });
+                      cont.setEnteredUnitPriceInSalesInvoice(
+                        widget.index,
+                        cont.combosPriceControllers[widget.index]!.text,
                       );
-                      var divider = '1';
-                      if (result != null) {
-                        divider = result["exchange_rate"].toString();
-                      }
-                      cont.combosPriceControllers[widget.index]!.text =
-                      '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                    } else if (cont.selectedCurrencyName != 'USD' &&
-                        cont.combosPricesCurrencies[selectedComboId] ==
-                            'USD') {
-                      cont.combosPriceControllers[widget.index]!.text =
-                      '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                    } else {
-                      var result = exchangeRatesController.exchangeRatesList
-                          .firstWhere(
-                            (item) =>
-                        item["currency"] ==
-                            cont.combosPricesCurrencies[selectedComboId],
-                        orElse: () => null,
+                      cont.setComboInSalesInvoice(
+                        widget.index,
+                        selectedComboId,
                       );
-                      var divider = '1';
-                      if (result != null) {
-                        divider = result["exchange_rate"].toString();
-                      }
-                      var usdPrice =
-                          '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                      cont.combosPriceControllers[widget.index]!.text =
-                      '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                    }
-                    cont.combosPriceControllers[widget.index]!.text =
-                    '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
-                    qtyController.text = '1';
-                    quantity = '1';
-                    discountController.text = '0';
-                    discount = '0';
-                    cont
-                        .combosPriceControllers[widget.index]!
-                        .text = double.parse(
-                      cont.combosPriceControllers[widget.index]!.text,
-                    ).toStringAsFixed(2);
-                    totalLine =
-                    '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                    cont.setEnteredQtyInSalesInvoice(widget.index, quantity);
-                    cont.setMainTotalInSalesInvoice(widget.index, totalLine);
-                    cont.getTotalItems();
-                  });
-                  cont.setEnteredUnitPriceInSalesInvoice(
-                    widget.index,
-                    cont.combosPriceControllers[widget.index]!.text,
-                  );
-                  cont.setComboInSalesInvoice(widget.index, selectedComboId);
-                  cont.setItemNameInSalesInvoice(
-                    widget.index,
-                    comboName,
-                    // value.split(" | ")[0],
-                  ); // set only first element as name
-                  cont.setMainCodeInSalesInvoice(widget.index, mainCode);
-                  cont.setTypeInSalesInvoice(widget.index, '3');
-                  cont.setMainDescriptionInSalesInvoice(
-                    widget.index,
-                    descriptionVar,
-                  );
-                },
-                validationFunc: (value) {
-                  // if (value == null || value.isEmpty) {
-                  //   return 'select_option'.tr;
-                  // }
-                  // return null;
-                },
-                rowWidth: homeController.isOpened.value?MediaQuery.of(context).size.width * 0.13: MediaQuery.of(context).size.width * 0.16,
-                textFieldWidth: homeController.isOpened.value?MediaQuery.of(context).size.width * 0.13: MediaQuery.of(context).size.width * 0.16,
-                clickableOptionText: 'create_virtual_combo'.tr,
-                isThereClickableOption: true,
-                onTappedClickableOption: () {
-                  showDialog<String>(
-                    context: context,
-                    builder:
-                        (BuildContext context) => const AlertDialog(
-                      backgroundColor: Colors.white,
-                      contentPadding: EdgeInsets.all(0),
-                      titlePadding: EdgeInsets.all(0),
-                      actionsPadding: EdgeInsets.all(0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(9),
-                        ),
-                      ),
-                      elevation: 0,
-                      content: Combo(),
-                    ),
-                  );
-                },
-                columnWidths: [
-                  100.0,
-                  200.0,
-                  550.0,
-                  100.0,
-                ], // Set column widths
-                focusNode: dropFocus,
-                nextFocusNode: quantityFocus,
-              ),)
-                ,
+                      cont.setItemNameInSalesInvoice(
+                        widget.index,
+                        comboName,
+                        // value.split(" | ")[0],
+                      ); // set only first element as name
+                      cont.setMainCodeInSalesInvoice(widget.index, mainCode);
+                      cont.setTypeInSalesInvoice(widget.index, '3');
+                      cont.setMainDescriptionInSalesInvoice(
+                        widget.index,
+                        descriptionVar,
+                      );
+                    },
+                    validationFunc: (value) {
+                      // if (value == null || value.isEmpty) {
+                      //   return 'select_option'.tr;
+                      // }
+                      // return null;
+                    },
+                    rowWidth:
+                        homeController.isOpened.value
+                            ? MediaQuery.of(context).size.width * 0.13
+                            : MediaQuery.of(context).size.width * 0.16,
+                    textFieldWidth:
+                        homeController.isOpened.value
+                            ? MediaQuery.of(context).size.width * 0.13
+                            : MediaQuery.of(context).size.width * 0.16,
+                    clickableOptionText: 'create_virtual_combo'.tr,
+                    isThereClickableOption: true,
+                    onTappedClickableOption: () {
+                      showDialog<String>(
+                        context: context,
+                        builder:
+                            (BuildContext context) => const AlertDialog(
+                              backgroundColor: Colors.white,
+                              contentPadding: EdgeInsets.all(0),
+                              titlePadding: EdgeInsets.all(0),
+                              actionsPadding: EdgeInsets.all(0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(9),
+                                ),
+                              ),
+                              elevation: 0,
+                              content: Combo(),
+                            ),
+                      );
+                    },
+                    columnWidths: [
+                      100.0,
+                      200.0,
+                      550.0,
+                      100.0,
+                    ], // Set column widths
+                    focusNode: dropFocus,
+                    nextFocusNode: quantityFocus,
+                  ),
+                ),
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.27,
                   child: TextFormField(
@@ -5107,76 +5504,88 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   // )
                 ),
                 // unitPrice
-               Obx(() =>  SizedBox(
-                 width:homeController.isOpened.value?MediaQuery.of(context).size.width * 0.05: MediaQuery.of(context).size.width * 0.1,
-                 child: TextFormField(
-                   style: GoogleFonts.openSans(
-                     fontSize: 12,
-                     // fontWeight: FontWeight.w500,
-                   ),
-                   focusNode: focus,
-                   onFieldSubmitted: (value) {
-                     FocusScope.of(context).requestFocus(focus1);
-                   },
-                   textAlign: TextAlign.center,
-                   controller: cont.combosPriceControllers[widget.index],
-                   cursorColor: Colors.black,
-                   decoration: InputDecoration(
-                     hintText: "".tr,
-                     enabledBorder: OutlineInputBorder(
-                       borderSide: BorderSide(
-                         color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                         width: 1,
-                       ),
-                       borderRadius: const BorderRadius.all(
-                         Radius.circular(6),
-                       ),
-                     ),
-                     focusedBorder: OutlineInputBorder(
-                       borderSide: BorderSide(
-                         color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                         width: 1,
-                       ),
-                       borderRadius: const BorderRadius.all(
-                         Radius.circular(6),
-                       ),
-                     ),
-                     errorStyle: const TextStyle(fontSize: 10.0),
-                     focusedErrorBorder: const OutlineInputBorder(
-                       borderRadius: BorderRadius.all(Radius.circular(6)),
-                       borderSide: BorderSide(width: 1, color: Colors.red),
-                     ),
-                   ),
-                   validator: (String? value) {
-                     return null;
-                   },
-                   keyboardType: const TextInputType.numberWithOptions(
-                     decimal: false,
-                     signed: true,
-                   ),
-                   inputFormatters: <TextInputFormatter>[
-                     FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
-                     // WhitelistingTextInputFormatter.digitsOnly
-                   ],
-                   onChanged: (val) {
-                     setState(() {
-                       if (val == '') {
-                         cont.combosPriceControllers[widget.index]!.text = '0';
-                       } else {
-                         // cont.unitPriceControllers[widget.index]!.text = val;
-                       }
-                       // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
-                       totalLine =
-                       '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                     });
-                     _formKey.currentState!.validate();
-                     // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                     cont.setEnteredUnitPriceInSalesInvoice(widget.index, val);
-                     cont.setMainTotalInSalesInvoice(widget.index, totalLine);
-                     cont.getTotalItems();
-                   },
-                 ),
-               ),),
+                Obx(
+                  () => SizedBox(
+                    width:
+                        homeController.isOpened.value
+                            ? MediaQuery.of(context).size.width * 0.05
+                            : MediaQuery.of(context).size.width * 0.1,
+                    child: TextFormField(
+                      style: GoogleFonts.openSans(
+                        fontSize: 12,
+                        // fontWeight: FontWeight.w500,
+                      ),
+                      focusNode: focus,
+                      onFieldSubmitted: (value) {
+                        FocusScope.of(context).requestFocus(focus1);
+                      },
+                      textAlign: TextAlign.center,
+                      controller: cont.combosPriceControllers[widget.index],
+                      cursorColor: Colors.black,
+                      decoration: InputDecoration(
+                        hintText: "".tr,
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                            width: 1,
+                          ),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(6),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                            width: 1,
+                          ),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(6),
+                          ),
+                        ),
+                        errorStyle: const TextStyle(fontSize: 10.0),
+                        focusedErrorBorder: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+                          borderSide: BorderSide(width: 1, color: Colors.red),
+                        ),
+                      ),
+                      validator: (String? value) {
+                        return null;
+                      },
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: false,
+                        signed: true,
+                      ),
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                        // WhitelistingTextInputFormatter.digitsOnly
+                      ],
+                      onChanged: (val) {
+                        setState(() {
+                          if (val == '') {
+                            cont.combosPriceControllers[widget.index]!.text =
+                                '0';
+                          } else {
+                            // cont.unitPriceControllers[widget.index]!.text = val;
+                          }
+                          // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
+                          totalLine =
+                              '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        });
+                        _formKey.currentState!.validate();
+                        // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
+                        cont.setEnteredUnitPriceInSalesInvoice(
+                          widget.index,
+                          val,
+                        );
+                        cont.setMainTotalInSalesInvoice(
+                          widget.index,
+                          totalLine,
+                        );
+                        cont.getTotalItems();
+                      },
+                    ),
+                  ),
+                ),
                 //discount
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.05,
@@ -5186,31 +5595,35 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus1,
-                    onFieldSubmitted: (value){
+                    onFieldSubmitted: (value) {
                       setState(() {
                         salesInvoiceController.salesInvoiceCounter += 1;
                       });
-                      salesInvoiceController.incrementListViewLengthInSalesInvoice(
-                        salesInvoiceController.increment,
-                      );
-
                       salesInvoiceController
-                          .addToRowsInListViewInSalesInvoice(salesInvoiceController.salesInvoiceCounter, {
-                        'line_type_id': '3',
-                        'item_id': '',
-                        'itemName': '',
-                        'item_main_code': '',
-                        'item_discount': '0',
-                        'item_description': '',
-                        'item_quantity': '0',
-                        'item_unit_price': '0',
-                        'item_total': '0',
-                        'title': '',
-                        'note': '',
-                        'combo': '',
-                      });
-                      salesInvoiceController.addToCombosPricesControllers(salesInvoiceController.salesInvoiceCounter);
+                          .incrementListViewLengthInSalesInvoice(
+                            salesInvoiceController.increment,
+                          );
 
+                      salesInvoiceController.addToRowsInListViewInSalesInvoice(
+                        salesInvoiceController.salesInvoiceCounter,
+                        {
+                          'line_type_id': '3',
+                          'item_id': '',
+                          'itemName': '',
+                          'item_main_code': '',
+                          'item_discount': '0',
+                          'item_description': '',
+                          'item_quantity': '0',
+                          'item_unit_price': '0',
+                          'item_total': '0',
+                          'title': '',
+                          'note': '',
+                          'combo': '',
+                        },
+                      );
+                      salesInvoiceController.addToCombosPricesControllers(
+                        salesInvoiceController.salesInvoiceCounter,
+                      );
                     },
                     controller: discountController,
                     cursorColor: Colors.black,
@@ -5277,16 +5690,20 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                 ),
 
                 //total
-                Obx(() =>ReusableShowInfoCard(
-                  text: formatDoubleWithCommas(
-                    double.parse(
-                      cont.rowsInListViewInSalesInvoice[widget
-                          .index]['item_total'],
+                Obx(
+                  () => ReusableShowInfoCard(
+                    text: formatDoubleWithCommas(
+                      double.parse(
+                        cont.rowsInListViewInSalesInvoice[widget
+                            .index]['item_total'],
+                      ),
                     ),
+                    width:
+                        homeController.isOpened.value
+                            ? MediaQuery.of(context).size.width * 0.07
+                            : MediaQuery.of(context).size.width * 0.1,
                   ),
-                  width: homeController.isOpened.value?MediaQuery.of(context).size.width * 0.07: MediaQuery.of(context).size.width * 0.1,
-                ), ),
-
+                ),
 
                 //more
                 SizedBox(
@@ -5481,7 +5898,7 @@ class PendingAsRowInTableLinks extends StatefulWidget {
 class _PendingAsRowInTableLinksState extends State<PendingAsRowInTableLinks> {
   final HomeController homeController = Get.find();
   final QuotationController quotationController = Get.find();
-  final SalesOrderController salesInvoiceController = Get.find();
+  final SalesInvoiceController salesInvoiceController = Get.find();
   final PendingDocsReviewController pendingDocsController = Get.find();
 
   bool isClicked = false;

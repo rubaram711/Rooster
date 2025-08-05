@@ -19,7 +19,7 @@ import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
-import '../Client/add_new_client.dart';
+import 'add_new_client.dart';
 
 class CreateClientDialog extends StatefulWidget {
   const CreateClientDialog({super.key});
@@ -51,6 +51,7 @@ class _CreateClientDialogState
   TextEditingController internalNoteController = TextEditingController();
   TextEditingController grantedDiscountController = TextEditingController();
   final HomeController homeController = Get.find();
+
   String paymentTerm = '', selectedPriceListId = '', selectedCountry = '',selectedCity='';
   String selectedPhoneCode = '', selectedMobileCode = '';
   int selectedClientType = 1;
@@ -74,6 +75,10 @@ class _CreateClientDialogState
         clientNumberController.text=data['clientNumber'];
       });
       for(var priceList in p['pricelists']){
+        if (priceList['code'] == 'STANDARD') {
+          selectedPriceListId = '${priceList['id']}';
+          priceListController.text = priceList['code'];
+        }
         pricesListsNames.add(priceList['title']);
         pricesListsIds.add('${priceList['id']}');
         pricesListsCodes.add('${priceList['code']}');
@@ -116,6 +121,9 @@ class _CreateClientDialogState
 
   @override
   void initState() {
+    clientController.contactsList=[];
+    clientController.salesPersonController.clear();
+    clientController.getAllUsersSalesPersonFromBack();
     getFieldsForCreateClientsFromBack();
     getCountriesFromBack();
     super.initState();
@@ -766,17 +774,34 @@ class _CreateClientDialogState
                                 MediaQuery.of(context).size.width * 0.3,
                                 child: Column(
                                   children: [
-                                    DialogDropMenu(
-                                      optionsList: const [''],
-                                      text: '${'sales_person'.tr}*',
-                                      hint: '',
-                                      rowWidth:
-                                      MediaQuery.of(context).size.width *
-                                          0.3,
-                                      textFieldWidth:
-                                      MediaQuery.of(context).size.width *
-                                          0.17,
-                                      onSelected: () {},
+                                    GetBuilder<ClientController>(
+                                      builder: (cont) {
+                                        return DialogDropMenu(
+                                          controller: cont.salesPersonController,
+                                          optionsList:
+                                          clientController
+                                              .salesPersonListNames,
+                                          text: 'sales_person'.tr,
+                                          hint: 'search'.tr,
+                                          rowWidth:
+                                          MediaQuery.of(context).size.width *
+                                              0.3,
+                                          textFieldWidth:
+                                          MediaQuery.of(context).size.width *
+                                              0.17,
+                                          onSelected: (String? val) {
+                                            setState(() {
+                                              var index = clientController
+                                                  .salesPersonListNames
+                                                  .indexOf(val!);
+                                              clientController.setSelectedSalesPerson
+                                                (val,
+                                                  clientController
+                                                      .salesPersonListId[index]);
+                                            });
+                                          },
+                                        );
+                                      }
                                     ),
                                     gapH16,
                                     DialogDropMenu(
@@ -902,17 +927,21 @@ class _CreateClientDialogState
                                           '',
                                           '',
                                           '',
-                                          '',
+                                          clientController.selectedSalesPersonId.toString(),
                                           paymentTerm,
                                           selectedPriceListId,
                                           internalNoteController.text,
                                           '',
                                           clientController.contactsList);
                                       if (res['success'] == true) {
+                                        print('yeeeees');
+                                        Get.back();
+
                                         CommonWidgets.snackBar('Success',
                                             res['message'] );
-                                        homeController.selectedTab.value =
-                                        'clients';
+                                        // Get.back();
+                                        // homeController.selectedTab.value =
+                                        // 'clients';
                                       } else {
                                         CommonWidgets.snackBar(
                                             'error', res['message'] );

@@ -622,12 +622,10 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
   double specialDisc = 0.0;
   double res = 0.0;
 
-
   ExchangeRatesController exchangeRatesController = Get.find();
 
   late Uint8List imageFile;
   bool isLoading = false; // Add loading state
-
 
   @override
   void initState() {
@@ -948,12 +946,20 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                             finalPriceBySalesOrderCurrency =
                                 totalPriceAfterSpecialDiscountBysalesOrderCurrency +
                                 vatBySalesOrderCurrency;
+                            var quotNumber = '';
+                            widget.info['quotation'] == null
+                                ? quotNumber = ''
+                                : quotNumber =
+                                    widget.info['quotation']['quotationNumber'];
+                            print("--------------quotNumber");
+                            print(quotNumber);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
                                   // print('widget.info[ ${widget.info['termsAndConditions']}');
                                   return PrintSalesOrder(
+                                    quotationNumber: quotNumber,
                                     isPrintedAs0:
                                         '${widget.info['printedAsPercentage']}' ==
                                                 '1'
@@ -1072,6 +1078,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                     content: UpdateSalesOrderDialog(
                                       index: widget.index,
                                       info: widget.info,
+                                      fromPage: 'salesOrderSummary',
                                     ),
                                   ),
                             );
@@ -1725,5 +1732,3 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
     );
   }
 }
-
-
