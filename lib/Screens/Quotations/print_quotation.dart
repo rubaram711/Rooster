@@ -24,6 +24,7 @@ class PrintQuotationData extends StatefulWidget {
     required this.receivedUser,
     required this.senderUser,
     required this.status,
+    required this.cancellationReason,
     required this.totalBeforeVat,
     required this.discountOnAllItem,
     required this.totalAllItems,
@@ -62,6 +63,7 @@ class PrintQuotationData extends StatefulWidget {
   final String receivedUser;
   final String senderUser;
   final String status;
+  final String cancellationReason;
   final String totalBeforeVat;
   final String discountOnAllItem;
   final String totalAllItems;
@@ -1411,9 +1413,30 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               ),
                             ],
                           ),
+                      pw.Spacer(),
+                      widget.cancellationReason.isNotEmpty
+                      ?pw.Column(
+                    children: [
+                      pw.Divider(
+                        height: 5,
+                        color: PdfColors.black,
+                        // endIndent: 250
+                      ),
+                      pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.start,
+                          children: [
+                            reusableText('Cancellation Reason : ${widget.cancellationReason}')]),
+                      pw.Divider(
+                        height: 5,
+                        color: PdfColors.black,
+                        // endIndent: 250
+                      ),
+                    ]
+                  ):pw.SizedBox.shrink()
                     ],
                   ),
                 ),
+
                 pw.Padding(
                   padding: pw.EdgeInsets.fromLTRB(0, 10, 0, 0),
                   child: pw.Column(

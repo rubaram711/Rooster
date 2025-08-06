@@ -253,7 +253,7 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                             children: [
                               tableTitleWithOrderArrow(
                                 'number'.tr,
-                                MediaQuery.of(context).size.width * 0.09,
+                                MediaQuery.of(context).size.width * 0.08,
                                 () {
                                   setState(() {
                                     isNumberOrderedUp = !isNumberOrderedUp;
@@ -271,7 +271,7 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                               ),
                               tableTitleWithOrderArrow(
                                 'creation'.tr,
-                                MediaQuery.of(context).size.width * 0.09,
+                                MediaQuery.of(context).size.width * 0.08,
                                 () {
                                   setState(() {
                                     isCreationOrderedUp = !isCreationOrderedUp;
@@ -289,7 +289,7 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                               ),
                               tableTitleWithOrderArrow(
                                 'customer'.tr,
-                                MediaQuery.of(context).size.width * 0.09,
+                                MediaQuery.of(context).size.width * 0.08,
                                 () {
                                   setState(() {
                                     isCustomerOrderedUp = !isCustomerOrderedUp;
@@ -329,6 +329,12 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                         );
                                   });
                                 },
+                              ),
+                              TableTitle(
+                                text: 'chance'.tr,
+                                width:
+                                    MediaQuery.of(context).size.width *
+                                    0.07, //085
                               ),
                               TableTitle(
                                 text: 'task'.tr,
@@ -373,7 +379,7 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                               ),
                               TableTitle(
                                 text: 'more_options'.tr,
-                                width: MediaQuery.of(context).size.width * 0.11,
+                                width: MediaQuery.of(context).size.width * 0.09,
                               ),
                               SizedBox(
                                 width: MediaQuery.of(context).size.width * 0.03,
@@ -700,14 +706,15 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onDoubleTap: () {
-        if (widget.info['status'] == 'pending') {
-          homeController.selectedTab.value = 'quotation_data';
-        } else {
-          homeController.selectedTab.value = 'quotation_summary';
-        }
-        quotationController.setSelectedQuotation(widget.info);
-      },
+      // onDoubleTap:
+      //     () {
+      //   if (widget.info['status'] == 'pending') {
+      //     homeController.selectedTab.value = 'quotation_data';
+      //   } else {
+      //     homeController.selectedTab.value = 'quotation_summary';
+      //   }
+      //   quotationController.setSelectedQuotation(widget.info);
+      // },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
         decoration: const BoxDecoration(
@@ -722,14 +729,14 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
               text: '${widget.info['quotationNumber'] ?? ''}',
               width:
                   widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.09
+                      ? MediaQuery.of(context).size.width * 0.08
                       : 150,
             ),
             TableItem(
               text: '${widget.info['createdAtDate'] ?? ''}',
               width:
                   widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.09
+                      ? MediaQuery.of(context).size.width * 0.08
                       : 150,
             ),
             TableItem(
@@ -739,7 +746,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                       : '${widget.info['client']['name'] ?? ''}',
               width:
                   widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.09
+                      ? MediaQuery.of(context).size.width * 0.08
                       : 150,
             ),
             TableItem(
@@ -747,6 +754,14 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                   widget.info['salesperson'] == null
                       ? ''
                       : '${widget.info['salesperson']['name'] ?? ''}',
+              width:
+                  widget.isDesktop
+                      ? MediaQuery.of(context).size.width * 0.07
+                      : 150,
+            ),
+            TableItem(
+              text:
+                  widget.info['chance']??'',
               width:
                   widget.isDesktop
                       ? MediaQuery.of(context).size.width * 0.07
@@ -830,11 +845,14 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                       borderRadius: BorderRadius.circular(25),
                     ),
                     child: Center(
-                      child: Text(
-                        '${widget.info['status'] ?? ''}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                      child: Tooltip(
+                        message: widget.info['status']== 'cancelled'?widget.info['cancellationReason']??'':'',
+                        child: Text(
+                          '${widget.info['status'] ?? ''}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -847,7 +865,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                 return SizedBox(
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.11
+                          ? MediaQuery.of(context).size.width * 0.09
                           : 150,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1093,6 +1111,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     receivedUser: '',
                                     senderUser: homeController.userName,
                                     status: widget.info['status'] ?? '',
+                                    cancellationReason: widget.info['cancellationReason'] ?? '',
                                     totalBeforeVat:
                                         widget.info['totalBeforeVat'] ?? '',
                                     discountOnAllItem:

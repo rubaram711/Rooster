@@ -254,20 +254,24 @@ class _PendingDocsState extends State<PendingDocs> {
                             children: [
                               TableTitle(
                                 text: 'number'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
+                                width: MediaQuery.of(context).size.width * 0.07,
                               ),
                               TableTitle(
                                 text: 'Creation'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
+                                width: MediaQuery.of(context).size.width * 0.08,
                               ),
                               TableTitle(
                                 text: 'Customer'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
+                                width: MediaQuery.of(context).size.width * 0.08,
                               ),
 
                               TableTitle(
                                 text: 'sales_person'.tr,
-                                width: MediaQuery.of(context).size.width * 0.07,
+                                width: MediaQuery.of(context).size.width * 0.06,
+                              ),
+                              TableTitle(
+                                text: 'chance'.tr,
+                                width: MediaQuery.of(context).size.width * 0.06,
                               ),
 
                               TableTitle(
@@ -596,14 +600,14 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                   text: '${widget.info['quotationNumber'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
+                          ? MediaQuery.of(context).size.width * 0.07
                           : 150,
                 ),
                 TableItem(
                   text: '${widget.info['createdAtDate'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
+                          ? MediaQuery.of(context).size.width * 0.08
                           : 150,
                 ),
                 TableItem(
@@ -613,7 +617,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           : '${widget.info['client']['name'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
+                          ? MediaQuery.of(context).size.width * 0.08
                           : 150,
                 ),
                 TableItem(
@@ -623,7 +627,15 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           : '${widget.info['salesperson']['name'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.07
+                          ? MediaQuery.of(context).size.width * 0.06
+                          : 150,
+                ),
+                TableItem(
+                  text:
+                      widget.info['chance'] ??'',
+                  width:
+                      widget.isDesktop
+                          ? MediaQuery.of(context).size.width * 0.06
                           : 150,
                 ),
 
@@ -943,6 +955,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                         receivedUser: '',
                                         senderUser: homeController.userName,
                                         status: widget.info['status'] ?? '',
+                                        cancellationReason: widget.info['cancellationReason'] ?? '',
                                         totalBeforeVat:
                                             widget.info['totalBeforeVat'] ?? '',
                                         discountOnAllItem:

@@ -510,6 +510,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         receivedUser: '',
                                         senderUser: homeController.userName,
                                         status: '',
+                                        cancellationReason: '',
                                         totalBeforeVat:
                                             quotationCont.totalItems.toString(),
                                         discountOnAllItem:
@@ -922,6 +923,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             ref: refController.text,
                                             receivedUser: '',
                                             senderUser: homeController.userName,
+                                            cancellationReason: '',
                                             status: '',
                                             totalBeforeVat:
                                                 quotationCont.totalItems

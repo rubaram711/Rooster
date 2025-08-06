@@ -362,6 +362,9 @@ class _QuotationDataState extends State<QuotationData> {
                                         '',
                                     receivedUser: '',
                                     senderUser: homeController.userName,
+                                    cancellationReason:  quotationController
+                                        .selectedQuotationData['cancellationReason'] ??
+                                        '',
                                     status:
                                         quotationController
                                             .selectedQuotationData['status'] ??

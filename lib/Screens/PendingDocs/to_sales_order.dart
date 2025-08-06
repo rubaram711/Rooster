@@ -271,7 +271,7 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                             children: [
                               tableTitleWithOrderArrow(
                                 'number'.tr,
-                                MediaQuery.of(context).size.width * 0.09,
+                                MediaQuery.of(context).size.width * 0.07,
                                 () {
                                   setState(() {
                                     isNumberOrderedUp = !isNumberOrderedUp;
@@ -289,7 +289,7 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                               ),
                               tableTitleWithOrderArrow(
                                 'creation'.tr,
-                                MediaQuery.of(context).size.width * 0.09,
+                                MediaQuery.of(context).size.width * 0.08,
                                 () {
                                   setState(() {
                                     isCreationOrderedUp = !isCreationOrderedUp;
@@ -307,7 +307,7 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                               ),
                               tableTitleWithOrderArrow(
                                 'customer'.tr,
-                                MediaQuery.of(context).size.width * 0.09,
+                                MediaQuery.of(context).size.width * 0.08,
                                 () {
                                   setState(() {
                                     isCustomerOrderedUp = !isCustomerOrderedUp;
@@ -328,8 +328,8 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                                 },
                               ),
                               tableTitleWithOrderArrow(
-                                'salesperson'.tr,
-                                MediaQuery.of(context).size.width * 0.07,
+                                'sales_person'.tr,
+                                MediaQuery.of(context).size.width * 0.06,
                                 () {
                                   setState(() {
                                     isSalespersonOrderedUp =
@@ -347,6 +347,10 @@ class _ToSalesOrderState extends State<ToSalesOrder> {
                                         );
                                   });
                                 },
+                              ),
+                              TableTitle(
+                                text: 'chance'.tr,
+                                width: MediaQuery.of(context).size.width * 0.06,
                               ),
                               TableTitle(
                                 text: 'task'.tr,
@@ -823,14 +827,14 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
               text: '${widget.info['quotationNumber'] ?? ''}',
               width:
                   widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.09
+                      ? MediaQuery.of(context).size.width * 0.07
                       : 150,
             ),
             TableItem(
               text: '${widget.info['createdAtDate'] ?? ''}',
               width:
                   widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.09
+                      ? MediaQuery.of(context).size.width * 0.08
                       : 150,
             ),
             TableItem(
@@ -840,7 +844,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                       : '${widget.info['client']['name'] ?? ''}',
               width:
                   widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.09
+                      ? MediaQuery.of(context).size.width * 0.08
                       : 150,
             ),
             TableItem(
@@ -850,8 +854,16 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                       : '${widget.info['salesperson']['name'] ?? ''}',
               width:
                   widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.07
+                      ? MediaQuery.of(context).size.width * 0.06
                       : 150,
+            ),
+            TableItem(
+              text:
+              widget.info['chance'] ??'',
+              width:
+              widget.isDesktop
+                  ? MediaQuery.of(context).size.width * 0.06
+                  : 150,
             ),
             MouseRegion(
               cursor: SystemMouseCursors.click,
@@ -1161,6 +1173,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     receivedUser: '',
                                     senderUser: homeController.userName,
                                     status: widget.info['status'] ?? '',
+                                    cancellationReason: widget.info['cancellationReason'] ?? '',
                                     totalBeforeVat:
                                         widget.info['totalBeforeVat'] ?? '',
                                     discountOnAllItem:
