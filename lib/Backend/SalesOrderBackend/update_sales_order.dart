@@ -35,7 +35,7 @@ Future updateSalesOrder(
   String code,
   String status,
   Map orderLines,
-    List<int> orderedKeys ,
+  List<int> orderedKeys,
 ) async {
   String token = await getAccessTokenFromPref();
   FormData formData = FormData.fromMap({
@@ -86,19 +86,25 @@ Future updateSalesOrder(
         '${orderLines[key]['item_main_code']}',
       ),
       MapEntry("orderLines[$i][itemName]", '${orderLines[key]['itemName']}'),
-      MapEntry("orderLines[$i][discount]", '${orderLines[key]['item_discount']}'),
+      MapEntry(
+        "orderLines[$i][discount]",
+        '${orderLines[key]['item_discount']}',
+      ),
       MapEntry(
         "orderLines[$i][description]",
         '${orderLines[key]['item_description']}',
       ),
-      MapEntry("orderLines[$i][quantity]", '${orderLines[key]['item_quantity']}'),
+      MapEntry(
+        "orderLines[$i][quantity]",
+        '${orderLines[key]['item_quantity']}',
+      ),
       MapEntry(
         "orderLines[$i][item_warehouse_id]",
-        '${orderLines[key]['item_warehouseId']}',
+        '${orderLines[key]['item_warehouse_id'] ?? orderLines[key]['item_warehouseId']}',
       ),
       MapEntry(
         "orderLines[$i][combo_warehouse_id]",
-        '${orderLines[key]['combo_warehouseId']}',
+        '${orderLines[key]['combo_warehouse_id'] ?? orderLines[key]['combo_warehouseId']}',
       ),
       MapEntry(
         "orderLines[$i][unitPrice]",

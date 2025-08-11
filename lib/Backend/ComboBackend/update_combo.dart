@@ -10,6 +10,8 @@ Future updateCombo(
   String currencyId,
   String price,
   String active,
+  String brand,
+  List<int> image,
   Map items,
 ) async {
   String token = await getAccessTokenFromPref();
@@ -20,6 +22,8 @@ Future updateCombo(
     "currencyId": currencyId,
     "price": price,
     "active": active,
+    'brand': brand,
+    "image": MultipartFile.fromBytes(image, filename: "image.jpg"),
   });
 
   for (int i = 1; i < items.length + 1; i++) {

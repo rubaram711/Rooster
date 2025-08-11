@@ -22,6 +22,7 @@ Future updateSettings({required String companyId,
   required  String companySubjectToVat,
   required  String posCurrencyId,
   required  String showLogoOnPos,
+  required  String headerName,
 }
 ) async {
   String token = await getAccessTokenFromPref();
@@ -44,6 +45,7 @@ Future updateSettings({required String companyId,
     'companySubjectToVat':companySubjectToVat,
     'posCurrencyId':posCurrencyId,
     'showLogoOnPos':showLogoOnPos,
+    'headerName':headerName,
   });
 if(imageFile!=null) {
   formData.files.add(

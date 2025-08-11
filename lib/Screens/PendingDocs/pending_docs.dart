@@ -35,7 +35,8 @@ import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/const/urls.dart';
 
-import '../../Widgets/dialog_title.dart';
+import '../../Widgets/reusableTableMenu.dart';
+import '../../const/constants.dart';
 import '../Quotations/add_cancelled_reason_dialog.dart';
 
 class PendingDocs extends StatefulWidget {
@@ -630,15 +631,317 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           ? MediaQuery.of(context).size.width * 0.06
                           : 150,
                 ),
-                TableItem(
-                  text:
-                      widget.info['chance'] ??'',
-                  width:
-                      widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.06
-                          : 150,
-                ),
+                // TableItem(
+                //   text: widget.info['chance'] ?? '',
+                //   width:
+                //       widget.isDesktop
+                //           ? MediaQuery.of(context).size.width * 0.06
+                //           : 150,
+                // ),
+                ReusableStatusDropdown(
+                  options: chanceLevels,
+                  value: widget.info['chance'] ?? chanceLevels.first,
+                  onSelected: (value) async {
+                    //update from back
 
+                    Map<int, Map<String, dynamic>> orderLines1 = {};
+                    List<int> orderedKeys = [];
+                    Map<int, dynamic> orderLinesMap = {
+                      for (
+                      int i = 0;
+                      i < widget.info['orderLines'].length;
+                      i++
+                      )
+                        (i + 1): widget.info['orderLines'][i],
+                    };
+
+                    for (int i = 0; i < orderLinesMap.length; i++) {
+                      orderedKeys.add(i + 1);
+                      Map<String, dynamic> selectedOrderLine =
+                      orderLinesMap[i + 1];
+                      orderLines1[i + 1] = {};
+                      if (selectedOrderLine['line_type_id'] == 1) {
+                        // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                        orderLines1[i + 1]!['line_type_id'] =
+                            selectedOrderLine['line_type_id']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['item_id'] = '';
+
+                        orderLines1[i + 1]!['itemName'] = '';
+                        orderLines1[i + 1]!['item_main_code'] = '';
+                        orderLines1[i + 1]!['item_discount'] = '0';
+                        orderLines1[i + 1]!['item_description'] =
+                        '';
+                        orderLines1[i + 1]!['item_quantity'] = '0';
+
+                        orderLines1[i + 1]!['item_unit_price'] =
+                        '0';
+                        orderLines1[i + 1]!['item_total'] = '0';
+                        orderLines1[i + 1]!['title'] =
+                            selectedOrderLine['title'] ?? '';
+                        orderLines1[i + 1]!['note'] = '';
+                        orderLines1[i + 1]!['combo'] = '';
+                        // Add more fields as needed
+                      }
+                      if (selectedOrderLine['line_type_id'] == 2) {
+                        // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                        orderLines1[i + 1]!['line_type_id'] =
+                            selectedOrderLine['line_type_id']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['item_id'] =
+                            selectedOrderLine['item_id']
+                                ?.toString() ??
+                                '';
+
+                        orderLines1[i + 1]!['itemName'] =
+                            selectedOrderLine['item_name'] ?? '';
+                        orderLines1[i + 1]!['item_main_code'] =
+                            selectedOrderLine['item_main_code'] ??
+                                '';
+                        orderLines1[i + 1]!['item_discount'] =
+                            selectedOrderLine['item_discount']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['item_description'] =
+                            selectedOrderLine['item_description'] ??
+                                '';
+                        orderLines1[i + 1]!['item_quantity'] =
+                            selectedOrderLine['item_quantity']
+                                ?.toString() ??
+                                '';
+
+                        orderLines1[i + 1]!['item_unit_price'] =
+                            selectedOrderLine['item_unit_price']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['item_total'] =
+                            selectedOrderLine['item_total']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['title'] =
+                            selectedOrderLine['title'] ?? '';
+                        orderLines1[i + 1]!['note'] =
+                            selectedOrderLine['note'] ?? '';
+                        orderLines1[i + 1]!['combo'] = '';
+                        // Add more fields as needed
+                      }
+                      if (selectedOrderLine['line_type_id'] == 3) {
+                        // Map the fields you want to copy from selectedOrderLine to orderLines1
+                        orderLines1[i + 1]!['line_type_id'] =
+                            selectedOrderLine['line_type_id']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['item_id'] = '';
+
+                        orderLines1[i + 1]!['itemName'] =
+                            selectedOrderLine['combo_name'] ?? '';
+                        orderLines1[i + 1]!['item_main_code'] =
+                            selectedOrderLine['combo_code'] ?? '';
+                        orderLines1[i + 1]!['item_discount'] =
+                            selectedOrderLine['combo_discount']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['item_description'] =
+                            selectedOrderLine['combo_description'] ??
+                                '';
+                        orderLines1[i + 1]!['item_quantity'] =
+                            selectedOrderLine['combo_quantity']
+                                ?.toString() ??
+                                '';
+
+                        orderLines1[i + 1]!['item_unit_price'] =
+                            selectedOrderLine['combo_unit_price']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['item_total'] =
+                            selectedOrderLine['combo_total']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['title'] =
+                            selectedOrderLine['title'] ?? '';
+                        orderLines1[i + 1]!['note'] =
+                            selectedOrderLine['note'] ?? '';
+                        orderLines1[i + 1]!['combo'] =
+                            selectedOrderLine['combo_id']
+                                ?.toString() ??
+                                '';
+                        // Add more fields as needed
+                      }
+                      if (selectedOrderLine['line_type_id'] == 4) {
+                        // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                        orderLines1[i + 1]!['line_type_id'] =
+                            selectedOrderLine['line_type_id']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['item_id'] = '';
+
+                        orderLines1[i + 1]!['itemName'] = '';
+                        orderLines1[i + 1]!['item_main_code'] = '';
+                        orderLines1[i + 1]!['item_discount'] = '0';
+                        orderLines1[i + 1]!['item_description'] =
+                        '';
+                        orderLines1[i + 1]!['item_quantity'] = '0';
+
+                        orderLines1[i + 1]!['item_unit_price'] =
+                        '0';
+                        orderLines1[i + 1]!['item_total'] = '0';
+                        orderLines1[i + 1]!['title'] = '';
+                        orderLines1[i + 1]!['note'] = '';
+                        late Uint8List imageFile;
+                        if (selectedOrderLine['image'] != null &&
+                            selectedOrderLine['image'].isNotEmpty) {
+                          try {
+                            final response = await http.get(
+                              Uri.parse(
+                                '$baseImage${selectedOrderLine['image']}',
+                              ),
+                            );
+
+                            if (response.statusCode == 200) {
+                              imageFile = response.bodyBytes;
+                            } else {
+                              imageFile = Uint8List(
+                                0,
+                              ); // Set to empty if loading fails
+                            }
+                          } catch (e) {
+                            imageFile = Uint8List(
+                              0,
+                            ); // Set to empty if loading fails
+                          }
+                        } else {
+                          imageFile = Uint8List(
+                            0,
+                          ); // Set to empty if no image URL
+                        }
+                        orderLines1[i + 1]!['image'] = imageFile;
+                        // Add more fields as needed
+                      }
+                      if (selectedOrderLine['line_type_id'] == 5) {
+                        // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                        orderLines1[i + 1]!['line_type_id'] =
+                            selectedOrderLine['line_type_id']
+                                ?.toString() ??
+                                '';
+                        orderLines1[i + 1]!['item_id'] = '';
+
+                        orderLines1[i + 1]!['itemName'] = '';
+                        orderLines1[i + 1]!['item_main_code'] = '';
+                        orderLines1[i + 1]!['item_discount'] = '0';
+                        orderLines1[i + 1]!['item_description'] =
+                        '';
+                        orderLines1[i + 1]!['item_quantity'] = '0';
+
+                        orderLines1[i + 1]!['item_unit_price'] =
+                        '0';
+                        orderLines1[i + 1]!['item_total'] = '0';
+                        orderLines1[i + 1]!['title'] = '';
+                        orderLines1[i + 1]!['note'] =
+                            selectedOrderLine['note'] ?? '';
+                        orderLines1[i + 1]!['combo'] = '';
+                        // Add more fields as needed
+                      }
+                    }
+
+                    String cashMethodId = '';
+                    String clientId = '';
+                    String pricelistId = '';
+                    String salespersonId = ' ';
+                    String commissionMethodId = '';
+                    String currencyId = ' ';
+
+                    if (widget.info['cashingMethod'] != null) {
+                      cashMethodId =
+                      '${widget.info['cashingMethod']['id']}';
+                    }
+                    if (widget.info['commissionMethod'] != null) {
+                      commissionMethodId =
+                      '${widget.info['commissionMethod']['id']}';
+                    }
+                    if (widget.info['currency'] != null) {
+                      currencyId =
+                      '${widget.info['currency']['id']}';
+                    }
+                    if (widget.info['client'] != null) {
+                      clientId =
+                          widget.info['client']['id'].toString();
+                    } else {}
+                    if (widget.info['pricelist'] != null) {
+                      pricelistId =
+                          widget.info['pricelist']['id'].toString();
+                    }
+                    if (widget.info['salesperson'] != null) {
+                      salespersonId =
+                          widget.info['salesperson']['id']
+                              .toString();
+                    }
+
+                    var res = await updateQuotation(
+                      '${widget.info['id']}',
+                      // false,
+                      '${widget.info['reference'] ?? ''}',
+                      clientId,
+
+                      '${widget.info['validity'] ?? ''}',
+                      '${widget.info['inputDate'] ?? ''}',
+                      '', //todo paymentTermsController.text,
+                      pricelistId,
+                      currencyId,
+                      '${widget.info['termsAndConditions']}',
+                      salespersonId,
+                      commissionMethodId,
+                      cashMethodId,
+                      '${widget.info['commissionRate'] ?? ''}',
+                      '${widget.info['commissionTotal'] ?? ''}',
+                      '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                      '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                      '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                      '${widget.info['globalDiscountAmount'] ?? ''}',
+                      '${widget.info['globalDiscount'] ?? ''}',
+                      '${widget.info['vat'] ?? ''}', //vat
+                      '${widget.info['vatLebanese'] ?? ''}',
+                      '${widget.info['total'] ?? ''}',
+                      '${widget.info['vatExempt'] ?? ''}',
+                      '${widget.info['notPrinted'] ?? ''}',
+                      '${widget.info['printedAsVatExempt'] ?? ''}',
+                      '${widget.info['printedAsPercentage'] ?? ''}',
+                      '${widget.info['vatInclusivePrices'] ?? ''}',
+                      '${widget.info['beforeVatPrices'] ?? ''}',
+
+                      '${widget.info['code'] ?? ''}',
+                      widget.info['status'],
+
+                      orderLines1,
+                      orderedKeys,
+                      '',
+                      widget.info['deliveryTerms'] ?? '',
+                      value,
+                    );
+                    if (res['success'] == true) {
+                      quotationController
+                          .getAllQuotationsFromBack();
+                      homeController.selectedTab.value =
+                      "pending_docs";
+                      CommonWidgets.snackBar(
+                        'Success',
+                        res['message'],
+                      );
+                    } else {
+                      CommonWidgets.snackBar(
+                        'error',
+                        res['message'],
+                      );
+                    }
+                  },
+                  width: widget.isDesktop
+                      ? MediaQuery.of(context).size.width * 0.06
+                      : 150,),
                 // MouseRegion(
                 //   cursor: SystemMouseCursors.click,
                 //   child: GestureDetector(
@@ -733,6 +1036,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                             message: 'preview'.tr,
                             child: InkWell(
                               onTap: () async {
+                                print("globalDiscount on pending docs----");
+                                print(widget.info['globalDiscount'] ?? '0');
                                 itemsInfoPrint = [];
                                 quotationItemInfo = {};
                                 totalAllItems = 0;
@@ -802,6 +1107,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       ),
                                       'item_image': itemImage,
                                       'item_brand': brand,
+                                      'combo_image': '',
+                                      'combo_brand': '',
                                       'title': '',
                                       'isImageList': false,
                                       'note': '',
@@ -824,6 +1131,18 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                     var itemTotal = double.parse(
                                       '${item['combo_total']}',
                                     );
+                                    var combosmap =
+                                        cont.combosMap[item['combo_id']
+                                            .toString()];
+                                    var comboImage =
+                                        '${combosmap['image']}' != '' &&
+                                                combosmap['image'] != null &&
+                                                combosmap['image'].isNotEmpty
+                                            ? '${combosmap['image']}'
+                                            : 'no has image';
+
+                                    var combobrand =
+                                        combosmap['brand'] ?? 'brand not found';
                                     totalAllItems += itemTotal;
                                     var quotationItemInfo = {
                                       'line_type_id': '3',
@@ -841,6 +1160,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'note': '',
                                       'item_image': '',
                                       'item_brand': '',
+                                      'combo_image': comboImage,
+                                      'combo_brand': combobrand,
                                       'isImageList': false,
                                       'title': '',
                                       'image': '',
@@ -857,6 +1178,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_total': '',
                                       'item_image': '',
                                       'item_brand': '',
+                                      'combo_image': '',
+                                      'combo_brand': '',
                                       'note': '',
                                       'isImageList': false,
                                       'title': item['title'],
@@ -874,6 +1197,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_total': '',
                                       'item_image': '',
                                       'item_brand': '',
+                                      'combo_image': '',
+                                      'combo_brand': '',
                                       'title': '',
                                       'note': item['note'],
                                       'isImageList': false,
@@ -891,6 +1216,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_total': '',
                                       'item_image': '',
                                       'item_brand': '',
+                                      'combo_image': '',
+                                      'combo_brand': '',
                                       'title': '',
                                       'note': '',
                                       'image': '$baseImage${item['image']}',
@@ -955,7 +1282,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                         receivedUser: '',
                                         senderUser: homeController.userName,
                                         status: widget.info['status'] ?? '',
-                                        cancellationReason: widget.info['cancellationReason'] ?? '',
+                                        cancellationReason:
+                                            widget.info['cancellationReason'] ??
+                                            '',
                                         totalBeforeVat:
                                             widget.info['totalBeforeVat'] ?? '',
                                         discountOnAllItem:
@@ -966,7 +1295,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                         globalDiscount:
                                             widget.info['globalDiscount'] ??
-                                            '0',
+                                            '0.00',
 
                                         totalPriceAfterDiscount:
                                             formatDoubleWithCommas(
@@ -1914,7 +2243,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                               widget.info['chance'] ?? '',
                                             );
                                             if (res['success'] == true) {
-                                             Get.back();
+                                              Get.back();
                                               quotationController
                                                   .getAllQuotationsFromBack();
 
@@ -2544,14 +2873,14 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                   text: '${widget.info['salesOrderNumber'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
+                          ? MediaQuery.of(context).size.width * 0.07
                           : 150,
                 ),
                 TableItem(
                   text: '${widget.info['createdAtDate'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
+                          ? MediaQuery.of(context).size.width * 0.08
                           : 150,
                 ),
                 TableItem(
@@ -2561,7 +2890,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           : '${widget.info['client']['name'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
+                          ? MediaQuery.of(context).size.width * 0.08
                           : 150,
                 ),
                 TableItem(
@@ -2571,7 +2900,14 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           : '${widget.info['salesperson']['name'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.07
+                          ? MediaQuery.of(context).size.width * 0.06
+                          : 150,
+                ),
+                TableItem(
+                  text:'',
+                  width:
+                      widget.isDesktop
+                          ? MediaQuery.of(context).size.width * 0.06
                           : 150,
                 ),
 
@@ -2731,7 +3067,11 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                         itemTotal,
                                       ),
                                       'item_image': itemImage,
+
+                                      'combo_image': '',
                                       'item_brand': brand,
+                                      'combo_brand': '',
+
                                       'title': '',
                                       'isImageList': false,
                                       'note': '',
@@ -2739,6 +3079,18 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                     };
                                     itemsInfoPrint.add(salesOrderItemInfo);
                                   } else if ('${item['line_type_id']}' == '3') {
+                                    var combosmap =
+                                        cont.combosMap[item['combo_id']
+                                            .toString()];
+                                    var comboImage =
+                                        '${combosmap['image']}' != '' &&
+                                                combosmap['image'] != null &&
+                                                combosmap['image'].isNotEmpty
+                                            ? '${combosmap['image']}'
+                                            : 'no has image';
+
+                                    var combobrand =
+                                        combosmap['brand'] ?? 'brand not found';
                                     var qty = item['combo_quantity'];
 
                                     var ind = cont.combosIdsList.indexOf(
@@ -2770,7 +3122,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       ),
                                       'note': '',
                                       'item_image': '',
+                                      'combo_image': comboImage,
                                       'item_brand': '',
+                                      'combo_brand': combobrand,
                                       'isImageList': false,
                                       'title': '',
                                       'image': '',
@@ -2786,7 +3140,10 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_discount': '0',
                                       'item_total': '',
                                       'item_image': '',
+
+                                      'combo_image': '',
                                       'item_brand': '',
+                                      'combo_brand': '',
                                       'note': '',
                                       'isImageList': false,
                                       'title': item['title'],
@@ -2803,7 +3160,10 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_discount': '0',
                                       'item_total': '',
                                       'item_image': '',
+                                      'combo_image': '',
                                       'item_brand': '',
+                                      'combo_brand': '',
+
                                       'title': '',
                                       'note': item['note'],
                                       'isImageList': false,
@@ -2820,7 +3180,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_discount': '0',
                                       'item_total': '',
                                       'item_image': '',
+                                      'combo_image': '',
                                       'item_brand': '',
+                                      'combo_brand': '',
                                       'title': '',
                                       'note': '',
                                       'image': '$baseImage${item['image']}',
@@ -2879,8 +3241,6 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                     : quotNumber =
                                         widget
                                             .info['quotation']['quotationNumber'];
-                                print("--------------quotNumber");
-                                print(quotNumber);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -3919,14 +4279,14 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                   text: '${widget.info['salesInvoiceNumber'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
+                          ? MediaQuery.of(context).size.width * 0.07
                           : 150,
                 ),
                 TableItem(
                   text: '${widget.info['createdAtDate'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
+                          ? MediaQuery.of(context).size.width * 0.08
                           : 150,
                 ),
                 // TableItem(
@@ -3943,7 +4303,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           : '${widget.info['client']['name'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
+                          ? MediaQuery.of(context).size.width * 0.08
                           : 150,
                 ),
                 TableItem(
@@ -3953,10 +4313,16 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                           : '${widget.info['salesperson']['name'] ?? ''}',
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.07
+                          ? MediaQuery.of(context).size.width * 0.06
                           : 150,
                 ),
-
+                TableItem(
+                  text:'',
+                  width:
+                  widget.isDesktop
+                      ? MediaQuery.of(context).size.width * 0.06
+                      : 150,
+                ),
                 SizedBox(
                   width:
                       widget.isDesktop
@@ -4112,6 +4478,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       ),
                                       'item_image': itemImage,
                                       'item_brand': brand,
+                                      'combo_image': '',
+                                      'combo_brand': '',
                                       'title': '',
                                       'isImageList': false,
                                       'note': '',
@@ -4134,6 +4502,18 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                     var itemTotal = double.parse(
                                       '${item['combo_total']}',
                                     );
+                                    var combosmap =
+                                        cont.combosMap[item['combo_id']
+                                            .toString()];
+                                    var comboImage =
+                                        '${combosmap['image']}' != '' &&
+                                                combosmap['image'] != null &&
+                                                combosmap['image'].isNotEmpty
+                                            ? '${combosmap['image']}'
+                                            : 'no has image';
+
+                                    var combobrand =
+                                        combosmap['brand'] ?? 'brand not found';
                                     totalAllItems += itemTotal;
                                     var quotationItemInfo = {
                                       'line_type_id': '3',
@@ -4151,6 +4531,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'note': '',
                                       'item_image': '',
                                       'item_brand': '',
+                                      'combo_image': comboImage,
+                                      'combo_brand': combobrand,
+
                                       'isImageList': false,
                                       'title': '',
                                       'image': '',
@@ -4167,6 +4550,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_total': '',
                                       'item_image': '',
                                       'item_brand': '',
+                                      'combo_image': '',
+                                      'combo_brand': '',
                                       'note': '',
                                       'isImageList': false,
                                       'title': item['title'],
@@ -4184,6 +4569,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_total': '',
                                       'item_image': '',
                                       'item_brand': '',
+                                      'combo_image': '',
+                                      'combo_brand': '',
                                       'title': '',
                                       'note': item['note'],
                                       'isImageList': false,
@@ -4201,6 +4588,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_total': '',
                                       'item_image': '',
                                       'item_brand': '',
+                                      'combo_image': '',
+                                      'combo_brand': '',
                                       'title': '',
                                       'note': '',
                                       'image': '$baseImage${item['image']}',

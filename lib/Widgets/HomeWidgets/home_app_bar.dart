@@ -314,7 +314,7 @@ class _AdminSectionInHomeAppBarState extends State<AdminSectionInHomeAppBar> {
                           // }));
 
                           await saveUserInfoLocally('', '', '', '', '','',);
-                          await saveCompanySettingsLocally('', '','','','', '','','', '','','','','','','','','','','','','','','','');
+                          await saveCompanySettingsLocally('', '','','','', '','','', '','','','','','','','','','','','','','','','','');
                           // Get.reset();
 
                           emailController.clear();

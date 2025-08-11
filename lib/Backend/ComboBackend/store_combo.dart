@@ -10,6 +10,8 @@ Future storeCombo(
   String currencyId,
   String price,
   String active,
+  String brand,
+  List<int> featureimage,
   Map items,
 ) async {
   String token = await getAccessTokenFromPref();
@@ -21,7 +23,15 @@ Future storeCombo(
     "currencyId": currencyId,
     "price": price,
     "active": '1',
+    'brand': brand,
+    // "image": MultipartFile.fromBytes(image, filename: "image.jpg"),
   });
+  formData.files.addAll([
+    MapEntry(
+      "image",
+      MultipartFile.fromBytes(featureimage ?? [], filename: "featureimage.jpg"),
+    ),
+  ]);
   for (int i = 1; i < items.length + 1; i++) {
     formData.fields.addAll([
       //   MapEntry("back value",'front value')
@@ -32,9 +42,6 @@ Future storeCombo(
       MapEntry("items[$i][discount]", '${items[i]['discount']}'),
     ]);
   }
-  // print("form data*******************");
-  // print(formData.fields);
-
   Response response = await Dio()
       .post(
         kStoreComboUrl,

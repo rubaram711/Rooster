@@ -215,9 +215,6 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
   String oldTermsAndConditionsString = '';
   @override
   void initState() {
-    // print('widget.info');
-    // print(widget.info);
-
     checkVatExempt();
     getCurrency();
     salesOrderController.orderedKeys = [];
@@ -3086,6 +3083,10 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                           } else {
                             if (_formKey.currentState!.validate()) {
                               _saveContent();
+                              print("inUPdateSalesorder----------------");
+                              print(
+                                salesOrderController.rowsInListViewInSalesOrder,
+                              );
                               var res = await updateSalesOrder(
                                 '${widget.info['id']}',
                                 false,
@@ -3461,6 +3462,8 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
       warehouseNameController.text =
           salesOrderController
               .warehousesNames['${widget.info['item_warehouse_id']}'];
+      print("in item row in Update------");
+      print(warehouseNameController.text);
 
       discountController.text = widget.info['item_discount'] ?? '0.0';
       discount = widget.info['item_discount'] ?? '0.0';
@@ -4620,7 +4623,9 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
       warehouseComboController.text =
           salesOrderController
-              .warehousesNames['${widget.info['combo_warehouse_id'] ?? 10}'];
+              .warehousesNames['${widget.info['combo_warehouse_id']}'];
+      print("in combo row in Update------");
+      print(warehouseComboController.text);
       discountController.text = widget.info['combo_discount'] ?? '';
       discount = widget.info['combo_discount'] ?? '0.0';
       salesOrderController.rowsInListViewInSalesOrder[widget

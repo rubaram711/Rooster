@@ -823,7 +823,9 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                     itemTotal,
                                   ),
                                   'item_image': itemImage,
+                                  'combo_image': '',
                                   'item_brand': brand,
+                                  'combo_brand': '',
                                   'title': '',
                                   'isImageList': false,
                                   'note': '',
@@ -846,6 +848,17 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 var itemTotal = double.parse(
                                   '${item['combo_total']}',
                                 );
+                                var combosmap =
+                                    cont.combosMap[item['combo_id'].toString()];
+                                var comboImage =
+                                    '${combosmap['image']}' != '' &&
+                                            combosmap['image'] != null &&
+                                            combosmap['image'].isNotEmpty
+                                        ? '${combosmap['image']}'
+                                        : 'no has image';
+
+                                var combobrand =
+                                    combosmap['brand'] ?? 'brand not found';
                                 totalAllItems += itemTotal;
                                 var quotationItemInfo = {
                                   'line_type_id': '3',
@@ -862,7 +875,9 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   ),
                                   'note': '',
                                   'item_image': '',
+                                  'combo_image': comboImage,
                                   'item_brand': '',
+                                  'combo_brand': combobrand,
                                   'isImageList': false,
                                   'title': '',
                                   'image': '',
@@ -878,7 +893,9 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   'item_discount': '0',
                                   'item_total': '',
                                   'item_image': '',
+                                  'combo_image': '',
                                   'item_brand': '',
+                                  'combo_brand': '',
                                   'note': '',
                                   'isImageList': false,
                                   'title': item['title'],
@@ -895,7 +912,9 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   'item_discount': '0',
                                   'item_total': '',
                                   'item_image': '',
+                                  'combo_image': '',
                                   'item_brand': '',
+                                  'combo_brand': '',
                                   'title': '',
                                   'note': item['note'],
                                   'isImageList': false,
@@ -912,7 +931,9 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   'item_discount': '0',
                                   'item_total': '',
                                   'item_image': '',
+                                  'combo_image': '',
                                   'item_brand': '',
+                                  'combo_brand': '',
                                   'title': '',
                                   'note': '',
                                   'image': '$baseImage${item['image']}',
@@ -951,8 +972,6 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 ? quotNumber = ''
                                 : quotNumber =
                                     widget.info['quotation']['quotationNumber'];
-                            print("--------------quotNumber");
-                            print(quotNumber);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -991,7 +1010,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                     formatDoubleWithCommas(totalAllItems),
 
                                     globalDiscount:
-                                        widget.info['globalDiscount'] ?? '0',
+                                        widget.info['globalDiscount'] ?? '0.00',
 
                                     totalPriceAfterDiscount:
                                         formatDoubleWithCommas(

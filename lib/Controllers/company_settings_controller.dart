@@ -15,6 +15,7 @@ class CompanySettingsController extends GetxController {
 
   Uint8List? imageFile;
   String selectedPhoneCode = '', selectedMobileCode = '',logo='';
+  TextEditingController headerName=TextEditingController();
   TextEditingController fullCompanyName=TextEditingController();
   TextEditingController address=TextEditingController();
   TextEditingController mobile=TextEditingController();
@@ -97,6 +98,7 @@ class CompanySettingsController extends GetxController {
     selectedPhoneCode = '';
     selectedMobileCode = '';
     fullCompanyName.clear();
+    headerName.clear();
     address.clear();
     mobile.clear();
     phone.clear();
@@ -106,5 +108,77 @@ class CompanySettingsController extends GetxController {
     localPayments.clear();
     vat.clear();
     update();
+  }
+
+
+  List<Map> headersList=[
+    { 'logo':'',
+      'fullCompanyName': '',
+      'companyEmail': '',
+      'vat': '',
+      'trn': '',
+      'bankInfo': '',
+      'phoneCode': '+961',
+      'phoneNumber': '',
+      'mobileCode': '+961',
+      'mobileNumber': '',
+      'address': '',
+      'localPayments': '',
+      'companySubjectToVat': '',
+      'headerName': '',}
+  ];
+  setFirstHeader(Map header){
+    headersList[0]=header;
+    update();
+  }
+  addToHeadersList(Map newMap){
+    headersList.add(newMap);
+    update();
+  }
+
+  updateLogo(int index,String newVal){
+    headersList[index]['logo']=newVal;
+  }
+  updateLogoFile(int index,Uint8List val){
+    headersList[index]['logo']=val;
+  }
+  updateFullCompanyName(int index,String newVal){
+    headersList[index]['fullCompanyName']=newVal;
+  }
+  updateCompanyEmail(int index,String newVal){
+    headersList[index]['companyEmail']=newVal;
+  }
+  updateVat(int index,String newVal){
+    headersList[index]['vat']=newVal;
+  }
+  updateTrn(int index,String newVal){
+    headersList[index]['trn']=newVal;
+  }
+  updatePhoneCode(int index,String newVal){
+    headersList[index]['phoneCode']=newVal;
+  }
+  updatePhoneNumber(int index,String newVal){
+    headersList[index]['phoneNumber']=newVal;
+  }
+  updateBankInfo(int index,String newVal){
+    headersList[index]['bankInfo']=newVal;
+  }
+  updateMobileCode(int index,String newVal){
+    headersList[index]['mobileCode']=newVal;
+  }
+  updateMobileNumber(int index,String newVal){
+    headersList[index]['mobileNumber']=newVal;
+  }
+  updateAddress(int index,String newVal){
+    headersList[index]['address']=newVal;
+  }
+  updateLocalPayments(int index,String newVal){
+    headersList[index]['localPayments']=newVal;
+  }
+  updateHeaderName(int index,String newVal){
+    headersList[index]['headerName']=newVal;
+  }
+  updateCompanySubjectToVat(int index,String newVal){
+    headersList[index]['companySubjectToVat']=newVal;
   }
 }

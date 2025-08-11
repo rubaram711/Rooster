@@ -114,6 +114,7 @@ saveCompanySettingsLocally(
     String primaryCurrencyLatestRate,
     String posCurrencyLatestRate,
   String showLogoOnPos,
+  String headerName,
 ) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('costCalculationType', costCalculationType);
@@ -140,6 +141,7 @@ saveCompanySettingsLocally(
   prefs.setString('posCurrencyLatestRate', posCurrencyLatestRate);
   prefs.setString('primaryCurrencyLatestRate', primaryCurrencyLatestRate);
   prefs.setString('companySubjectToVat', companySubjectToVat);
+  prefs.setString('headerName', headerName);
 }
 
 Future<String> getFullCompanyNameFromPref() async {
@@ -266,4 +268,10 @@ Future<String> getPrimaryCurrencyLatestRateFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String primaryCurrencyLatestRate = prefs.getString('primaryCurrencyLatestRate') ?? '1';
   return primaryCurrencyLatestRate;
+}
+
+Future<String> getHeaderNameFromPref() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String headerName = prefs.getString('headerName') ?? '';
+  return headerName;
 }

@@ -224,6 +224,25 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
           imageProviders[item['image']] = null;
         }
       }
+      if (item['line_type_id'] == '3') {
+        if (item['combo_image'] != null) {
+          try {
+            final response = await http.get(Uri.parse(item['combo_image']));
+            if (response.statusCode == 200) {
+              imageProviders[item['combo_image']] = pw.MemoryImage(
+                response.bodyBytes,
+              );
+            } else {
+              imageProviders[item['combo_image']] =
+                  null; // Store null if image fails to load
+            }
+          } catch (e) {
+            imageProviders[item['combo_image']] = null;
+          }
+        } else {
+          imageProviders[item['combo_image']] = null;
+        }
+      }
     }
     // 000
     // await preFetchImages(deliveryController.itemList);
@@ -232,9 +251,12 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
     var gapW20 = pw.SizedBox(width: 20);
     var gapW180 = pw.SizedBox(width: 180);
     var gapH4 = pw.SizedBox(height: 4);
+    var gapH2 = pw.SizedBox(height: 2);
     var gapH6 = pw.SizedBox(height: 6);
     final font = await rootBundle.load('assets/fonts/Tajawal-Medium.ttf');
     final arabicFont = pw.Font.ttf(font);
+    final italicfont = await rootBundle.load('assets/fonts/Roboto-Italic.ttf');
+    final italicRobotoFont = pw.Font.ttf(italicfont);
     tableTitle({required String text, required double width}) {
       return pw.SizedBox(
         width: width,
@@ -244,7 +266,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
           style: pw.TextStyle(
             color: PdfColors.black,
             fontSize: 7,
-            fontWeight: pw.FontWeight.bold,
+            fontWeight: pw.FontWeight.normal,
           ),
         ),
       );
@@ -317,6 +339,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
     reusableRowInDeliveries({
       required Map quotationItemInfo,
       required int index,
+      required pw.ImageProvider? imageProvider,
     }) {
       return pw.Container(
         margin: const pw.EdgeInsets.symmetric(vertical: 8),
@@ -325,7 +348,27 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                 ? pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                   children: [
-                    reusableShowInfoCard(text: '---', width: width * 0.05),
+                    pw.Column(
+                      children: [
+                        reusableShowInfoCard(
+                          text:
+                              quotationItemInfo['combo_brand'] != ''
+                                  ? quotationItemInfo['combo_brand']
+                                  : '---',
+                          width: width * 0.05,
+                        ),
+                        gapH4,
+                        gapH4,
+                        if (imageProvider != null)
+                          pw.Image(
+                            imageProvider,
+                            fit: pw.BoxFit.contain,
+                            width: 50,
+                            height: 50,
+                          ),
+                      ],
+                    ),
+
                     reusableShowInfoCard(
                       text: '${quotationItemInfo['item_name'] ?? ''}',
                       width: width * 0.05,
@@ -351,9 +394,25 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                     pw.Container(
                       padding: pw.EdgeInsets.symmetric(horizontal: 10),
                       width: width * 0.35,
-                      child: pw.Text(
-                        '${quotationItemInfo['title'] ?? ''}',
-                        style: pw.TextStyle(fontSize: 7, font: arabicFont),
+                      child: pw.Column(
+                        children: [
+                          pw.Divider(
+                            height: 5,
+                            color: PdfColors.black,
+                            // endIndent: 250
+                          ),
+                          gapH4,
+                          pw.Text(
+                            '${quotationItemInfo['title'] ?? ''}',
+                            style: pw.TextStyle(fontSize: 7, font: arabicFont),
+                          ),
+
+                          pw.Divider(
+                            height: 5,
+                            color: PdfColors.black,
+                            // endIndent: 250
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -366,8 +425,11 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                       padding: pw.EdgeInsets.symmetric(horizontal: 10),
                       width: width * 0.35,
                       child: pw.Text(
-                        '${quotationItemInfo['note'] ?? ''}',
-                        style: pw.TextStyle(fontSize: 7, font: arabicFont),
+                        'Note : ${quotationItemInfo['note'] ?? ''}',
+                        style: pw.TextStyle(
+                          fontSize: 7,
+                          font: italicRobotoFont,
+                        ),
                       ),
                     ),
                   ],
@@ -461,17 +523,6 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                   width: 180, // Set the desired width
                                   height: 70, // Set the desired height
                                   child: pw.Image(image),
-
-                                  // pw.Image(
-                                  //   pw.MemoryImage(
-                                  //     (deliveryController.logoBytes).buffer.asUint8List(),
-                                  //   ),
-                                  //   fit:
-                                  //       pw
-                                  //           .BoxFit
-                                  //           .contain, // Display the image at its original size
-                                  // ),
-                                  // alignment: pw.Alignment.topLeft, // Align the image to the top-left (optional, but recommended)
                                 ),
                               ],
                             ),
@@ -480,7 +531,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                       ),
 
                       pw.SizedBox(
-                        width: width * 0.15,
+                        width: width * 0.125,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
                           children: [
@@ -493,7 +544,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                   fullCompanyName,
                                   style: pw.TextStyle(
                                     fontSize: 7,
-                                    fontWeight: pw.FontWeight.bold,
+                                    fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
                                 ),
@@ -595,7 +646,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                   'delivery'.tr,
                                   style: pw.TextStyle(
                                     fontSize: 12,
-                                    fontWeight: pw.FontWeight.bold,
+                                    fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
                                 ),
@@ -616,7 +667,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                   '${'to'.tr}:',
                                   style: pw.TextStyle(
                                     fontSize: 7,
-                                    fontWeight: pw.FontWeight.bold,
+                                    fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
                                 ),
@@ -625,7 +676,16 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                   '${'telephone'.tr}:',
                                   style: pw.TextStyle(
                                     fontSize: 7,
-                                    fontWeight: pw.FontWeight.bold,
+                                    fontWeight: pw.FontWeight.normal,
+                                    color: PdfColors.black,
+                                  ),
+                                ),
+                                gapH4,
+                                pw.Text(
+                                  '${'address'.tr}:',
+                                  style: pw.TextStyle(
+                                    fontSize: 7,
+                                    fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
                                 ),
@@ -643,6 +703,8 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 ),
                                 gapH4,
                                 reusableText(widget.clientPhoneNumber),
+                                gapH4,
+                                reusableText(companyAddress),
                               ],
                             ),
                           ],
@@ -661,7 +723,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                   '${'offer_no'.tr}:',
                                   style: pw.TextStyle(
                                     fontSize: 7,
-                                    fontWeight: pw.FontWeight.bold,
+                                    fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
                                 ),
@@ -670,7 +732,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                   '${'sales_person'.tr}:',
                                   style: pw.TextStyle(
                                     fontSize: 7,
-                                    fontWeight: pw.FontWeight.bold,
+                                    fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
                                 ),
@@ -679,7 +741,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                   '${'date'.tr}:',
                                   style: pw.TextStyle(
                                     fontSize: 7,
-                                    fontWeight: pw.FontWeight.bold,
+                                    fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
                                 ),
@@ -691,7 +753,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 //       '${'$primaryCurrency/${widget.deliveryCurrency} rate'.tr}:',
                                 //       style: pw.TextStyle(
                                 //         fontSize: 7,
-                                //         fontWeight: pw.FontWeight.bold,
+                                //         fontWeight: pw.FontWeight.normal,
                                 //         color: PdfColors.black,
                                 //       ),
                                 //     )
@@ -705,6 +767,33 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                     ],
                   ),
                 ),
+                // sequence of workflow
+                pw.Padding(
+                  padding: pw.EdgeInsets.fromLTRB(0, 25, 0, 0),
+                  child:
+                  // to
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
+                    children: [
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.center,
+                        children: [
+                          tableTitle(text: 'Delivery', width: width * 0.07),
+                        ],
+                      ),
+                      gapH2,
+                      pw.SizedBox(
+                        width: width * 0.07,
+                        child: pw.Divider(
+                          height: 5,
+                          color: PdfColors.black,
+                          // endIndent: 250
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
                 //////////////////////////////////////////////////////////////
                 // orderLine quotation table
                 pw.Padding(
@@ -771,6 +860,8 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                               : reusableRowInDeliveries(
                                 quotationItemInfo: item,
                                 index: index,
+                                imageProvider:
+                                    imageProviders[item['combo_image']],
                               );
                         },
                       ),
@@ -1381,7 +1472,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
 //           style: pw.TextStyle(
 //             color: PdfColors.black,
 //             fontSize: 9,
-//             fontWeight: pw.FontWeight.bold,
+//             fontWeight: pw.FontWeight.normal,
 //           ),
 //         ),
 //       );
@@ -1393,7 +1484,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
 //         style: pw.TextStyle(
 //           color: PdfColors.black,
 //           fontSize: 12,
-//           fontWeight: pw.FontWeight.bold,
+//           fontWeight: pw.FontWeight.normal,
 //         ),
 //       );
 //     }

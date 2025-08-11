@@ -6,12 +6,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
+import 'package:rooster_app/Controllers/products_controller.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
+import 'package:rooster_app/Screens/Products/CreateProductDialog/create_product_dialog.dart';
 import 'package:rooster_app/Widgets/TransferWidgets/reusable_show_info_card.dart';
 import 'package:rooster_app/Widgets/add_photo_circle.dart';
 import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
 import 'package:rooster_app/Widgets/reusable_add_card.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
+import 'package:rooster_app/Widgets/reusable_drop_down_menu.dart';
 import 'package:rooster_app/Widgets/reusable_text_field.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
 import 'package:rooster_app/Widgets/table_title.dart';
@@ -23,7 +26,7 @@ import '../../../const/colors.dart';
 import '../../Widgets/reusable_more.dart';
 
 class Combo extends StatefulWidget {
-  const Combo({super.key, this.isCombosPageIsLastPage=false});
+  const Combo({super.key, this.isCombosPageIsLastPage = false});
   final bool isCombosPageIsLastPage;
   @override
   State<Combo> createState() => _ComboState();
@@ -41,6 +44,17 @@ class _ComboState extends State<Combo> {
   TextEditingController brandController = TextEditingController();
   final TextEditingController comboMainDescriptionController =
       TextEditingController();
+  double totalSum = 0.0;
+
+  void handleRowTotal(double rowTotal) {
+    setState(() {
+      totalSum += rowTotal;
+      // You might want to recalculate totalSum from scratch each time,
+      // so for accuracy, re-calculate in this method instead.
+    });
+    // Update total field
+    comboPriceController.text = totalSum.toStringAsFixed(2);
+  }
 
   int comboCounter = 0;
   String selectedCurrency = '';
@@ -68,7 +82,15 @@ class _ComboState extends State<Combo> {
   late Uint8List imageFile;
   @override
   void initState() {
-    comboController.isCombosPageIsLastPage=widget.isCombosPageIsLastPage;
+    imageFile = Uint8List(0);
+    setState(() {
+      comboPriceController.text = overallTotal.toString();
+    });
+
+    comboController.photosFilesList = [];
+    comboController.photosWidgetsMap = {};
+    comboController.photosListWidth = 0;
+    comboController.isCombosPageIsLastPage = widget.isCombosPageIsLastPage;
     comboController.orderLinesComboList = {};
     comboController.rowsInListViewInCombo = {};
     comboController.getComboCreatFieldFromBack();
@@ -80,6 +102,7 @@ class _ComboState extends State<Combo> {
     super.initState();
   }
 
+  // final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ComboController>(
@@ -92,418 +115,434 @@ class _ComboState extends State<Combo> {
           height: MediaQuery.of(context).size.height * 0.95,
           margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
           // padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  DialogTitle(text: 'create_new_combo'.tr),
-                  gapW100,
-                  InkWell(
-                    onTap: () {
-                      comboController.resetCombo();
-                      Get.back();
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: Primary.primary,
-                      radius: 15,
-                      child: const Icon(
-                        Icons.close_rounded,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              GetBuilder<ComboController>(
-                builder: (cont) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: 150,
-                        width:
-                            cont.photosListWidth >
-                                    MediaQuery.of(context).size.width * 0.1
-                                ? MediaQuery.of(context).size.width * 0.1
-                                : cont.photosListWidth,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: cont.photosWidgetsMap.values.toList(),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    DialogTitle(text: 'create_new_combo'.tr),
+                    gapW100,
+                    InkWell(
+                      onTap: () {
+                        comboController.resetCombo();
+                        Get.back();
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Primary.primary,
+                        radius: 15,
+                        child: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                          size: 20,
                         ),
                       ),
-                      ReusableAddPhotoCircle(
-                        onTapCircle: () async {
-                          final image = await ImagePickerHelper.pickImage();
-                          setState(() {
-                            imageFile = image!;
-                            var index = 1;
-                            cont.addImageToPhotosWidgetsMap(
-                              index,
-                              ReusablePhotoCircleInProduct(
-                                imageFilePassed: imageFile,
-                                func: () {
-                                  cont.removeFromImagesList(index);
-                                },
-                              ),
-                            );
-                            cont.addImageToPhotosFilesList(imageFile);
-                            cont.photosListWidth == 0
-                                ? cont.setPhotosListWidth(
-                                  cont.photosListWidth + 130,
-                                )
-                                : cont.setPhotosListWidth(cont.photosListWidth);
-                          });
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-              gapH16,
-              Text(
-                "Combo's Name",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17.00,
+                    ),
+                  ],
                 ),
-              ),
-              gapH10,
-              ReusableTextField(
-                onChangedFunc: () {},
-                validationFunc: () {},
-                hint: " ",
-                isPasswordField: false,
-                textEditingController: comboNameController,
-              ),
-              gapH10,
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  DialogTextField(
-                    read: true,
-                    textEditingController: comboCodeController,
-                    text: 'combo_code'.tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.30,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.20,
-                    validationFunc: (value) {
-                      if (value.isEmpty) {
-                        return 'required_field'.tr;
-                      }
-                      return null;
-                    },
-                  ),
-                  DialogNumericTextField(
-                    validationFunc: () {},
-                    text: "total".tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.30,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.20,
-                    textEditingController: comboPriceController,
-                  ),
-                ],
-              ),
-              gapH10,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //to use ity again
+                //in way circle
+                GetBuilder<ComboController>(
+                  builder: (cont) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text('currency'.tr),
-                        GetBuilder<ExchangeRatesController>(
-                          builder: (cont) {
-                            return DropdownMenu<String>(
-                              width: MediaQuery.of(context).size.width * 0.20,
-                              // requestFocusOnTap: false,
-                              enableSearch: true,
-                              controller: comboCurrenceController,
-                              hintText: '',
-                              inputDecorationTheme: InputDecorationTheme(
-                                // filled: true,
-                                hintStyle: const TextStyle(
-                                  fontStyle: FontStyle.italic,
+                        SizedBox(
+                          height: 150,
+                          width:
+                              cont.photosListWidth >
+                                      MediaQuery.of(context).size.width * 0.1
+                                  ? MediaQuery.of(context).size.width * 0.1
+                                  : cont.photosListWidth,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: cont.photosWidgetsMap.values.toList(),
+                          ),
+                        ),
+                        ReusableAddPhotoCircle(
+                          onTapCircle: () async {
+                            final image = await ImagePickerHelper.pickImage();
+                            setState(() {
+                              imageFile = image!;
+                              var index = 1;
+                              cont.addImageToPhotosWidgetsMap(
+                                index,
+                                ReusablePhotoCircleInProduct(
+                                  imageFilePassed: imageFile,
+                                  func: () {
+                                    cont.removeFromImagesList(index);
+                                  },
                                 ),
-                                contentPadding: const EdgeInsets.fromLTRB(
-                                  20,
-                                  0,
-                                  25,
-                                  5,
-                                ),
-                                // outlineBorder: BorderSide(color: Colors.black,),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Primary.primary.withAlpha(
-                                      (0.2 * 255).toInt(),
-                                    ),
-                                    width: 1,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Primary.primary.withAlpha(
-                                      (0.4 * 255).toInt(),
-                                    ),
-                                    width: 2,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                              ),
-                              // menuStyle: ,
-                              menuHeight: 250,
-                              dropdownMenuEntries:
-                                  cont.currenciesNamesList
-                                      .map<DropdownMenuEntry<String>>((
-                                        String option,
-                                      ) {
-                                        return DropdownMenuEntry<String>(
-                                          value: option,
-                                          label: option,
-                                        );
-                                      })
-                                      .toList(),
-                              enableFilter: true,
-                              onSelected: (String? val) {
-                                setState(() {
-                                  selectedCurrency = val!;
-                                  var index = cont.currenciesNamesList.indexOf(
-                                    val,
+                              );
+                              cont.addImageToPhotosFilesList(imageFile);
+                              cont.photosListWidth == 0
+                                  ? cont.setPhotosListWidth(
+                                    cont.photosListWidth + 130,
+                                  )
+                                  : cont.setPhotosListWidth(
+                                    cont.photosListWidth,
                                   );
-                                  comboController.setSelectedCurrency(
-                                    cont.currenciesIdsList[index],
-                                    val,
-                                  );
-                                  comboController.setSelectedCurrencySymbol(
-                                    cont.currenciesSymbolsList[index],
-                                  );
-                                  var result = cont.exchangeRatesList
-                                      .firstWhere(
-                                        (item) => item["currency"] == val,
-                                        orElse: () => null,
-                                      );
-                                  comboController
-                                      .setExchangeRateForSelectedCurrency(
-                                        result != null
-                                            ? '${result["exchange_rate"]}'
-                                            : '1',
-                                      );
-                                });
-                                var keys =
-                                    comboController.unitPriceControllers.keys
-                                        .toList();
-                                for (
-                                  int i = 0;
-                                  i <
-                                      comboController
-                                          .unitPriceControllers
-                                          .length;
-                                  i++
-                                ) {
-                                  var selectedItemId =
-                                      '${comboController.rowsInListViewInCombo[keys[i]]['item_id']}';
-                                  if (selectedItemId != '') {
-                                    if (comboController
-                                            .priceCurrency[selectedItemId] ==
-                                        val) {
-                                      comboController
-                                          .unitPriceControllers[keys[i]]!
-                                          .text = comboController
-                                              .itemUnitPrice[selectedItemId]
-                                              .toString();
-                                    } else if (comboController
-                                                .selectedCurrencyName ==
-                                            'USD' &&
-                                        comboController
-                                                .priceCurrency[selectedItemId] !=
-                                            val) {
-                                      var result = exchangeRatesController
-                                          .exchangeRatesList
-                                          .firstWhere(
-                                            (item) =>
-                                                item["currency"] ==
-                                                comboController
-                                                    .priceCurrency[selectedItemId],
-                                            orElse: () => null,
-                                          );
-                                      var divider = '1';
-                                      if (result != null) {
-                                        divider =
-                                            result["exchange_rate"].toString();
-                                      }
-                                      comboController
-                                              .unitPriceControllers[keys[i]]!
-                                              .text =
-                                          '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                    } else if (comboController
-                                                .selectedCurrencyName !=
-                                            'USD' &&
-                                        comboController
-                                                .priceCurrency[selectedItemId] ==
-                                            'USD') {
-                                      comboController
-                                              .unitPriceControllers[keys[i]]!
-                                              .text =
-                                          '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) * double.parse(comboController.exchangeRateForSelectedCurrency))}')}';
-                                    } else {
-                                      var result = exchangeRatesController
-                                          .exchangeRatesList
-                                          .firstWhere(
-                                            (item) =>
-                                                item["currency"] ==
-                                                comboController
-                                                    .priceCurrency[selectedItemId],
-                                            orElse: () => null,
-                                          );
-                                      var divider = '1';
-                                      if (result != null) {
-                                        divider =
-                                            result["exchange_rate"].toString();
-                                      }
-                                      var usdPrice =
-                                          '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                      comboController
-                                              .unitPriceControllers[keys[i]]!
-                                              .text =
-                                          '${double.parse('${(double.parse(usdPrice) * double.parse(comboController.exchangeRateForSelectedCurrency))}')}';
-                                    }
-
-                                    comboController
-                                        .unitPriceControllers[keys[i]]!
-                                        .text = double.parse(
-                                      comboController
-                                          .unitPriceControllers[keys[i]]!
-                                          .text,
-                                    ).toStringAsFixed(2);
-                                    var totalLine =
-                                        '${(int.parse(comboController.rowsInListViewInCombo[keys[i]]['quantity']) * double.parse(comboController.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(comboController.rowsInListViewInCombo[keys[i]]['discount']) / 100)}';
-
-                                    comboController.setEnteredUnitPriceInCombo(
-                                      keys[i],
-                                      comboController
-                                          .unitPriceControllers[keys[i]]!
-                                          .text,
-                                    );
-                                    comboController
-                                        .setItemtotalInListViewLengthInCombo(
-                                          keys[i],
-                                          totalLine,
-                                        );
-                                    comboController.getTotalItems();
-                                  }
-                                }
-                              },
-                            );
+                            });
                           },
                         ),
                       ],
-                    ),
-                  ),
+                    );
+                  },
+                ),
 
-                  DialogTextField(
-                    validationFunc: () {},
-                    text: "brand".tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.20,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.17,
-                    textEditingController: brandController,
+                gapH16,
+                Text(
+                  "Combo's Name",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17.00,
                   ),
-                  DialogTextField(
-                    validationFunc: () {},
-                    text: "main_description".tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.30,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.20,
-                    textEditingController: comboMainDescriptionController,
-                  ),
-                ],
-              ),
+                ),
+                gapH10,
+                ReusableTextField(
+                  onChangedFunc: () {},
+                  validationFunc: () {},
+                  hint: " ",
+                  isPasswordField: false,
+                  textEditingController: comboNameController,
+                ),
+                gapH10,
 
-              gapH20,
-              Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: MediaQuery.of(context).size.width * 0.01,
-                      vertical: 15,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    DialogTextField(
+                      read: true,
+                      textEditingController: comboCodeController,
+                      text: 'combo_code'.tr,
+                      rowWidth: MediaQuery.of(context).size.width * 0.30,
+                      textFieldWidth: MediaQuery.of(context).size.width * 0.20,
+                      validationFunc: (value) {
+                        if (value.isEmpty) {
+                          return 'required_field'.tr;
+                        }
+                        return null;
+                      },
                     ),
-                    decoration: BoxDecoration(
-                      color: Primary.primary,
-                      borderRadius: const BorderRadius.all(Radius.circular(6)),
-                    ),
-                    child: Row(
-                      children: [
-                        gapW16,
-                        TableTitle(
-                          text: 'item_code'.tr,
-                          isCentered: false,
-                          width: MediaQuery.of(context).size.width * 0.19,
-                        ),
 
-                        TableTitle(
-                          text: 'description'.tr,
-                          isCentered: false,
-                          width: MediaQuery.of(context).size.width * 0.25,
-                        ),
-
-                        TableTitle(
-                          text: 'quantity'.tr,
-                          isCentered: false,
-                          width: MediaQuery.of(context).size.width * 0.07,
-                        ),
-                        TableTitle(
-                          text: 'unit_price'.tr,
-                          isCentered: false,
-                          width: MediaQuery.of(context).size.width * 0.07,
-                        ),
-                        TableTitle(
-                          text: '${'disc'.tr}. %',
-                          isCentered: false,
-                          width: MediaQuery.of(context).size.width * 0.07,
-                        ),
-                        TableTitle(
-                          text: 'total'.tr,
-                          isCentered: false,
-                          width: MediaQuery.of(context).size.width * 0.07,
-                        ),
-                        TableTitle(
-                          text: '     ${'more_options'.tr}',
-                          isCentered: false,
-                          width: MediaQuery.of(context).size.width * 0.07,
-                        ),
-                      ],
+                    DialogNumericTextField(
+                      validationFunc: () {},
+                      text: "total".tr,
+                      rowWidth: MediaQuery.of(context).size.width * 0.30,
+                      textFieldWidth: MediaQuery.of(context).size.width * 0.20,
+                      textEditingController: comboPriceController,
                     ),
-                  ),
-                  //********************************Get Builder For Table Row********************************************* */
-                  GetBuilder<ComboController>(
-                    builder: (cont) {
-                      return Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width * 0.01,
-                        ),
-                        decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(6),
-                            bottomRight: Radius.circular(6),
+                  ],
+                ),
+                gapH10,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('currency'.tr),
+                          GetBuilder<ExchangeRatesController>(
+                            builder: (cont) {
+                              return DropdownMenu<String>(
+                                width: MediaQuery.of(context).size.width * 0.20,
+                                // requestFocusOnTap: false,
+                                enableSearch: true,
+                                controller: comboCurrenceController,
+                                hintText: '',
+                                inputDecorationTheme: InputDecorationTheme(
+                                  // filled: true,
+                                  hintStyle: const TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  contentPadding: const EdgeInsets.fromLTRB(
+                                    20,
+                                    0,
+                                    25,
+                                    5,
+                                  ),
+                                  // outlineBorder: BorderSide(color: Colors.black,),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Primary.primary.withAlpha(
+                                        (0.2 * 255).toInt(),
+                                      ),
+                                      width: 1,
+                                    ),
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(9),
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Primary.primary.withAlpha(
+                                        (0.4 * 255).toInt(),
+                                      ),
+                                      width: 2,
+                                    ),
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(9),
+                                    ),
+                                  ),
+                                ),
+                                // menuStyle: ,
+                                menuHeight: 250,
+                                dropdownMenuEntries:
+                                    cont.currenciesNamesList
+                                        .map<DropdownMenuEntry<String>>((
+                                          String option,
+                                        ) {
+                                          return DropdownMenuEntry<String>(
+                                            value: option,
+                                            label: option,
+                                          );
+                                        })
+                                        .toList(),
+                                enableFilter: true,
+                                onSelected: (String? val) {
+                                  setState(() {
+                                    selectedCurrency = val!;
+                                    var index = cont.currenciesNamesList
+                                        .indexOf(val);
+                                    comboController.setSelectedCurrency(
+                                      cont.currenciesIdsList[index],
+                                      val,
+                                    );
+                                    comboController.setSelectedCurrencySymbol(
+                                      cont.currenciesSymbolsList[index],
+                                    );
+                                    var result = cont.exchangeRatesList
+                                        .firstWhere(
+                                          (item) => item["currency"] == val,
+                                          orElse: () => null,
+                                        );
+                                    comboController
+                                        .setExchangeRateForSelectedCurrency(
+                                          result != null
+                                              ? '${result["exchange_rate"]}'
+                                              : '1',
+                                        );
+                                  });
+                                  var keys =
+                                      comboController.unitPriceControllers.keys
+                                          .toList();
+                                  for (
+                                    int i = 0;
+                                    i <
+                                        comboController
+                                            .unitPriceControllers
+                                            .length;
+                                    i++
+                                  ) {
+                                    var selectedItemId =
+                                        '${comboController.rowsInListViewInCombo[keys[i]]['item_id']}';
+                                    if (selectedItemId != '') {
+                                      if (comboController
+                                              .priceCurrency[selectedItemId] ==
+                                          val) {
+                                        comboController
+                                            .unitPriceControllers[keys[i]]!
+                                            .text = comboController
+                                                .itemUnitPrice[selectedItemId]
+                                                .toString();
+                                      } else if (comboController
+                                                  .selectedCurrencyName ==
+                                              'USD' &&
+                                          comboController
+                                                  .priceCurrency[selectedItemId] !=
+                                              val) {
+                                        var result = exchangeRatesController
+                                            .exchangeRatesList
+                                            .firstWhere(
+                                              (item) =>
+                                                  item["currency"] ==
+                                                  comboController
+                                                      .priceCurrency[selectedItemId],
+                                              orElse: () => null,
+                                            );
+                                        var divider = '1';
+                                        if (result != null) {
+                                          divider =
+                                              result["exchange_rate"]
+                                                  .toString();
+                                        }
+                                        comboController
+                                                .unitPriceControllers[keys[i]]!
+                                                .text =
+                                            '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                      } else if (comboController
+                                                  .selectedCurrencyName !=
+                                              'USD' &&
+                                          comboController
+                                                  .priceCurrency[selectedItemId] ==
+                                              'USD') {
+                                        comboController
+                                                .unitPriceControllers[keys[i]]!
+                                                .text =
+                                            '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) * double.parse(comboController.exchangeRateForSelectedCurrency))}')}';
+                                      } else {
+                                        var result = exchangeRatesController
+                                            .exchangeRatesList
+                                            .firstWhere(
+                                              (item) =>
+                                                  item["currency"] ==
+                                                  comboController
+                                                      .priceCurrency[selectedItemId],
+                                              orElse: () => null,
+                                            );
+                                        var divider = '1';
+                                        if (result != null) {
+                                          divider =
+                                              result["exchange_rate"]
+                                                  .toString();
+                                        }
+                                        var usdPrice =
+                                            '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                        comboController
+                                                .unitPriceControllers[keys[i]]!
+                                                .text =
+                                            '${double.parse('${(double.parse(usdPrice) * double.parse(comboController.exchangeRateForSelectedCurrency))}')}';
+                                      }
+
+                                      comboController
+                                          .unitPriceControllers[keys[i]]!
+                                          .text = double.parse(
+                                        comboController
+                                            .unitPriceControllers[keys[i]]!
+                                            .text,
+                                      ).toStringAsFixed(2);
+                                      var totalLine =
+                                          '${(int.parse(comboController.rowsInListViewInCombo[keys[i]]['quantity']) * double.parse(comboController.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(comboController.rowsInListViewInCombo[keys[i]]['discount']) / 100)}';
+
+                                      comboController
+                                          .setEnteredUnitPriceInCombo(
+                                            keys[i],
+                                            comboController
+                                                .unitPriceControllers[keys[i]]!
+                                                .text,
+                                          );
+                                      comboController
+                                          .setItemtotalInListViewLengthInCombo(
+                                            keys[i],
+                                            totalLine,
+                                          );
+                                      comboController.getTotalItems();
+                                    }
+                                  }
+                                },
+                              );
+                            },
                           ),
-                          color: Colors.white,
+                        ],
+                      ),
+                    ),
+
+                    DialogTextField(
+                      validationFunc: () {},
+                      text: "brand".tr,
+                      rowWidth: MediaQuery.of(context).size.width * 0.20,
+                      textFieldWidth: MediaQuery.of(context).size.width * 0.17,
+                      textEditingController: brandController,
+                    ),
+                    DialogTextField(
+                      validationFunc: () {},
+                      text: "main_description".tr,
+                      rowWidth: MediaQuery.of(context).size.width * 0.30,
+                      textFieldWidth: MediaQuery.of(context).size.width * 0.20,
+                      textEditingController: comboMainDescriptionController,
+                    ),
+                  ],
+                ),
+
+                gapH20,
+                Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: MediaQuery.of(context).size.width * 0.01,
+                        vertical: 15,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Primary.primary,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
                         ),
-                        child: SingleChildScrollView(
+                      ),
+                      child: Row(
+                        children: [
+                          gapW16,
+                          TableTitle(
+                            text: 'item_code'.tr,
+                            isCentered: false,
+                            width: MediaQuery.of(context).size.width * 0.19,
+                          ),
+
+                          TableTitle(
+                            text: 'description'.tr,
+                            isCentered: false,
+                            width: MediaQuery.of(context).size.width * 0.25,
+                          ),
+
+                          TableTitle(
+                            text: 'quantity'.tr,
+                            isCentered: false,
+                            width: MediaQuery.of(context).size.width * 0.07,
+                          ),
+                          TableTitle(
+                            text: 'unit_price'.tr,
+                            isCentered: false,
+                            width: MediaQuery.of(context).size.width * 0.07,
+                          ),
+                          TableTitle(
+                            text: '${'disc'.tr}. %',
+                            isCentered: false,
+                            width: MediaQuery.of(context).size.width * 0.07,
+                          ),
+                          TableTitle(
+                            text: 'total'.tr,
+                            isCentered: false,
+                            width: MediaQuery.of(context).size.width * 0.07,
+                          ),
+                          TableTitle(
+                            text: '     ${'more_options'.tr}',
+                            isCentered: true,
+                            width: MediaQuery.of(context).size.width * 0.07,
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.01,
+                          ),
+                        ],
+                      ),
+                    ),
+                    //********************************Get Builder For Table Row********************************************* */
+                    GetBuilder<ComboController>(
+                      builder: (cont) {
+                        return Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal:
+                                MediaQuery.of(context).size.width * 0.01,
+                          ),
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(6),
+                              bottomRight: Radius.circular(6),
+                            ),
+                            color: Colors.white,
+                          ),
+
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               //+++++++++++++++++Rows in table With SingleScrollView+++++++++++++++++++++++++++++++
                               SizedBox(
                                 height:
-                                    MediaQuery.of(context).size.height * 0.2,
+                                    MediaQuery.of(context).size.height * 0.20,
                                 child: ListView(
                                   children:
                                       keysList.map((key) {
@@ -546,71 +585,154 @@ class _ComboState extends State<Combo> {
 
                               //++++++++++++++Save Discard+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                               gapH10,
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        comboNameController.clear();
-                                        comboPriceController.clear();
-                                        comboMainDescriptionController.clear();
-                                        cont.resetCombo();
-                                      });
-                                    },
-                                    child: Text(
-                                      'discard'.tr,
-                                      style: TextStyle(
-                                        decoration: TextDecoration.underline,
-                                        color: Primary.primary,
-                                      ),
-                                    ),
-                                  ),
-                                  gapW24,
-                                  ReusableButtonWithColor(
-                                    btnText: 'save'.tr,
-                                    onTapFunction: () async {
-                                      var oldKeys =
-                                          comboController
-                                              .rowsInListViewInCombo
-                                              .keys
-                                              .toList()
-                                            ..sort();
-                                      for (int i = 0; i < oldKeys.length; i++) {
-                                        comboController.newRowMap[i + 1] =
-                                            comboController
-                                                .rowsInListViewInCombo[oldKeys[i]]!;
-                                      }
 
-                                      var companyid =
-                                          await getCompanyIdFromPref();
+                              // Row(
+                              //   mainAxisAlignment: MainAxisAlignment.end,
+                              //   children: [
+                              //     TextButton(
+                              //       onPressed: () {
+                              //         setState(() {
+                              //           comboNameController.clear();
+                              //           comboPriceController.clear();
+                              //           comboMainDescriptionController.clear();
+                              //           cont.resetCombo();
+                              //         });
+                              //       },
+                              //       child: Text(
+                              //         'discard'.tr,
+                              //         style: TextStyle(
+                              //           decoration: TextDecoration.underline,
+                              //           color: Primary.primary,
+                              //         ),
+                              //       ),
+                              //     ),
+                              //     gapW24,
+                              //     ReusableButtonWithColor(
+                              //       btnText: 'save'.tr,
+                              //       onTapFunction: () async {
+                              //         var oldKeys =
+                              //             comboController
+                              //                 .rowsInListViewInCombo
+                              //                 .keys
+                              //                 .toList()
+                              //               ..sort();
+                              //         for (int i = 0; i < oldKeys.length; i++) {
+                              //           comboController.newRowMap[i + 1] =
+                              //               comboController
+                              //                   .rowsInListViewInCombo[oldKeys[i]]!;
+                              //         }
 
-                                      cont.storeComboInDataBase(
-                                        companyid,
-                                        comboNameController.text,
-                                        comboCodeController.text,
-                                        comboMainDescriptionController.text,
-                                        comboController.selectedCurrencyId,
-                                        comboPriceController.text,
-                                        '1',
-                                        comboController.newRowMap,
-                                      );
-                                    },
-                                    width: 100,
-                                    height: 35,
-                                  ),
-                                ],
-                              ),
+                              //         var companyid =
+                              //             await getCompanyIdFromPref();
+                              //         //in way box
+                              //         // print("img------------------");
+                              //         // print(
+                              //         //   cont.image1.isNotEmpty
+                              //         //       ? 'not empty'
+                              //         //       : 'empty',
+                              //         // );
+                              //         // print(
+                              //         //   cont.photosFilesList.isNotEmpty
+                              //         //       ? 'not empty'
+                              //         //       : 'empty',
+                              //         // );
+                              //         cont.storeComboInDataBase(
+                              //           companyid,
+                              //           comboNameController.text,
+                              //           comboCodeController.text,
+                              //           comboMainDescriptionController.text,
+                              //           comboController.selectedCurrencyId,
+                              //           comboPriceController.text,
+                              //           '1',
+                              //           brandController.text,
+                              //           // cont.image1,in way box
+                              //           cont.photosFilesList[0],
+                              //           comboController.newRowMap,
+                              //         );
+                              //       },
+                              //       width: 100,
+                              //       height: 35,
+                              //     ),
+                              //   ],
+                              // ),
                             ],
                           ),
+                        );
+                      },
+                    ),
+
+                    //**************************************************************************** */
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              comboNameController.clear();
+                              comboPriceController.clear();
+                              comboMainDescriptionController.clear();
+                              cont.resetCombo();
+                              Get.back();
+                            });
+                          },
+                          child: Text(
+                            'discard'.tr,
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: Primary.primary,
+                            ),
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                  //**************************************************************************** */
-                ],
-              ),
-            ],
+                        gapW24,
+                        ReusableButtonWithColor(
+                          btnText: 'save'.tr,
+                          onTapFunction: () async {
+                            var oldKeys =
+                                comboController.rowsInListViewInCombo.keys
+                                    .toList()
+                                  ..sort();
+                            for (int i = 0; i < oldKeys.length; i++) {
+                              comboController.newRowMap[i + 1] =
+                                  comboController
+                                      .rowsInListViewInCombo[oldKeys[i]]!;
+                            }
+
+                            var companyid = await getCompanyIdFromPref();
+                            //in way box
+                            // print("img------------------");
+                            // print(
+                            //   cont.image1.isNotEmpty
+                            //       ? 'not empty'
+                            //       : 'empty',
+                            // );
+                            // print(
+                            //   cont.photosFilesList.isNotEmpty
+                            //       ? 'not empty'
+                            //       : 'empty',
+                            // );
+                            cont.storeComboInDataBase(
+                              companyid,
+                              comboNameController.text,
+                              comboCodeController.text,
+                              comboMainDescriptionController.text,
+                              comboController.selectedCurrencyId,
+                              comboPriceController.text,
+                              '1',
+                              brandController.text,
+                              // cont.image1,in way box
+                              cont.photosFilesList[0],
+                              comboController.newRowMap,
+                            );
+                          },
+                          width: 100,
+                          height: 35,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -628,22 +750,62 @@ class _ComboState extends State<Combo> {
       'discount': '0',
       'total': '0',
     };
+
     comboController.addToUnitPriceControllers(comboCounter);
     comboController.addToRowsInListViewInCombo(comboCounter, pp);
-    Widget p = ReusableItemRow(index: comboCounter);
+
+    Widget p = ReusableItemRow(
+      index: comboCounter,
+      onTotalChanged: (double newTotal) {
+        recalculateOverallTotal(); // Recalculate total when an item total changes
+      },
+      onRemove: () {
+        // This is where you will trigger the total recalculation after removal
+        recalculateOverallTotal();
+      },
+    );
+    // Widget p = ReusableItemRow(index: comboCounter);
 
     comboController.addToOrderLinesInComboList('$comboCounter', p);
     setState(() {
       comboCounter += 1;
+      comboPriceController.text = overallTotal.toStringAsFixed(2);
+    });
+    // After adding a new item, recalculate the overall total
+    recalculateOverallTotal();
+  }
+
+  double overallTotal = 0.0;
+
+  void recalculateOverallTotal() {
+    double sum = 0.0;
+    // var oldKeys = comboController.rowsInListViewInCombo.keys.toList()..sort();
+    // for (int i = 0; i < oldKeys.length; i++) {
+    //   comboController.newRowMap[i + 1] =
+    //       comboController.rowsInListViewInCombo[oldKeys[i]]!;
+    // }
+    for (var key in comboController.rowsInListViewInCombo.keys) {
+      final totalStr = comboController.rowsInListViewInCombo[key]['total'];
+      sum += double.tryParse(totalStr) ?? 0;
+    }
+    setState(() {
+      overallTotal = sum;
+      comboPriceController.text = overallTotal.toStringAsFixed(2);
     });
   }
 }
 
 class ReusableItemRow extends StatefulWidget {
   // const ReusableItemRow({super.key});
-  const ReusableItemRow({super.key, required this.index});
+  const ReusableItemRow({
+    super.key,
+    required this.index,
+    required this.onTotalChanged,
+    required this.onRemove,
+  });
   final int index;
-  // final Map info;
+  final Function(double) onTotalChanged;
+  final VoidCallback onRemove; // Add this callback
   @override
   State<ReusableItemRow> createState() => _ReusableItemRowState();
 }
@@ -666,6 +828,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
   final _formKey = GlobalKey<FormState>();
   final ComboController combocont = Get.find();
+  final ProductController productController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
 
   TextEditingController dropDownController = TextEditingController();
@@ -674,9 +837,12 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   TextEditingController descritipnComboController = TextEditingController();
   TextEditingController discountController = TextEditingController();
   TextEditingController totalController = TextEditingController();
-
+  double rowTotal = 0.0;
   @override
   void initState() {
+    String totalStr = combocont.rowsInListViewInCombo[widget.index]['total'];
+    rowTotal = double.tryParse(totalStr) ?? 0.0;
+
     quantityComboController.text =
         combocont.rowsInListViewInCombo[widget.index]['quantity'];
 
@@ -689,6 +855,29 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
     totalLine = combocont.rowsInListViewInCombo[widget.index]['total'];
 
     super.initState();
+  }
+
+  void updateRowTotal() {
+    final cont = Get.find<ComboController>();
+    double quantity =
+        double.tryParse(cont.rowsInListViewInCombo[widget.index]['quantity']) ??
+        0;
+    double unitPrice =
+        double.tryParse(
+          cont.rowsInListViewInCombo[widget.index]['unit_price'],
+        ) ??
+        0;
+    double discount =
+        double.tryParse(cont.rowsInListViewInCombo[widget.index]['discount']) ??
+        0;
+
+    // Calculate total considering discount
+    double total = quantity * unitPrice * (1 - discount / 100);
+    setState(() {
+      rowTotal = total;
+    });
+    // Notify parent about total change
+    widget.onTotalChanged(total);
   }
 
   @override
@@ -714,13 +903,12 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     ),
                   ),
                 ),
-                DialogDropMenu(
+                ReusableDropDownMenusWithSearch(
+                  list:
+                      cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
+                  text: ''.tr,
+                  hint: 'Item'.tr,
                   controller: dropDownController,
-                  optionsList: cont.itemsName,
-                  text: '',
-                  hint: 'item'.tr,
-                  rowWidth: MediaQuery.of(context).size.width * 0.16,
-                  textFieldWidth: MediaQuery.of(context).size.width * 0.16,
                   onSelected: (String? value) {
                     dropDownController.text = value!;
                     //++++++++++++++++++++Set Info In RawsInListViewInCombo+++++++++++++++++++++++++++++++++++++++++++
@@ -836,10 +1024,179 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       widget.index,
                       discription,
                     );
+                    updateRowTotal();
                     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                   },
+                  validationFunc: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'select_option'.tr;
+                    }
+                    return null;
+                  },
+                  rowWidth: MediaQuery.of(context).size.width * 0.12,
+                  textFieldWidth: MediaQuery.of(context).size.width * 0.12,
+                  clickableOptionText: 'create_virtual_item'.tr,
+                  isThereClickableOption: true,
+                  onTappedClickableOption: () {
+                    productController.clearData();
+                    productController.getFieldsForCreateProductFromBack();
+                    productController.setIsItUpdateProduct(false);
+                    showDialog<String>(
+                      context: context,
+                      builder:
+                          (BuildContext context) => const AlertDialog(
+                            backgroundColor: Colors.white,
+                            contentPadding: EdgeInsets.all(0),
+                            titlePadding: EdgeInsets.all(0),
+                            actionsPadding: EdgeInsets.all(0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(9),
+                              ),
+                            ),
+                            elevation: 0,
+                            content: CreateProductDialogContent(),
+                          ),
+                    );
+                  },
+                  columnWidths: [
+                    100.0,
+                    200.0,
+                    550.0,
+                    100.0,
+                  ], // Set column widths
+                  focusNode: dropFocus,
+                  nextFocusNode: quantityFocus,
                 ),
+
+                // DialogDropMenu(
+                //   controller: dropDownController,
+                //   optionsList: cont.itemsName,
+                //   text: '',
+                //   hint: 'item'.tr,
+                //   rowWidth: MediaQuery.of(context).size.width * 0.16,
+                //   textFieldWidth: MediaQuery.of(context).size.width * 0.16,
+                //   onSelected: (String? value) {
+                //     dropDownController.text = value!;
+                //     //++++++++++++++++++++Set Info In RawsInListViewInCombo+++++++++++++++++++++++++++++++++++++++++++
+
+                //     setState(() {
+                //       selectedItemId =
+                //           '${cont.itemsIds[cont.itemsName.indexOf(value)]}';
+                //       qty =
+                //           '${cont.items[cont.itemsName.indexOf(value)]['quantity']}';
+                //       name = value;
+                //       discription =
+                //           cont.items[cont.itemsName.indexOf(
+                //             value,
+                //           )]['mainDescription'];
+
+                //       descritipnComboController.text =
+                //           cont.items[cont.itemsName.indexOf(
+                //             value,
+                //           )]['mainDescription'];
+                //       cont.setTypeInCombo(widget.index, '2');
+                //       // **************************Currency***********************************************************************************
+                //       if (cont.priceCurrency[selectedItemId] ==
+                //           cont.selectedCurrencyName) {
+                //         price =
+                //             cont
+                //                 .items[cont.itemsName.indexOf(
+                //                   value,
+                //                 )]['unitPrice']
+                //                 .toString();
+
+                //         cont.unitPriceControllers[widget.index]!.text =
+                //             cont.itemUnitPrice[selectedItemId].toString();
+                //       } else if (cont.selectedCurrencyName == 'USD' &&
+                //           cont.priceCurrency[selectedItemId] !=
+                //               cont.selectedCurrencyName) {
+                //         var result = exchangeRatesController.exchangeRatesList
+                //             .firstWhere(
+                //               (item) =>
+                //                   item["currency"] ==
+                //                   cont.priceCurrency[selectedItemId],
+                //               orElse: () => null,
+                //             );
+
+                //         var divider = '1';
+                //         if (result != null) {
+                //           divider = result["exchange_rate"].toString();
+                //         }
+
+                //         price =
+                //             '${double.parse('${(double.parse(cont.items[cont.itemsName.indexOf(value)]['unitPrice'].toString()) / double.parse(divider))}')}';
+                //         price = price.toString();
+
+                //         cont.unitPriceControllers[widget.index]!.text =
+                //             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                //       } else if (cont.selectedCurrencyName != 'USD' &&
+                //           cont.priceCurrency[selectedItemId] == 'USD') {
+                //         cont.unitPriceControllers[widget.index]!.text =
+                //             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                //       } else {
+                //         var result = exchangeRatesController.exchangeRatesList
+                //             .firstWhere(
+                //               (item) =>
+                //                   item["currency"] ==
+                //                   cont.priceCurrency[selectedItemId],
+                //               orElse: () => null,
+                //             );
+                //         var divider = '1';
+                //         if (result != null) {
+                //           divider = result["exchange_rate"].toString();
+                //         }
+                //         var usdPrice =
+                //             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                //         cont.unitPriceControllers[widget.index]!.text =
+                //             '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                //       }
+
+                //       quantityComboController.text = '1';
+                //       quantity = '1';
+
+                //       discountController.text = '0';
+                //       disc = '0';
+                //       cont
+                //           .unitPriceControllers[widget.index]!
+                //           .text = double.parse(
+                //         cont.unitPriceControllers[widget.index]!.text,
+                //       ).toStringAsFixed(2);
+                //       totalLine =
+                //           '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(disc) / 100)}';
+
+                //       totalLine = totalLine.toString();
+                //       cont.setItemQuantityInListViewLengthInCombo(
+                //         widget.index,
+                //         quantity,
+                //       );
+
+                //       cont.setItemtotalInListViewLengthInCombo(
+                //         widget.index,
+                //         totalLine,
+                //       );
+                //       cont.getTotalItems();
+                //     });
+
+                //     cont.setEnteredUnitPriceInCombo(
+                //       widget.index,
+                //       cont.unitPriceControllers[widget.index]!.text,
+                //     );
+                //     cont.setItemIdInListViewLengthInCombo(
+                //       widget.index,
+                //       selectedItemId,
+                //     );
+                //     cont.setItemNameInListViewLengthInCombo(widget.index, name);
+                //     cont.setItemDescriptionInListViewLengthInCombo(
+                //       widget.index,
+                //       discription,
+                //     );
+                //     updateRowTotal();
+                //     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                //   },
+                // ),
                 gapW12,
+
                 //description
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.24,
@@ -964,11 +1321,13 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         widget.index,
                         val,
                       );
+
                       cont.setItemtotalInListViewLengthInCombo(
                         widget.index,
                         totalLine,
                       );
                       cont.getTotalItems();
+                      updateRowTotal();
                     },
                   ),
                 ),
@@ -1042,6 +1401,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         totalLine,
                       );
                       cont.getTotalItems();
+                      updateRowTotal();
                     },
                   ),
                 ),
@@ -1116,11 +1476,13 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         widget.index,
                         val,
                       );
+
                       cont.setItemtotalInListViewLengthInCombo(
                         widget.index,
                         totalLine,
                       );
                       await cont.getTotalItems();
+                      updateRowTotal();
                     },
                   ),
                 ),
@@ -1202,6 +1564,9 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                                 widget.index.toString(),
                               );
                             });
+                            // Call the provided callback to recalculate total
+                            widget.onRemove();
+
                             setState(() {
                               cont.totalItems = 0.0;
                               cont.globalDisc = "0.0";

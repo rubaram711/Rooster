@@ -895,6 +895,8 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                                   'combo_warehouse': '',
                                   'item_image': itemImage,
                                   'item_brand': brand,
+                                  'combo_image': '',
+                                  'combo_brand': '',
                                   'title': '',
                                   'isImageList': false,
                                   'note': '',
@@ -913,7 +915,18 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
 
                                 var itemwarehouse =
                                     '${item['combo_warehouse']}';
+                                var combosmap =
+                                    cont.combosMap[item['combo_id'].toString()];
+                                var comboImage =
+                                    '${combosmap['image']}' != '' &&
+                                            combosmap['image'] != null &&
+                                            combosmap['image'].isNotEmpty
+                                        ? '${combosmap['image']}'
+                                        : 'no has image';
 
+                                var combobrand =
+                                    combosmap['brand'] ?? 'brand not found';
+                                totalAllItems += itemTotal;
                                 var quotationItemInfo = {
                                   'line_type_id': '3',
                                   'item_name': itemName,
@@ -921,8 +934,10 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                                   'item_quantity': qty,
                                   'item_warehouse': '',
                                   'combo_warehouse': itemwarehouse,
-                                  'item_image': itemImage,
-                                  'item_brand': brand,
+                                  'item_image': '',
+                                  'item_brand': '',
+                                  'combo_image': comboImage,
+                                  'combo_brand': combobrand,
                                   'title': '',
                                   'isImageList': false,
                                   'note': '',
@@ -939,6 +954,8 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                                   'combo_warehouse': '',
                                   'item_image': '',
                                   'item_brand': '',
+                                  'combo_image': '',
+                                  'combo_brand': '',
                                   'title': item['title'],
                                   'isImageList': false,
                                   'note': '',
@@ -955,6 +972,8 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                                   'combo_warehouse': '',
                                   'item_image': '',
                                   'item_brand': '',
+                                  'combo_image': '',
+                                  'combo_brand': '',
                                   'title': '',
                                   'note': item['note'],
                                   'isImageList': false,
@@ -971,6 +990,8 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                                   'combo_warehouse': '',
                                   'item_image': '',
                                   'item_brand': '',
+                                  'combo_image': '',
+                                  'combo_brand': '',
                                   'title': '',
                                   'note': '',
                                   'image': '$baseImage${item['image']}',
@@ -3418,6 +3439,8 @@ class _UpdateDeliveryDialogState extends State<UpdateDeliveryDialog> {
                                 'You have an empty note',
                               );
                             } else {
+                              print("UpdAte delivery -----------");
+                              print(deliveryController.newRowMap);
                               var res = await updateDelivery(
                                 '${widget.info['id']}',
                                 selectedCustomerIds,
@@ -3737,19 +3760,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
       descriptionController.text =
           deliveryController.rowsInListViewInDelivery[widget
               .index]['item_description'];
-      print("----------Item");
-      print(
-        deliveryController.rowsInListViewInDelivery[widget
-            .index]['item_warehouseId'],
-      );
-      print("WarehouseNameList-----------------");
       var inddd = deliveryController.warehouseIds.indexOf(
         deliveryController.rowsInListViewInDelivery[widget
             .index]['item_warehouseId'],
       );
-      print(inddd);
-
-      print(deliveryController.warehousesNameList);
 
       itemwarehouseController.text =
           deliveryController.rowsInListViewInDelivery[widget
@@ -3983,6 +3997,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     onChanged: (val) {
                       setState(() {
                         quantity = val;
+                        qtyController.text = val;
                       });
 
                       _formKey.currentState!.validate();
@@ -4608,20 +4623,12 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
       comboCodeController.text = widget.info['combo_code'].toString();
       selectedComboId = widget.info['combo_id'].toString();
     } else {
-      print("----------Combo");
-      print(
-        deliveryController.rowsInListViewInDelivery[widget
-            .index]['combo_warehouseId'],
-      );
-      print("WarehouseNameList-----------------");
       var indd = deliveryController.warehouseIds.indexOf(
         deliveryController.rowsInListViewInDelivery[widget
             .index]['combo_warehouseId'],
       );
-      print(indd);
       // var indx = deliveryController.warehousesNameList[indd];
 
-      print(deliveryController.warehousesNameList);
       // print(deliveryController.warehousesNameList[indd]);
 
       combowarehouseController.text =
@@ -4915,15 +4922,14 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                     onChanged: (val) {
                       setState(() {
                         quantity = val;
-                        totalLine =
-                            '${(double.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                        qtyController.text = val;
                       });
-
                       _formKey.currentState!.validate();
 
                       cont.setEnteredQtyInDelivery(widget.index, val);
-                      cont.setMainTotalInDelivery(widget.index, totalLine);
-                      cont.getTotalItems();
+
+                      print("-----on save but change qty---");
+                      print(cont.rowsInListViewInDelivery['item_quantity']);
                     },
                   ),
                 ),

@@ -802,6 +802,8 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                   ),
                                   'item_image': itemImage,
                                   'item_brand': brand,
+                                  'combo_image': '',
+                                  'combo_brand': '',
                                   'title': '',
                                   'isImageList': false,
                                   'note': '',
@@ -823,6 +825,17 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                 var itemTotal = double.parse(
                                   '${item['combo_total']}',
                                 );
+                                var combosmap =
+                                    cont.combosMap[item['combo_id'].toString()];
+                                var comboImage =
+                                    '${combosmap['image']}' != '' &&
+                                            combosmap['image'] != null &&
+                                            combosmap['image'].isNotEmpty
+                                        ? '${combosmap['image']}'
+                                        : 'no has image';
+
+                                var combobrand =
+                                    combosmap['brand'] ?? 'brand not found';
                                 totalAllItems += itemTotal;
                                 var quotationItemInfo = {
                                   'line_type_id': '3',
@@ -840,6 +853,8 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                   'note': '',
                                   'item_image': '',
                                   'item_brand': '',
+                                  'combo_image': comboImage,
+                                  'combo_brand': combobrand,
                                   'isImageList': false,
                                   'title': '',
                                   'image': '',
@@ -856,6 +871,8 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                   'item_total': '',
                                   'item_image': '',
                                   'item_brand': '',
+                                  'combo_image': '',
+                                  'combo_brand': '',
                                   'note': '',
                                   'isImageList': false,
                                   'title': item['title'],
@@ -873,6 +890,8 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                   'item_total': '',
                                   'item_image': '',
                                   'item_brand': '',
+                                  'combo_image': '',
+                                  'combo_brand': '',
                                   'title': '',
                                   'note': item['note'],
                                   'isImageList': false,
@@ -890,6 +909,8 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                   'item_total': '',
                                   'item_image': '',
                                   'item_brand': '',
+                                  'combo_image': '',
+                                  'combo_brand': '',
                                   'title': '',
                                   'note': '',
                                   'image': '$baseImage${item['image']}',
@@ -923,7 +944,6 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                             finalPriceBySalesInvoiceCurrency =
                                 totalPriceAfterSpecialDiscountBysalesInvoiceCurrency +
                                 vatBySalesInvoiceCurrency;
-                            print("--------------SalesInvoice");
 
                             var salesOrderNumber = '';
                             var quotNumber = '';
@@ -979,7 +999,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                     formatDoubleWithCommas(totalAllItems),
 
                                     globalDiscount:
-                                        widget.info['globalDiscount'] ?? '0',
+                                        widget.info['globalDiscount'] ?? '0.00',
 
                                     totalPriceAfterDiscount:
                                         formatDoubleWithCommas(

@@ -1755,7 +1755,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                   .indexOf(value)];
                                           if (salesInvoiceCont
                                               .customersPricesListsIds[index]
-                                              .isNotEmpty) {
+                                              .isNotEmpty && salesInvoiceCont
+                                              .customersPricesListsIds[index]!=null) {
                                             salesInvoiceCont.setSelectedPriceListId(
                                               '${salesInvoiceCont.customersPricesListsIds[index]}',
                                             );
@@ -1774,7 +1775,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                           }
                                           if (salesInvoiceCont
                                               .customersSalesPersonsIds[index]
-                                              .isNotEmpty) {
+                                              .isNotEmpty && salesInvoiceCont
+                                              .customersSalesPersonsIds[index]!=null) {
                                             setState(() {
                                               selectedSalesPersonId = int.parse(
                                                 '${salesInvoiceCont.customersSalesPersonsIds[index]}',

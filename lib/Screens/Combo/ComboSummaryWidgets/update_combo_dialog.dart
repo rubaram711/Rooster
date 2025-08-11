@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:rooster_app/Backend/ComboBackend/update_combo.dart';
 import 'package:rooster_app/Controllers/combo_controller.dart';
@@ -18,6 +19,7 @@ import 'package:rooster_app/Widgets/reusable_text_field.dart';
 import 'package:rooster_app/Widgets/table_item.dart';
 import 'package:rooster_app/Widgets/table_title.dart';
 import 'package:rooster_app/const/functions.dart';
+
 import 'package:rooster_app/utils/image_picker_helper.dart';
 
 import '../../../Widgets/dialog_title.dart';
@@ -81,7 +83,6 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
     });
     comboController.incrementlistViewLengthInCombo(comboController.increment);
     comboController.addToRowsInListViewInCombo(comboCounter, {
-      'line_type_id': '2',
       'item_id': '0',
       'item_name': 'Item Name',
       'description': 'Description',
@@ -96,19 +97,29 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
   }
 
   late Uint8List imageFile;
+  bool isLoading = false; // Add loading state
+  double listViewLength = Sizes.deviceHeight * 0.08;
+
+  // final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
-    super.initState();
+    // imageFile = Uint8List(0);
+    comboController.photosFilesList = [];
+    comboController.photosWidgetsMap = {};
+
+    // _loadImage();
+
+    _loadImage();
     getCurrency();
     comboController.orderLinesComboList = {};
     comboController.rowsInListViewInCombo = {};
-    comboNameController.text = widget.info['name'];
-    comboMainDescriptionController.text = widget.info['description'];
-    brandController.text = widget.info['brand'] ?? 'Not fount';
-    comboCurrenceController.text = widget.info['currency']['name'];
-    comboPriceController.text = widget.info['price'];
+    comboNameController.text = widget.info['name'] ?? '';
+    comboMainDescriptionController.text = widget.info['description'] ?? '';
+    brandController.text = widget.info['brand'] ?? '';
+    comboCurrenceController.text = widget.info['currency']['name'] ?? 'USD';
+    comboPriceController.text = widget.info['price'] ?? '0.0';
     comboCodeController.text = widget.info['code'];
-
     comboController.selectedComboData2['orderLines'] =
         widget.info['comboItems'] ?? '';
 
@@ -132,6 +143,53 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
     comboCounter = comboController.rowsInListViewInCombo.length;
     comboController.listViewLengthInCombo =
         comboController.orderLinesComboList.length * 60;
+    super.initState();
+  }
+
+  //in way circle
+  Future<void> _loadImage() async {
+    setState(() {
+      isLoading = true;
+    });
+    if (widget.info['image'].isNotEmpty) {
+      try {
+        // final response = await http.get(Uri.parse(widget.info['image']));
+        final response = await http
+            .get(Uri.parse(widget.info['image']))
+            .timeout(Duration(seconds: 3));
+        if (response.statusCode == 200) {
+          imageFile = response.bodyBytes;
+        } else {
+          imageFile = Uint8List(0); // Set to empty if loading fails
+        }
+      } catch (e, stackTrace) {
+        imageFile = Uint8List(0);
+      }
+    } else {
+      imageFile = Uint8List(0); // Set to empty if no image URL
+    }
+    setState(() {
+      isLoading = false;
+    });
+    if (widget.info['image'].isNotEmpty) {
+      setState(() {
+        comboController.photosWidgetsMap[1] = ReusablePhotoCircleInProduct(
+          imageFilePassed: imageFile,
+          func: () {
+            comboController.removeFromImagesList(1);
+          },
+        );
+
+        comboController.photosFilesList.add(imageFile);
+        comboController.photosListWidth == 0
+            ? comboController.photosListWidth =
+                comboController.photosListWidth + 130
+            : comboController.photosListWidth = comboController.photosListWidth;
+      });
+    } else {
+      comboController.resetPhotosFilesList();
+      comboController.resetPhotosWidgetsMap();
+    }
   }
 
   @override
@@ -172,6 +230,7 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                     ),
                   ],
                 ),
+                //in way circle
                 GetBuilder<ComboController>(
                   builder: (cont) {
                     return Row(
@@ -184,10 +243,14 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                       MediaQuery.of(context).size.width * 0.1
                                   ? MediaQuery.of(context).size.width * 0.1
                                   : cont.photosListWidth,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: cont.photosWidgetsMap.values.toList(),
-                          ),
+                          child:
+                              widget.info['image'].isNotEmpty
+                                  ? ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    children:
+                                        cont.photosWidgetsMap.values.toList(),
+                                  )
+                                  : Text(""),
                         ),
                         ReusableAddPhotoCircle(
                           onTapCircle: () async {
@@ -219,6 +282,7 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                     );
                   },
                 ),
+
                 gapH16,
                 Text(
                   "Combo's Name",
@@ -539,8 +603,11 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                           ),
                           TableTitle(
                             text: '     ${'more_options'.tr}',
-                            isCentered: false,
+                            isCentered: true,
                             width: MediaQuery.of(context).size.width * 0.07,
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.01,
                           ),
                         ],
                       ),
@@ -625,6 +692,7 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                     comboPriceController.clear();
                                     comboMainDescriptionController.clear();
                                     cont.resetCombo();
+                                    Get.back();
                                   });
                                 },
                                 child: Text(
@@ -657,6 +725,8 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                     comboController.selectedCurrencyId,
                                     comboPriceController.text,
                                     '1',
+                                    brandController.text,
+                                    cont.photosFilesList[0],
                                     comboController.newRowMap,
                                   );
                                   if (res['success'] == true) {

@@ -412,6 +412,7 @@ class _SignFormState extends State<SignForm> {
                             '${res['data']['companySettings']['primaryCurrency']['latest_rate']??''}',
                             res['data']['companySettings']['posCurrency']==null?'': '${res['data']['companySettings']['posCurrency']['latest_rate']??''}',
                             '${res['data']['companySettings']['showLogoOnPos'] ?? '0'}',
+                            '${res['data']['companySettings']['headerName'] ?? ''}',//todo check
                           );
                         }
                         await saveDefaultWarehouseInfoLocally(
@@ -553,6 +554,7 @@ class _SignFormState extends State<SignForm> {
                           '${res['data']['companySettings']['primaryCurrency']['latest_rate']??''}',
                           res['data']['companySettings']['posCurrency']==null?'': '${res['data']['companySettings']['posCurrency']['latest_rate']??''}',
                           '${res['data']['companySettings']['showLogoOnPos'] ?? '0'}',
+                          '${res['data']['companySettings']['headerName'] ?? ''}',//todo check
                         );
                       }
                       if(res['data']['defaultWarehouse']!=null){

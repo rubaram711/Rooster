@@ -468,8 +468,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       }
                                       var quotNumber = '';
 
-                                      print("--------------quotNumber");
-                                      print(quotNumber);
                                       return PrintSalesOrder(
                                         quotationNumber: quotNumber,
                                         isPrintedAs0:
@@ -890,8 +888,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                           }
                                           var quotNumber = '';
 
-                                          print("--------------quotNumber");
-                                          print(quotNumber);
                                           return PrintSalesOrder(
                                             quotationNumber: quotNumber,
                                             isPrintedAs0:
@@ -1616,7 +1612,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                   .indexOf(value)];
                                           if (salesOrderCont
                                               .customersPricesListsIds[index]
-                                              .isNotEmpty) {
+                                              .isNotEmpty && salesOrderCont
+                                              .customersPricesListsIds[index]!=null) {
                                             salesOrderCont.setSelectedPriceListId(
                                               '${salesOrderCont.customersPricesListsIds[index]}',
                                             );
@@ -1635,17 +1632,22 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                           }
                                           if (salesOrderCont
                                               .customersSalesPersonsIds[index]
-                                              .isNotEmpty) {
+                                              .isNotEmpty && salesOrderCont
+                                              .customersSalesPersonsIds[index]!=null) {
                                             setState(() {
-                                              selectedSalesPersonId = int.parse('${salesOrderCont.customersSalesPersonsIds[index]}');
-                                              selectedSalesPerson =salesOrderCont
-                                                  .salesPersonListNames[salesOrderCont
-                                                  .salesPersonListId
-                                                  .indexOf(
-                                                selectedSalesPersonId,
-                                              )];
+                                              selectedSalesPersonId = int.parse(
+                                                '${salesOrderCont.customersSalesPersonsIds[index]}',
+                                              );
+                                              selectedSalesPerson =
+                                                  salesOrderCont
+                                                      .salesPersonListNames[salesOrderCont
+                                                      .salesPersonListId
+                                                      .indexOf(
+                                                        selectedSalesPersonId,
+                                                      )];
 
-                                              salesPersonController.text= selectedSalesPerson;
+                                              salesPersonController.text =
+                                                  selectedSalesPerson;
                                             });
                                           }
                                         });
@@ -1725,15 +1727,19 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                               .customersSalesPersonsIds[index]
                                               .isNotEmpty) {
                                             setState(() {
-                                              selectedSalesPersonId = int.parse('${salesOrderCont.customersSalesPersonsIds[index]}');
-                                              selectedSalesPerson =salesOrderCont
-                                                  .salesPersonListNames[salesOrderCont
-                                                  .salesPersonListId
-                                                  .indexOf(
-                                                selectedSalesPersonId,
-                                              )];
+                                              selectedSalesPersonId = int.parse(
+                                                '${salesOrderCont.customersSalesPersonsIds[index]}',
+                                              );
+                                              selectedSalesPerson =
+                                                  salesOrderCont
+                                                      .salesPersonListNames[salesOrderCont
+                                                      .salesPersonListId
+                                                      .indexOf(
+                                                        selectedSalesPersonId,
+                                                      )];
 
-                                              salesPersonController.text= selectedSalesPerson;
+                                              salesPersonController.text =
+                                                  selectedSalesPerson;
                                             });
                                           }
                                         });
@@ -3201,6 +3207,14 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                         'You have an empty note',
                                       );
                                     } else {
+                                      print(
+                                        "Createsalesorder-------------------",
+                                      );
+                                      print(
+                                        salesOrderController
+                                            .rowsInListViewInSalesOrder,
+                                      );
+
                                       var res = await storeSalesOrder(
                                         refController.text,
                                         selectedCustomerIds,
@@ -3681,19 +3695,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
     // qtyController.text = '0';
     // discount = '0';
     // quantity = '0';
-    print("----------Item");
-    print(
-      salesOrderController.rowsInListViewInSalesOrder[widget
-          .index]['item_warehouseId'],
-    );
-    print("WarehouseNameList-----------------");
     var inddd = salesOrderController.warehouseIds.indexOf(
       salesOrderController.rowsInListViewInSalesOrder[widget
           .index]['item_warehouseId'],
     );
-    print(inddd);
-
-    print(salesOrderController.warehousesNameList);
 
     itemwarehouseController.text =
         salesOrderController.rowsInListViewInSalesOrder[widget
@@ -4812,20 +4817,12 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
-    print("----------Combo");
-    print(
-      salesOrderController.rowsInListViewInSalesOrder[widget
-          .index]['combo_warehouseId'],
-    );
-    print("WarehouseNameList-----------------");
     var indd = salesOrderController.warehouseIds.indexOf(
       salesOrderController.rowsInListViewInSalesOrder[widget
           .index]['combo_warehouseId'],
     );
-    print(indd);
     // var indx = salesOrderController.warehousesNameList[indd];
 
-    print(salesOrderController.warehousesNameList);
     // print(salesOrderController.warehousesNameList[indd]);
 
     warehouseController.text =

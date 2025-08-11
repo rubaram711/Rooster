@@ -934,7 +934,6 @@ class _CreateClientDialogState
                                           '',
                                           clientController.contactsList);
                                       if (res['success'] == true) {
-                                        print('yeeeees');
                                         Get.back();
 
                                         CommonWidgets.snackBar('Success',

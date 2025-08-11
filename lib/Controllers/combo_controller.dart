@@ -8,6 +8,7 @@ import 'package:rooster_app/Backend/ComboBackend/get_combo_create_info.dart';
 import 'package:rooster_app/Backend/ComboBackend/get_combos.dart';
 // import 'package:rooster_app/Models/Combo/creat_combo_model.dart';
 import 'package:rooster_app/Widgets/custom_snak_bar.dart';
+import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/Backend/ComboBackend/store_combo.dart';
 import '../../../Controllers/home_controller.dart';
@@ -16,7 +17,7 @@ abstract class ComboControllerAbstract extends GetxController {
   //Combo
   changeBoolVar(bool val);
   increaseImageSpace(double val);
-  setImageInCombo(int index, Uint8List imageFile);
+  setImageInCombo(Uint8List imageFile);
   setTypeInCombo(int index, String val);
   incrementlistViewLengthInCombo(double val);
   decrementlistViewLengthInCombo(double val);
@@ -39,6 +40,8 @@ abstract class ComboControllerAbstract extends GetxController {
     String currencyid,
     String price,
     String active,
+    String brand,
+    List<int> image,
     Map itemss,
   );
   deleteItemFromComboFromDB(String id);
@@ -143,10 +146,11 @@ class ComboController extends ComboControllerAbstract {
     update();
   }
 
+  late Uint8List image1;
   @override
-  setImageInCombo(int index, Uint8List imageFile) {
+  setImageInCombo(Uint8List imageFile) {
     // print(imageFile);
-    rowsInListViewInCombo[index]['image'] = imageFile;
+    image1 = imageFile;
     update();
   }
 
@@ -262,10 +266,24 @@ class ComboController extends ComboControllerAbstract {
   late List items;
   List<String> itemsName = [];
   List itemsIds = [];
+  List<String> itemsInfo = [];
+  List<String> itemsDes = [];
+  List<String> itemsTotalQuantity = [];
+  List<List<String>> itemsMultiPartList = [];
+  List<String> itemsForSplit = [];
   Map priceCurrency = {}, itemUnitPrice = {}, itemsCodes = {};
 
   @override
   getComboCreatFieldFromBack() async {
+    itemsIds = [];
+    itemsInfo = [];
+    itemsDes = [];
+    itemsTotalQuantity = [];
+    itemsMultiPartList = [];
+    itemsForSplit = [];
+    priceCurrency = {};
+    itemUnitPrice = {};
+    itemsCodes = {};
     var response = await getFieldsForCreateCombo();
     code = response['code'];
     items = response['items'];
@@ -276,7 +294,22 @@ class ComboController extends ComboControllerAbstract {
       itemUnitPrice["${item['id']}"] = item['unitPrice'];
       priceCurrency["${item['id']}"] = item['priceCurrency']['name'];
       itemsCodes["${item['id']}"] = item['mainCode'];
+      itemsCode.add('${item['mainCode']}');
+      itemsIds.add('${item['id']}');
+      itemsInfo.add(
+        '${item['mainCode']}, ${item['mainDescription']} , ${item['totalQuantities']} Pcs',
+      );
+      itemsDes.add('${item['mainDescription']}');
+      itemsName.add('${item['item_name']}');
+      itemsTotalQuantity.add('${item['totalQuantities']}');
     }
+    for (int i = 0; i < itemsCode.length; i++) {
+      itemsForSplit.add(itemsCode[i]);
+      itemsForSplit.add(itemsName[i]);
+      itemsForSplit.add(itemsDes[i]);
+      itemsForSplit.add('${itemsTotalQuantity[i]} Pcs');
+    }
+    itemsMultiPartList = splitList(itemsForSplit, 4);
 
     isCombosInfoFetched = true;
 
@@ -334,12 +367,12 @@ class ComboController extends ComboControllerAbstract {
 
   String resultStorInDB = 'NotSuccess';
 
-
   bool isCombosPageIsLastPage = false;
   setIsCombosPageIsLastPage(bool val) {
     isCombosPageIsLastPage = val;
     update();
   }
+
   @override
   storeComboInDataBase(
     String companyId,
@@ -349,6 +382,8 @@ class ComboController extends ComboControllerAbstract {
     String currencyid,
     String price,
     String active,
+    String brand,
+    List<int> image,
     Map itemss,
   ) async {
     var res = await storeCombo(
@@ -359,6 +394,8 @@ class ComboController extends ComboControllerAbstract {
       currencyid,
       price,
       active,
+      brand,
+      image,
       itemss,
     );
     if (res['success'] == true) {
@@ -366,9 +403,13 @@ class ComboController extends ComboControllerAbstract {
       CommonWidgets.snackBar('Success', res['message']);
       resultStorInDB = 'Success';
       getAllCombosFromBackWithSeach('');
-      if(isCombosPageIsLastPage){
-      homeController.selectedTab.value = 'combo_summary';
-      }else{Get.back();}
+      print("---------isCombosPageIsLastPage${isCombosPageIsLastPage}");
+      if (isCombosPageIsLastPage) {
+        homeController.selectedTab.value = 'combo_summary';
+      } else {
+        CommonWidgets.snackBar('Success', res['message']);
+        Get.back();
+      }
       update();
     } else {
       CommonWidgets.snackBar('error', res['message']);

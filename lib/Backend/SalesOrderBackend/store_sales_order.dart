@@ -3,38 +3,38 @@ import '../../const/urls.dart';
 import 'package:dio/dio.dart';
 
 Future storeSalesOrder(
-    String manualReference,
-    String clientId,
-    String validity,
-    String inputDate,
-    String paymentTerm,
-    String salesOrderNumber,
-    String priceList,
-    String currency,
-    String termsAndConditions,
-    String salespersonId,
-    String commissionMethodId,
-    String cashingMethodId,
-    String commissionRate,
-    String commissionTotal,
-    String totalBeforeVat,
-    String specialDiscountPercentage,
-    String specialDiscount,
-    String globalDiscountPercentage,
-    String globalDiscount,
-    String vat,
-    String vatLebanese,
-    String total,
-    String vatExempt,
-    String notPrinted,
-    String printedAsVatExempt,
-    String printedAsPercentage,
-    String vatInclusivePrices,
-    String beforeVatPrices,
-    String code,
-    Map orderLines,
-    List<int> orderedKeys ,
-    String title,
+  String manualReference,
+  String clientId,
+  String validity,
+  String inputDate,
+  String paymentTerm,
+  String salesOrderNumber,
+  String priceList,
+  String currency,
+  String termsAndConditions,
+  String salespersonId,
+  String commissionMethodId,
+  String cashingMethodId,
+  String commissionRate,
+  String commissionTotal,
+  String totalBeforeVat,
+  String specialDiscountPercentage,
+  String specialDiscount,
+  String globalDiscountPercentage,
+  String globalDiscount,
+  String vat,
+  String vatLebanese,
+  String total,
+  String vatExempt,
+  String notPrinted,
+  String printedAsVatExempt,
+  String printedAsPercentage,
+  String vatInclusivePrices,
+  String beforeVatPrices,
+  String code,
+  Map orderLines,
+  List<int> orderedKeys,
+  String title,
 ) async {
   String token = await getAccessTokenFromPref();
   FormData formData = FormData.fromMap({
@@ -85,19 +85,25 @@ Future storeSalesOrder(
         '${orderLines[key]['item_main_code']}',
       ),
       MapEntry("orderLines[$i][itemName]", '${orderLines[key]['itemName']}'),
-      MapEntry("orderLines[$i][discount]", '${orderLines[key]['item_discount']}'),
+      MapEntry(
+        "orderLines[$i][discount]",
+        '${orderLines[key]['item_discount']}',
+      ),
       MapEntry(
         "orderLines[$i][description]",
         '${orderLines[key]['item_description']}',
       ),
-      MapEntry("orderLines[$i][quantity]", '${orderLines[key]['item_quantity']}'),
+      MapEntry(
+        "orderLines[$i][quantity]",
+        '${orderLines[key]['item_quantity']}',
+      ),
       MapEntry(
         "orderLines[$i][item_warehouse_id]",
         '${orderLines[key]['item_warehouseId']}',
       ),
       MapEntry(
         "orderLines[$i][combo_warehouse_id]",
-        '${orderLines[key]['item_warehouseId']}',
+        '${orderLines[key]['combo_warehouseId']}',
       ),
       MapEntry(
         "orderLines[$i][unitPrice]",
@@ -126,6 +132,10 @@ Future storeSalesOrder(
     ]);
     i++;
   }
+  print("InBackTo StoreSalesOrder------------");
+  print(formData.files);
+  print("------------------------------------");
+  print(formData.fields);
 
   Response response = await Dio()
       .post(

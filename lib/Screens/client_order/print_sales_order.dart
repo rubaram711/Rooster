@@ -288,6 +288,25 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
           imageProviders[item['image']] = null;
         }
       }
+      if (item['line_type_id'] == '3') {
+        if (item['combo_image'] != null) {
+          try {
+            final response = await http.get(Uri.parse(item['combo_image']));
+            if (response.statusCode == 200) {
+              imageProviders[item['combo_image']] = pw.MemoryImage(
+                response.bodyBytes,
+              );
+            } else {
+              imageProviders[item['combo_image']] =
+                  null; // Store null if image fails to load
+            }
+          } catch (e) {
+            imageProviders[item['combo_image']] = null;
+          }
+        } else {
+          imageProviders[item['combo_image']] = null;
+        }
+      }
     }
 
     // await preFetchImages(quotationController.itemList);
@@ -296,6 +315,7 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
     var gapW20 = pw.SizedBox(width: 20);
     var gapW180 = pw.SizedBox(width: 180);
     var gapH4 = pw.SizedBox(height: 4);
+    var gapH2 = pw.SizedBox(height: 2);
     var gapH5 = pw.SizedBox(height: 5);
     var gapH6 = pw.SizedBox(height: 6);
     final font = await rootBundle.load('assets/fonts/Tajawal-Medium.ttf');
@@ -408,6 +428,7 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
     reusableRowInSalesOrder({
       required Map salesOrderItemInfo,
       required int index,
+      required pw.ImageProvider? imageProvider,
     }) {
       return pw.Container(
         margin: const pw.EdgeInsets.symmetric(vertical: 8),
@@ -416,7 +437,27 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                 ? pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                   children: [
-                    reusableShowInfoCard(text: '---', width: width * 0.05),
+                    pw.Column(
+                      children: [
+                        reusableShowInfoCard(
+                          text:
+                              salesOrderItemInfo['combo_brand'] != ''
+                                  ? salesOrderItemInfo['combo_brand']
+                                  : '---',
+                          width: width * 0.05,
+                        ),
+                        gapH4,
+                        gapH4,
+                        if (imageProvider != null)
+                          pw.Image(
+                            imageProvider,
+                            fit: pw.BoxFit.contain,
+                            width: 50,
+                            height: 50,
+                          ),
+                      ],
+                    ),
+
                     reusableShowInfoCard(
                       text: '${salesOrderItemInfo['item_name'] ?? ''}',
                       width: width * 0.05,
@@ -574,7 +615,7 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
       );
     }
 
-    final image = pw.MemoryImage(salesOrderController.logoBytes); // to ba again
+    // final image = pw.MemoryImage(salesOrderController.logoBytes); // to ba again
 
     final myTheme = pw.PageTheme(
       margin: const pw.EdgeInsets.all(10),
@@ -616,7 +657,7 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Padding(
-                  padding: pw.EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  padding: pw.EdgeInsets.fromLTRB(0, 40, 0, 0),
                   child: pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
@@ -631,9 +672,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 pw.Container(
                                   width: 180, // Set the desired width
                                   height: 70, // Set the desired height
-                                  child:
-                                  // pw.Text("image"),
-                                  pw.Image(image), //to be again
+                                  child: pw.Text("image"),
+                                  // pw.Image(image), //to be again
                                 ),
                               ],
                             ),
@@ -641,7 +681,7 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                         ),
                       ),
                       pw.SizedBox(
-                        width: width * 0.15,
+                        width: width * 0.125,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
                           children: [
@@ -711,27 +751,6 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      // pw.SizedBox(
-                      //   width: width * 0.1,
-                      //   child: pw.Row(
-                      //     mainAxisAlignment: pw.MainAxisAlignment.start,
-                      //     children: [
-                      //       pw.Column(
-                      //         crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      //         children: [
-                      //           pw.Text(
-                      //             'sales_order'.tr,
-                      //             style: pw.TextStyle(
-                      //               fontSize: 12,
-                      //               fontWeight: pw.FontWeight.bold,
-                      //               color: PdfColors.black,
-                      //             ),
-                      //           ),
-                      //         ],
-                      //       ),
-                      //     ],
-                      //   ),
-                      // ),
                       pw.SizedBox(
                         width: width * 0.1,
                         child: pw.Row(
@@ -864,14 +883,14 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                   child:
                   // to
                   pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
                       pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.center,
                         children: [
                           tableTitle(
                             text: 'Sales Order [${widget.salesOrderNumber}] ',
-                            width: width * 0.05,
+                            width: width * 0.07,
                           ),
                           widget.quotationNumber == ''
                               ? tableTitle(
@@ -884,12 +903,14 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               ),
                         ],
                       ),
-
-                      gapH4,
-                      pw.Divider(
-                        height: 5,
-                        color: PdfColors.black,
-                        // endIndent: 250
+                      gapH2,
+                      pw.SizedBox(
+                        width: width * 0.13,
+                        child: pw.Divider(
+                          height: 5,
+                          color: PdfColors.black,
+                          // endIndent: 250
+                        ),
                       ),
                     ],
                   ),
@@ -964,6 +985,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               : reusableRowInSalesOrder(
                                 salesOrderItemInfo: item,
                                 index: index,
+                                imageProvider:
+                                    imageProviders[item['combo_image']],
                               );
                         },
                       ),
@@ -1032,14 +1055,16 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                         ],
                       ),
 
-                      widget.globalDiscount == '0.00'
+                      widget.globalDiscount == '0.00' ||
+                              widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Divider(
                             height: 5,
                             color: PdfColors.black,
                             // endIndent: 250
                           ),
-                      widget.globalDiscount == '0.00'
+                      widget.globalDiscount == '0.00' ||
+                              widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Row(
                             children: [
@@ -1062,7 +1087,7 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                     //     ? width * 0.08
                                     //     : width * 0.068,
                                     child: reusableNumber(
-                                      '${widget.globalDiscount == '0.00' ? 0 : widget.globalDiscount}%',
+                                      '${widget.globalDiscount == '0.00' || widget.globalDiscount == '0' ? 0 : widget.globalDiscount}%',
                                     ),
                                   ),
                                 ],
@@ -1075,7 +1100,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                     width: width * 0.08,
                                     // child: reusableText('$discountOnAllItem'),
                                     child: reusableNumber(
-                                      widget.discountOnAllItem == '0'
+                                      widget.discountOnAllItem == '0' ||
+                                              widget.discountOnAllItem == '0.00'
                                           ? '0.00'
                                           : widget.discountOnAllItem,
                                     ),
@@ -1084,7 +1110,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               ),
                             ],
                           ),
-                      widget.globalDiscount == '0.00'
+                      widget.globalDiscount == '0.00' ||
+                              widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Divider(
                             height: 5,
@@ -1092,7 +1119,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                             // endIndent: 250
                           ),
                       // TOTAL PRICE AFTER  DISCOUNT
-                      widget.globalDiscount == '0.00'
+                      widget.globalDiscount == '0.00' ||
+                              widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Row(
                             children: [
@@ -1138,14 +1166,16 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                             ],
                           ),
 
-                      widget.globalDiscount == '0.00'
+                      widget.globalDiscount == '0.00' ||
+                              widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Divider(
                             height: 5,
                             color: PdfColors.black,
                             // endIndent: 250
                           ),
-                      widget.specialDiscount == '0.00'
+                      widget.specialDiscount == '0.00' ||
+                              widget.specialDiscount == '0'
                           ? pw.Text("")
                           : pw.Row(
                             children: [
@@ -1171,7 +1201,7 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                     //         ? width * 0.08
                                     //         : width * 0.068,
                                     child: reusableNumber(
-                                      '${widget.specialDiscount == '0.00' ? 0 : widget.specialDiscount}%',
+                                      '${widget.specialDiscount == '0.00' || widget.specialDiscount == '0' ? 0 : widget.specialDiscount}%',
                                     ),
                                   ),
                                 ],
@@ -1218,16 +1248,7 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               children: [
                                 pw.SizedBox(
                                   width: width * 0.05,
-                                  // width:
-                                  //     numberWithComma(
-                                  //               double.parse(
-                                  //                 '${double.parse(widget.totalPriceAfterSpecialDiscount.replaceAll(',', ''))}',
-                                  //                 // '${double.parse(widget.totalPriceAfterSpecialDiscount.replaceAll(',', '')) / double.parse(finallyRate)}',
-                                  //               ).toStringAsFixed(2),
-                                  //             ) ==
-                                  //             '0.00'
-                                  //         ? width * 0.08
-                                  //         : width * 0.068,
+
                                   child: reusableNumber(
                                     widget.salesOrderCurrency,
                                   ),
@@ -1485,9 +1506,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                     pw.Container(
                                       width: 180,
                                       height: 70,
-                                      child:
-                                      //  pw.Text("image"),
-                                      pw.Image(image), //to ba aganin
+                                      child: pw.Text("image"),
+                                      // pw.Image(image), //to ba aganin
                                     ),
                                   ],
                                 ),

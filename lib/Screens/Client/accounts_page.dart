@@ -103,7 +103,9 @@ class _AccountsPageState extends State<AccountsPage> {
   @override
   void initState() {
     clientController.getAllUsersSalesPersonFromBack();
-
+    clientController.selectedSalesPerson='';
+    clientController.selectedSalesPersonId=0;
+    clientController.salesPersonController.text='';
     getCurrency();
     // generalListViewLength = accounts.length < 10
     //     ? Sizes.deviceHeight * (0.09 * accounts.length)
@@ -3317,7 +3319,7 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                         '',
                         '',
                         '',
-                        clientController.selectedSalesPersonId.toString(),
+                        clientController.selectedSalesPersonId==0?'':clientController.selectedSalesPersonId.toString(),
                         paymentTerm,
                         selectedPriceListId,
                         internalNoteController.text,

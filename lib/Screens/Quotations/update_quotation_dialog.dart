@@ -24,7 +24,6 @@ import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/custom_snak_bar.dart';
-import '../../Widgets/dialog_title.dart';
 import '../../Widgets/page_title.dart';
 import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_drop_down_menu.dart';
@@ -233,7 +232,6 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
 
     chanceController.text = widget.info['chance'] ?? '';
     deliveryTermsController.text = widget.info['deliveryTerms'] ?? '';
-    print('widget.info[ ${widget.info['cancellationReason']}');
     cancelledReasonController.text = widget.info['cancellationReason'] ?? '';
     if (widget.info['cashingMethod'] != null) {
       cashingMethodsController.text =

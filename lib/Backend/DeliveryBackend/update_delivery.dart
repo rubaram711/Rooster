@@ -1,5 +1,3 @@
-
-
 import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../const/urls.dart';
 import 'package:dio/dio.dart';
@@ -35,10 +33,17 @@ Future updateDelivery(
         "orderLines[$i][mainCode]",
         '${orderLines[i]['item_main_code']}',
       ),
-      MapEntry("orderLines[$i][itemName]", '${orderLines[i]['itemName']}'),
+      MapEntry(
+        "orderLines[$i][itemName]",
+        '${orderLines[i]['itemName'] ?? ''}',
+      ),
       MapEntry(
         "orderLines[$i][item_warehouse_id]",
-        '${orderLines[i]['item_warehouseId']}',
+        '${orderLines[i]['item_warehouse_id'] ?? orderLines[i]['item_warehouseId']}',
+      ),
+      MapEntry(
+        "orderLines[$i][combo_warehouse_id]",
+        '${orderLines[i]['combo_warehouse_id'] ?? orderLines[i]['combo_warehouseId']}',
       ),
 
       MapEntry(
@@ -50,16 +55,15 @@ Future updateDelivery(
 
       MapEntry("orderLines[$i][title]", '${orderLines[i]['title']}'),
       MapEntry("orderLines[$i][note]", '${orderLines[i]['note']}'),
-      MapEntry("orderLines[$i][combo]", '${orderLines[i]['combo']}'),
+      MapEntry(
+        "orderLines[$i][combo]",
+        '${orderLines[i]['combo'] ?? orderLines[i]['combo_id']}',
+      ),
       MapEntry(
         "orderLines[$i][comboPrice]",
         orderLines[i]['combo'] == '' || orderLines[i]['combo'] == null
             ? ''
-            : '${orderLines[i]['item_unit_price']}',
-      ),
-      MapEntry(
-        "orderLines[$i][combo_warehouse_id]",
-        '${orderLines[i]['combo_warehouseId']}',
+            : '${orderLines[i]['item_unit_price'] ?? ''}',
       ),
     ]);
     // print( 'hfrym  ${orderLines[i]['image']}');

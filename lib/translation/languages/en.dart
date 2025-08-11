@@ -593,6 +593,8 @@ Map<String, String> en = {
   "add_new_contact": "Add new contact",
   "contact": "Contact",
   "ext": "Ext",
+  "header": "Header",
+  "add_new_header": "Add New Header",
   "delivery_address": "Delivery Address",
   "update_delivery": "Update Delivery",
   "add_items": "Add Items",

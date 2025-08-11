@@ -1755,19 +1755,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
-    print("----------Item");
-    print(
-      deliveryController.rowsInListViewInDelivery[widget
-          .index]['item_warehouseId'],
-    );
-    print("WarehouseNameList-----------------");
     var inddd = deliveryController.warehouseIds.indexOf(
       deliveryController.rowsInListViewInDelivery[widget
           .index]['item_warehouseId'],
     );
-    print(inddd);
-
-    print(deliveryController.warehousesNameList);
 
     itemwarehouseController.text =
         deliveryController.rowsInListViewInDelivery[widget
@@ -2478,7 +2469,6 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
               builder: (cont) {
                 return InkWell(
                   onTap: () async {
-                    print("start delivery------");
                     final image = await ImagePickerHelper.pickImage();
 
                     setState(() {
@@ -2650,20 +2640,12 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
-    print("----------Combo");
-    print(
-      deliveryController.rowsInListViewInDelivery[widget
-          .index]['combo_warehouseId'],
-    );
-    print("WarehouseNameList-----------------");
     var indd = deliveryController.warehouseIds.indexOf(
       deliveryController.rowsInListViewInDelivery[widget
           .index]['combo_warehouseId'],
     );
-    print(indd);
     // var indx = deliveryController.warehousesNameList[indd];
 
-    print(deliveryController.warehousesNameList);
     // print(deliveryController.warehousesNameList[indd]);
 
     warehouseController.text =

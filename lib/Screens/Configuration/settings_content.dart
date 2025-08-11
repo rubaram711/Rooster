@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Backend/CompanySettings/update_settings.dart';
@@ -39,12 +41,13 @@ class SettingsContent extends StatefulWidget {
 
 class _SettingsContentState extends State<SettingsContent> {
   int selectedTabIndex = 0;
-  List tabsList = ['cost_options', 'pos_options', 'company_settings'];
+  List tabsList = ['cost_options', 'pos_options', 'company_settings', 'header'];
 
   List tabsContent = [
     const CostOptionsTab(),
     const PosOptionsTab(),
     const CompanySettingsTab(),
+    const HeaderTab(),
   ];
   CompanySettingsController companySettingsController = Get.find();
   HomeController homeController = Get.find();
@@ -55,6 +58,7 @@ class _SettingsContentState extends State<SettingsContent> {
     var showQuantitiesOnPos = await getShowQuantitiesOnPosFromPref();
     var showLogoOnPos = await getShowLogoOnPosFromPref();
     var fullCompanyName = await getFullCompanyNameFromPref();
+    var headerName = await getHeaderNameFromPref();
     var companyEmail = await getCompanyEmailFromPref();
     var companyPhone = await getCompanyPhoneNumberFromPref();
     var companyMobile = await getCompanyMobileNumberFromPref();
@@ -98,6 +102,7 @@ class _SettingsContentState extends State<SettingsContent> {
     companySettingsController.selectedPhoneCode = companyPhoneCode;
     companySettingsController.selectedMobileCode = companyMobileCode;
     companySettingsController.fullCompanyName.text = fullCompanyName;
+    companySettingsController.headerName.text = headerName;
     companySettingsController.email.text = companyEmail;
     companySettingsController.phone.text = companyPhone;
     companySettingsController.mobile.text = companyMobile;
@@ -115,8 +120,8 @@ class _SettingsContentState extends State<SettingsContent> {
     companySettingsController.selectedPosCurrencySymbol = posCurrencySymbol;
     companySettingsController.isCompanySubjectToVat =
         companySubjectToVat == '1' ? true : false;
-    if(posCurrency.isNotEmpty){
-      companySettingsController.isPosCurrencyFound=true;
+    if (posCurrency.isNotEmpty) {
+      companySettingsController.isPosCurrencyFound = true;
     }
   }
 
@@ -214,6 +219,7 @@ class _SettingsContentState extends State<SettingsContent> {
                   ReusableButtonWithColor(
                     btnText: 'save'.tr,
                     onTapFunction: () async {
+                      //todo check if header empty*********************************
                       showDialog<String>(
                         context: context,
                         builder:
@@ -248,9 +254,11 @@ class _SettingsContentState extends State<SettingsContent> {
                         vat: cont.vat.text.replaceAll(',', ''),
                         imageFile: cont.imageFile,
                         primaryCurrencyId: cont.selectedCurrencyId,
-                        companySubjectToVat: cont.isCompanySubjectToVat ? '1' : '0',
+                        companySubjectToVat:
+                            cont.isCompanySubjectToVat ? '1' : '0',
                         posCurrencyId: cont.selectedPosCurrencyId,
-                        showLogoOnPos: cont.isShowLogoOnPosChecked? '1' : '0',
+                        showLogoOnPos: cont.isShowLogoOnPosChecked ? '1' : '0',
+                        headerName: cont.headerName.text,
                       );
                       Get.back();
                       if (res['success'] == true) {
@@ -279,12 +287,23 @@ class _SettingsContentState extends State<SettingsContent> {
                           cont.selectedPosCurrencyId,
                           cont.selectedPosCurrencySymbol,
                           res['data']['primaryCurrency']['latest_rate'],
-                          res['data']['posCurrency']==null?'': res['data']['posCurrency']['latest_rate'],
+                          res['data']['posCurrency'] == null
+                              ? ''
+                              : res['data']['posCurrency']['latest_rate'],
                           cont.isShowLogoOnPosChecked ? '1' : '0',
+                          cont.headerName.text,
                         );
-                        quotationController.setIsVatExemptCheckBoxShouldAppear(cont.isCompanySubjectToVat);
-                        quotationController.setIsVatExempted(false, false,!cont.isCompanySubjectToVat);
-                        quotationController.setIsVatExemptChecked(!cont.isCompanySubjectToVat);
+                        quotationController.setIsVatExemptCheckBoxShouldAppear(
+                          cont.isCompanySubjectToVat,
+                        );
+                        quotationController.setIsVatExempted(
+                          false,
+                          false,
+                          !cont.isCompanySubjectToVat,
+                        );
+                        quotationController.setIsVatExemptChecked(
+                          !cont.isCompanySubjectToVat,
+                        );
                       } else {
                         CommonWidgets.snackBar(
                           'error',
@@ -425,76 +444,85 @@ class _PosOptionsTabState extends State<PosOptionsTab> {
               Row(
                 children: [
                   SizedBox(
-                    width: homeController.isMobile.value
-                        ?MediaQuery.of(context).size.width * 0.22
-                        :MediaQuery.of(context).size.width * 0.1,
+                    width:
+                        homeController.isMobile.value
+                            ? MediaQuery.of(context).size.width * 0.22
+                            : MediaQuery.of(context).size.width * 0.1,
                     child: Text('pos_currency'.tr),
                   ),
-                  cont.isPosCurrencyFound? ReusableShowInfoCard(text: cont.posCurrency.text, width: MediaQuery.of(context).size.width * 0.4)
-                  :GetBuilder<ExchangeRatesController>(
-                    builder: (exchangeRatesCont) {
-                      return DropdownMenu<String>(
-                        width:homeController.isMobile.value
-                            ?MediaQuery.of(context).size.width * 0.4: MediaQuery.of(context).size.width * 0.25,
-                        enableSearch: true,
-                        controller: cont.posCurrency,
-                        hintText: '',
-                        inputDecorationTheme: InputDecorationTheme(
-                          hintStyle: const TextStyle(
-                            fontStyle: FontStyle.italic,
-                          ),
-                          contentPadding: const EdgeInsets.fromLTRB(
-                            20, 0, 25, 5,),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Primary.primary.withAlpha(
-                                (0.2 * 255).toInt(),
+                  cont.isPosCurrencyFound
+                      ? ReusableShowInfoCard(
+                        text: cont.posCurrency.text,
+                        width: MediaQuery.of(context).size.width * 0.4,
+                      )
+                      : GetBuilder<ExchangeRatesController>(
+                        builder: (exchangeRatesCont) {
+                          return DropdownMenu<String>(
+                            width:
+                                homeController.isMobile.value
+                                    ? MediaQuery.of(context).size.width * 0.4
+                                    : MediaQuery.of(context).size.width * 0.25,
+                            enableSearch: true,
+                            controller: cont.posCurrency,
+                            hintText: '',
+                            inputDecorationTheme: InputDecorationTheme(
+                              hintStyle: const TextStyle(
+                                fontStyle: FontStyle.italic,
                               ),
-                              width: 1,
-                            ),
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(9),
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Primary.primary.withAlpha(
-                                (0.4 * 255).toInt(),
+                              contentPadding: const EdgeInsets.fromLTRB(
+                                20,
+                                0,
+                                25,
+                                5,
                               ),
-                              width: 2,
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Primary.primary.withAlpha(
+                                    (0.2 * 255).toInt(),
+                                  ),
+                                  width: 1,
+                                ),
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(9),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Primary.primary.withAlpha(
+                                    (0.4 * 255).toInt(),
+                                  ),
+                                  width: 2,
+                                ),
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(9),
+                                ),
+                              ),
                             ),
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(9),
-                            ),
-                          ),
-                        ),
-                        menuHeight: 250,
-                        dropdownMenuEntries:
-                        exchangeRatesCont.currenciesNamesList
-                            .map<DropdownMenuEntry<String>>((
-                            String option,
-                            ) {
-                          return DropdownMenuEntry<String>(
-                            value: option,
-                            label: option,
-                          );
-                        })
-                            .toList(),
-                        enableFilter: true,
-                        onSelected: (val) {
-                          var index = exchangeRatesCont
-                              .currenciesNamesList
-                              .indexOf(val!);
-                          cont.setSelectedPosCurrency(
-                            exchangeRatesCont.currenciesIdsList[index],
-                            val,
-                            exchangeRatesCont
-                                .currenciesSymbolsList[index],
+                            menuHeight: 250,
+                            dropdownMenuEntries:
+                                exchangeRatesCont.currenciesNamesList
+                                    .map<DropdownMenuEntry<String>>((
+                                      String option,
+                                    ) {
+                                      return DropdownMenuEntry<String>(
+                                        value: option,
+                                        label: option,
+                                      );
+                                    })
+                                    .toList(),
+                            enableFilter: true,
+                            onSelected: (val) {
+                              var index = exchangeRatesCont.currenciesNamesList
+                                  .indexOf(val!);
+                              cont.setSelectedPosCurrency(
+                                exchangeRatesCont.currenciesIdsList[index],
+                                val,
+                                exchangeRatesCont.currenciesSymbolsList[index],
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                  ),
+                      ),
                 ],
               ),
             ],
@@ -514,7 +542,7 @@ class CompanySettingsTab extends StatefulWidget {
 
 class _CompanySettingsTabState extends State<CompanySettingsTab> {
   HomeController homeController = Get.find();
-final ScrollController scrollController=ScrollController();
+  final ScrollController scrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
     return homeController.isMobile.value
@@ -522,6 +550,285 @@ final ScrollController scrollController=ScrollController();
           color: Colors.white,
           // width: MediaQuery.of(context).size.width * 0.8,
           height: MediaQuery.of(context).size.height * 0.65,
+          child: GetBuilder<CompanySettingsController>(
+            builder: (cont) {
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    gapH32,
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.32,
+                          child: Text('primary_currency'.tr),
+                        ),
+                        ReusableShowInfoCard(
+                          text: cont.primaryCurrency.text,
+                          width: MediaQuery.of(context).size.width * 0.4,
+                        ),
+                        // GetBuilder<ExchangeRatesController>(
+                        //   builder: (exchangeRatesCont) {
+                        //     return DropdownMenu<String>(
+                        //       width: MediaQuery.of(context).size.width * 0.4,
+                        //       // requestFocusOnTap: false,
+                        //       enableSearch: true,
+                        //       controller: cont.primaryCurrency,
+                        //       hintText: '',
+                        //       inputDecorationTheme: InputDecorationTheme(
+                        //         // filled: true,
+                        //         hintStyle: const TextStyle(
+                        //           fontStyle: FontStyle.italic,
+                        //         ),
+                        //         contentPadding: const EdgeInsets.fromLTRB(
+                        //           20,
+                        //           0,
+                        //           25,
+                        //           5,
+                        //         ),
+                        //         // outlineBorder: BorderSide(color: Colors.black,),
+                        //         enabledBorder: OutlineInputBorder(
+                        //           borderSide: BorderSide(
+                        //             color: Primary.primary.withAlpha(
+                        //               (0.2 * 255).toInt(),
+                        //             ),
+                        //             width: 1,
+                        //           ),
+                        //           borderRadius: const BorderRadius.all(
+                        //             Radius.circular(9),
+                        //           ),
+                        //         ),
+                        //         focusedBorder: OutlineInputBorder(
+                        //           borderSide: BorderSide(
+                        //             color: Primary.primary.withAlpha(
+                        //               (0.4 * 255).toInt(),
+                        //             ),
+                        //             width: 2,
+                        //           ),
+                        //           borderRadius: const BorderRadius.all(
+                        //             Radius.circular(9),
+                        //           ),
+                        //         ),
+                        //       ),
+                        //       // menuStyle: ,
+                        //       menuHeight: 250,
+                        //       dropdownMenuEntries:
+                        //           exchangeRatesCont.currenciesNamesList
+                        //               .map<DropdownMenuEntry<String>>((
+                        //                 String option,
+                        //               ) {
+                        //                 return DropdownMenuEntry<String>(
+                        //                   value: option,
+                        //                   label: option,
+                        //                 );
+                        //               })
+                        //               .toList(),
+                        //       enableFilter: true,
+                        //       onSelected: (val) {
+                        //         var index = exchangeRatesCont
+                        //             .currenciesNamesList
+                        //             .indexOf(val!);
+                        //         cont.setSelectedCurrency(
+                        //           exchangeRatesCont.currenciesIdsList[index],
+                        //           val,
+                        //           exchangeRatesCont
+                        //               .currenciesSymbolsList[index],
+                        //         );
+                        //         var result = exchangeRatesCont.exchangeRatesList
+                        //             .firstWhere(
+                        //               (item) => item["currency"] == val,
+                        //               orElse: () => null,
+                        //             );
+                        //         cont.setExchangeRateForSelectedCurrency(
+                        //           result != null
+                        //               ? '${result["exchange_rate"]}'
+                        //               : '1',
+                        //         );
+                        //       },
+                        //     );
+                        //
+                        //     // ReusableDropDownMenuWithSearch(
+                        //     //   list: exchangeRatesCont.currenciesNamesList,
+                        //     //   text: 'primary_currency'.tr,
+                        //     //   hint: '',
+                        //     //   onSelected: (val){
+                        //     //     var index = exchangeRatesCont
+                        //     //         .currenciesNamesList
+                        //     //         .indexOf(val!);
+                        //     //     cont.setSelectedCurrency(
+                        //     //       exchangeRatesCont.currenciesIdsList[index],
+                        //     //       val,
+                        //     //     );
+                        //     //     var result = exchangeRatesCont
+                        //     //         .exchangeRatesList
+                        //     //         .firstWhere(
+                        //     //           (item) =>
+                        //     //       item["currency"] == val,
+                        //     //       orElse: () => null,
+                        //     //     );
+                        //     //     cont
+                        //     //         .setExchangeRateForSelectedCurrency(
+                        //     //       result != null
+                        //     //           ? '${result["exchange_rate"]}'
+                        //     //           : '1',
+                        //     //     );
+                        //     //   },
+                        //     //   controller: cont.primaryCurrency,
+                        //     //   validationFunc: (value) {
+                        //     //     return null;
+                        //     //   },
+                        //     //   rowWidth: MediaQuery.of(context).size.width * 0.35,
+                        //     //   textFieldWidth: MediaQuery.of(context).size.width * 0.25,
+                        //     //   clickableOptionText: '',
+                        //     //   isThereClickableOption: false,
+                        //     //   onTappedClickableOption: (){});
+                        //   },
+                        // ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        )
+        : Container(
+          color: Colors.white,
+          width: MediaQuery.of(context).size.width * 0.8,
+          height: MediaQuery.of(context).size.height * 0.65,
+          child: GetBuilder<CompanySettingsController>(
+            builder: (cont) {
+              return RawScrollbar(
+                controller: scrollController,
+                thumbVisibility: true,
+                thickness: 8,
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      gapH32,
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.10,
+                            child: Text('primary_currency'.tr),
+                          ),
+                          ReusableShowInfoCard(
+                            text: cont.primaryCurrency.text,
+                            width: MediaQuery.of(context).size.width * 0.25,
+                            isCentered: false,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+  }
+}
+
+class HeaderTab extends StatefulWidget {
+  const HeaderTab({super.key});
+
+  @override
+  State<HeaderTab> createState() => _HeaderTabState();
+}
+
+class _HeaderTabState extends State<HeaderTab> {
+  CompanySettingsController companySettingsController = Get.find();
+  HomeController homeController = Get.find();
+  addNewHeader() {
+    Map header = {
+      'logo':'',
+      'fullCompanyName': '',
+      'companyEmail': '',
+      'vat': '',
+      'trn': '',
+      'bankInfo': '',
+      'phoneCode': '+961',
+      'phoneNumber': '',
+      'mobileCode': '+961',
+      'mobileNumber': '',
+      'address': '',
+      'localPayments': '',
+      'companySubjectToVat': '',
+      'headerName': '',
+    };
+    companySettingsController.addToHeadersList(header);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return
+      // homeController.companyName == 'CASALAGO'
+      //   ? GetBuilder<CompanySettingsController>(
+      //     builder: (cont) {
+      //       return Column(
+      //         children: [
+      //           SizedBox(
+      //             // height: cont.headersList.isEmpty?20:420,
+      //             height: MediaQuery.of(context).size.height * 0.65,
+      //             child: ListView.builder(
+      //               itemCount: cont.headersList.length,
+      //               itemBuilder:
+      //                   (context, index) => ReusableCASALAGOHeaderSection(index: index),
+      //             ),
+      //           ),
+      //           gapH16,
+      //           ReusableAddCard(
+      //             text: 'add_new_header'.tr,
+      //             onTap: () {
+      //               addNewHeader();
+      //             },
+      //           ),
+      //         ],
+      //       );
+      //     },
+      //   )
+      //   :
+    Container(
+          color:
+              Colors.white, // width: MediaQuery.of(context).size.width * 0.8,
+          height: MediaQuery.of(context).size.height * 0.65,
+          child: ReusableHeaderSection(),
+        );
+  }
+}
+
+class ReusableHeaderSection extends StatefulWidget {
+  const ReusableHeaderSection({super.key,});
+  @override
+  State<ReusableHeaderSection> createState() => _ReusableHeaderSectionState();
+}
+
+class _ReusableHeaderSectionState extends State<ReusableHeaderSection> {
+  HomeController homeController = Get.find();
+  final ScrollController scrollController = ScrollController();
+  @override
+  Widget build(BuildContext context) {
+    return homeController.isMobile.value
+        ? Container(
+          decoration:
+              homeController.companyName == 'CASALAGO'
+                  ? BoxDecoration(
+
+                    border: Border.all(
+                      color: Primary.black.withAlpha((0.2 * 255).toInt()),
+                    ),
+                    borderRadius: BorderRadius.circular(9),
+                  )
+                  : BoxDecoration(
+                    color:
+                        Colors
+                            .white,
+                  ),
+          // height: MediaQuery.of(context).size.height * 0.65,
           child: GetBuilder<CompanySettingsController>(
             builder: (cont) {
               return SingleChildScrollView(
@@ -562,15 +869,6 @@ final ScrollController scrollController=ScrollController();
                                 }
                               },
                             ),
-                        // ReusableAddPhotoCircle(
-                        //   onTapCircle: () async {
-                        //     final image = await ImagePickerHelper.pickImage();
-                        //     print('image $image');
-                        //     cont.setImageFile(image!);
-                        //     print('cont.imageFile');
-                        //     print(cont.imageFile);
-                        //   },
-                        // )
                       ],
                     ),
                     gapH20,
@@ -711,144 +1009,16 @@ final ScrollController scrollController=ScrollController();
                     gapH6,
                     Row(
                       children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.32,
-                          child: Text('primary_currency'.tr),
+                        Checkbox(
+                          value: cont.isCompanySubjectToVat,
+                          onChanged: (bool? value) {
+                            cont.setIsCompanySubjectToVat(value!);
+                          },
                         ),
-                        ReusableShowInfoCard(text: cont.primaryCurrency.text, width: MediaQuery.of(context).size.width * 0.4,)
-                        // GetBuilder<ExchangeRatesController>(
-                        //   builder: (exchangeRatesCont) {
-                        //     return DropdownMenu<String>(
-                        //       width: MediaQuery.of(context).size.width * 0.4,
-                        //       // requestFocusOnTap: false,
-                        //       enableSearch: true,
-                        //       controller: cont.primaryCurrency,
-                        //       hintText: '',
-                        //       inputDecorationTheme: InputDecorationTheme(
-                        //         // filled: true,
-                        //         hintStyle: const TextStyle(
-                        //           fontStyle: FontStyle.italic,
-                        //         ),
-                        //         contentPadding: const EdgeInsets.fromLTRB(
-                        //           20,
-                        //           0,
-                        //           25,
-                        //           5,
-                        //         ),
-                        //         // outlineBorder: BorderSide(color: Colors.black,),
-                        //         enabledBorder: OutlineInputBorder(
-                        //           borderSide: BorderSide(
-                        //             color: Primary.primary.withAlpha(
-                        //               (0.2 * 255).toInt(),
-                        //             ),
-                        //             width: 1,
-                        //           ),
-                        //           borderRadius: const BorderRadius.all(
-                        //             Radius.circular(9),
-                        //           ),
-                        //         ),
-                        //         focusedBorder: OutlineInputBorder(
-                        //           borderSide: BorderSide(
-                        //             color: Primary.primary.withAlpha(
-                        //               (0.4 * 255).toInt(),
-                        //             ),
-                        //             width: 2,
-                        //           ),
-                        //           borderRadius: const BorderRadius.all(
-                        //             Radius.circular(9),
-                        //           ),
-                        //         ),
-                        //       ),
-                        //       // menuStyle: ,
-                        //       menuHeight: 250,
-                        //       dropdownMenuEntries:
-                        //           exchangeRatesCont.currenciesNamesList
-                        //               .map<DropdownMenuEntry<String>>((
-                        //                 String option,
-                        //               ) {
-                        //                 return DropdownMenuEntry<String>(
-                        //                   value: option,
-                        //                   label: option,
-                        //                 );
-                        //               })
-                        //               .toList(),
-                        //       enableFilter: true,
-                        //       onSelected: (val) {
-                        //         var index = exchangeRatesCont
-                        //             .currenciesNamesList
-                        //             .indexOf(val!);
-                        //         cont.setSelectedCurrency(
-                        //           exchangeRatesCont.currenciesIdsList[index],
-                        //           val,
-                        //           exchangeRatesCont
-                        //               .currenciesSymbolsList[index],
-                        //         );
-                        //         var result = exchangeRatesCont.exchangeRatesList
-                        //             .firstWhere(
-                        //               (item) => item["currency"] == val,
-                        //               orElse: () => null,
-                        //             );
-                        //         cont.setExchangeRateForSelectedCurrency(
-                        //           result != null
-                        //               ? '${result["exchange_rate"]}'
-                        //               : '1',
-                        //         );
-                        //       },
-                        //     );
-                        //
-                        //     // ReusableDropDownMenuWithSearch(
-                        //     //   list: exchangeRatesCont.currenciesNamesList,
-                        //     //   text: 'primary_currency'.tr,
-                        //     //   hint: '',
-                        //     //   onSelected: (val){
-                        //     //     var index = exchangeRatesCont
-                        //     //         .currenciesNamesList
-                        //     //         .indexOf(val!);
-                        //     //     cont.setSelectedCurrency(
-                        //     //       exchangeRatesCont.currenciesIdsList[index],
-                        //     //       val,
-                        //     //     );
-                        //     //     var result = exchangeRatesCont
-                        //     //         .exchangeRatesList
-                        //     //         .firstWhere(
-                        //     //           (item) =>
-                        //     //       item["currency"] == val,
-                        //     //       orElse: () => null,
-                        //     //     );
-                        //     //     cont
-                        //     //         .setExchangeRateForSelectedCurrency(
-                        //     //       result != null
-                        //     //           ? '${result["exchange_rate"]}'
-                        //     //           : '1',
-                        //     //     );
-                        //     //   },
-                        //     //   controller: cont.primaryCurrency,
-                        //     //   validationFunc: (value) {
-                        //     //     return null;
-                        //     //   },
-                        //     //   rowWidth: MediaQuery.of(context).size.width * 0.35,
-                        //     //   textFieldWidth: MediaQuery.of(context).size.width * 0.25,
-                        //     //   clickableOptionText: '',
-                        //     //   isThereClickableOption: false,
-                        //     //   onTappedClickableOption: (){});
-                        //   },
-                        // ),
+                        gapW8,
+                        Text('company_subject_to_vat'.tr),
                       ],
                     ),
-                    gapH6,
-                    Row(children: [
-                      Checkbox(
-                        value: cont.isCompanySubjectToVat,
-                        onChanged: (bool? value) {
-                          cont.setIsCompanySubjectToVat(value!);
-                        },
-                      ),
-                      gapW8,
-                      Text(
-                        'company_subject_to_vat'.tr,
-                      ),
-
-                    ],)
                   ],
                 ),
               );
@@ -904,165 +1074,28 @@ final ScrollController scrollController=ScrollController();
                                   }
                                 },
                               ),
-                          // ReusableAddPhotoCircle(
-                          //   onTapCircle: () async {
-                          //     final image = await ImagePickerHelper.pickImage();
-                          //     print('image $image');
-                          //     cont.setImageFile(image!);
-                          //     print('cont.imageFile');
-                          //     print(cont.imageFile);
-                          //   },
-                          // )
                         ],
                       ),
                       gapH20,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          DialogTextField(
-                            textEditingController: cont.fullCompanyName,
-                            text: 'full_company_name'.tr,
-                            rowWidth: MediaQuery.of(context).size.width * 0.35,
-                            textFieldWidth:
-                                MediaQuery.of(context).size.width * 0.25,
-                            validationFunc: (value) {
-                              // if(value.isEmpty){
-                              //   return 'required_field'.tr;
-                              // }
-                              // return null;
-                            },
-                          ),
-                          Row(
+                   Row(
+                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.10,
-                                child: Text('primary_currency'.tr),
+                              DialogTextField(
+                                textEditingController: cont.fullCompanyName,
+                                text: 'full_company_name'.tr,
+                                rowWidth:
+                                    MediaQuery.of(context).size.width * 0.35,
+                                textFieldWidth:
+                                    MediaQuery.of(context).size.width * 0.25,
+                                validationFunc: (value) {
+                                  // if(value.isEmpty){
+                                  //   return 'required_field'.tr;
+                                  // }
+                                  // return null;
+                                },
                               ),
-                              ReusableShowInfoCard(text: cont.primaryCurrency.text, width: MediaQuery.of(context).size.width * 0.25,isCentered: false,)
-                              // GetBuilder<ExchangeRatesController>(
-                              //   builder: (exchangeRatesCont) {
-                              //     return DropdownMenu<String>(
-                              //       width:
-                              //           MediaQuery.of(context).size.width * 0.25,
-                              //       // requestFocusOnTap: false,
-                              //       enableSearch: true,
-                              //       controller: cont.primaryCurrency,
-                              //       hintText: '',
-                              //       inputDecorationTheme: InputDecorationTheme(
-                              //         // filled: true,
-                              //         hintStyle: const TextStyle(
-                              //           fontStyle: FontStyle.italic,
-                              //         ),
-                              //         contentPadding: const EdgeInsets.fromLTRB(
-                              //           20,
-                              //           0,
-                              //           25,
-                              //           5,
-                              //         ),
-                              //         // outlineBorder: BorderSide(color: Colors.black,),
-                              //         enabledBorder: OutlineInputBorder(
-                              //           borderSide: BorderSide(
-                              //             color: Primary.primary.withAlpha(
-                              //               (0.2 * 255).toInt(),
-                              //             ),
-                              //             width: 1,
-                              //           ),
-                              //           borderRadius: const BorderRadius.all(
-                              //             Radius.circular(9),
-                              //           ),
-                              //         ),
-                              //         focusedBorder: OutlineInputBorder(
-                              //           borderSide: BorderSide(
-                              //             color: Primary.primary.withAlpha(
-                              //               (0.4 * 255).toInt(),
-                              //             ),
-                              //             width: 2,
-                              //           ),
-                              //           borderRadius: const BorderRadius.all(
-                              //             Radius.circular(9),
-                              //           ),
-                              //         ),
-                              //       ),
-                              //       // menuStyle: ,
-                              //       menuHeight: 250,
-                              //       dropdownMenuEntries:
-                              //           exchangeRatesCont.currenciesNamesList
-                              //               .map<DropdownMenuEntry<String>>((
-                              //                 String option,
-                              //               ) {
-                              //                 return DropdownMenuEntry<String>(
-                              //                   value: option,
-                              //                   label: option,
-                              //                 );
-                              //               })
-                              //               .toList(),
-                              //       enableFilter: true,
-                              //       onSelected: (val) {
-                              //         var index = exchangeRatesCont
-                              //             .currenciesNamesList
-                              //             .indexOf(val!);
-                              //         cont.setSelectedCurrency(
-                              //           exchangeRatesCont
-                              //               .currenciesIdsList[index],
-                              //           val,
-                              //           exchangeRatesCont
-                              //               .currenciesSymbolsList[index],
-                              //         );
-                              //         var result = exchangeRatesCont
-                              //             .exchangeRatesList
-                              //             .firstWhere(
-                              //               (item) => item["currency"] == val,
-                              //               orElse: () => null,
-                              //             );
-                              //         cont.setExchangeRateForSelectedCurrency(
-                              //           result != null
-                              //               ? '${result["exchange_rate"]}'
-                              //               : '1',
-                              //         );
-                              //       },
-                              //     );
-                              //
-                              //     // ReusableDropDownMenuWithSearch(
-                              //     //   list: exchangeRatesCont.currenciesNamesList,
-                              //     //   text: 'primary_currency'.tr,
-                              //     //   hint: '',
-                              //     //   onSelected: (val){
-                              //     //     var index = exchangeRatesCont
-                              //     //         .currenciesNamesList
-                              //     //         .indexOf(val!);
-                              //     //     cont.setSelectedCurrency(
-                              //     //       exchangeRatesCont.currenciesIdsList[index],
-                              //     //       val,
-                              //     //     );
-                              //     //     var result = exchangeRatesCont
-                              //     //         .exchangeRatesList
-                              //     //         .firstWhere(
-                              //     //           (item) =>
-                              //     //       item["currency"] == val,
-                              //     //       orElse: () => null,
-                              //     //     );
-                              //     //     cont
-                              //     //         .setExchangeRateForSelectedCurrency(
-                              //     //       result != null
-                              //     //           ? '${result["exchange_rate"]}'
-                              //     //           : '1',
-                              //     //     );
-                              //     //   },
-                              //     //   controller: cont.primaryCurrency,
-                              //     //   validationFunc: (value) {
-                              //     //     return null;
-                              //     //   },
-                              //     //   rowWidth: MediaQuery.of(context).size.width * 0.35,
-                              //     //   textFieldWidth: MediaQuery.of(context).size.width * 0.25,
-                              //     //   clickableOptionText: '',
-                              //     //   isThereClickableOption: false,
-                              //     //   onTappedClickableOption: (){});
-                              //   },
-                              // ),
                             ],
                           ),
-                        ],
-                      ),
                       gapH6,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1210,22 +1243,327 @@ final ScrollController scrollController=ScrollController();
                         ],
                       ),
                       gapH10,
-                      Row(children: [
-                        Checkbox(
-                          value: cont.isCompanySubjectToVat,
-                          onChanged: (bool? value) {
-                            cont.setIsCompanySubjectToVat(value!);
-                          },
-                        ),
-                        gapW8,
-                        Text(
-                          'company_subject_to_vat'.tr,
-                        ),
-
-                      ],)
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: cont.isCompanySubjectToVat,
+                            onChanged: (bool? value) {
+                              cont.setIsCompanySubjectToVat(value!);
+                            },
+                          ),
+                          gapW8,
+                          Text('company_subject_to_vat'.tr),
+                        ],
+                      ),
                     ],
                   ),
                 ),
+              );
+            },
+          ),
+        );
+  }
+}
+
+
+
+class ReusableCASALAGOHeaderSection extends StatefulWidget {
+  const ReusableCASALAGOHeaderSection({super.key, required this.index});
+  final int index;
+  @override
+  State<ReusableCASALAGOHeaderSection> createState() => _ReusableCASALAGOHeaderSectionState();
+}
+
+class _ReusableCASALAGOHeaderSectionState extends State<ReusableCASALAGOHeaderSection> {
+  HomeController homeController = Get.find();
+  Uint8List? imageFile;
+  String selectedPhoneCode = '', selectedMobileCode = '',logo='';
+  TextEditingController headerName=TextEditingController();
+  TextEditingController fullCompanyName=TextEditingController();
+  TextEditingController address=TextEditingController();
+  TextEditingController mobile=TextEditingController();
+  TextEditingController phone=TextEditingController();
+  TextEditingController email=TextEditingController();
+  TextEditingController trn=TextEditingController();
+  TextEditingController bankInformation=TextEditingController();
+  TextEditingController localPayments=TextEditingController();
+  TextEditingController vat=TextEditingController();
+  bool isCompanySubjectToVat = true;
+  @override
+  void initState() {
+    headerName.text='Header${widget.index+1}';
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin:
+      const EdgeInsets.only(top: 5.0),
+      padding:
+           EdgeInsets.symmetric(vertical: 5,horizontal: 10),
+      decoration:BoxDecoration(
+
+        border: Border.all(
+          color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+        ),
+        borderRadius: BorderRadius.circular(9),
+      ),
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: GetBuilder<CompanySettingsController>(
+            builder: (cont) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // gapH32,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      imageFile != null
+                          ? InkWell(
+                            onTap: () async {
+                              final image =
+                                  await ImagePickerHelper.pickImage();
+                              cont.updateLogoFile(widget.index,image!);
+                            },
+                            child: ReusablePhotoCircle(
+                              imageFilePassed:imageFile!,
+                            ),
+                          )
+                          : logo.isNotEmpty
+                          ? InkWell(
+                            onTap: () async {
+                              final image =
+                                  await ImagePickerHelper.pickImage();
+                              cont.updateLogoFile(widget.index,image!);
+                            },
+                            child: ReusablePhotoCard(url: logo),
+                          )
+                          : ReusableAddPhotoCircle(
+                            onTapCircle: () async {
+                              final image =
+                                  await ImagePickerHelper.pickImage();
+                              if (image != null) {
+                                cont.updateLogoFile(widget.index,image);
+                              }
+                            },
+                          ),
+                    ],
+                  ),
+                  gapH20,
+                  Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          DialogTextField(
+                            textEditingController: headerName,
+                            text: 'header'.tr,
+                            rowWidth:
+                                MediaQuery.of(context).size.width * 0.35,
+                            textFieldWidth:
+                                MediaQuery.of(context).size.width * 0.25,
+                            validationFunc: (value) {
+                              if (value.isEmpty) {
+                                return 'required_field'.tr;
+                              }
+                              return null;
+                            },
+                            onChangedFunc: (val){
+                              cont.updateFullCompanyName(widget.index,val);
+                            },
+                          ),
+                          DialogTextField(
+                            textEditingController: fullCompanyName,
+                            text: 'full_company_name'.tr,
+                            rowWidth:
+                                MediaQuery.of(context).size.width * 0.35,
+                            textFieldWidth:
+                                MediaQuery.of(context).size.width * 0.25,
+                            validationFunc: (value) {
+                              // if(value.isEmpty){
+                              //   return 'required_field'.tr;
+                              // }
+                              // return null;
+                            },
+                            onChangedFunc: (val){
+                              cont.updateFullCompanyName(widget.index,val);
+                            },
+                          ),
+                        ],
+                      ),
+                  gapH6,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      PhoneTextField(
+                        textEditingController: mobile,
+                        initialValue: selectedMobileCode,
+                        text: 'mobile'.tr,
+                        rowWidth: MediaQuery.of(context).size.width * 0.35,
+                        textFieldWidth:
+                            MediaQuery.of(context).size.width * 0.25,
+                        validationFunc: (val) {
+                          if (val.isNotEmpty && val.length < 9) {
+                            return '7_digits'.tr;
+                          }
+                          return null;
+                        },
+                        onCodeSelected: (value) {
+                          cont.updateMobileCode(widget.index,value);
+                        },
+                        onChangedFunc: (value) {
+                          cont.updateMobileNumber(widget.index,value);
+                        },
+                      ),
+                      PhoneTextField(
+                        textEditingController: phone,
+                        text: 'phone'.tr,
+                        initialValue: selectedPhoneCode,
+                        rowWidth: MediaQuery.of(context).size.width * 0.35,
+                        textFieldWidth:
+                            MediaQuery.of(context).size.width * 0.25,
+                        validationFunc: (val) {
+                          if (val.isNotEmpty && val.length < 9) {
+                            return '7_digits'.tr;
+                          }
+                          return null;
+                        },
+                        onCodeSelected: (value) {
+                          cont.updatePhoneCode(widget.index,value);
+                        },
+                        onChangedFunc: (value) {
+                          cont.updatePhoneNumber(widget.index,value);
+                        },
+                      ),
+                    ],
+                  ),
+                  gapH6,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      DialogTextField(
+                        textEditingController: email,
+                        text: 'email'.tr,
+                        rowWidth: MediaQuery.of(context).size.width * 0.35,
+                        textFieldWidth:
+                            MediaQuery.of(context).size.width * 0.25,
+                        validationFunc: (value) {
+                          // if(value.isEmpty){
+                          //   return 'required_field'.tr;
+                          // }
+                          // return null;
+                        },
+                        onChangedFunc: (val){
+                          cont.updateCompanyEmail(widget.index,val);
+                        },
+                      ),
+                      DialogTextField(
+                        textEditingController: address,
+                        text: 'address'.tr,
+                        rowWidth: MediaQuery.of(context).size.width * 0.35,
+                        textFieldWidth:
+                            MediaQuery.of(context).size.width * 0.25,
+                        validationFunc: (value) {
+                          // if(value.isEmpty){
+                          //   return 'required_field'.tr;
+                          // }
+                          // return null;
+                        },
+                        onChangedFunc: (val){
+                          cont.updateAddress(widget.index,val);
+                        },
+                      ),
+                    ],
+                  ),
+                  gapH6,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      DialogTextField(
+                        textEditingController: bankInformation,
+                        text: 'bank_information'.tr,
+                        rowWidth: MediaQuery.of(context).size.width * 0.35,
+                        textFieldWidth:
+                            MediaQuery.of(context).size.width * 0.25,
+                        validationFunc: (value) {
+                          // if(value.isEmpty){
+                          //   return 'required_field'.tr;
+                          // }
+                          // return null;
+                        },
+                        onChangedFunc: (val){
+                          cont.updateBankInfo(widget.index,val);
+                        },
+                      ),
+                      DialogTextField(
+                        textEditingController: localPayments,
+                        text: 'local_payments'.tr,
+                        rowWidth: MediaQuery.of(context).size.width * 0.35,
+                        textFieldWidth:
+                            MediaQuery.of(context).size.width * 0.25,
+                        validationFunc: (value) {
+                          // if(value.isEmpty){
+                          //   return 'required_field'.tr;
+                          // }
+                          // return null;
+                        },
+                        onChangedFunc: (val){
+                          cont.updateLocalPayments(widget.index,val);
+                        },
+                      ),
+                    ],
+                  ),
+                  gapH6,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      DialogTextField(
+                        textEditingController: trn,
+                        text: 'trn'.tr,
+                        rowWidth: MediaQuery.of(context).size.width * 0.35,
+                        textFieldWidth:
+                            MediaQuery.of(context).size.width * 0.25,
+                        validationFunc: (value) {
+                          // if(value.isEmpty){
+                          //   return 'required_field'.tr;
+                          // }
+                          // return null;
+                        },
+                        onChangedFunc: (val){
+                          cont.updateTrn(widget.index,val);
+                        },
+                      ),
+                      ReusableInputNumberField(
+                        controller: vat,
+                        text: '${'vat'.tr} %',
+                        rowWidth: MediaQuery.of(context).size.width * 0.35,
+                        textFieldWidth:
+                            MediaQuery.of(context).size.width * 0.25,
+                        validationFunc: (value) {
+                          // if(value.isEmpty){
+                          //   return 'required_field'.tr;
+                          // }
+                          // return null;
+                        },
+                        onChangedFunc: (val){
+                          cont.updateVat(widget.index,val);
+                        },
+                      ),
+                    ],
+                  ),
+                  gapH10,
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isCompanySubjectToVat,
+                        onChanged: (bool? value) {
+                          cont.updateCompanySubjectToVat(widget.index,value==true?'1':'0');
+                        },
+                      ),
+                      gapW8,
+                      Text('company_subject_to_vat'.tr),
+                    ],
+                  ),
+                ],
               );
             },
           ),

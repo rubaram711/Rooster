@@ -291,6 +291,25 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
           imageProviders[item['image']] = null;
         }
       }
+      if (item['line_type_id'] == '3') {
+        if (item['combo_image'] != null) {
+          try {
+            final response = await http.get(Uri.parse(item['combo_image']));
+            if (response.statusCode == 200) {
+              imageProviders[item['combo_image']] = pw.MemoryImage(
+                response.bodyBytes,
+              );
+            } else {
+              imageProviders[item['combo_image']] =
+                  null; // Store null if image fails to load
+            }
+          } catch (e) {
+            imageProviders[item['combo_image']] = null;
+          }
+        } else {
+          imageProviders[item['combo_image']] = null;
+        }
+      }
     }
     // await preFetchImages(salesInvoiceController.itemList);
     final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
@@ -298,6 +317,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
     var gapW20 = pw.SizedBox(width: 20);
     var gapW180 = pw.SizedBox(width: 180);
     var gapH4 = pw.SizedBox(height: 4);
+    var gapH2 = pw.SizedBox(height: 2);
     var gapH5 = pw.SizedBox(height: 5);
     var gapH6 = pw.SizedBox(height: 6);
     final font = await rootBundle.load('assets/fonts/Tajawal-Medium.ttf');
@@ -409,6 +429,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
     reusableRowInSalesInvoice({
       required Map salesInvoiceItemInfo,
       required int index,
+      required pw.ImageProvider? imageProvider,
     }) {
       return pw.Container(
         margin: const pw.EdgeInsets.symmetric(vertical: 8),
@@ -417,7 +438,26 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                 ? pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                   children: [
-                    reusableShowInfoCard(text: '---', width: width * 0.05),
+                    pw.Column(
+                      children: [
+                        reusableShowInfoCard(
+                          text:
+                              salesInvoiceItemInfo['combo_brand'] != ''
+                                  ? salesInvoiceItemInfo['combo_brand']
+                                  : '---',
+                          width: width * 0.05,
+                        ),
+                        gapH4,
+                        gapH4,
+                        if (imageProvider != null)
+                          pw.Image(
+                            imageProvider,
+                            fit: pw.BoxFit.contain,
+                            width: 50,
+                            height: 50,
+                          ),
+                      ],
+                    ),
                     reusableShowInfoCard(
                       text: '${salesInvoiceItemInfo['item_name'] ?? ''}',
                       width: width * 0.05,
@@ -639,7 +679,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                         ),
                       ),
                       pw.SizedBox(
-                        width: width * 0.15,
+                        width: width * 0.125,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
                           children: [
@@ -862,7 +902,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                   child:
                   // to
                   pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
                       pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.center,
@@ -870,36 +910,39 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                           tableTitle(
                             text:
                                 'Sales Invoice [${widget.salesInvoiceNumber}] ',
-                            width: width * 0.05,
+                            width: width * 0.07,
                           ),
                           widget.salesOrderNumber == ''
                               ? tableTitle(
                                 text: 'is New Sales Invoice',
-                                width: width * 0.06,
+                                width: width * 0.07,
                               )
                               : tableTitle(
                                 text:
                                     'is Sales Order [${widget.salesOrderNumber}]',
-                                width: width * 0.06,
+                                width: width * 0.07,
                               ),
                           widget.quotationNumber == ''
                               ? tableTitle(
                                 text: ', This Sales Order is New Sales Order',
-                                width: width * 0.06,
+                                width: width * 0.07,
                               )
                               : tableTitle(
                                 text:
                                     ', This Sales Order is Quotation [${widget.quotationNumber}]',
-                                width: width * 0.06,
+                                width: width * 0.07,
                               ),
                         ],
                       ),
 
-                      gapH4,
-                      pw.Divider(
-                        height: 5,
-                        color: PdfColors.black,
-                        // endIndent: 250
+                      gapH2,
+                      pw.SizedBox(
+                        width: width * 0.13,
+                        child: pw.Divider(
+                          height: 5,
+                          color: PdfColors.black,
+                          // endIndent: 250
+                        ),
                       ),
                     ],
                   ),
@@ -972,6 +1015,8 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                               : reusableRowInSalesInvoice(
                                 salesInvoiceItemInfo: item,
                                 index: index,
+                                imageProvider:
+                                    imageProviders[item['combo_image']],
                               );
                         },
                       ),
@@ -1040,14 +1085,16 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                         ],
                       ),
 
-                      widget.globalDiscount == '0.00'
+                      widget.globalDiscount == '0.00' ||
+                              widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Divider(
                             height: 5,
                             color: PdfColors.black,
                             // endIndent: 250
                           ),
-                      widget.globalDiscount == '0.00'
+                      widget.globalDiscount == '0.00' ||
+                              widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Row(
                             children: [
@@ -1067,7 +1114,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                   pw.SizedBox(
                                     width: width * 0.05,
                                     child: reusableNumber(
-                                      '${widget.globalDiscount.isEmpty ? 0 : widget.globalDiscount}%',
+                                      '${widget.globalDiscount == '0.00' || widget.globalDiscount == '0' ? 0 : widget.globalDiscount}%',
                                     ),
                                   ),
                                 ],
@@ -1080,7 +1127,8 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                     width: width * 0.08,
                                     // child: reusableText('$discountOnAllItem'),
                                     child: reusableNumber(
-                                      widget.discountOnAllItem == '0'
+                                      widget.discountOnAllItem == '0' ||
+                                              widget.discountOnAllItem == '0.00'
                                           ? '0.00'
                                           : widget.discountOnAllItem,
                                     ),
@@ -1089,7 +1137,8 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                               ),
                             ],
                           ),
-                      widget.globalDiscount == '0.00'
+                      widget.globalDiscount == '0.00' ||
+                              widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Divider(
                             height: 5,
@@ -1097,7 +1146,8 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                             // endIndent: 250
                           ),
                       // TOTAL PRICE AFTER  DISCOUNT
-                      widget.globalDiscount == '0.00'
+                      widget.globalDiscount == '0.00' ||
+                              widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Row(
                             children: [
@@ -1146,14 +1196,16 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                             ],
                           ),
 
-                      widget.globalDiscount == '0.00'
+                      widget.globalDiscount == '0.00' ||
+                              widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Divider(
                             height: 5,
                             color: PdfColors.black,
                             // endIndent: 250
                           ),
-                      widget.specialDiscount == '0.00'
+                      widget.specialDiscount == '0.00' ||
+                              widget.specialDiscount == '0'
                           ? pw.Text("")
                           : pw.Row(
                             children: [
@@ -1175,7 +1227,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                   pw.SizedBox(
                                     width: width * 0.05,
                                     child: reusableNumber(
-                                      '${widget.specialDiscount.isEmpty ? 0 : widget.specialDiscount}%',
+                                      '${widget.specialDiscount == '0.00' || widget.specialDiscount == '0' ? 0 : widget.specialDiscount}%',
                                     ),
                                   ),
                                 ],
