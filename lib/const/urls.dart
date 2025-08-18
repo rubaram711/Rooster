@@ -1,6 +1,6 @@
 // const String baseUrl='https://theravenstyle.com/api';
-// const String baseUrl='https://theravenstyle.com/rooster-backend/public/api';
-const String baseUrl='https://demo.theravenstyle.com/rooster-backend-with-headers/public/api';//test version
+const String baseUrl='https://theravenstyle.com/rooster-backend/public/api';
+// const String baseUrl='https://demo.theravenstyle.com/rooster-backend-with-headers/public/api'; //test version
 const String baseImage='https://theravenstyle.com/rooster-backend/public/';
 
 
@@ -83,6 +83,7 @@ const kOpenSessionIdUrl='$baseUrl/sessions/current-session';
 const kGetInventoryDataUrl='$baseUrl/inventory/get-inventory-data';
 const kInventoryUrl='$baseUrl/inventory';
 const kSettingsUrl='$baseUrl/settings';
+const kHeadersUrl='$baseUrl/headers';
 const kTasksUrl='$baseUrl/tasks';
 const kPriceListUrl='$baseUrl/pricelists';
 const kGetPriceListItemsUrl='$baseUrl/pricelists/items';

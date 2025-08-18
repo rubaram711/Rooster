@@ -121,17 +121,17 @@ class _ClientOrderState extends State<ClientOrderSummary> {
     String companyLogo = await getCompanyLogoFromPref();
 
     // 1. Download image
-    final response = await http.get(Uri.parse(companyLogo));
+    final response = await http.get(Uri.parse('$baseImage$companyLogo'));
     if (response.statusCode != 200) {
       throw Exception('Failed to load image');
+    } else {
+      final Uint8List imageBytes = response.bodyBytes;
+      // String companyLogo = await getCompanyLogoFromPref();
+      // final Uint8List logoBytes = await fetchImage(
+      //   companyLogo,
+      // );
+      salesOrderController.setLogo(imageBytes);
     }
-
-    final Uint8List imageBytes = response.bodyBytes;
-    // String companyLogo = await getCompanyLogoFromPref();
-    // final Uint8List logoBytes = await fetchImage(
-    //   companyLogo,
-    // );
-    salesOrderController.setLogo(imageBytes);
   }
 
   @override
@@ -855,10 +855,9 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                             combosmap['image'] != null &&
                                             combosmap['image'].isNotEmpty
                                         ? '${combosmap['image']}'
-                                        : 'no has image';
+                                        : '';
 
-                                var combobrand =
-                                    combosmap['brand'] ?? 'brand not found';
+                                var combobrand = combosmap['brand'] ?? '';
                                 totalAllItems += itemTotal;
                                 var quotationItemInfo = {
                                   'line_type_id': '3',
@@ -1096,7 +1095,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                     elevation: 0,
                                     content: UpdateSalesOrderDialog(
                                       index: widget.index,
-                                      info: widget.info,
+                                      info: deepCloneMap(widget.info),
                                       fromPage: 'salesOrderSummary',
                                     ),
                                   ),

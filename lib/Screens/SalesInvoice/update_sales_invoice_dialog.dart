@@ -546,6 +546,8 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     ),
                                     'item_image': itemImage,
                                     'item_brand': brand,
+                                    'combo_image': '',
+                                    'combo_brand': '',
                                     'title': '',
                                     'isImageList': false,
                                     'note': '',
@@ -568,6 +570,18 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   var itemTotal = double.parse(
                                     '${item['combo_total']}',
                                   );
+                                  var combosmap =
+                                      salesInvoiceCont
+                                          .combosMap[item['combo_id']
+                                          .toString()];
+                                  var comboImage =
+                                      '${combosmap['image']}' != '' &&
+                                              combosmap['image'] != null &&
+                                              combosmap['image'].isNotEmpty
+                                          ? '${combosmap['image']}'
+                                          : '';
+
+                                  var combobrand = combosmap['brand'] ?? '';
                                   totalAllItems += itemTotal;
                                   var quotationItemInfo = {
                                     'line_type_id': '3',
@@ -585,6 +599,8 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     'note': '',
                                     'item_image': '',
                                     'item_brand': '',
+                                    'combo_image': comboImage,
+                                    'combo_brand': combobrand,
                                     'isImageList': false,
                                     'title': '',
                                     'image': '',
@@ -601,6 +617,8 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     'item_total': '',
                                     'item_image': '',
                                     'item_brand': '',
+                                    'combo_image': '',
+                                    'combo_brand': '',
                                     'note': '',
                                     'isImageList': false,
                                     'title': item['title'],
@@ -618,6 +636,8 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     'item_total': '',
                                     'item_image': '',
                                     'item_brand': '',
+                                    'combo_image': '',
+                                    'combo_brand': '',
                                     'title': '',
                                     'note': item['note'],
                                     'isImageList': false,
@@ -635,6 +655,8 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     'item_total': '',
                                     'item_image': '',
                                     'item_brand': '',
+                                    'combo_image': '',
+                                    'combo_brand': '',
                                     'title': '',
                                     'note': '',
                                     'image': '$baseImage${item['image']}',
@@ -670,17 +692,20 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   vatBySalesInvoiceCurrency;
                               var salesOrderNumber = '';
                               var quotNumber = '';
-                              widget.info['salesorder'] == null
+                              widget.info['salesOrder'] == null
                                   ? salesOrderNumber = ''
                                   : salesOrderNumber =
                                       widget
-                                          .info['salesorder']['salesorderNumber'];
+                                          .info['salesOrder']['salesOrderNumber'];
 
                               salesOrderNumber == ''
                                   ? quotNumber = ''
+                                  : widget.info['salesOrder']['quotation'] ==
+                                      null
+                                  ? quotNumber = ''
                                   : quotNumber =
                                       widget
-                                          .info['salesorder']['quotation']['quotationNumber'];
+                                          .info['salesOrder']['quotation']['quotationNumber'];
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(

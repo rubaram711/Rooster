@@ -28,7 +28,7 @@ Future oldStoreQuotation(
   String total,
   // String cancellationReason,
   String deliveryTerms,
-  String chance
+  String chance,
 ) async
 {
   final uri = Uri.parse(kStoreQuotationUrl);
@@ -59,7 +59,7 @@ Future oldStoreQuotation(
       "total": total,
       // "cancellationReason":cancellationReason,
       "deliveryTerms":deliveryTerms,
-      "chance":chance
+      "chance":chance,
     },
   );
 
@@ -100,11 +100,13 @@ Future storeQuotations(
   List<int> orderedKeys ,
   String title,
     String deliveryTerms,
-    String chance
-) async
+    String chance,
+    String companyHeaderId,
+
+    ) async
 {
   String token = await getAccessTokenFromPref();
-  FormData formData = FormData.fromMap({
+  var p={
     "manualReference": manualReference,
     "clientId": clientId,
     "validity": validity,
@@ -135,8 +137,12 @@ Future storeQuotations(
     "code": code,
     "title": title,
     "deliveryTerms":deliveryTerms,
-    "chance":chance
-  });
+    "chance":chance,
+  };
+  if(companyHeaderId.isNotEmpty){
+    p.addAll({"companyHeaderId":companyHeaderId,});
+  }
+  FormData formData = FormData.fromMap(p);
 
 
   int i = 1;

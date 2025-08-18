@@ -247,6 +247,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
 
   @override
   void initState() {
+    quotationController.selectedHeaderIndex = 0;
     chanceController.text = chanceLevels[0];
     quotationController.quotationCounter = 0;
     _controller = QuillController(
@@ -303,29 +304,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                             UnderTitleBtn(
                               text: 'preview'.tr,
                               onTap: () {
-                                // bool isThereItemsEmpty = false;
-                                // var keys =
-                                //     quotationCont.rowsInListViewInQuotation.keys
-                                //         .toList();
-                                // for (int i = 0; i < keys.length; i++) {
-                                //   if (quotationCont
-                                //               .rowsInListViewInQuotation[keys[i]]["item_quantity"] ==
-                                //           '' ||
-                                //       quotationCont
-                                //               .rowsInListViewInQuotation[keys[i]]["item_quantity"] ==
-                                //           '0') {
-                                //     setState(() {
-                                //       isThereItemsEmpty = true;
-                                //     });
-                                //     break;
-                                //   }
-                                // }
-                                // if (isThereItemsEmpty) {
-                                //   CommonWidgets.snackBar(
-                                //     'error',
-                                //     'check all order lines and enter the required fields',
-                                //   );
-                                // } else {
+                                var itemTotal = 0.00;
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -365,7 +344,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                   ? ''
                                                   : firstBrandObject['name'] ??
                                                       '';
-                                          var itemTotal = double.parse(
+                                          itemTotal = double.parse(
                                             '${item['item_total']}',
                                           );
                                           // double.parse(qty) * itemPrice;
@@ -386,6 +365,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                 ),
                                             'item_image': itemImage,
                                             'item_brand': brand,
+                                            'combo_image': '',
+                                            'combo_brand': '',
                                             'title': '',
                                             'isImageList': true,
                                             'note': '',
@@ -411,8 +392,23 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                           );
                                           var itemDescription =
                                               item['item_description'];
+                                          var combosmap =
+                                              quotationCont
+                                                  .combosMap[item['combo_id']
+                                                  .toString()];
+                                          var comboImage =
+                                              '${combosmap['image']}' != '' &&
+                                                      combosmap['image'] !=
+                                                          null &&
+                                                      combosmap['image']
+                                                          .isNotEmpty
+                                                  ? '${combosmap['image']}'
+                                                  : '';
 
-                                          var itemTotal = double.parse(
+                                          var combobrand =
+                                              combosmap['brand'] ?? '';
+
+                                          itemTotal += double.parse(
                                             '${item['item_total']}',
                                           );
                                           // double.parse(qty) * itemPrice;
@@ -434,6 +430,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             'note': '',
                                             'item_image': '',
                                             'item_brand': '',
+                                            'combo_image': comboImage,
+                                            'combo_brand': combobrand,
                                             'isImageList': true,
                                             'title': '',
                                             'image': '',
@@ -451,6 +449,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             'item_total': '',
                                             'item_image': '',
                                             'item_brand': '',
+                                            'combo_image': '',
+                                            'combo_brand': '',
                                             'note': '',
                                             'isImageList': true,
                                             'title': item['title'],
@@ -469,6 +469,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             'item_total': '',
                                             'item_image': '',
                                             'item_brand': '',
+                                            'combo_image': '',
+                                            'combo_brand': '',
                                             'title': '',
                                             'note': item['note'],
                                             'image': '',
@@ -487,6 +489,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             'item_total': '',
                                             'item_image': '',
                                             'item_brand': '',
+                                            'combo_image': '',
+                                            'combo_brand': '',
                                             'title': '',
                                             'note': '',
                                             'image': item['image'],
@@ -496,6 +500,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         }
                                       }
                                       return PrintQuotationData(
+                                        header: quotationCont.selectedHeader,
                                         isPrintedAs0:
                                             quotationCont.isPrintedAs0,
                                         isVatNoPrinted:
@@ -714,6 +719,14 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                     titleController.text,
                                     deliveryTermsController.text,
                                     chanceController.text,
+                                    homeController.companyName == 'CASALAGO' ||
+                                            homeController.companyName ==
+                                                'AMAZON'
+                                        ? quotationCont
+                                            .headersList[quotationCont
+                                                .selectedHeaderIndex]['id']
+                                            .toString()
+                                        : '',
                                   );
                                   if (res['success'] == true) {
                                     CommonWidgets.snackBar(
@@ -726,6 +739,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (BuildContext context) {
+                                          var itemTotal = 0.00;
                                           List itemsInfoPrint = [];
                                           for (var item
                                               in quotationCont
@@ -762,7 +776,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                       ? ''
                                                       : firstBrandObject['name'] ??
                                                           '';
-                                              var itemTotal = double.parse(
+                                              itemTotal = double.parse(
                                                 '${item['item_total']}',
                                               );
                                               // double.parse(qty) * itemPrice;
@@ -785,6 +799,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                     ),
                                                 'item_image': itemImage,
                                                 'item_brand': brand,
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'title': '',
                                                 'isImageList': true,
                                                 'note': '',
@@ -813,10 +829,27 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                               );
                                               var itemDescription =
                                                   item['item_description'];
+                                              var combosmap =
+                                                  quotationCont
+                                                      .combosMap[item['combo_id']
+                                                      .toString()];
+                                              var comboImage =
+                                                  '${combosmap['image']}' !=
+                                                              '' &&
+                                                          combosmap['image'] !=
+                                                              null &&
+                                                          combosmap['image']
+                                                              .isNotEmpty
+                                                      ? '${combosmap['image']}'
+                                                      : '';
 
-                                              var itemTotal = double.parse(
+                                              var combobrand =
+                                                  combosmap['brand'] ?? '';
+
+                                              itemTotal += double.parse(
                                                 '${item['item_total']}',
                                               );
+
                                               // double.parse(qty) * itemPrice;
                                               var quotationItemInfo = {
                                                 'line_type_id': '3',
@@ -838,6 +871,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                 'note': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': comboImage,
+                                                'combo_brand': combobrand,
                                                 'isImageList': true,
                                                 'title': '',
                                                 'image': '',
@@ -857,6 +892,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                 'item_total': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'note': '',
                                                 'isImageList': true,
                                                 'title': item['title'],
@@ -877,6 +914,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                 'item_total': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'title': '',
                                                 'note': item['note'],
                                                 'image': '',
@@ -897,6 +936,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                 'item_total': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'title': '',
                                                 'note': '',
                                                 'image': item['image'],
@@ -908,6 +949,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             }
                                           }
                                           return PrintQuotationData(
+                                            header:
+                                                quotationCont.selectedHeader,
                                             isPrintedAs0:
                                                 quotationCont.isPrintedAs0,
                                             isVatNoPrinted:
@@ -2256,9 +2299,11 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                   .customerNumberList
                                                   .indexOf(value)];
                                           if (quotationCont
-                                              .customersPricesListsIds[index]
-                                              .isNotEmpty && quotationCont
-                                              .customersPricesListsIds[index]!=null) {
+                                                  .customersPricesListsIds[index]
+                                                  .isNotEmpty &&
+                                              quotationCont
+                                                      .customersPricesListsIds[index] !=
+                                                  null) {
                                             quotationCont.setSelectedPriceListId(
                                               '${quotationCont.customersPricesListsIds[index]}',
                                             );
@@ -2276,9 +2321,11 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             });
                                           }
                                           if (quotationCont
-                                              .customersSalesPersonsIds[index]
-                                              .isNotEmpty && quotationCont
-                                              .customersSalesPersonsIds[index]!=null) {
+                                                  .customersSalesPersonsIds[index]
+                                                  .isNotEmpty &&
+                                              quotationCont
+                                                      .customersSalesPersonsIds[index] !=
+                                                  null) {
                                             setState(() {
                                               selectedSalesPersonId = int.parse(
                                                 '${quotationCont.customersSalesPersonsIds[index]}',
@@ -3182,6 +3229,72 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                   : SizedBox(),
                             ],
                           ),
+                          homeController.companyName == 'CASALAGO' ||
+                                  homeController.companyName == 'AMAZON'
+                              ? Column(
+                                children: [
+                                  gapH16,
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.15,
+                                        child: ListTile(
+                                          title: Text(
+                                            quotationCont
+                                                .headersList[0]['header_name'],
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          leading: Radio(
+                                            value: 0,
+                                            groupValue:
+                                                quotationCont
+                                                    .selectedHeaderIndex,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                quotationCont
+                                                        .selectedHeaderIndex =
+                                                    value!;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.15,
+                                        child: ListTile(
+                                          title: Text(
+                                            quotationCont
+                                                .headersList[1]['header_name'],
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          leading: Radio(
+                                            value: 1,
+                                            groupValue:
+                                                quotationCont
+                                                    .selectedHeaderIndex,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                quotationCont
+                                                        .selectedHeaderIndex =
+                                                    value!;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              )
+                              : SizedBox.shrink(),
                         ],
                       ),
                     ),
@@ -3957,6 +4070,15 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         titleController.text,
                                         deliveryTermsController.text,
                                         chanceController.text,
+                                        homeController.companyName ==
+                                                    'CASALAGO' ||
+                                                homeController.companyName ==
+                                                    'AMAZON'
+                                            ? quotationCont
+                                                .headersList[quotationCont
+                                                    .selectedHeaderIndex]['id']
+                                                .toString()
+                                            : '',
                                       );
                                       if (res['success'] == true) {
                                         CommonWidgets.snackBar(

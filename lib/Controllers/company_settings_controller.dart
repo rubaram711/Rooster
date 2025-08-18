@@ -2,6 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+// import 'package:rooster_app/Controllers/home_controller.dart';
+
+import '../Backend/HeadersBackend/get_headers.dart';
 
 
 
@@ -111,22 +114,98 @@ class CompanySettingsController extends GetxController {
   }
 
 
-  List<Map> headersList=[
-    { 'logo':'',
-      'fullCompanyName': '',
-      'companyEmail': '',
-      'vat': '',
-      'trn': '',
-      'bankInfo': '',
-      'phoneCode': '+961',
-      'phoneNumber': '',
-      'mobileCode': '+961',
-      'mobileNumber': '',
-      'address': '',
-      'localPayments': '',
-      'companySubjectToVat': '',
-      'headerName': '',}
-  ];
+
+  getCashTraysFromBack(bool isItHaveHeader2) async {
+    headersList = [];
+    print('object xx$headersList');
+    isHeadersFetched = false;
+    var p = await getAllHeaders();
+    if (p['success']==true) {
+      for (var header in p['data']) {
+        headersList.add(header);
+      }
+      // cashTraysList=cashTraysList.reversed.toList();
+
+      if(headersList.isEmpty && isItHaveHeader2){
+        headersList=[
+          { 'id': '',
+            'logo':'',
+            'fullCompanyName': '',
+            'email': '',
+            'vat': '',
+            'trn': '',
+            'bankInfo': '',
+            'phoneCode': '+961',
+            'phoneNumber': '',
+            'mobileCode': '+961',
+            'mobileNumber': '',
+            'address': '',
+            'localPayments': '',
+            'companySubjectToVat': '',
+            'headerName': 'Header 1',
+          } ,
+          { 'id': '',
+            'logo':'',
+            'fullCompanyName': '',
+            'email': '',
+            'vat': '',
+            'trn': '',
+            'bankInfo': '',
+            'phoneCode': '+961',
+            'phoneNumber': '',
+            'mobileCode': '+961',
+            'mobileNumber': '',
+            'address': '',
+            'localPayments': '',
+            'companySubjectToVat': '',
+            'headerName': 'Header 2',}
+        ];
+      }
+      else if(headersList.length==1 && isItHaveHeader2){
+        headersList.add({
+          'id': '',
+          'logo':'',
+          'fullCompanyName': '',
+          'email': '',
+          'vat': '',
+          'trn': '',
+          'bankInfo': '',
+          'phoneCode': '+961',
+          'phoneNumber': '',
+          'mobileCode': '+961',
+          'mobileNumber': '',
+          'address': '',
+          'localPayments': '',
+          'companySubjectToVat': '',
+          'headerName': 'Header 2',});
+      }
+      else if (headersList.isEmpty && !isItHaveHeader2){
+        headersList=[
+          { 'id': '',
+            'logo':'',
+            'fullCompanyName': '',
+            'email': '',
+            'vat': '',
+            'trn': '',
+            'bankInfo': '',
+            'phoneCode': '+961',
+            'phoneNumber': '',
+            'mobileCode': '+961',
+            'mobileNumber': '',
+            'address': '',
+            'localPayments': '',
+            'companySubjectToVat': '',
+            'headerName': 'Header 1',
+          } ,
+        ];
+      }
+    }
+    print('object xx$headersList');
+    isHeadersFetched = true;
+    update();
+  }
+  bool isHeadersFetched=false;
+  List<Map> headersList=[];
   setFirstHeader(Map header){
     headersList[0]=header;
     update();
@@ -146,7 +225,7 @@ class CompanySettingsController extends GetxController {
     headersList[index]['fullCompanyName']=newVal;
   }
   updateCompanyEmail(int index,String newVal){
-    headersList[index]['companyEmail']=newVal;
+    headersList[index]['email']=newVal;
   }
   updateVat(int index,String newVal){
     headersList[index]['vat']=newVal;
@@ -177,6 +256,9 @@ class CompanySettingsController extends GetxController {
   }
   updateHeaderName(int index,String newVal){
     headersList[index]['headerName']=newVal;
+  }
+  updateHeaderId(int index,String newVal){
+    headersList[index]['id']=newVal;
   }
   updateCompanySubjectToVat(int index,String newVal){
     headersList[index]['companySubjectToVat']=newVal;

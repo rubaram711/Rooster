@@ -11,7 +11,8 @@ import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
 import 'package:rooster_app/Screens/Products/CreateProductDialog/create_product_dialog.dart';
 import 'package:rooster_app/Widgets/TransferWidgets/reusable_show_info_card.dart';
 import 'package:rooster_app/Widgets/add_photo_circle.dart';
-import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
+import 'package:rooster_app/Widgets/loading.dart';
+// import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
 import 'package:rooster_app/Widgets/reusable_add_card.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
 import 'package:rooster_app/Widgets/reusable_drop_down_menu.dart';
@@ -109,14 +110,14 @@ class _ComboState extends State<Combo> {
       builder: (cont) {
         var keysList = cont.orderLinesComboList.keys.toList();
         comboCodeController = TextEditingController(text: comboController.code);
-        return Container(
+        return  Container(
           color: Colors.white,
           width: MediaQuery.of(context).size.width * 0.85,
           height: MediaQuery.of(context).size.height * 0.95,
           margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
           // padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 0),
           child: SingleChildScrollView(
-            child: Column(
+            child:cont.isCombosInfoFetched? Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -732,7 +733,7 @@ class _ComboState extends State<Combo> {
                   ],
                 ),
               ],
-            ),
+            ):Center(child: loading()),
           ),
         );
       },
@@ -840,8 +841,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   double rowTotal = 0.0;
   @override
   void initState() {
-    String totalStr = combocont.rowsInListViewInCombo[widget.index]['total'];
-    rowTotal = double.tryParse(totalStr) ?? 0.0;
+    // {
+    //   String totalStr = combocont.rowsInListViewInCombo[widget.index]['total'];
+    // }
+    // rowTotal = double.tryParse(totalStr) ?? 0.0;
 
     quantityComboController.text =
         combocont.rowsInListViewInCombo[widget.index]['quantity'];

@@ -23,6 +23,7 @@ import '../../Controllers/transfer_controller.dart';
 import '../../Controllers/users_controller.dart';
 import '../../Controllers/warehouse_controller.dart';
 import '../../Controllers/languages_controller.dart';
+import '../../Locale_Memory/save_header_2_locally.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Screens/Authorization/sign_up_screen.dart';
 import '../../Screens/Configuration/cashing_method.dart';
@@ -314,7 +315,10 @@ class _AdminSectionInHomeAppBarState extends State<AdminSectionInHomeAppBar> {
                           // }));
 
                           await saveUserInfoLocally('', '', '', '', '','',);
-                          await saveCompanySettingsLocally('', '','','','', '','','', '','','','','','','','','','','','','','','','','');
+                          await saveCompanySettingsLocally('', '','','','', '','','', '','','',);
+                          await saveHeader1Locally('', '','', '', '', '', '','','','','','','','','' );
+                          await saveHeader2Locally('', '','', '', '', '', '','','','','','','','','' );
+
                           // Get.reset();
 
                           emailController.clear();

@@ -344,6 +344,7 @@ class _QuotationDataState extends State<QuotationData> {
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
                                   return PrintQuotationData(
+                                    header: quotationController.selectedQuotationData['companyHeader'],
                                     isPrintedAs0: '${quotationController.selectedQuotationData['printedAsPercentage']}'=='1'?true:false,
                                     isVatNoPrinted: '${quotationController.selectedQuotationData['notPrinted']}'=='1'?true:false,
                                     isPrintedAsVatExempt:'${quotationController.selectedQuotationData['printedAsVatExempt']}'=='1'?true:false,

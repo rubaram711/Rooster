@@ -2,9 +2,11 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:rooster_app/Backend/HeadersBackend/get_headers.dart';
 import 'package:rooster_app/Locale_Memory/DefaultWareHouse/save_default_warehouse_locally.dart';
 import 'package:rooster_app/const/string_extensions.dart';
 import '../../Backend/login_api.dart';
+import '../../Locale_Memory/save_header_2_locally.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/reusable_btn.dart';
@@ -377,26 +379,26 @@ class _SignFormState extends State<SignForm> {
                           await saveCompanySettingsLocally(
                             '${res['data']['companySettings']['costCalculationType'] ?? ''}',
                             '${res['data']['companySettings']['showQuantitiesOnPos'] ?? ''}',
-                            res['data']['companySettings']['logo'] ?? '',
-                            res['data']['companySettings']['fullCompanyName'] ??
-                                '',
-                            res['data']['companySettings']['email'] ?? '',
-                            res['data']['companySettings']['vat'] ?? '0',
-                            res['data']['companySettings']['mobileNumber'] ??
-                                '',
-                            res['data']['companySettings']['phoneNumber'] ?? '',
-                            res['data']['companySettings']['trn'] ?? '',
-                            res['data']['companySettings']['bankInfo'] ?? '',
-                            res['data']['companySettings']['address'] ?? '',
-                            res['data']['companySettings']['phoneCode'] ?? '',
-                            res['data']['companySettings']['mobileCode'] ?? '',
-                            res['data']['companySettings']['localPayments'] ??
-                                '',
+                            // res['data']['companySettings']['logo'] ?? '',
+                            // res['data']['companySettings']['fullCompanyName'] ??
+                            //     '',
+                            // res['data']['companySettings']['email'] ?? '',
+                            // res['data']['companySettings']['vat'] ?? '0',
+                            // res['data']['companySettings']['mobileNumber'] ??
+                            //     '',
+                            // res['data']['companySettings']['phoneNumber'] ?? '',
+                            // res['data']['companySettings']['trn'] ?? '',
+                            // res['data']['companySettings']['bankInfo'] ?? '',
+                            // res['data']['companySettings']['address'] ?? '',
+                            // res['data']['companySettings']['phoneCode'] ?? '',
+                            // res['data']['companySettings']['mobileCode'] ?? '',
+                            // res['data']['companySettings']['localPayments'] ??
+                            //     '',
                             res['data']['companySettings']['primaryCurrency']['name'] ??
                                 'USD',
                             '${res['data']['companySettings']['primaryCurrency']['id'] ?? ''}',
                             '${res['data']['companySettings']['primaryCurrency']['symbol'] ?? ''}',
-                            '${res['data']['companySettings']['companySubjectToVat'] ?? '1'}',
+                            // '${res['data']['companySettings']['companySubjectToVat'] ?? '1'}',
                             res['data']['companySettings']['posCurrency'] ==
                                     null
                                 ? ''
@@ -412,7 +414,7 @@ class _SignFormState extends State<SignForm> {
                             '${res['data']['companySettings']['primaryCurrency']['latest_rate']??''}',
                             res['data']['companySettings']['posCurrency']==null?'': '${res['data']['companySettings']['posCurrency']['latest_rate']??''}',
                             '${res['data']['companySettings']['showLogoOnPos'] ?? '0'}',
-                            '${res['data']['companySettings']['headerName'] ?? ''}',//todo check
+                            // '${res['data']['companySettings']['headerName'] ?? ''}',//todo check
                           );
                         }
                         await saveDefaultWarehouseInfoLocally(
@@ -421,6 +423,50 @@ class _SignFormState extends State<SignForm> {
                           res['data']['defaultWarehouse']['warehouse_number'],
                           res['data']['defaultWarehouse']['address'] ?? '',
                         );
+                        var headersRes=await getAllHeaders();
+                        if(headersRes['success']==true){
+                          int i=0;
+                          for(var header in headersRes['data']){
+                            if(i==0) {
+                              await saveHeader1Locally(
+                                header['logo']??'',
+                                header['fullCompanyName']??'',
+                                header['email']??'',
+                                '${header['vat']??'0'}',
+                                header['mobileNumber']??'',
+                                header['phoneNumber']??'',
+                                '${header['trn']??''}',
+                                header['bankInfo']??'',
+                                header['address']??'',
+                                header['phoneCode']??'',
+                                header['mobileCode']??'',
+                                header['localPayments']??'',
+                                '${header['companySubjectToVat']??'1'}',
+                                header['headerName']??'',
+                                '${header['id']??''}',
+                              );
+                            }
+                            else if(i==1){
+                              await saveHeader2Locally(
+                                header['logo']??'',
+                                header['fullCompanyName']??'',
+                                header['email']??'',
+                                '${header['vat']??'0'}',
+                                header['mobileNumber']??'',
+                                header['phoneNumber']??'',
+                                '${header['trn']??''}',
+                                header['bankInfo']??'',
+                                header['address']??'',
+                                header['phoneCode']??'',
+                                header['mobileCode']??'',
+                                header['localPayments']??'',
+                                '${header['companySubjectToVat']??'1'}',
+                                header['headerName']??'',
+                                '${header['id']??''}',
+                              );}
+                            i++;
+                          }
+                        }
                         // ignore: use_build_context_synchronously
                         Navigator.pushReplacement(
                           context,
@@ -523,24 +569,24 @@ class _SignFormState extends State<SignForm> {
                         await saveCompanySettingsLocally(
                           '${res['data']['companySettings']['costCalculationType'] ?? ''}',
                           '${res['data']['companySettings']['showQuantitiesOnPos'] ?? ''}',
-                          res['data']['companySettings']['logo'] ?? '',
-                          res['data']['companySettings']['fullCompanyName'] ??
-                              '',
-                          res['data']['companySettings']['email'] ?? '',
-                          res['data']['companySettings']['vat'] ?? '0',
-                          res['data']['companySettings']['mobileNumber'] ?? '',
-                          res['data']['companySettings']['phoneNumber'] ?? '',
-                          res['data']['companySettings']['trn'] ?? '',
-                          res['data']['companySettings']['bankInfo'] ?? '',
-                          res['data']['companySettings']['address'] ?? '',
-                          res['data']['companySettings']['phoneCode'] ?? '',
-                          res['data']['companySettings']['mobileCode'] ?? '',
-                          res['data']['companySettings']['localPayments'] ?? '',
+                          // res['data']['companySettings']['logo'] ?? '',
+                          // res['data']['companySettings']['fullCompanyName'] ??
+                          //     '',
+                          // res['data']['companySettings']['email'] ?? '',
+                          // res['data']['companySettings']['vat'] ?? '0',
+                          // res['data']['companySettings']['mobileNumber'] ?? '',
+                          // res['data']['companySettings']['phoneNumber'] ?? '',
+                          // res['data']['companySettings']['trn'] ?? '',
+                          // res['data']['companySettings']['bankInfo'] ?? '',
+                          // res['data']['companySettings']['address'] ?? '',
+                          // res['data']['companySettings']['phoneCode'] ?? '',
+                          // res['data']['companySettings']['mobileCode'] ?? '',
+                          // res['data']['companySettings']['localPayments'] ?? '',
                           res['data']['companySettings']['primaryCurrency']['name'] ??
                               'USD',
                           '${res['data']['companySettings']['primaryCurrency']['id'] ?? ''}',
                           '${res['data']['companySettings']['primaryCurrency']['symbol'] ?? ''}',
-                          '${res['data']['companySettings']['companySubjectToVat'] ?? '1'}',
+                          // '${res['data']['companySettings']['companySubjectToVat'] ?? '1'}',
                           res['data']['companySettings']['posCurrency'] == null
                               ? ''
                               : res['data']['companySettings']['posCurrency']['name'] ??
@@ -554,7 +600,7 @@ class _SignFormState extends State<SignForm> {
                           '${res['data']['companySettings']['primaryCurrency']['latest_rate']??''}',
                           res['data']['companySettings']['posCurrency']==null?'': '${res['data']['companySettings']['posCurrency']['latest_rate']??''}',
                           '${res['data']['companySettings']['showLogoOnPos'] ?? '0'}',
-                          '${res['data']['companySettings']['headerName'] ?? ''}',//todo check
+                          // '${res['data']['companySettings']['headerName'] ?? ''}',//todo check
                         );
                       }
                       if(res['data']['defaultWarehouse']!=null){
@@ -564,6 +610,50 @@ class _SignFormState extends State<SignForm> {
                         res['data']['defaultWarehouse']['warehouse_number'],
                         res['data']['defaultWarehouse']['address'] ?? '',
                       );}
+                      var headersRes=await getAllHeaders();
+                      if(headersRes['success']==true){
+                        int i=0;
+                        for(var header in headersRes['data']){
+                          if(i==0) {
+                            await saveHeader1Locally(
+                              header['logo']??'',
+                              header['fullCompanyName']??'',
+                              header['email']??'',
+                              '${header['vat']??'0'}',
+                              header['mobileNumber']??'',
+                              header['phoneNumber']??'',
+                              '${header['trn']??''}',
+                              header['bankInfo']??'',
+                              header['address']??'',
+                              header['phoneCode']??'',
+                              header['mobileCode']??'',
+                              header['localPayments']??'',
+                              '${header['companySubjectToVat']??'1'}',
+                              header['headerName']??'',
+                              '${header['id']??''}',
+                            );
+                          }
+                          else if(i==1){
+                            await saveHeader2Locally(
+                              header['logo']??'',
+                              header['fullCompanyName']??'',
+                              header['email']??'',
+                              '${header['vat']??'0'}',
+                              header['mobileNumber']??'',
+                              header['phoneNumber']??'',
+                              '${header['trn']??''}',
+                              header['bankInfo']??'',
+                              header['address']??'',
+                              header['phoneCode']??'',
+                              header['mobileCode']??'',
+                              header['localPayments']??'',
+                              '${header['companySubjectToVat']??'1'}',
+                              header['headerName']??'',
+                              '${header['id']??''}',
+                            );}
+                          i++;
+                        }
+                      }
                       // ignore: use_build_context_synchronously
                       Navigator.pushReplacement(
                         context,

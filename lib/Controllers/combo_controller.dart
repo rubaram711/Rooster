@@ -284,6 +284,7 @@ class ComboController extends ComboControllerAbstract {
     priceCurrency = {};
     itemUnitPrice = {};
     itemsCodes = {};
+    isCombosInfoFetched = false;
     var response = await getFieldsForCreateCombo();
     code = response['code'];
     items = response['items'];

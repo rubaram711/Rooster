@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Backend/Quotations/get_quotation_create_info.dart';
 import 'package:rooster_app/Backend/Quotations/get_quotations.dart';
 import 'package:rooster_app/Backend/get_currencies.dart';
+import 'package:rooster_app/Controllers/home_controller.dart';
 
 import '../Backend/PriceListBackend/get_prices_list_items.dart';
 import '../Backend/UsersBackend/get_user.dart';
@@ -12,6 +13,17 @@ import '../const/functions.dart';
 import 'exchange_rates_controller.dart';
 
 class QuotationController extends GetxController {
+  int selectedHeaderIndex = 0;
+  Map selectedHeader={};
+  setSelectedHeaderIndex(int val){
+    selectedHeaderIndex=val;
+    update;
+  }
+  setSelectedHeader(Map val){
+    selectedHeader=val;
+    update;
+  }
+
   int quotationCounter = 0;
   setQuotationCounter(int val){
     quotationCounter=val;
@@ -187,6 +199,7 @@ class QuotationController extends GetxController {
     update();
   }
 
+  List<Map> headersList=[];
   List<String> cashingMethodsNamesList = [];
   List<String> cashingMethodsIdsList = [];
   List<String> itemsCode = [];
@@ -251,6 +264,7 @@ class QuotationController extends GetxController {
     combosMultiPartList = [];
     combosForSplit = [];
     cashingMethodsNamesList = [];
+    headersList = [];
     cashingMethodsIdsList = [];
     itemsDescription = {};
     itemsMap = {};
@@ -359,6 +373,13 @@ class QuotationController extends GetxController {
       cashingMethodsNamesList.add(priceList['title']);
       cashingMethodsIdsList.add('${priceList['id']}');
     }
+    print('cashing $cashingMethodsNamesList');
+
+    for (var header in p['companyHeaders']??[]) {
+      headersList.add(header);
+    }
+
+
     for (var combo in p['combos']) {
       combosMap["${combo['id']}"] = combo;
       combosPricesCurrencies["${combo['id']}"] = combo['currency']['name'];

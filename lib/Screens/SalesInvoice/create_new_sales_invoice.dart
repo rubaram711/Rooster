@@ -412,6 +412,9 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                     ),
                                                 'item_image': itemImage,
                                                 'item_brand': brand,
+
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'title': '',
                                                 'isImageList': true,
                                                 'note': '',
@@ -444,6 +447,26 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                               var itemTotal = double.parse(
                                                 '${item['item_total']}',
                                               );
+                                              var combosmap =
+                                                  salesInvoiceCont
+                                                      .combosMap[item['combo_id']
+                                                      .toString()];
+                                              var comboImage =
+                                                  '${combosmap['image']}' !=
+                                                              '' &&
+                                                          combosmap['image'] !=
+                                                              null &&
+                                                          combosmap['image']
+                                                              .isNotEmpty
+                                                      ? '${combosmap['image']}'
+                                                      : '';
+                                              print("ComboImg when print");
+                                              print(comboImage);
+                                              var combobrand =
+                                                  combosmap['brand'] ?? '---';
+                                              print("Combobrand when print");
+                                              print(combobrand);
+                                              totalAllItems += itemTotal;
                                               // double.parse(qty) * itemPrice;
                                               var quotationItemInfo = {
                                                 'line_type_id': '3',
@@ -465,6 +488,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                 'note': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': comboImage,
+                                                'combo_brand': combobrand,
                                                 'isImageList': true,
                                                 'title': '',
                                                 'image': '',
@@ -484,6 +509,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                 'item_total': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'note': '',
                                                 'isImageList': true,
                                                 'title': item['title'],
@@ -504,6 +531,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                 'item_total': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'title': '',
                                                 'note': item['note'],
                                                 'image': '',
@@ -524,6 +553,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                 'item_total': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'title': '',
                                                 'note': '',
                                                 'image': item['image'],
@@ -1754,9 +1785,11 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                   .customerNumberList
                                                   .indexOf(value)];
                                           if (salesInvoiceCont
-                                              .customersPricesListsIds[index]
-                                              .isNotEmpty && salesInvoiceCont
-                                              .customersPricesListsIds[index]!=null) {
+                                                  .customersPricesListsIds[index]
+                                                  .isNotEmpty &&
+                                              salesInvoiceCont
+                                                      .customersPricesListsIds[index] !=
+                                                  null) {
                                             salesInvoiceCont.setSelectedPriceListId(
                                               '${salesInvoiceCont.customersPricesListsIds[index]}',
                                             );
@@ -1774,9 +1807,11 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             });
                                           }
                                           if (salesInvoiceCont
-                                              .customersSalesPersonsIds[index]
-                                              .isNotEmpty && salesInvoiceCont
-                                              .customersSalesPersonsIds[index]!=null) {
+                                                  .customersSalesPersonsIds[index]
+                                                  .isNotEmpty &&
+                                              salesInvoiceCont
+                                                      .customersSalesPersonsIds[index] !=
+                                                  null) {
                                             setState(() {
                                               selectedSalesPersonId = int.parse(
                                                 '${salesInvoiceCont.customersSalesPersonsIds[index]}',

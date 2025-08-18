@@ -932,7 +932,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                             combosmap['image'] != null &&
                                             combosmap['image'].isNotEmpty
                                         ? '${combosmap['image']}'
-                                        : 'no has image';
+                                        : '';
 
                                 var combobrand =
                                     combosmap['brand'] ?? 'brand not found';
@@ -1176,7 +1176,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                     elevation: 0,
                                     content: UpdateSalesOrderDialog(
                                       index: widget.index,
-                                      info: widget.info,
+                                      info: deepCloneMap(widget.info),
                                       fromPage: 'toDeleiver',
                                     ),
                                     // UpdatePendingSalesOrderInToDeleiver(

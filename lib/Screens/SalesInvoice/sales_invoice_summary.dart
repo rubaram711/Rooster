@@ -125,17 +125,17 @@ class _SalesInvoiceSummaryState extends State<SalesInvoiceSummary> {
     String companyLogo = await getCompanyLogoFromPref();
 
     // 1. Download image
-    final response = await http.get(Uri.parse(companyLogo));
+    final response = await http.get(Uri.parse('$baseImage$companyLogo'));
     if (response.statusCode != 200) {
       throw Exception('Failed to load image');
+    } else {
+      final Uint8List imageBytes = response.bodyBytes;
+      // String companyLogo = await getCompanyLogoFromPref();
+      // final Uint8List logoBytes = await fetchImage(
+      //   companyLogo,
+      // );
+      salesInvoiceController.setLogo(imageBytes);
     }
-
-    final Uint8List imageBytes = response.bodyBytes;
-    // String companyLogo = await getCompanyLogoFromPref();
-    // final Uint8List logoBytes = await fetchImage(
-    //   companyLogo,
-    // );
-    salesInvoiceController.setLogo(imageBytes);
   }
 
   @override
@@ -832,10 +832,9 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                             combosmap['image'] != null &&
                                             combosmap['image'].isNotEmpty
                                         ? '${combosmap['image']}'
-                                        : 'no has image';
+                                        : '';
 
-                                var combobrand =
-                                    combosmap['brand'] ?? 'brand not found';
+                                var combobrand = combosmap['brand'] ?? '';
                                 totalAllItems += itemTotal;
                                 var quotationItemInfo = {
                                   'line_type_id': '3',
@@ -947,18 +946,22 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
 
                             var salesOrderNumber = '';
                             var quotNumber = '';
-                            widget.info['salesorder'] == null
+                            widget.info['salesOrder'] == null
                                 ? salesOrderNumber = ''
                                 : salesOrderNumber =
                                     widget
-                                        .info['salesorder']['salesorderNumber'];
-
+                                        .info['salesOrder']['salesOrderNumber'];
+                            print("preview so-----");
+                            print(salesOrderNumber);
                             salesOrderNumber == ''
+                                ? quotNumber = ''
+                                : widget.info['salesOrder']['quotation'] == null
                                 ? quotNumber = ''
                                 : quotNumber =
                                     widget
-                                        .info['salesorder']['quotation']['quotationNumber'];
-
+                                        .info['salesOrder']['quotation']['quotationNumber'];
+                            print("preview Q-----");
+                            print(quotNumber);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -1085,7 +1088,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                     elevation: 0.0,
                                     content: UpdateSalesInvoiceDialog(
                                       index: widget.index,
-                                      info: widget.info,
+                                      info: deepCloneMap(widget.info),
                                       fromPage: 'salesInvoiceSummary',
                                     ),
                                   ),

@@ -116,3 +116,30 @@ String calculateRateCur1ToCur2(double usdToCur1, double usdToCur2) {
 // }
 
 
+Map<K, V> deepCloneMap<K, V>(Map<K, V> original) {
+  final Map<K, V> newMap = {};
+  original.forEach((key, value) {
+    if (value is Map) {
+      newMap[key] = deepCloneMap(value) as V;
+    } else if (value is List) {
+      newMap[key] = deepCloneList(value) as V;
+    } else {
+      newMap[key] = value;
+    }
+  });
+  return newMap;
+}
+
+List<T> deepCloneList<T>(List<T> original) {
+  final List<T> newList = [];
+  for (var item in original) {
+    if (item is Map) {
+      newList.add(deepCloneMap(item) as T);
+    } else if (item is List) {
+      newList.add(deepCloneList(item) as T);
+    } else {
+      newList.add(item);
+    }
+  }
+  return newList;
+}

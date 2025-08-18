@@ -10,7 +10,7 @@ saveUserInfoLocally(
 ) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('accessToken', accessToken);
-  prefs.setString('login_IDd', userId);
+  prefs.setString('identifier1', userId);
   prefs.setString('email', email);
   prefs.setString('name', name);
   prefs.setString('companyId', companyId);
@@ -20,14 +20,14 @@ saveUserInfoLocally(
 Future<Map> getUserInfoFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String accessToken = prefs.getString('accessToken') ?? '';
-  String userId = prefs.getString('login_IDd') ?? '';
+  String userId = prefs.getString('identifier1') ?? '';
   String email = prefs.getString('email') ?? '';
   String name = prefs.getString('name') ?? '';
   String companyId = prefs.getString('companyId') ?? '';
   String companyName = prefs.getString('companyName') ?? '';
   return {
     'accessToken': accessToken,
-    'login_IDd': userId,
+    'identifier1': userId,
     'email': email,
     'name': name,
     'companyId': companyId,
@@ -55,7 +55,7 @@ Future<String> getNameFromPref() async {
 
 Future<String> getIdFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String userId = prefs.getString('login_IDd') ?? '';
+  String userId = prefs.getString('identifier1') ?? '';
   return userId;
 }
 
@@ -92,46 +92,47 @@ Future<String> getShowLogoOnPosFromPref() async {
 saveCompanySettingsLocally(
   String costCalculationType,
   String showQuantitiesOnPos,
-  String logo,
-  String fullCompanyName,
-  String companyEmail,
-  String vat,
-  String mobileNumber,
-  String phoneNumber,
-  String trn,
-  String bankInfo,
-  String address,
-  String phoneCode,
-  String mobileCode,
-  String localPayments,
+  // String logo,
+  // String fullCompanyName,
+  // String companyEmail,
+  // String vat,
+  // String mobileNumber,
+  // String phoneNumber,
+  // String trn,
+  // String bankInfo,
+  // String address,
+  // String phoneCode,
+  // String mobileCode,
+  // String localPayments,
   String primaryCurrency,
   String primaryCurrencyId,
   String primaryCurrencySymbol,
-  String companySubjectToVat,
+  // String companySubjectToVat,
   String posCurrency,
   String posCurrencyId,
   String posCurrencySymbol,
     String primaryCurrencyLatestRate,
     String posCurrencyLatestRate,
   String showLogoOnPos,
-  String headerName,
-) async {
+  // String headerName,
+) async
+{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('costCalculationType', costCalculationType);
   prefs.setString('showQuantitiesOnPos', showQuantitiesOnPos);
   prefs.setString('showLogoOnPos', showLogoOnPos);
-  prefs.setString('logo', logo);
-  prefs.setString('fullCompanyName', fullCompanyName);
-  prefs.setString('companyEmail', companyEmail);
-  prefs.setString('vat', vat);
-  prefs.setString('mobileNumber', mobileNumber);
-  prefs.setString('phoneNumber', phoneNumber);
-  prefs.setString('trn', trn);
-  prefs.setString('bankInfo', bankInfo);
-  prefs.setString('address', address);
-  prefs.setString('phoneCode', phoneCode);
-  prefs.setString('mobileCode', mobileCode);
-  prefs.setString('localPayments', localPayments);
+  // prefs.setString('logo', logo);
+  // prefs.setString('fullCompanyName', fullCompanyName);
+  // prefs.setString('companyEmail', companyEmail);
+  // prefs.setString('vat', vat);
+  // prefs.setString('mobileNumber', mobileNumber);
+  // prefs.setString('phoneNumber', phoneNumber);
+  // prefs.setString('trn', trn);
+  // prefs.setString('bankInfo', bankInfo);
+  // prefs.setString('address', address);
+  // prefs.setString('phoneCode', phoneCode);
+  // prefs.setString('mobileCode', mobileCode);
+  // prefs.setString('localPayments', localPayments);
   prefs.setString('primaryCurrency', primaryCurrency);
   prefs.setString('primaryCurrencyId', primaryCurrencyId);
   prefs.setString('primaryCurrencySymbol', primaryCurrencySymbol);
@@ -140,8 +141,8 @@ saveCompanySettingsLocally(
   prefs.setString('posCurrencySymbol', posCurrencySymbol);
   prefs.setString('posCurrencyLatestRate', posCurrencyLatestRate);
   prefs.setString('primaryCurrencyLatestRate', primaryCurrencyLatestRate);
-  prefs.setString('companySubjectToVat', companySubjectToVat);
-  prefs.setString('headerName', headerName);
+  // prefs.setString('companySubjectToVat', companySubjectToVat);
+  // prefs.setString('headerName', headerName);
 }
 
 Future<String> getFullCompanyNameFromPref() async {
@@ -176,7 +177,7 @@ Future<String> getCompanyVatFromPref() async {
 
 Future<String> getCompanyLogoFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String logo = prefs.getString('logo') ?? '';
+  String logo = prefs.getString('logo') ?? 'https://share.google/images/DwDJv41UrDDARwPui';
   return logo;
 }
 
@@ -275,3 +276,47 @@ Future<String> getHeaderNameFromPref() async {
   String headerName = prefs.getString('headerName') ?? '';
   return headerName;
 }
+
+Future<String> getHeaderIdFromPref() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String headerName = prefs.getString('headerId') ?? '';
+  return headerName;
+}
+
+
+saveHeader1Locally(
+    String logo,
+    String fullCompanyName,
+    String companyEmail,
+    String vat,
+    String mobileNumber,
+    String phoneNumber,
+    String trn,
+    String bankInfo,
+    String address,
+    String phoneCode,
+    String mobileCode,
+    String localPayments,
+    String companySubjectToVat,
+    String headerName,
+    String headerId,
+    ) async
+{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setString('logo', logo);
+  prefs.setString('fullCompanyName', fullCompanyName);
+  prefs.setString('companyEmail', companyEmail);
+  prefs.setString('vat', vat);
+  prefs.setString('mobileNumber', mobileNumber);
+  prefs.setString('phoneNumber', phoneNumber);
+  prefs.setString('trn', trn);
+  prefs.setString('bankInfo', bankInfo);
+  prefs.setString('address', address);
+  prefs.setString('phoneCode', phoneCode);
+  prefs.setString('mobileCode', mobileCode);
+  prefs.setString('localPayments', localPayments);
+  prefs.setString('companySubjectToVat', companySubjectToVat);
+  prefs.setString('headerName', headerName);
+  prefs.setString('headerId', headerId);
+}
+

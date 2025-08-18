@@ -16,6 +16,7 @@ import 'package:rooster_app/const/colors.dart';
 import 'package:rooster_app/const/sizes.dart';
 
 import '../../Widgets/reusable_more.dart';
+import '../../const/functions.dart';
 
 class ComboSummary extends StatefulWidget {
   const ComboSummary({super.key});
@@ -612,7 +613,7 @@ class _ComboAsRowInTableState extends State<ComboAsRowInTable> {
                                   ),
                                   elevation: 0,
                                   content: ShowItemsComboDialog(
-                                    info: widget.info,
+                                    info:deepCloneMap(widget.info),
                                   ),
                                 ),
                           );

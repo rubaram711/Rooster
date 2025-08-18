@@ -257,6 +257,22 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
     final arabicFont = pw.Font.ttf(font);
     final italicfont = await rootBundle.load('assets/fonts/Roboto-Italic.ttf');
     final italicRobotoFont = pw.Font.ttf(italicfont);
+    tableTitleForSequence({required String text, required double width}) {
+      return pw.SizedBox(
+        width: width,
+        child: pw.Text(
+          text,
+          textAlign: pw.TextAlign.center,
+          style: pw.TextStyle(
+            color: PdfColors.black,
+            fontSize: 12,
+            fontWeight: pw.FontWeight.normal,
+            decoration: pw.TextDecoration.underline,
+          ),
+        ),
+      );
+    }
+
     tableTitle({required String text, required double width}) {
       return pw.SizedBox(
         width: width,
@@ -297,6 +313,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
           children: [
             pw.Column(
               children: [
+                gapH4,
                 reusableShowInfoCard(
                   text:
                       quotationItemInfo['item_brand'] != ''
@@ -304,7 +321,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                           : '---',
                   width: width * 0.05,
                 ),
-                gapH4,
+
                 gapH4,
                 if (imageProvider != null)
                   pw.Image(
@@ -317,11 +334,11 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
             ),
             reusableShowInfoCard(
               text: '${quotationItemInfo['item_name'] ?? ''}',
-              width: width * 0.05,
+              width: width * 0.07,
             ),
             reusableShowInfoCard(
               text: '${quotationItemInfo['item_description'] ?? ''}',
-              width: width * 0.06,
+              width: width * 0.08,
             ),
             reusableShowInfoCard(
               text: '${quotationItemInfo['item_quantity'] ?? ''}',
@@ -350,6 +367,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                   children: [
                     pw.Column(
                       children: [
+                        gapH4,
                         reusableShowInfoCard(
                           text:
                               quotationItemInfo['combo_brand'] != ''
@@ -357,7 +375,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                   : '---',
                           width: width * 0.05,
                         ),
-                        gapH4,
+
                         gapH4,
                         if (imageProvider != null)
                           pw.Image(
@@ -371,11 +389,11 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
 
                     reusableShowInfoCard(
                       text: '${quotationItemInfo['item_name'] ?? ''}',
-                      width: width * 0.05,
+                      width: width * 0.07,
                     ),
                     reusableShowInfoCard(
                       text: '${quotationItemInfo['item_description'] ?? ''}',
-                      width: width * 0.06,
+                      width: width * 0.08,
                     ),
                     reusableShowInfoCard(
                       text: '${quotationItemInfo['item_quantity'] ?? ''}',
@@ -396,22 +414,22 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                       width: width * 0.35,
                       child: pw.Column(
                         children: [
-                          pw.Divider(
-                            height: 5,
-                            color: PdfColors.black,
-                            // endIndent: 250
-                          ),
-                          gapH4,
+                          // pw.Divider(
+                          //   height: 5,
+                          //   color: PdfColors.black,
+                          //   // endIndent: 250
+                          // ),
+                          // gapH4,
                           pw.Text(
                             '${quotationItemInfo['title'] ?? ''}',
-                            style: pw.TextStyle(fontSize: 7, font: arabicFont),
+                            style: pw.TextStyle(fontSize: 12, font: arabicFont),
                           ),
 
-                          pw.Divider(
-                            height: 5,
-                            color: PdfColors.black,
-                            // endIndent: 250
-                          ),
+                          // pw.Divider(
+                          //   height: 5,
+                          //   color: PdfColors.black,
+                          //   // endIndent: 250
+                          // ),
                         ],
                       ),
                     ),
@@ -778,12 +796,15 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                       pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.center,
                         children: [
-                          tableTitle(text: 'Delivery', width: width * 0.07),
+                          tableTitleForSequence(
+                            text: 'Delivery [${widget.deliveryNumber}]',
+                            width: width * 0.07,
+                          ),
                         ],
                       ),
                       gapH2,
                       pw.SizedBox(
-                        width: width * 0.07,
+                        width: width * 0.12,
                         child: pw.Divider(
                           height: 5,
                           color: PdfColors.black,
@@ -807,10 +828,10 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                         mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                         children: [
                           tableTitle(text: 'brand'.tr, width: width * 0.05),
-                          tableTitle(text: 'item_'.tr, width: width * 0.05),
+                          tableTitle(text: 'item_'.tr, width: width * 0.07),
                           tableTitle(
                             text: 'description'.tr,
-                            width: width * 0.06,
+                            width: width * 0.08,
                           ),
                           tableTitle(text: 'qty'.tr, width: width * 0.03),
                           tableTitle(text: 'warehouse'.tr, width: width * 0.04),
@@ -865,33 +886,6 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                               );
                         },
                       ),
-                      // pw.ListView.builder(
-                      //   padding: const pw.EdgeInsets.symmetric(vertical: 10),
-                      //   itemCount:
-                      //
-                      //       deliveryController
-                      //           .itemList
-                      //           .length, //products is data from back res
-                      //   itemBuilder:
-                      //       (context, index) =>
-                      //       // buildQuotationListView(),
-                      //           reusableItemRowInQuotations  (
-                      //         quotationItemInfo:
-                      //             deliveryController.itemList[index],
-                      //         index: index,
-                      //         // img:  await fetchImage( deliveryController.itemList[index]['images'][0]??[]),
-                      //
-                      //       ),
-                      //
-                      //   // itemBuilder: (context, index) {
-                      //   //   var keys = quotationItemInfo.keys.toList();
-                      //   //   return reusableItemRowInQuotations(
-                      //   //     quotationItemInfo:
-                      //   //     quotationItemInfo[keys[index]],
-                      //   //     index: index,
-                      //   //   );
-                      //   // },
-                      // ),
                     ],
                   ),
                 ),

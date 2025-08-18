@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+// import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import '../../../Locale_Memory/save_user_info_locally.dart';
 import '../../../const/urls.dart';
@@ -6,23 +6,23 @@ import '../../../const/urls.dart';
 Future updateSettings({required String companyId,
   required String costCalculationType,
   required String showQuantitiesOnPos,
-  Uint8List? imageFile,
-  required  String selectedPhoneCode,
-  required  String selectedMobileCode,
-  required  String companyName,
-  required  String address,
-  required  String mobile,
-  required  String phone,
-  required  String email,
-  required  String trn,
-  required  String bankInformation,
-  required  String localPayments,
-  required  String vat,
+  // Uint8List? imageFile,
+  // required  String selectedPhoneCode,
+  // required  String selectedMobileCode,
+  // required  String companyName,
+  // required  String address,
+  // required  String mobile,
+  // required  String phone,
+  // required  String email,
+  // required  String trn,
+  // required  String bankInformation,
+  // required  String localPayments,
+  // required  String vat,
   required  String primaryCurrencyId,
-  required  String companySubjectToVat,
+  // required  String companySubjectToVat,
   required  String posCurrencyId,
   required  String showLogoOnPos,
-  required  String headerName,
+  // required  String headerName,
 }
 ) async {
   String token = await getAccessTokenFromPref();
@@ -30,28 +30,28 @@ Future updateSettings({required String companyId,
     "companyId": companyId,
     "costCalculationType": costCalculationType,
     "showQuantitiesOnPos": showQuantitiesOnPos,
-    'email':email,
-    'vat':vat,
-    'bankInfo':bankInformation,
-    'trn':trn,
-    'phoneNumber':phone,
-    'mobileNumber':mobile,
-    'phoneCode':selectedPhoneCode,
-    'mobileCode':selectedMobileCode,
-    'address':address,
-    'fullCompanyName':companyName,
-    'localPayments':localPayments,
+    // 'email':email,
+    // 'vat':vat,
+    // 'bankInfo':bankInformation,
+    // 'trn':trn,
+    // 'phoneNumber':phone,
+    // 'mobileNumber':mobile,
+    // 'phoneCode':selectedPhoneCode,
+    // 'mobileCode':selectedMobileCode,
+    // 'address':address,
+    // 'fullCompanyName':companyName,
+    // 'localPayments':localPayments,
     'primaryCurrencyId':primaryCurrencyId,
-    'companySubjectToVat':companySubjectToVat,
+    // 'companySubjectToVat':companySubjectToVat,
     'posCurrencyId':posCurrencyId,
     'showLogoOnPos':showLogoOnPos,
-    'headerName':headerName,
+    // 'headerName':headerName,
   });
-if(imageFile!=null) {
-  formData.files.add(
-    MapEntry("logo", MultipartFile.fromBytes(imageFile, filename: "image.jpg")),
-  );
-}
+// if(imageFile!=null) {
+//   formData.files.add(
+//     MapEntry("logo", MultipartFile.fromBytes(imageFile, filename: "image.jpg")),
+//   );
+// }
 
   Response response = await Dio()
       .post(

@@ -914,10 +914,13 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                                 combosmap['image'] != null &&
                                                 combosmap['image'].isNotEmpty
                                             ? '${combosmap['image']}'
-                                            : 'no has image';
-
+                                            : '';
+                                    print("ComboImg when print");
+                                    print(comboImage);
                                     var combobrand =
-                                        combosmap['brand'] ?? 'brand not found';
+                                        combosmap['brand'] ?? '---';
+                                    print("Combobrand when print");
+                                    print(combobrand);
                                     totalAllItems += itemTotal;
 
                                     var quotationItemInfo = {
@@ -937,6 +940,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                       'item_image': '',
                                       'combo_image': comboImage,
                                       'item_brand': '',
+                                      'combo_brand': combobrand,
                                       'isImageList': false,
                                       'title': '',
                                       'image': '',
@@ -954,8 +958,8 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                       'item_total': '',
                                       'item_image': '',
                                       'combo_image': '',
-                                      'item_brand': '',
-                                      'combo_brand': '',
+                                      'item_brand': ' ',
+                                      'combo_brand': ' ',
                                       'note': '',
                                       'isImageList': false,
                                       'title': item['title'],
@@ -1038,6 +1042,12 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
+                                      print("Vat---------");
+                                      print(
+                                        formatDoubleWithCommas(
+                                          vatBySalesOrderCurrency,
+                                        ),
+                                      );
                                       return PrintSalesOrder(
                                         quotationNumber: quotNumber,
                                         isPrintedAs0:
@@ -1168,7 +1178,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                         elevation: 0,
                                         content: UpdateSalesOrderDialog(
                                           index: widget.index,
-                                          info: widget.info,
+                                          info: deepCloneMap(widget.info),
                                           fromPage: 'toInvoice',
                                         ),
                                         // content: UpdatePendingSalesOrderDialog(
@@ -2301,7 +2311,21 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                     var itemTotal = double.parse(
                                       '${item['combo_total']}',
                                     );
-
+                                    var combosmap =
+                                        cont.combosMap[item['combo_id']
+                                            .toString()];
+                                    var comboImage =
+                                        '${combosmap['image']}' != '' &&
+                                                combosmap['image'] != null &&
+                                                combosmap['image'].isNotEmpty
+                                            ? '${combosmap['image']}'
+                                            : '';
+                                    print("ComboImg when print");
+                                    print(comboImage);
+                                    var combobrand =
+                                        combosmap['brand'] ?? '---';
+                                    print("Combobrand when print");
+                                    print(combobrand);
                                     totalAllItems += itemTotal;
 
                                     var quotationItemInfo = {
@@ -2320,6 +2344,8 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                       'note': '',
                                       'item_image': '',
                                       'item_brand': '',
+                                      'combo_image': comboImage,
+                                      'combo_brand': combobrand,
                                       'isImageList': false,
                                       'title': '',
                                       'image': '',
@@ -2415,6 +2441,12 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
+                                      print("Vat---------");
+                                      print(
+                                        formatDoubleWithCommas(
+                                          vatBySalesOrderCurrency,
+                                        ),
+                                      );
                                       return PrintSalesOrder(
                                         quotationNumber: quotNumber,
                                         isPrintedAs0:
@@ -2545,7 +2577,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                         elevation: 0,
                                         content: UpdateSalesOrderDialog(
                                           index: widget.index,
-                                          info: widget.info,
+                                          info:deepCloneMap(widget.info),
                                           fromPage: "toInvoice",
                                         ),
                                       ),

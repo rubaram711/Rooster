@@ -38,10 +38,11 @@ Future updateQuotation(
     List<int> orderedKeys ,
     String cancellationReason,
     String deliveryTerms,
-    String chance
-) async {
+    String chance,
+    String companyHeaderId,
+    ) async {
   String token = await getAccessTokenFromPref();
-  FormData formData = FormData.fromMap({
+  var p={
     "manualReference": manualReference,
     "clientId": clientId,
     "validity": validity,
@@ -73,8 +74,12 @@ Future updateQuotation(
     "status": status,
     "cancellationReason":cancellationReason,
     "deliveryTerms":deliveryTerms,
-    "chance":chance
-  });
+    "chance":chance,
+  };
+  if(companyHeaderId.isNotEmpty){
+    p.addAll({"companyHeaderId":companyHeaderId,});
+  }
+  FormData formData = FormData.fromMap(p);
 
   int i = 1;
 

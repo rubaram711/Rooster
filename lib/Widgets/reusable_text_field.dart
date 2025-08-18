@@ -683,6 +683,9 @@ class _ReusableInputNumberFieldState extends State<ReusableInputNumberField> {
               SizedBox(
                 width: widget.textFieldWidth,
                 child: TextFormField(
+                  onChanged: (value){
+                    widget.onChangedFunc(value);
+                  },
                   // textAlign: TextAlign.center,
                   decoration: InputDecoration(
                     contentPadding:

@@ -17,6 +17,7 @@ import 'package:rooster_app/Screens/Products/CreateProductDialog/create_product_
 import 'package:rooster_app/Screens/Client/create_client_dialog.dart';
 import 'package:rooster_app/Widgets/TransferWidgets/reusable_show_info_card.dart';
 import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
+import 'package:rooster_app/Widgets/loading.dart';
 import 'package:rooster_app/Widgets/reusable_add_card.dart';
 import 'package:rooster_app/utils/image_picker_helper.dart';
 import '../../Controllers/home_controller.dart';
@@ -223,8 +224,8 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   void initState() {
     quotationController.rowsInListViewInQuotation = {};
     quotationController.orderedKeys = [];
-    // print('widget.info');
-    // print(widget.info);
+    print('selected');
+     print(  widget.info['orderLines']);
     quotationController.quotationCounter = 0;
     checkVatExempt();
     getCurrency();
@@ -239,6 +240,12 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
       quotationController.selectedCashingMethodId =
           '${widget.info['cashingMethod']['id']}';
     }
+
+    quotationController.selectedHeaderIndex=0;
+    if(widget.info['companyHeader']!=null){
+      if('${widget.info['companyHeader']['id']}' != '${quotationController.headersList[0]['id']}'){
+        quotationController.selectedHeaderIndex=1;
+    }}
 
     if (widget.info['pricelist'] != null) {
       priceListController.text = '${widget.info['pricelist']['code'] ?? ''}';
@@ -346,8 +353,14 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
           3) {
         quotationController.combosPriceControllers[i + 1] =
             TextEditingController();
+      }else if (quotationController
+              .selectedQuotationData['orderLines'][i]['line_type_id'] ==
+          5) {
+        quotationController.rowsInListViewInQuotation[i + 1]['image'] =
+        quotationController.selectedQuotationData['orderLines'][i]['image'];
       }
     }
+    print('rowsInListViewInQuotation ${quotationController.rowsInListViewInQuotation}');
     //
     // for (int i = 0; i < widget.info['orderLines'].length; i++) {
     //   quotationController.orderedKeys.add(i + 1);
@@ -672,6 +685,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     cancelledReasonController.text,
                                     deliveryTermsController.text,
                                     chanceController.text,
+                                    homeController.companyName == 'CASALAGO' ||
+                                        homeController.companyName == 'AMAZON'
+                                        ?quotationCont.headersList[quotationCont.selectedHeaderIndex]['id'].toString():'',
                                   );
                                   if (res['success'] == true) {
                                     setState(() {
@@ -859,6 +875,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                 cancelledReason,
                                                 deliveryTermsController.text,
                                                 chanceController.text,
+                                                homeController.companyName == 'CASALAGO' ||
+                                                    homeController.companyName == 'AMAZON'
+                                                    ?quotationCont.headersList[quotationCont.selectedHeaderIndex]['id'].toString():'',
                                               );
                                               if (res['success'] == true) {
                                                 Get.back();
@@ -2302,6 +2321,52 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 : SizedBox(),
                           ],
                         ),
+                        homeController.companyName == 'CASALAGO' ||
+                            homeController.companyName == 'AMAZON'?Column(
+                          children: [
+                            gapH16,
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width * 0.15,
+                                  child: ListTile(
+                                    title: Text(
+                                      quotationCont.headersList[0]['header_name'],
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    leading: Radio(
+                                      value: 0,
+                                      groupValue: quotationCont.selectedHeaderIndex,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          quotationCont.selectedHeaderIndex = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width * 0.15,
+                                  child: ListTile(
+                                    title: Text(
+                                      quotationCont.headersList[1]['header_name'],
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    leading: Radio(
+                                      value: 1,
+                                      groupValue: quotationCont.selectedHeaderIndex,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          quotationCont.selectedHeaderIndex = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ):SizedBox.shrink(),
                         gapH10,
                       ],
                     ),
@@ -3242,6 +3307,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 cancelledReasonController.text,
                                 deliveryTermsController.text,
                                 chanceController.text,
+                                homeController.companyName == 'CASALAGO' ||
+                                    homeController.companyName == 'AMAZON'
+                                    ?quotationCont.headersList[quotationCont.selectedHeaderIndex]['id'].toString():'',
                               );
                               if (res['success'] == true) {
                                 Get.back();
@@ -4418,13 +4486,15 @@ class ReusableImageRow extends StatefulWidget {
 class _ReusableImageRowState extends State<ReusableImageRow> {
   final QuotationController quotationController = Get.find();
   late Uint8List imageFile;
-  bool isLoading = false; // Add loading state
+  // bool isLoading = false; // Add loading state
+  bool isImageFetched = false; // Add loading state
   double listViewLength = Sizes.deviceHeight * 0.08;
 
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
+    print('infos ${widget.info['image']}');
     imageFile = Uint8List(0);
     _loadImage();
     super.initState();
@@ -4432,16 +4502,21 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
 
   Future<void> _loadImage() async {
     setState(() {
-      isLoading = true;
+      // isLoading = true;
+      isImageFetched = false;
     });
-
+// print('dfdf ${widget.info['image']}');
     if (widget.info['image'] != null && widget.info['image'].isNotEmpty) {
       try {
         final response = await http.get(
           Uri.parse('$baseImage${widget.info['image']}'),
         );
+        print('dfdf ${response.statusCode}');
+
         if (response.statusCode == 200) {
-          imageFile = response.bodyBytes;
+          setState(() {
+            imageFile = response.bodyBytes;
+          });
         } else {
           imageFile = Uint8List(0); // Set to empty if loading fails
         }
@@ -4451,9 +4526,10 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
     } else {
       imageFile = Uint8List(0); // Set to empty if no image URL
     }
-    quotationController.setImageInQuotation(widget.index, imageFile);
+    quotationController.rowsInListViewInQuotation[widget.index]['image'] = imageFile;
     setState(() {
-      isLoading = false;
+      // isLoading = false;
+      isImageFetched = true;
     });
   }
 
@@ -4464,135 +4540,127 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
         return Container(
           height: 100,
           margin: const EdgeInsets.symmetric(vertical: 2),
-          child: Form(
-            key: _formKey,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GetBuilder<QuotationController>(
-                  builder: (cont) {
-                    return InkWell(
-                      onTap: () async {
-                        final image = await ImagePickerHelper.pickImage();
-                        setState(() {
-                          imageFile = image!;
-                          cont.changeBoolVar(true);
-                          cont.increaseImageSpace(30);
-                        });
-                        cont.setTypeInQuotation(widget.index, '4');
-                        cont.setImageInQuotation(widget.index, imageFile);
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(
-                          vertical: 5,
-                          horizontal: 5,
-                        ),
-                        child: DottedBorder(
-                          dashPattern: const [10, 10],
-                          color: Others.borderColor,
-                          radius: const Radius.circular(9),
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.72,
+          child: isImageFetched?Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: () async {
+                  final image = await ImagePickerHelper.pickImage();
+                  setState(() {
+                    imageFile = image!;
+                    cont.changeBoolVar(true);
+                    cont.increaseImageSpace(30);
+                  });
+                  cont.setTypeInQuotation(widget.index, '4');
+                  cont.setImageInQuotation(widget.index, imageFile);
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 5,
+                    horizontal: 5,
+                  ),
+                  child: DottedBorder(
+                    dashPattern: const [10, 10],
+                    color: Others.borderColor,
+                    radius: const Radius.circular(9),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.72,
+                      height: cont.imageSpaceHeight,
+                      child:
+                      imageFile.isNotEmpty
+                          ? Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment.start,
+                        children: [
+                          Image.memory(
+                            imageFile,
                             height: cont.imageSpaceHeight,
-                            child:
-                                imageFile.isNotEmpty
-                                    ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Image.memory(
-                                          imageFile,
-                                          height: cont.imageSpaceHeight,
-                                        ),
-                                      ],
-                                    )
-                                    : Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        gapW20,
-                                        Icon(
-                                          Icons.cloud_upload_outlined,
-                                          color: Others.iconColor,
-                                          size: 32,
-                                        ),
-                                        gapW20,
-                                        Text(
-                                          'drag_drop_image'.tr,
-                                          style: TextStyle(
-                                            color: TypographyColor.textTable,
-                                          ),
-                                        ),
-                                        Text(
-                                          'browse'.tr,
-                                          style: TextStyle(
-                                            color: Primary.primary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
                           ),
-                        ),
+                        ],
+                      )
+                          : Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment.start,
+                        crossAxisAlignment:
+                        CrossAxisAlignment.center,
+                        children: [
+                          gapW20,
+                          Icon(
+                            Icons.cloud_upload_outlined,
+                            color: Others.iconColor,
+                            size: 32,
+                          ),
+                          gapW20,
+                          Text(
+                            'drag_drop_image'.tr,
+                            style: TextStyle(
+                              color: TypographyColor.textTable,
+                            ),
+                          ),
+                          Text(
+                            'browse'.tr,
+                            style: TextStyle(
+                              color: Primary.primary,
+                            ),
+                          ),
+                        ],
                       ),
-                    );
+                    ),
+                  ),
+                ),
+              ),
+              //more
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.02,
+                child: ReusableMore(
+                  itemsList: [
+                    // PopupMenuItem<String>(
+                    //   value: '1',
+                    //   onTap: () async {
+                    //     showDialog<String>(
+                    //         context: context,
+                    //         builder: (BuildContext context) => AlertDialog(
+                    //           backgroundColor: Colors.white,
+                    //           shape: const RoundedRectangleBorder(
+                    //             borderRadius:
+                    //             BorderRadius.all(Radius.circular(9)),
+                    //           ),
+                    //           elevation: 0,
+                    //           content: Column(
+                    //             mainAxisAlignment: MainAxisAlignment.center,
+                    //             children: [
+                    //
+                    //             ],
+                    //           ),
+                    //         ));
+                    //   },
+                    //   child: const Text('Show Quantity'),
+                    // ),
+                  ],
+                ),
+              ),
+              //delete
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.03,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      quotationController.decrementListViewLengthInQuotation(
+                        quotationController.increment + 50,
+                      );
+                      quotationController.removeFromRowsInListViewInQuotation(
+                        widget.index,
+                      );
+                      // quotationController.removeFromOrderLinesInQuotationList(
+                      //   widget.index.toString(),
+                      // );
+                    });
                   },
+                  child: Icon(Icons.delete_outline, color: Primary.primary),
                 ),
-
-                //more
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.02,
-                  child: ReusableMore(
-                    itemsList: [
-                      // PopupMenuItem<String>(
-                      //   value: '1',
-                      //   onTap: () async {
-                      //     showDialog<String>(
-                      //         context: context,
-                      //         builder: (BuildContext context) => AlertDialog(
-                      //           backgroundColor: Colors.white,
-                      //           shape: const RoundedRectangleBorder(
-                      //             borderRadius:
-                      //             BorderRadius.all(Radius.circular(9)),
-                      //           ),
-                      //           elevation: 0,
-                      //           content: Column(
-                      //             mainAxisAlignment: MainAxisAlignment.center,
-                      //             children: [
-                      //
-                      //             ],
-                      //           ),
-                      //         ));
-                      //   },
-                      //   child: const Text('Show Quantity'),
-                      // ),
-                    ],
-                  ),
-                ),
-                //delete
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.03,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        quotationController.decrementListViewLengthInQuotation(
-                          quotationController.increment + 50,
-                        );
-                        quotationController.removeFromRowsInListViewInQuotation(
-                          widget.index,
-                        );
-                        // quotationController.removeFromOrderLinesInQuotationList(
-                        //   widget.index.toString(),
-                        // );
-                      });
-                    },
-                    child: Icon(Icons.delete_outline, color: Primary.primary),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            ],
+          ):loading(),
         );
       },
     );

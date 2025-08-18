@@ -18,7 +18,7 @@ import '../../Controllers/home_controller.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/page_title.dart';
-import '../../Widgets/reusableTableMenu.dart';
+import '../../Widgets/reusable_table_menu.dart';
 import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_more.dart';
 import '../../Widgets/reusable_text_field.dart';
@@ -127,27 +127,29 @@ class _QuotationSummaryState extends State<QuotationSummary> {
     quotationController.setSearchInQuotationsController(value);
     await quotationController.getAllQuotationsFromBack();
   }
-
-  Future<void> generatePdfFromImageUrl() async {
-    String companyLogo = await getCompanyLogoFromPref();
-
-    // 1. Download image
-    final response = await http.get(Uri.parse(companyLogo));
-    if (response.statusCode != 200) {
-      throw Exception('Failed to load image');
-    }
-
-    final Uint8List imageBytes = response.bodyBytes;
-    // String companyLogo = await getCompanyLogoFromPref();
-    // final Uint8List logoBytes = await fetchImage(
-    //   companyLogo,
-    // );
-    quotationController.setLogo(imageBytes);
-  }
+  //
+  //   Future<void> generatePdfFromImageUrl() async {
+  //     String companyLogo = await getCompanyLogoFromPref();
+  // print('companyLogo1 $companyLogo');
+  //     // 1. Download image
+  //     final response = await http.get(Uri.parse(companyLogo));
+  //     print('response is ${response.statusCode} ');
+  //     print(response.body );
+  //     if (response.statusCode != 200) {
+  //       throw Exception('Failed to load image');
+  //     }
+  //
+  //     final Uint8List imageBytes = response.bodyBytes;
+  //     // String companyLogo = await getCompanyLogoFromPref();
+  //     // final Uint8List logoBytes = await fetchImage(
+  //     //   companyLogo,
+  //     // );
+  //     quotationController.setLogo(imageBytes);
+  //   }
 
   @override
   void initState() {
-    generatePdfFromImageUrl();
+    // generatePdfFromImageUrl();
     quotationController.itemsMultiPartList = [];
     quotationController.salesPersonListNames = [];
     quotationController.salesPersonListId = [];
@@ -778,37 +780,28 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                 Map<int, Map<String, dynamic>> orderLines1 = {};
                 List<int> orderedKeys = [];
                 Map<int, dynamic> orderLinesMap = {
-                  for (
-                  int i = 0;
-                  i < widget.info['orderLines'].length;
-                  i++
-                  )
+                  for (int i = 0; i < widget.info['orderLines'].length; i++)
                     (i + 1): widget.info['orderLines'][i],
                 };
 
                 for (int i = 0; i < orderLinesMap.length; i++) {
                   orderedKeys.add(i + 1);
-                  Map<String, dynamic> selectedOrderLine =
-                  orderLinesMap[i + 1];
+                  Map<String, dynamic> selectedOrderLine = orderLinesMap[i + 1];
                   orderLines1[i + 1] = {};
                   if (selectedOrderLine['line_type_id'] == 1) {
                     // Map the fields you want to copy from selectedOrderLine to orderLines1
 
                     orderLines1[i + 1]!['line_type_id'] =
-                        selectedOrderLine['line_type_id']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['line_type_id']?.toString() ?? '';
                     orderLines1[i + 1]!['item_id'] = '';
 
                     orderLines1[i + 1]!['itemName'] = '';
                     orderLines1[i + 1]!['item_main_code'] = '';
                     orderLines1[i + 1]!['item_discount'] = '0';
-                    orderLines1[i + 1]!['item_description'] =
-                    '';
+                    orderLines1[i + 1]!['item_description'] = '';
                     orderLines1[i + 1]!['item_quantity'] = '0';
 
-                    orderLines1[i + 1]!['item_unit_price'] =
-                    '0';
+                    orderLines1[i + 1]!['item_unit_price'] = '0';
                     orderLines1[i + 1]!['item_total'] = '0';
                     orderLines1[i + 1]!['title'] =
                         selectedOrderLine['title'] ?? '';
@@ -820,39 +813,25 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                     // Map the fields you want to copy from selectedOrderLine to orderLines1
 
                     orderLines1[i + 1]!['line_type_id'] =
-                        selectedOrderLine['line_type_id']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['line_type_id']?.toString() ?? '';
                     orderLines1[i + 1]!['item_id'] =
-                        selectedOrderLine['item_id']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['item_id']?.toString() ?? '';
 
                     orderLines1[i + 1]!['itemName'] =
                         selectedOrderLine['item_name'] ?? '';
                     orderLines1[i + 1]!['item_main_code'] =
-                        selectedOrderLine['item_main_code'] ??
-                            '';
+                        selectedOrderLine['item_main_code'] ?? '';
                     orderLines1[i + 1]!['item_discount'] =
-                        selectedOrderLine['item_discount']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['item_discount']?.toString() ?? '';
                     orderLines1[i + 1]!['item_description'] =
-                        selectedOrderLine['item_description'] ??
-                            '';
+                        selectedOrderLine['item_description'] ?? '';
                     orderLines1[i + 1]!['item_quantity'] =
-                        selectedOrderLine['item_quantity']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['item_quantity']?.toString() ?? '';
 
                     orderLines1[i + 1]!['item_unit_price'] =
-                        selectedOrderLine['item_unit_price']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['item_unit_price']?.toString() ?? '';
                     orderLines1[i + 1]!['item_total'] =
-                        selectedOrderLine['item_total']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['item_total']?.toString() ?? '';
                     orderLines1[i + 1]!['title'] =
                         selectedOrderLine['title'] ?? '';
                     orderLines1[i + 1]!['note'] =
@@ -863,9 +842,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                   if (selectedOrderLine['line_type_id'] == 3) {
                     // Map the fields you want to copy from selectedOrderLine to orderLines1
                     orderLines1[i + 1]!['line_type_id'] =
-                        selectedOrderLine['line_type_id']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['line_type_id']?.toString() ?? '';
                     orderLines1[i + 1]!['item_id'] = '';
 
                     orderLines1[i + 1]!['itemName'] =
@@ -873,53 +850,38 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                     orderLines1[i + 1]!['item_main_code'] =
                         selectedOrderLine['combo_code'] ?? '';
                     orderLines1[i + 1]!['item_discount'] =
-                        selectedOrderLine['combo_discount']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['combo_discount']?.toString() ?? '';
                     orderLines1[i + 1]!['item_description'] =
-                        selectedOrderLine['combo_description'] ??
-                            '';
+                        selectedOrderLine['combo_description'] ?? '';
                     orderLines1[i + 1]!['item_quantity'] =
-                        selectedOrderLine['combo_quantity']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['combo_quantity']?.toString() ?? '';
 
                     orderLines1[i + 1]!['item_unit_price'] =
-                        selectedOrderLine['combo_unit_price']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['combo_unit_price']?.toString() ?? '';
                     orderLines1[i + 1]!['item_total'] =
-                        selectedOrderLine['combo_total']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['combo_total']?.toString() ?? '';
                     orderLines1[i + 1]!['title'] =
                         selectedOrderLine['title'] ?? '';
                     orderLines1[i + 1]!['note'] =
                         selectedOrderLine['note'] ?? '';
                     orderLines1[i + 1]!['combo'] =
-                        selectedOrderLine['combo_id']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['combo_id']?.toString() ?? '';
                     // Add more fields as needed
                   }
                   if (selectedOrderLine['line_type_id'] == 4) {
                     // Map the fields you want to copy from selectedOrderLine to orderLines1
 
                     orderLines1[i + 1]!['line_type_id'] =
-                        selectedOrderLine['line_type_id']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['line_type_id']?.toString() ?? '';
                     orderLines1[i + 1]!['item_id'] = '';
 
                     orderLines1[i + 1]!['itemName'] = '';
                     orderLines1[i + 1]!['item_main_code'] = '';
                     orderLines1[i + 1]!['item_discount'] = '0';
-                    orderLines1[i + 1]!['item_description'] =
-                    '';
+                    orderLines1[i + 1]!['item_description'] = '';
                     orderLines1[i + 1]!['item_quantity'] = '0';
 
-                    orderLines1[i + 1]!['item_unit_price'] =
-                    '0';
+                    orderLines1[i + 1]!['item_unit_price'] = '0';
                     orderLines1[i + 1]!['item_total'] = '0';
                     orderLines1[i + 1]!['title'] = '';
                     orderLines1[i + 1]!['note'] = '';
@@ -928,9 +890,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                         selectedOrderLine['image'].isNotEmpty) {
                       try {
                         final response = await http.get(
-                          Uri.parse(
-                            '$baseImage${selectedOrderLine['image']}',
-                          ),
+                          Uri.parse('$baseImage${selectedOrderLine['image']}'),
                         );
 
                         if (response.statusCode == 200) {
@@ -946,9 +906,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                         ); // Set to empty if loading fails
                       }
                     } else {
-                      imageFile = Uint8List(
-                        0,
-                      ); // Set to empty if no image URL
+                      imageFile = Uint8List(0); // Set to empty if no image URL
                     }
                     orderLines1[i + 1]!['image'] = imageFile;
                     // Add more fields as needed
@@ -957,20 +915,16 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                     // Map the fields you want to copy from selectedOrderLine to orderLines1
 
                     orderLines1[i + 1]!['line_type_id'] =
-                        selectedOrderLine['line_type_id']
-                            ?.toString() ??
-                            '';
+                        selectedOrderLine['line_type_id']?.toString() ?? '';
                     orderLines1[i + 1]!['item_id'] = '';
 
                     orderLines1[i + 1]!['itemName'] = '';
                     orderLines1[i + 1]!['item_main_code'] = '';
                     orderLines1[i + 1]!['item_discount'] = '0';
-                    orderLines1[i + 1]!['item_description'] =
-                    '';
+                    orderLines1[i + 1]!['item_description'] = '';
                     orderLines1[i + 1]!['item_quantity'] = '0';
 
-                    orderLines1[i + 1]!['item_unit_price'] =
-                    '0';
+                    orderLines1[i + 1]!['item_unit_price'] = '0';
                     orderLines1[i + 1]!['item_total'] = '0';
                     orderLines1[i + 1]!['title'] = '';
                     orderLines1[i + 1]!['note'] =
@@ -988,29 +942,23 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                 String currencyId = ' ';
 
                 if (widget.info['cashingMethod'] != null) {
-                  cashMethodId =
-                  '${widget.info['cashingMethod']['id']}';
+                  cashMethodId = '${widget.info['cashingMethod']['id']}';
                 }
                 if (widget.info['commissionMethod'] != null) {
                   commissionMethodId =
-                  '${widget.info['commissionMethod']['id']}';
+                      '${widget.info['commissionMethod']['id']}';
                 }
                 if (widget.info['currency'] != null) {
-                  currencyId =
-                  '${widget.info['currency']['id']}';
+                  currencyId = '${widget.info['currency']['id']}';
                 }
                 if (widget.info['client'] != null) {
-                  clientId =
-                      widget.info['client']['id'].toString();
+                  clientId = widget.info['client']['id'].toString();
                 } else {}
                 if (widget.info['pricelist'] != null) {
-                  pricelistId =
-                      widget.info['pricelist']['id'].toString();
+                  pricelistId = widget.info['pricelist']['id'].toString();
                 }
                 if (widget.info['salesperson'] != null) {
-                  salespersonId =
-                      widget.info['salesperson']['id']
-                          .toString();
+                  salespersonId = widget.info['salesperson']['id'].toString();
                 }
 
                 var res = await updateQuotation(
@@ -1053,26 +1001,24 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                   '',
                   widget.info['deliveryTerms'] ?? '',
                   value,
+                  widget.info['companyHeader'] != null ||
+                          '${widget.info['companyHeader']}' != '[]'
+                      ? '${widget.info['companyHeader']['id']}'
+                      : '',
                 );
                 if (res['success'] == true) {
-                  quotationController
-                      .getAllQuotationsFromBack();
-                  homeController.selectedTab.value =
-                  "quotation_summary";
-                  CommonWidgets.snackBar(
-                    'Success',
-                    res['message'],
-                  );
+                  quotationController.getAllQuotationsFromBack();
+                  homeController.selectedTab.value = "quotation_summary";
+                  CommonWidgets.snackBar('Success', res['message']);
                 } else {
-                  CommonWidgets.snackBar(
-                    'error',
-                    res['message'],
-                  );
+                  CommonWidgets.snackBar('error', res['message']);
                 }
               },
-              width: widget.isDesktop
-                        ? MediaQuery.of(context).size.width * 0.07
-                        : 150,),
+              width:
+                  widget.isDesktop
+                      ? MediaQuery.of(context).size.width * 0.07
+                      : 150,
+            ),
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
@@ -1183,6 +1129,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                         message: 'preview'.tr,
                         child: InkWell(
                           onTap: () async {
+                            print("press");
+                            print(widget.info['orderLines']);
                             itemsInfoPrint = [];
                             quotationItemInfo = {};
                             totalAllItems = 0;
@@ -1283,10 +1231,9 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                             combosmap['image'] != null &&
                                             combosmap['image'].isNotEmpty
                                         ? '${combosmap['image']}'
-                                        : 'no has image';
+                                        : '';
 
-                                var combobrand =
-                                    combosmap['brand'] ?? 'brand not found';
+                                var combobrand = combosmap['brand'] ?? '';
                                 totalAllItems += itemTotal;
                                 var quotationItemInfo = {
                                   'line_type_id': '3',
@@ -1370,24 +1317,6 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                 itemsInfoPrint.add(quotationItemInfo);
                               }
                             }
-                            // var primaryCurrency = await getCompanyPrimaryCurrencyFromPref();
-                            // var result = exchangeRatesController
-                            //     .exchangeRatesList
-                            //     .firstWhere(
-                            //       (item) =>
-                            //   item["currency"] == primaryCurrency,
-                            //   orElse: () => null,
-                            // );
-                            // var primaryLatestRate=
-                            // result != null
-                            //     ? '${result["exchange_rate"]}'
-                            //     : '1';
-                            // discountOnAllItem =
-                            //     totalAllItems *
-                            //     double.parse(
-                            //       widget.info['globalDiscount'] ?? '0',
-                            //     ) /
-                            //     100;
 
                             totalPriceAfterDiscount =
                                 totalAllItems - discountOnAllItem;
@@ -1419,6 +1348,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                 builder: (BuildContext context) {
                                   // print('widget.info[ ${widget.info['termsAndConditions']}');
                                   return PrintQuotationData(
+                                    header: widget.info['companyHeader'],
                                     isPrintedAs0:
                                         '${widget.info['printedAsPercentage']}' ==
                                                 '1'
@@ -1540,7 +1470,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     elevation: 0,
                                     content: UpdateQuotationDialog(
                                       index: widget.index,
-                                      info: widget.info,
+                                      info: deepCloneMap(widget.info),
                                       fromPage: 'quotationSummary',
                                     ),
                                   ),

@@ -357,6 +357,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 ),
                                             'item_image': itemImage,
                                             'item_brand': brand,
+                                            'combo_image': '',
+                                            'combo_brand': '',
                                             'title': '',
                                             'isImageList': true,
                                             'note': '',
@@ -386,7 +388,25 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                           var itemTotal = double.parse(
                                             '${item['item_total']}',
                                           );
-                                          // double.parse(qty) * itemPrice;
+                                          var combosmap =
+                                              salesOrderCont
+                                                  .combosMap[item['combo_id']
+                                                  .toString()];
+                                          var comboImage =
+                                              '${combosmap['image']}' != '' &&
+                                                      combosmap['image'] !=
+                                                          null &&
+                                                      combosmap['image']
+                                                          .isNotEmpty
+                                                  ? '${combosmap['image']}'
+                                                  : '';
+
+                                          var combobrand =
+                                              combosmap['brand'] ?? '';
+
+                                          itemTotal += double.parse(
+                                            '${item['item_total']}',
+                                          );
                                           var quotationItemInfo = {
                                             'line_type_id': '3',
                                             'item_name': itemName,
@@ -405,6 +425,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             'note': '',
                                             'item_image': '',
                                             'item_brand': '',
+                                            'combo_image': comboImage,
+                                            'combo_brand': combobrand,
                                             'isImageList': true,
                                             'title': '',
                                             'image': '',
@@ -422,6 +444,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             'item_total': '',
                                             'item_image': '',
                                             'item_brand': '',
+                                            'combo_image': '',
+                                            'combo_brand': '',
                                             'note': '',
                                             'isImageList': true,
                                             'title': item['title'],
@@ -440,6 +464,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             'item_total': '',
                                             'item_image': '',
                                             'item_brand': '',
+                                            'combo_image': '',
+                                            'combo_brand': '',
                                             'title': '',
                                             'note': item['note'],
                                             'image': '',
@@ -458,6 +484,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             'item_total': '',
                                             'item_image': '',
                                             'item_brand': '',
+                                            'combo_image': '',
+                                            'combo_brand': '',
                                             'title': '',
                                             'note': '',
                                             'image': item['image'],
@@ -645,6 +673,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   );
                                 } else {
                                   _saveContent();
+                                  print("vat is store so-------------------");
+                                  print(salesOrderController.vat11.toString());
                                   var res = await storeSalesOrder(
                                     refController.text,
                                     selectedCustomerIds,
@@ -764,6 +794,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                     ),
                                                 'item_image': itemImage,
                                                 'item_brand': brand,
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'title': '',
                                                 'isImageList': true,
                                                 'note': '',
@@ -775,10 +807,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             } else if ('${item['line_type_id']}' ==
                                                 '3') {
                                               var qty = item['item_quantity'];
-                                              // var map =
-                                              //     quotationCont
-                                              //         .combosMap[item['combo']
-                                              //         .toString()];
+
                                               var ind = salesOrderCont
                                                   .combosIdsList
                                                   .indexOf(
@@ -796,7 +825,23 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                               var itemTotal = double.parse(
                                                 '${item['item_total']}',
                                               );
-                                              // double.parse(qty) * itemPrice;
+                                              var combosmap =
+                                                  salesOrderCont
+                                                      .combosMap[item['combo_id']
+                                                      .toString()];
+                                              var comboImage =
+                                                  '${combosmap['image']}' !=
+                                                              '' &&
+                                                          combosmap['image'] !=
+                                                              null &&
+                                                          combosmap['image']
+                                                              .isNotEmpty
+                                                      ? '${combosmap['image']}'
+                                                      : '';
+
+                                              var combobrand =
+                                                  combosmap['brand'] ?? '';
+                                              itemTotal += itemTotal;
                                               var quotationItemInfo = {
                                                 'line_type_id': '3',
                                                 'item_name': itemName,
@@ -817,6 +862,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 'note': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': comboImage,
+                                                'combo_brand': combobrand,
                                                 'isImageList': true,
                                                 'title': '',
                                                 'image': '',
@@ -836,6 +883,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 'item_total': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'note': '',
                                                 'isImageList': true,
                                                 'title': item['title'],
@@ -856,6 +905,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 'item_total': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'title': '',
                                                 'note': item['note'],
                                                 'image': '',
@@ -876,6 +927,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 'item_total': '',
                                                 'item_image': '',
                                                 'item_brand': '',
+                                                'combo_image': '',
+                                                'combo_brand': '',
                                                 'title': '',
                                                 'note': '',
                                                 'image': item['image'],
@@ -1611,9 +1664,11 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                   .customerNumberList
                                                   .indexOf(value)];
                                           if (salesOrderCont
-                                              .customersPricesListsIds[index]
-                                              .isNotEmpty && salesOrderCont
-                                              .customersPricesListsIds[index]!=null) {
+                                                  .customersPricesListsIds[index]
+                                                  .isNotEmpty &&
+                                              salesOrderCont
+                                                      .customersPricesListsIds[index] !=
+                                                  null) {
                                             salesOrderCont.setSelectedPriceListId(
                                               '${salesOrderCont.customersPricesListsIds[index]}',
                                             );
@@ -1631,9 +1686,11 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             });
                                           }
                                           if (salesOrderCont
-                                              .customersSalesPersonsIds[index]
-                                              .isNotEmpty && salesOrderCont
-                                              .customersSalesPersonsIds[index]!=null) {
+                                                  .customersSalesPersonsIds[index]
+                                                  .isNotEmpty &&
+                                              salesOrderCont
+                                                      .customersSalesPersonsIds[index] !=
+                                                  null) {
                                             setState(() {
                                               selectedSalesPersonId = int.parse(
                                                 '${salesOrderCont.customersSalesPersonsIds[index]}',
@@ -3208,11 +3265,10 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       );
                                     } else {
                                       print(
-                                        "Createsalesorder-------------------",
+                                        "vat is store so-------------------",
                                       );
                                       print(
-                                        salesOrderController
-                                            .rowsInListViewInSalesOrder,
+                                        salesOrderController.vat11.toString(),
                                       );
 
                                       var res = await storeSalesOrder(
