@@ -977,6 +977,8 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 builder: (BuildContext context) {
                                   // print('widget.info[ ${widget.info['termsAndConditions']}');
                                   return PrintSalesOrder(
+                                    fromPage: 'SoSummary',
+                                    vat: salesOrderController.vat11,
                                     quotationNumber: quotNumber,
                                     isPrintedAs0:
                                         '${widget.info['printedAsPercentage']}' ==

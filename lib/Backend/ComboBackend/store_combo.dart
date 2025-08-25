@@ -29,7 +29,7 @@ Future storeCombo(
   formData.files.addAll([
     MapEntry(
       "image",
-      MultipartFile.fromBytes(featureimage ?? [], filename: "featureimage.jpg"),
+      MultipartFile.fromBytes(featureimage , filename: "featureimage.jpg"),
     ),
   ]);
   for (int i = 1; i < items.length + 1; i++) {

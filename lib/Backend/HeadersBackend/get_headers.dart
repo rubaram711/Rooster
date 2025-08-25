@@ -13,6 +13,5 @@ Future getAllHeaders() async {
   );
 
   var p = json.decode(response.body);
-  print(p);
   return p;
 }

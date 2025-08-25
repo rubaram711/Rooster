@@ -251,7 +251,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
     var gapW20 = pw.SizedBox(width: 20);
     var gapW180 = pw.SizedBox(width: 180);
     var gapH4 = pw.SizedBox(height: 4);
-    var gapH2 = pw.SizedBox(height: 2);
+    // var gapH2 = pw.SizedBox(height: 2);
     var gapH6 = pw.SizedBox(height: 6);
     final font = await rootBundle.load('assets/fonts/Tajawal-Medium.ttf');
     final arabicFont = pw.Font.ttf(font);
@@ -281,7 +281,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(
             color: PdfColors.black,
-            fontSize: 7,
+            fontSize: 11,
             fontWeight: pw.FontWeight.normal,
           ),
         ),
@@ -295,7 +295,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
         child: pw.Center(
           child: pw.Text(
             text,
-            style: pw.TextStyle(fontSize: 7, font: arabicFont),
+            style: pw.TextStyle(fontSize: 11, font: arabicFont),
           ),
         ),
       );
@@ -308,12 +308,12 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
     }) {
       return pw.Container(
         margin: const pw.EdgeInsets.symmetric(vertical: 8),
-        child: pw.Row(
+        child: pw.Column(
           mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
           children: [
-            pw.Column(
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
               children: [
-                gapH4,
                 reusableShowInfoCard(
                   text:
                       quotationItemInfo['item_brand'] != ''
@@ -322,31 +322,69 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                   width: width * 0.05,
                 ),
 
-                gapH4,
-                if (imageProvider != null)
-                  pw.Image(
-                    imageProvider,
-                    fit: pw.BoxFit.contain,
-                    width: 50,
-                    height: 50,
-                  ),
+                reusableShowInfoCard(
+                  text: '${quotationItemInfo['item_name'] ?? ''}',
+                  width: width * 0.07,
+                ),
+                reusableShowInfoCard(
+                  text: '${quotationItemInfo['item_description'] ?? ''}',
+                  width: width * 0.08,
+                ),
+                reusableShowInfoCard(
+                  text: '${quotationItemInfo['item_quantity'] ?? ''}',
+                  width: width * 0.03,
+                ),
+                reusableShowInfoCard(
+                  text: '${quotationItemInfo['item_warehouse'] ?? ''}',
+                  width: width * 0.03,
+                ),
               ],
             ),
-            reusableShowInfoCard(
-              text: '${quotationItemInfo['item_name'] ?? ''}',
-              width: width * 0.07,
-            ),
-            reusableShowInfoCard(
-              text: '${quotationItemInfo['item_description'] ?? ''}',
-              width: width * 0.08,
-            ),
-            reusableShowInfoCard(
-              text: '${quotationItemInfo['item_quantity'] ?? ''}',
-              width: width * 0.03,
-            ),
-            reusableShowInfoCard(
-              text: '${quotationItemInfo['item_warehouse'] ?? ''}',
-              width: width * 0.03,
+            gapH4,
+            gapH4,
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.start,
+              children: [
+                pw.SizedBox(width: 50),
+                // pw.Container(
+                //   width: 50,
+                //   height: 50,
+                //   decoration: pw.BoxDecoration(
+                //     color: PdfColors.black,
+                //     border: pw.Border.all(
+                //       color: PdfColors.black,
+                //       width: 1.00,
+                //       style: pw.BorderStyle.solid,
+                //     ),
+                //   ),
+                // ),
+                pw.Container(
+                  width: 125,
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(
+                      color: PdfColors.white,
+                      width: 1.00,
+                      style: pw.BorderStyle.solid,
+                    ),
+                  ),
+                  child: pw.Center(
+                    child: pw.Column(
+                      children: [
+                        gapH4,
+
+                        if (imageProvider != null)
+                          pw.Image(
+                            imageProvider,
+                            fit: pw.BoxFit.contain,
+                            width: 120,
+                            height: 100,
+                          ),
+                        gapH4,
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -362,12 +400,12 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
         margin: const pw.EdgeInsets.symmetric(vertical: 8),
         child:
             quotationItemInfo['line_type_id'] == '3'
-                ? pw.Row(
+                ? pw.Column(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                   children: [
-                    pw.Column(
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                       children: [
-                        gapH4,
                         reusableShowInfoCard(
                           text:
                               quotationItemInfo['combo_brand'] != ''
@@ -376,32 +414,69 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                           width: width * 0.05,
                         ),
 
-                        gapH4,
-                        if (imageProvider != null)
-                          pw.Image(
-                            imageProvider,
-                            fit: pw.BoxFit.contain,
-                            width: 50,
-                            height: 50,
-                          ),
+                        reusableShowInfoCard(
+                          text: '${quotationItemInfo['item_name'] ?? ''}',
+                          width: width * 0.07,
+                        ),
+                        reusableShowInfoCard(
+                          text:
+                              '${quotationItemInfo['item_description'] ?? ''}',
+                          width: width * 0.08,
+                        ),
+                        reusableShowInfoCard(
+                          text: '${quotationItemInfo['item_quantity'] ?? ''}',
+                          width: width * 0.03,
+                        ),
+                        reusableShowInfoCard(
+                          text: '${quotationItemInfo['combo_warehouse'] ?? ''}',
+                          width: width * 0.03,
+                        ),
                       ],
                     ),
+                    gapH4,
+                    gapH4,
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.start,
+                      children: [
+                        pw.SizedBox(width: 50),
+                        // pw.Container(
+                        //   width: 50,
+                        //   height: 50,
+                        //   decoration: pw.BoxDecoration(
+                        //     color: PdfColors.black,
+                        //     border: pw.Border.all(
+                        //       color: PdfColors.black,
+                        //       width: 1.00,
+                        //       style: pw.BorderStyle.solid,
+                        //     ),
+                        //   ),
+                        // ),
+                        pw.Container(
+                          width: 125,
+                          decoration: pw.BoxDecoration(
+                            border: pw.Border.all(
+                              color: PdfColors.white,
+                              width: 1.00,
+                              style: pw.BorderStyle.solid,
+                            ),
+                          ),
+                          child: pw.Center(
+                            child: pw.Column(
+                              children: [
+                                gapH4,
 
-                    reusableShowInfoCard(
-                      text: '${quotationItemInfo['item_name'] ?? ''}',
-                      width: width * 0.07,
-                    ),
-                    reusableShowInfoCard(
-                      text: '${quotationItemInfo['item_description'] ?? ''}',
-                      width: width * 0.08,
-                    ),
-                    reusableShowInfoCard(
-                      text: '${quotationItemInfo['item_quantity'] ?? ''}',
-                      width: width * 0.03,
-                    ),
-                    reusableShowInfoCard(
-                      text: '${quotationItemInfo['combo_warehouse'] ?? ''}',
-                      width: width * 0.03,
+                                if (imageProvider != null)
+                                  pw.Image(
+                                    imageProvider,
+                                    fit: pw.BoxFit.contain,
+                                    width: 120,
+                                    height: 100,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 )
@@ -445,7 +520,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                       child: pw.Text(
                         'Note : ${quotationItemInfo['note'] ?? ''}',
                         style: pw.TextStyle(
-                          fontSize: 7,
+                          fontSize: 11,
                           font: italicRobotoFont,
                         ),
                       ),
@@ -495,7 +570,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
     }
 
     reusableText(String text) {
-      return pw.Text(text, style: pw.TextStyle(fontSize: 7));
+      return pw.Text(text, style: pw.TextStyle(fontSize: 11));
     }
 
     buildDividersRow(double width) {
@@ -513,7 +588,9 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
       );
     }
 
-    final image = pw.MemoryImage(deliveryController.logoBytes);
+    final image = pw.MemoryImage(
+      deliveryController.logoBytes,
+    ); //to be use again
 
     pdf.addPage(
       pw.MultiPage(
@@ -540,7 +617,9 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Container(
                                   width: 180, // Set the desired width
                                   height: 70, // Set the desired height
-                                  child: pw.Image(image),
+                                  child:
+                                  // pw.Text("image"),
+                                  pw.Image(image), //to be use again
                                 ),
                               ],
                             ),
@@ -561,7 +640,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   fullCompanyName,
                                   style: pw.TextStyle(
-                                    fontSize: 7,
+                                    fontSize: 11,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -684,7 +763,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'to'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 7,
+                                    fontSize: 11,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -693,7 +772,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'telephone'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 7,
+                                    fontSize: 11,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -702,7 +781,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'address'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 7,
+                                    fontSize: 11,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -740,7 +819,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'offer_no'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 7,
+                                    fontSize: 11,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -749,7 +828,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'sales_person'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 7,
+                                    fontSize: 11,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -758,7 +837,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'date'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 7,
+                                    fontSize: 11,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -770,7 +849,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 //     ? pw.Text(
                                 //       '${'$primaryCurrency/${widget.deliveryCurrency} rate'.tr}:',
                                 //       style: pw.TextStyle(
-                                //         fontSize: 7,
+                                //         fontSize: 11,
                                 //         fontWeight: pw.FontWeight.normal,
                                 //         color: PdfColors.black,
                                 //       ),
@@ -797,19 +876,10 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                         mainAxisAlignment: pw.MainAxisAlignment.center,
                         children: [
                           tableTitleForSequence(
-                            text: 'Delivery [${widget.deliveryNumber}]',
+                            text: 'Delivery',
                             width: width * 0.07,
                           ),
                         ],
-                      ),
-                      gapH2,
-                      pw.SizedBox(
-                        width: width * 0.12,
-                        child: pw.Divider(
-                          height: 5,
-                          color: PdfColors.black,
-                          // endIndent: 250
-                        ),
                       ),
                     ],
                   ),
@@ -898,7 +968,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                     horizontal: width * 0.01,
                     vertical: 25,
                   ),
-                  width: width * 0.36,
+                  width: width * 0.365,
                   height: 300,
                   decoration: const pw.BoxDecoration(
                     color: PdfColors.white,
@@ -917,7 +987,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.25,
+                                width: width * 0.255,
                                 child: reusableText('total_price'.tr),
                               ),
                             ],
@@ -927,7 +997,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.05,
+                                width: width * 0.075,
                                 child: pw.Text(''),
                                 // child: reusableText(primaryCurrency),
                               ),
@@ -937,12 +1007,12 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.1,
+                                width: width * 0.055,
                                 child: pw.Text(
                                   widget.total,
 
                                   style: pw.TextStyle(
-                                    fontSize: 7,
+                                    fontSize: 11,
                                     color: PdfColors.black,
                                   ),
                                 ),
@@ -982,7 +1052,9 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                           pw.Container(
                                             width: 180,
                                             height: 70,
-                                            child: pw.Image(image),
+                                            child:
+                                            // pw.Text("image"),
+                                            pw.Image(image), //to be use again
                                             // child: pw.Image(
                                             //   pw.MemoryImage(
                                             //     (deliveryController.logoBytes).buffer.asUint8List(),

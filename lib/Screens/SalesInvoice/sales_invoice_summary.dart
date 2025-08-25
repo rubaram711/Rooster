@@ -951,8 +951,6 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                 : salesOrderNumber =
                                     widget
                                         .info['salesOrder']['salesOrderNumber'];
-                            print("preview so-----");
-                            print(salesOrderNumber);
                             salesOrderNumber == ''
                                 ? quotNumber = ''
                                 : widget.info['salesOrder']['quotation'] == null
@@ -960,14 +958,14 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                 : quotNumber =
                                     widget
                                         .info['salesOrder']['quotation']['quotationNumber'];
-                            print("preview Q-----");
-                            print(quotNumber);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
                                   // print('widget.info[ ${widget.info['termsAndConditions']}');
                                   return PrintSalesInvoice(
+                                    vat: salesInvoiceController.vat11,
+                                    fromPage: 'SiSummary',
                                     quotationNumber: quotNumber,
                                     salesOrderNumber: salesOrderNumber,
                                     isPrintedAs0:

@@ -364,7 +364,6 @@ class _SettingsContentState extends State<SettingsContent> {
                     for(var header in companySettingsController.headersList) {
                       var headersResponse;
                       if(!header.containsKey('company')){
-                        print('store $header');
                         headersResponse = await storeHeader(
                             selectedPhoneCode: header['phoneCode']??'',
                             selectedMobileCode: header['mobileCode']??'',
@@ -382,7 +381,6 @@ class _SettingsContentState extends State<SettingsContent> {
                             imageFile: '${header['logo']??''}'.startsWith('https://') || header['logo']==''?null:header['logo']//todo something
                         );
                       }else{
-                        print('update');
                          headersResponse = await updateHeader(
                             headerId: header['id'].toString(),
                             selectedPhoneCode: header['phoneCode']??'',
@@ -1444,7 +1442,6 @@ class _ReusableHeaderSectionState
   bool isCompanySubjectToVat = true;
   @override
   void initState() {
-    print('index is ${widget.index}');
     headerName.text = companySettingsController.headersList[widget.index]['headerName']??'';
     fullCompanyName.text = companySettingsController.headersList[widget.index]['fullCompanyName']??'';
     address.text = companySettingsController.headersList[widget.index]['address'] ?? '';

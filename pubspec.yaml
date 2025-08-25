@@ -66,7 +66,7 @@ dependencies:
   fl_chart: ^0.71.0
   flutter_reorderable_list: ^1.3.1
   drag_and_drop_lists:
-
+  flutter_screenutil: ^5.9.3
 #  flutter_barcode_scanner: ^2.0.0
 #  share_plus: ^10.1.4
 #  js: ^0.6.7

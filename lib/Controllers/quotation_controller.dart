@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Backend/Quotations/get_quotation_create_info.dart';
 import 'package:rooster_app/Backend/Quotations/get_quotations.dart';
 import 'package:rooster_app/Backend/get_currencies.dart';
-import 'package:rooster_app/Controllers/home_controller.dart';
 
 import '../Backend/PriceListBackend/get_prices_list_items.dart';
 import '../Backend/UsersBackend/get_user.dart';
@@ -159,8 +158,8 @@ class QuotationController extends GetxController {
 
   // Map<String, Widget> orderLinesQuotationList = {};
   resetQuotation() {
-    cashingMethodsNamesList = [];
-    cashingMethodsIdsList = [];
+    // cashingMethodsNamesList = [];
+    // cashingMethodsIdsList = [];
     // orderLinesQuotationList = {};
     rowsInListViewInQuotation = {};
     // itemsList = [];
@@ -373,7 +372,8 @@ class QuotationController extends GetxController {
       cashingMethodsNamesList.add(priceList['title']);
       cashingMethodsIdsList.add('${priceList['id']}');
     }
-    print('cashing $cashingMethodsNamesList');
+    // print('cashing $cashingMethodsNamesList');
+
 
     for (var header in p['companyHeaders']??[]) {
       headersList.add(header);

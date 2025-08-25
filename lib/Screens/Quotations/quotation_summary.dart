@@ -12,7 +12,6 @@ import 'package:rooster_app/Screens/Quotations/schedule_task_dialog.dart';
 import 'package:rooster_app/Screens/Quotations/tasks.dart';
 import 'package:rooster_app/const/constants.dart';
 import '../../Backend/Quotations/delete_quotation.dart';
-import '../../Backend/Quotations/get_quotations.dart';
 import '../../Backend/Quotations/update_quotation.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
@@ -20,7 +19,6 @@ import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/page_title.dart';
 import '../../Widgets/reusable_table_menu.dart';
 import '../../Widgets/reusable_btn.dart';
-import '../../Widgets/reusable_more.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../Widgets/table_item.dart';
 import '../../Widgets/table_title.dart';
@@ -1129,8 +1127,6 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                         message: 'preview'.tr,
                         child: InkWell(
                           onTap: () async {
-                            print("press");
-                            print(widget.info['orderLines']);
                             itemsInfoPrint = [];
                             quotationItemInfo = {};
                             totalAllItems = 0;
@@ -1439,6 +1435,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                             : "---",
                                     clientName:
                                         widget.info['client']['name'] ?? '',
+                                    vat: widget.info['vat'] ?? '',
+                                    fromPage: 'quotationSummary',
                                     termsAndConditions:
                                         widget.info['termsAndConditions'] ?? '',
                                     itemsInfoPrint: itemsInfoPrint,
@@ -1838,9 +1836,10 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                   );
                   var p = json.decode(res.body);
                   if (res.statusCode == 200) {
+                    quotationController.quotationsListCC = [];
+                    quotationController.isQuotationsFetched = false;
+                    quotationController.getAllQuotationsFromBack();
                     CommonWidgets.snackBar('Success', p['message']);
-                    quotationController
-                        .getAllQuotationsWithoutPendingFromBack();
                   } else {
                     CommonWidgets.snackBar('error', p['message']);
                   }
@@ -1855,648 +1854,648 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
   }
 }
 
-class MobileQuotationSummary extends StatefulWidget {
-  const MobileQuotationSummary({super.key});
-
-  @override
-  State<MobileQuotationSummary> createState() => _MobileQuotationSummaryState();
-}
-
-class _MobileQuotationSummaryState extends State<MobileQuotationSummary> {
-  final TextEditingController filterController = TextEditingController();
-  TextEditingController searchController = TextEditingController();
-  double listViewLength = 100;
-  String selectedNumberOfRows = '10';
-  int selectedNumberOfRowsAsInt = 10;
-  int start = 1;
-  bool isArrowBackClicked = false;
-  bool isArrowForwardClicked = false;
-  final HomeController homeController = Get.find();
-  bool isNumberOrderedUp = true;
-  bool isCreationOrderedUp = true;
-  bool isCustomerOrderedUp = true;
-  bool isSalespersonOrderedUp = true;
-  getAllQuotationsFromBack() async {
-    var p = await getAllQuotationsWithoutPending('');
-    setState(() {
-      quotationsList.addAll(p);
-      isQuotationsFetched = true;
-      listViewLength =
-          quotationsList.length < 10
-              ? Sizes.deviceHeight * (0.09 * quotationsList.length)
-              : Sizes.deviceHeight * (0.09 * 10);
-    });
-  }
-
-  List quotationsList = [];
-  bool isQuotationsFetched = false;
-
-  TaskController taskController = Get.find();
-  int selectedTabIndex = 0;
-  List tabsList = ['all_quotations', 'tasks'];
-  String searchValueInTasks = '';
-  Timer? searchOnStoppedTypingInTasks;
-
-  _onChangeTaskSearchHandler(value) {
-    const duration = Duration(
-      milliseconds: 800,
-    ); // set the duration that you want call search() after that.
-    if (searchOnStoppedTypingInTasks != null) {
-      setState(() => searchOnStoppedTypingInTasks!.cancel()); // clear timer
-    }
-    setState(
-      () =>
-          searchOnStoppedTypingInTasks = Timer(
-            duration,
-            () => searchOnTask(value),
-          ),
-    );
-  }
-
-  searchOnTask(value) async {
-    setState(() {
-      searchValueInTasks = value;
-    });
-    await taskController.getAllTasksFromBack(value);
-  }
-
-  @override
-  void initState() {
-    // listViewLength = quotationsList.length < 10
-    //     ? Sizes.deviceHeight * (0.09 * quotationsList.length)
-    //     : Sizes.deviceHeight * (0.09 * 10);
-    getAllQuotationsFromBack();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.02,
-      ),
-      height: MediaQuery.of(context).size.height * 0.8,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PageTitle(text: 'quotations'.tr),
-            gapH10,
-            ReusableButtonWithColor(
-              width: MediaQuery.of(context).size.width * 0.4,
-              height: 45,
-              onTapFunction: () {
-                homeController.selectedTab.value = 'new_quotation';
-              },
-              btnText: 'create_new_quotation'.tr,
-            ),
-            gapH10,
-            SizedBox(
-              // width: MediaQuery.of(context).size.width * 0.59,
-              child: ReusableSearchTextField(
-                hint: '${"search".tr}...',
-                textEditingController:
-                    selectedTabIndex == 0
-                        ? searchController
-                        : taskController.searchInTasksController,
-                onChangedFunc: (value) {
-                  if (selectedTabIndex == 1) {
-                    _onChangeTaskSearchHandler(value);
-                  }
-                },
-                validationFunc: () {},
-              ),
-            ),
-            gapH24,
-            // ReusableChip(
-            //   name: 'all_quotations'.tr,
-            //   isDesktop: false,
-            // ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 0.0,
-                  direction: Axis.horizontal,
-                  children:
-                      tabsList
-                          .map(
-                            (element) => ReusableBuildTabChipItem(
-                              index: tabsList.indexOf(element),
-                              function: () {
-                                setState(() {
-                                  selectedTabIndex = tabsList.indexOf(element);
-                                });
-                              },
-                              isClicked:
-                                  selectedTabIndex == tabsList.indexOf(element),
-                              name: element,
-                            ),
-                          )
-                          .toList(),
-                ),
-              ],
-            ),
-            selectedTabIndex == 0
-                ? SizedBox(
-                  height: listViewLength + 150,
-                  child: SingleChildScrollView(
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 5,
-                                    vertical: 15,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Primary.primary,
-                                    borderRadius: const BorderRadius.all(
-                                      Radius.circular(6),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      tableTitleWithOrderArrow(
-                                        'number'.tr,
-                                        150,
-                                        () {
-                                          setState(() {
-                                            isNumberOrderedUp =
-                                                !isNumberOrderedUp;
-                                            isNumberOrderedUp
-                                                ? quotationsList.sort(
-                                                  (a, b) => a['quotationNumber']
-                                                      .compareTo(
-                                                        b['quotationNumber'],
-                                                      ),
-                                                )
-                                                : quotationsList.sort(
-                                                  (a, b) => b['quotationNumber']
-                                                      .compareTo(
-                                                        a['quotationNumber'],
-                                                      ),
-                                                );
-                                          });
-                                        },
-                                      ),
-                                      tableTitleWithOrderArrow(
-                                        'creation'.tr,
-                                        150,
-                                        () {
-                                          setState(() {
-                                            isCreationOrderedUp =
-                                                !isCreationOrderedUp;
-                                            isCreationOrderedUp
-                                                ? quotationsList.sort(
-                                                  (a, b) => a['createdAtDate']
-                                                      .compareTo(
-                                                        b['createdAtDate'],
-                                                      ),
-                                                )
-                                                : quotationsList.sort(
-                                                  (a, b) => b['createdAtDate']
-                                                      .compareTo(
-                                                        a['createdAtDate'],
-                                                      ),
-                                                );
-                                          });
-                                        },
-                                      ),
-                                      tableTitleWithOrderArrow(
-                                        'customer'.tr,
-                                        150,
-                                        () {
-                                          setState(() {
-                                            isCustomerOrderedUp =
-                                                !isCustomerOrderedUp;
-                                            isCustomerOrderedUp
-                                                ? quotationsList.sort(
-                                                  (
-                                                    a,
-                                                    b,
-                                                  ) => '${a['client']['name']}'
-                                                      .compareTo(
-                                                        '${b['client']['name']}',
-                                                      ),
-                                                )
-                                                : quotationsList.sort(
-                                                  (
-                                                    a,
-                                                    b,
-                                                  ) => '${b['client']['name']}'
-                                                      .compareTo(
-                                                        '${a['client']['name']}',
-                                                      ),
-                                                );
-                                          });
-                                        },
-                                      ),
-                                      tableTitleWithOrderArrow(
-                                        'salesperson'.tr,
-                                        150,
-                                        () {
-                                          setState(() {
-                                            isSalespersonOrderedUp =
-                                                !isSalespersonOrderedUp;
-                                            isSalespersonOrderedUp
-                                                ? quotationsList.sort(
-                                                  (a, b) => a['salesperson']
-                                                      .compareTo(
-                                                        b['salesperson'],
-                                                      ),
-                                                )
-                                                : quotationsList.sort(
-                                                  (a, b) => b['salesperson']
-                                                      .compareTo(
-                                                        a['salesperson'],
-                                                      ),
-                                                );
-                                          });
-                                        },
-                                      ),
-                                      TableTitle(text: 'task'.tr, width: 150),
-                                      TableTitle(text: 'total'.tr, width: 150),
-                                      TableTitle(text: 'status'.tr, width: 150),
-                                      TableTitle(
-                                        text: 'more_options'.tr,
-                                        width: 100,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                isQuotationsFetched
-                                    ? Container(
-                                      color: Colors.white,
-                                      child: Column(
-                                        children: List.generate(
-                                          quotationsList.length > 9
-                                              ? selectedNumberOfRowsAsInt
-                                              : quotationsList.length,
-                                          (index) => Column(
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  QuotationAsRowInTable(
-                                                    info: quotationsList[index],
-                                                    index: index,
-                                                    isDesktop: false,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 100,
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
-                                                      children: [
-                                                        SizedBox(
-                                                          width:
-                                                              MediaQuery.of(
-                                                                context,
-                                                              ).size.width *
-                                                              0.03,
-                                                          child:
-                                                              const ReusableMore(
-                                                                itemsList: [],
-                                                              ),
-                                                        ),
-                                                        SizedBox(
-                                                          width:
-                                                              MediaQuery.of(
-                                                                context,
-                                                              ).size.width *
-                                                              0.03,
-                                                          child: InkWell(
-                                                            onTap: () async {
-                                                              var res =
-                                                                  await deleteQuotation(
-                                                                    '${quotationsList[index]['id']}',
-                                                                  );
-                                                              var p = json
-                                                                  .decode(
-                                                                    res.body,
-                                                                  );
-                                                              if (res.statusCode ==
-                                                                  200) {
-                                                                CommonWidgets.snackBar(
-                                                                  'Success',
-                                                                  p['message'],
-                                                                );
-                                                                setState(() {
-                                                                  selectedNumberOfRowsAsInt =
-                                                                      selectedNumberOfRowsAsInt -
-                                                                      1;
-                                                                  quotationsList
-                                                                      .removeAt(
-                                                                        index,
-                                                                      );
-                                                                  listViewLength =
-                                                                      listViewLength -
-                                                                      0.09;
-                                                                });
-                                                              } else {
-                                                                CommonWidgets.snackBar(
-                                                                  'error',
-                                                                  p['message'],
-                                                                );
-                                                              }
-                                                            },
-                                                            child: Icon(
-                                                              Icons
-                                                                  .delete_outline,
-                                                              color:
-                                                                  Primary
-                                                                      .primary,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const Divider(),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    : const CircularProgressIndicator(),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${'rows_per_page'.tr}:  ',
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 60,
-                                      height: 30,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(
-                                          color: Colors.black,
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: Center(
-                                        child: DropdownButtonHideUnderline(
-                                          child: DropdownButton<String>(
-                                            borderRadius: BorderRadius.circular(
-                                              0,
-                                            ),
-                                            items:
-                                                [
-                                                  '10',
-                                                  '20',
-                                                  '50',
-                                                  'all'.tr,
-                                                ].map((String value) {
-                                                  return DropdownMenuItem<
-                                                    String
-                                                  >(
-                                                    value: value,
-                                                    child: Text(
-                                                      value,
-                                                      style: const TextStyle(
-                                                        fontSize: 12,
-                                                        color: Colors.grey,
-                                                      ),
-                                                    ),
-                                                  );
-                                                }).toList(),
-                                            value: selectedNumberOfRows,
-                                            onChanged: (val) {
-                                              setState(() {
-                                                selectedNumberOfRows = val!;
-                                                if (val == '10') {
-                                                  listViewLength =
-                                                      quotationsList.length < 10
-                                                          ? Sizes.deviceHeight *
-                                                              (0.09 *
-                                                                  quotationsList
-                                                                      .length)
-                                                          : Sizes.deviceHeight *
-                                                              (0.09 * 10);
-                                                  selectedNumberOfRowsAsInt =
-                                                      quotationsList.length < 10
-                                                          ? quotationsList
-                                                              .length
-                                                          : 10;
-                                                }
-                                                if (val == '20') {
-                                                  listViewLength =
-                                                      quotationsList.length < 20
-                                                          ? Sizes.deviceHeight *
-                                                              (0.09 *
-                                                                  quotationsList
-                                                                      .length)
-                                                          : Sizes.deviceHeight *
-                                                              (0.09 * 20);
-                                                  selectedNumberOfRowsAsInt =
-                                                      quotationsList.length < 20
-                                                          ? quotationsList
-                                                              .length
-                                                          : 20;
-                                                }
-                                                if (val == '50') {
-                                                  listViewLength =
-                                                      quotationsList.length < 50
-                                                          ? Sizes.deviceHeight *
-                                                              (0.09 *
-                                                                  quotationsList
-                                                                      .length)
-                                                          : Sizes.deviceHeight *
-                                                              (0.09 * 50);
-                                                  selectedNumberOfRowsAsInt =
-                                                      quotationsList.length < 50
-                                                          ? quotationsList
-                                                              .length
-                                                          : 50;
-                                                }
-                                                if (val == 'all'.tr) {
-                                                  listViewLength =
-                                                      Sizes.deviceHeight *
-                                                      (0.09 *
-                                                          quotationsList
-                                                              .length);
-                                                  selectedNumberOfRowsAsInt =
-                                                      quotationsList.length;
-                                                }
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    gapW16,
-                                    Text(
-                                      selectedNumberOfRows == 'all'.tr
-                                          ? '${'all'.tr} of ${quotationsList.length}'
-                                          : '$start-$selectedNumberOfRows of ${quotationsList.length}',
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                    gapW16,
-                                    InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          isArrowBackClicked =
-                                              !isArrowBackClicked;
-                                          isArrowForwardClicked = false;
-                                        });
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.skip_previous,
-                                            color:
-                                                isArrowBackClicked
-                                                    ? Colors.black87
-                                                    : Colors.grey,
-                                          ),
-                                          Icon(
-                                            Icons.navigate_before,
-                                            color:
-                                                isArrowBackClicked
-                                                    ? Colors.black87
-                                                    : Colors.grey,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    gapW10,
-                                    InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          isArrowForwardClicked =
-                                              !isArrowForwardClicked;
-                                          isArrowBackClicked = false;
-                                        });
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.navigate_next,
-                                            color:
-                                                isArrowForwardClicked
-                                                    ? Colors.black87
-                                                    : Colors.grey,
-                                          ),
-                                          Icon(
-                                            Icons.skip_next,
-                                            color:
-                                                isArrowForwardClicked
-                                                    ? Colors.black87
-                                                    : Colors.grey,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    gapW40,
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                : const Tasks(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String hoverTitle = '';
-  String clickedTitle = '';
-  bool isClicked = false;
-  tableTitleWithOrderArrow(String text, double width, Function onClickedFunc) {
-    return SizedBox(
-      width: width,
-      child: Center(
-        child: InkWell(
-          onTap: () {
-            setState(() {
-              clickedTitle = text;
-              hoverTitle = '';
-              isClicked = !isClicked;
-              onClickedFunc();
-            });
-          },
-          onHover: (val) {
-            if (val) {
-              setState(() {
-                hoverTitle = text;
-              });
-            } else {
-              setState(() {
-                hoverTitle = '';
-              });
-            }
-          },
-          child:
-              clickedTitle == text
-                  ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        text,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      isClicked
-                          ? const Icon(
-                            Icons.arrow_drop_down,
-                            color: Colors.white,
-                          )
-                          : const Icon(
-                            Icons.arrow_drop_up,
-                            color: Colors.white,
-                          ),
-                    ],
-                  )
-                  : hoverTitle == text
-                  ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '$text...',
-                        style: TextStyle(
-                          color: Colors.white.withAlpha((0.5 * 255).toInt()),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Icon(
-                        Icons.arrow_drop_down,
-                        color: Colors.white.withAlpha((0.5 * 255).toInt()),
-                      ),
-                    ],
-                  )
-                  : Text(
-                    text,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-        ),
-      ),
-    );
-  }
-}
+// class MobileQuotationSummary extends StatefulWidget {
+//   const MobileQuotationSummary({super.key});
+//
+//   @override
+//   State<MobileQuotationSummary> createState() => _MobileQuotationSummaryState();
+// }
+//
+// class _MobileQuotationSummaryState extends State<MobileQuotationSummary> {
+//   final TextEditingController filterController = TextEditingController();
+//   TextEditingController searchController = TextEditingController();
+//   double listViewLength = 100;
+//   String selectedNumberOfRows = '10';
+//   int selectedNumberOfRowsAsInt = 10;
+//   int start = 1;
+//   bool isArrowBackClicked = false;
+//   bool isArrowForwardClicked = false;
+//   final HomeController homeController = Get.find();
+//   bool isNumberOrderedUp = true;
+//   bool isCreationOrderedUp = true;
+//   bool isCustomerOrderedUp = true;
+//   bool isSalespersonOrderedUp = true;
+//   getAllQuotationsFromBack() async {
+//     var p = await getAllQuotationsWithoutPending('');
+//     setState(() {
+//       quotationsList.addAll(p);
+//       isQuotationsFetched = true;
+//       listViewLength =
+//           quotationsList.length < 10
+//               ? Sizes.deviceHeight * (0.09 * quotationsList.length)
+//               : Sizes.deviceHeight * (0.09 * 10);
+//     });
+//   }
+//
+//   List quotationsList = [];
+//   bool isQuotationsFetched = false;
+//
+//   TaskController taskController = Get.find();
+//   int selectedTabIndex = 0;
+//   List tabsList = ['all_quotations', 'tasks'];
+//   String searchValueInTasks = '';
+//   Timer? searchOnStoppedTypingInTasks;
+//
+//   _onChangeTaskSearchHandler(value) {
+//     const duration = Duration(
+//       milliseconds: 800,
+//     ); // set the duration that you want call search() after that.
+//     if (searchOnStoppedTypingInTasks != null) {
+//       setState(() => searchOnStoppedTypingInTasks!.cancel()); // clear timer
+//     }
+//     setState(
+//       () =>
+//           searchOnStoppedTypingInTasks = Timer(
+//             duration,
+//             () => searchOnTask(value),
+//           ),
+//     );
+//   }
+//
+//   searchOnTask(value) async {
+//     setState(() {
+//       searchValueInTasks = value;
+//     });
+//     await taskController.getAllTasksFromBack(value);
+//   }
+//
+//   @override
+//   void initState() {
+//     // listViewLength = quotationsList.length < 10
+//     //     ? Sizes.deviceHeight * (0.09 * quotationsList.length)
+//     //     : Sizes.deviceHeight * (0.09 * 10);
+//     getAllQuotationsFromBack();
+//     super.initState();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: EdgeInsets.symmetric(
+//         horizontal: MediaQuery.of(context).size.width * 0.02,
+//       ),
+//       height: MediaQuery.of(context).size.height * 0.8,
+//       child: SingleChildScrollView(
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             PageTitle(text: 'quotations'.tr),
+//             gapH10,
+//             ReusableButtonWithColor(
+//               width: MediaQuery.of(context).size.width * 0.4,
+//               height: 45,
+//               onTapFunction: () {
+//                 homeController.selectedTab.value = 'new_quotation';
+//               },
+//               btnText: 'create_new_quotation'.tr,
+//             ),
+//             gapH10,
+//             SizedBox(
+//               // width: MediaQuery.of(context).size.width * 0.59,
+//               child: ReusableSearchTextField(
+//                 hint: '${"search".tr}...',
+//                 textEditingController:
+//                     selectedTabIndex == 0
+//                         ? searchController
+//                         : taskController.searchInTasksController,
+//                 onChangedFunc: (value) {
+//                   if (selectedTabIndex == 1) {
+//                     _onChangeTaskSearchHandler(value);
+//                   }
+//                 },
+//                 validationFunc: () {},
+//               ),
+//             ),
+//             gapH24,
+//             // ReusableChip(
+//             //   name: 'all_quotations'.tr,
+//             //   isDesktop: false,
+//             // ),
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.start,
+//               children: [
+//                 Wrap(
+//                   spacing: 0.0,
+//                   direction: Axis.horizontal,
+//                   children:
+//                       tabsList
+//                           .map(
+//                             (element) => ReusableBuildTabChipItem(
+//                               index: tabsList.indexOf(element),
+//                               function: () {
+//                                 setState(() {
+//                                   selectedTabIndex = tabsList.indexOf(element);
+//                                 });
+//                               },
+//                               isClicked:
+//                                   selectedTabIndex == tabsList.indexOf(element),
+//                               name: element,
+//                             ),
+//                           )
+//                           .toList(),
+//                 ),
+//               ],
+//             ),
+//             selectedTabIndex == 0
+//                 ? SizedBox(
+//                   height: listViewLength + 150,
+//                   child: SingleChildScrollView(
+//                     child: Row(
+//                       children: [
+//                         Flexible(
+//                           child: SingleChildScrollView(
+//                             scrollDirection: Axis.horizontal,
+//                             child: Column(
+//                               crossAxisAlignment: CrossAxisAlignment.start,
+//                               children: [
+//                                 Container(
+//                                   padding: const EdgeInsets.symmetric(
+//                                     horizontal: 5,
+//                                     vertical: 15,
+//                                   ),
+//                                   decoration: BoxDecoration(
+//                                     color: Primary.primary,
+//                                     borderRadius: const BorderRadius.all(
+//                                       Radius.circular(6),
+//                                     ),
+//                                   ),
+//                                   child: Row(
+//                                     children: [
+//                                       tableTitleWithOrderArrow(
+//                                         'number'.tr,
+//                                         150,
+//                                         () {
+//                                           setState(() {
+//                                             isNumberOrderedUp =
+//                                                 !isNumberOrderedUp;
+//                                             isNumberOrderedUp
+//                                                 ? quotationsList.sort(
+//                                                   (a, b) => a['quotationNumber']
+//                                                       .compareTo(
+//                                                         b['quotationNumber'],
+//                                                       ),
+//                                                 )
+//                                                 : quotationsList.sort(
+//                                                   (a, b) => b['quotationNumber']
+//                                                       .compareTo(
+//                                                         a['quotationNumber'],
+//                                                       ),
+//                                                 );
+//                                           });
+//                                         },
+//                                       ),
+//                                       tableTitleWithOrderArrow(
+//                                         'creation'.tr,
+//                                         150,
+//                                         () {
+//                                           setState(() {
+//                                             isCreationOrderedUp =
+//                                                 !isCreationOrderedUp;
+//                                             isCreationOrderedUp
+//                                                 ? quotationsList.sort(
+//                                                   (a, b) => a['createdAtDate']
+//                                                       .compareTo(
+//                                                         b['createdAtDate'],
+//                                                       ),
+//                                                 )
+//                                                 : quotationsList.sort(
+//                                                   (a, b) => b['createdAtDate']
+//                                                       .compareTo(
+//                                                         a['createdAtDate'],
+//                                                       ),
+//                                                 );
+//                                           });
+//                                         },
+//                                       ),
+//                                       tableTitleWithOrderArrow(
+//                                         'customer'.tr,
+//                                         150,
+//                                         () {
+//                                           setState(() {
+//                                             isCustomerOrderedUp =
+//                                                 !isCustomerOrderedUp;
+//                                             isCustomerOrderedUp
+//                                                 ? quotationsList.sort(
+//                                                   (
+//                                                     a,
+//                                                     b,
+//                                                   ) => '${a['client']['name']}'
+//                                                       .compareTo(
+//                                                         '${b['client']['name']}',
+//                                                       ),
+//                                                 )
+//                                                 : quotationsList.sort(
+//                                                   (
+//                                                     a,
+//                                                     b,
+//                                                   ) => '${b['client']['name']}'
+//                                                       .compareTo(
+//                                                         '${a['client']['name']}',
+//                                                       ),
+//                                                 );
+//                                           });
+//                                         },
+//                                       ),
+//                                       tableTitleWithOrderArrow(
+//                                         'salesperson'.tr,
+//                                         150,
+//                                         () {
+//                                           setState(() {
+//                                             isSalespersonOrderedUp =
+//                                                 !isSalespersonOrderedUp;
+//                                             isSalespersonOrderedUp
+//                                                 ? quotationsList.sort(
+//                                                   (a, b) => a['salesperson']
+//                                                       .compareTo(
+//                                                         b['salesperson'],
+//                                                       ),
+//                                                 )
+//                                                 : quotationsList.sort(
+//                                                   (a, b) => b['salesperson']
+//                                                       .compareTo(
+//                                                         a['salesperson'],
+//                                                       ),
+//                                                 );
+//                                           });
+//                                         },
+//                                       ),
+//                                       TableTitle(text: 'task'.tr, width: 150),
+//                                       TableTitle(text: 'total'.tr, width: 150),
+//                                       TableTitle(text: 'status'.tr, width: 150),
+//                                       TableTitle(
+//                                         text: 'more_options'.tr,
+//                                         width: 100,
+//                                       ),
+//                                     ],
+//                                   ),
+//                                 ),
+//                                 isQuotationsFetched
+//                                     ? Container(
+//                                       color: Colors.white,
+//                                       child: Column(
+//                                         children: List.generate(
+//                                           quotationsList.length > 9
+//                                               ? selectedNumberOfRowsAsInt
+//                                               : quotationsList.length,
+//                                           (index) => Column(
+//                                             children: [
+//                                               Row(
+//                                                 children: [
+//                                                   QuotationAsRowInTable(
+//                                                     info: quotationsList[index],
+//                                                     index: index,
+//                                                     isDesktop: false,
+//                                                   ),
+//                                                   SizedBox(
+//                                                     width: 100,
+//                                                     child: Row(
+//                                                       mainAxisAlignment:
+//                                                           MainAxisAlignment
+//                                                               .spaceEvenly,
+//                                                       children: [
+//                                                         SizedBox(
+//                                                           width:
+//                                                               MediaQuery.of(
+//                                                                 context,
+//                                                               ).size.width *
+//                                                               0.03,
+//                                                           child:
+//                                                               const ReusableMore(
+//                                                                 itemsList: [],
+//                                                               ),
+//                                                         ),
+//                                                         SizedBox(
+//                                                           width:
+//                                                               MediaQuery.of(
+//                                                                 context,
+//                                                               ).size.width *
+//                                                               0.03,
+//                                                           child: InkWell(
+//                                                             onTap: () async {
+//                                                               var res =
+//                                                                   await deleteQuotation(
+//                                                                     '${quotationsList[index]['id']}',
+//                                                                   );
+//                                                               var p = json
+//                                                                   .decode(
+//                                                                     res.body,
+//                                                                   );
+//                                                               if (res.statusCode ==
+//                                                                   200) {
+//                                                                 CommonWidgets.snackBar(
+//                                                                   'Success',
+//                                                                   p['message'],
+//                                                                 );
+//                                                                 setState(() {
+//                                                                   selectedNumberOfRowsAsInt =
+//                                                                       selectedNumberOfRowsAsInt -
+//                                                                       1;
+//                                                                   quotationsList
+//                                                                       .removeAt(
+//                                                                         index,
+//                                                                       );
+//                                                                   listViewLength =
+//                                                                       listViewLength -
+//                                                                       0.09;
+//                                                                 });
+//                                                               } else {
+//                                                                 CommonWidgets.snackBar(
+//                                                                   'error',
+//                                                                   p['message'],
+//                                                                 );
+//                                                               }
+//                                                             },
+//                                                             child: Icon(
+//                                                               Icons
+//                                                                   .delete_outline,
+//                                                               color:
+//                                                                   Primary
+//                                                                       .primary,
+//                                                             ),
+//                                                           ),
+//                                                         ),
+//                                                       ],
+//                                                     ),
+//                                                   ),
+//                                                 ],
+//                                               ),
+//                                               const Divider(),
+//                                             ],
+//                                           ),
+//                                         ),
+//                                       ),
+//                                     )
+//                                     : const CircularProgressIndicator(),
+//                                 Row(
+//                                   mainAxisAlignment: MainAxisAlignment.start,
+//                                   children: [
+//                                     Text(
+//                                       '${'rows_per_page'.tr}:  ',
+//                                       style: const TextStyle(
+//                                         fontSize: 13,
+//                                         color: Colors.black54,
+//                                       ),
+//                                     ),
+//                                     Container(
+//                                       width: 60,
+//                                       height: 30,
+//                                       decoration: BoxDecoration(
+//                                         borderRadius: BorderRadius.circular(6),
+//                                         border: Border.all(
+//                                           color: Colors.black,
+//                                           width: 2,
+//                                         ),
+//                                       ),
+//                                       child: Center(
+//                                         child: DropdownButtonHideUnderline(
+//                                           child: DropdownButton<String>(
+//                                             borderRadius: BorderRadius.circular(
+//                                               0,
+//                                             ),
+//                                             items:
+//                                                 [
+//                                                   '10',
+//                                                   '20',
+//                                                   '50',
+//                                                   'all'.tr,
+//                                                 ].map((String value) {
+//                                                   return DropdownMenuItem<
+//                                                     String
+//                                                   >(
+//                                                     value: value,
+//                                                     child: Text(
+//                                                       value,
+//                                                       style: const TextStyle(
+//                                                         fontSize: 12,
+//                                                         color: Colors.grey,
+//                                                       ),
+//                                                     ),
+//                                                   );
+//                                                 }).toList(),
+//                                             value: selectedNumberOfRows,
+//                                             onChanged: (val) {
+//                                               setState(() {
+//                                                 selectedNumberOfRows = val!;
+//                                                 if (val == '10') {
+//                                                   listViewLength =
+//                                                       quotationsList.length < 10
+//                                                           ? Sizes.deviceHeight *
+//                                                               (0.09 *
+//                                                                   quotationsList
+//                                                                       .length)
+//                                                           : Sizes.deviceHeight *
+//                                                               (0.09 * 10);
+//                                                   selectedNumberOfRowsAsInt =
+//                                                       quotationsList.length < 10
+//                                                           ? quotationsList
+//                                                               .length
+//                                                           : 10;
+//                                                 }
+//                                                 if (val == '20') {
+//                                                   listViewLength =
+//                                                       quotationsList.length < 20
+//                                                           ? Sizes.deviceHeight *
+//                                                               (0.09 *
+//                                                                   quotationsList
+//                                                                       .length)
+//                                                           : Sizes.deviceHeight *
+//                                                               (0.09 * 20);
+//                                                   selectedNumberOfRowsAsInt =
+//                                                       quotationsList.length < 20
+//                                                           ? quotationsList
+//                                                               .length
+//                                                           : 20;
+//                                                 }
+//                                                 if (val == '50') {
+//                                                   listViewLength =
+//                                                       quotationsList.length < 50
+//                                                           ? Sizes.deviceHeight *
+//                                                               (0.09 *
+//                                                                   quotationsList
+//                                                                       .length)
+//                                                           : Sizes.deviceHeight *
+//                                                               (0.09 * 50);
+//                                                   selectedNumberOfRowsAsInt =
+//                                                       quotationsList.length < 50
+//                                                           ? quotationsList
+//                                                               .length
+//                                                           : 50;
+//                                                 }
+//                                                 if (val == 'all'.tr) {
+//                                                   listViewLength =
+//                                                       Sizes.deviceHeight *
+//                                                       (0.09 *
+//                                                           quotationsList
+//                                                               .length);
+//                                                   selectedNumberOfRowsAsInt =
+//                                                       quotationsList.length;
+//                                                 }
+//                                               });
+//                                             },
+//                                           ),
+//                                         ),
+//                                       ),
+//                                     ),
+//                                     gapW16,
+//                                     Text(
+//                                       selectedNumberOfRows == 'all'.tr
+//                                           ? '${'all'.tr} of ${quotationsList.length}'
+//                                           : '$start-$selectedNumberOfRows of ${quotationsList.length}',
+//                                       style: const TextStyle(
+//                                         fontSize: 13,
+//                                         color: Colors.black54,
+//                                       ),
+//                                     ),
+//                                     gapW16,
+//                                     InkWell(
+//                                       onTap: () {
+//                                         setState(() {
+//                                           isArrowBackClicked =
+//                                               !isArrowBackClicked;
+//                                           isArrowForwardClicked = false;
+//                                         });
+//                                       },
+//                                       child: Row(
+//                                         children: [
+//                                           Icon(
+//                                             Icons.skip_previous,
+//                                             color:
+//                                                 isArrowBackClicked
+//                                                     ? Colors.black87
+//                                                     : Colors.grey,
+//                                           ),
+//                                           Icon(
+//                                             Icons.navigate_before,
+//                                             color:
+//                                                 isArrowBackClicked
+//                                                     ? Colors.black87
+//                                                     : Colors.grey,
+//                                           ),
+//                                         ],
+//                                       ),
+//                                     ),
+//                                     gapW10,
+//                                     InkWell(
+//                                       onTap: () {
+//                                         setState(() {
+//                                           isArrowForwardClicked =
+//                                               !isArrowForwardClicked;
+//                                           isArrowBackClicked = false;
+//                                         });
+//                                       },
+//                                       child: Row(
+//                                         children: [
+//                                           Icon(
+//                                             Icons.navigate_next,
+//                                             color:
+//                                                 isArrowForwardClicked
+//                                                     ? Colors.black87
+//                                                     : Colors.grey,
+//                                           ),
+//                                           Icon(
+//                                             Icons.skip_next,
+//                                             color:
+//                                                 isArrowForwardClicked
+//                                                     ? Colors.black87
+//                                                     : Colors.grey,
+//                                           ),
+//                                         ],
+//                                       ),
+//                                     ),
+//                                     gapW40,
+//                                   ],
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 )
+//                 : const Tasks(),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+//
+//   String hoverTitle = '';
+//   String clickedTitle = '';
+//   bool isClicked = false;
+//   tableTitleWithOrderArrow(String text, double width, Function onClickedFunc) {
+//     return SizedBox(
+//       width: width,
+//       child: Center(
+//         child: InkWell(
+//           onTap: () {
+//             setState(() {
+//               clickedTitle = text;
+//               hoverTitle = '';
+//               isClicked = !isClicked;
+//               onClickedFunc();
+//             });
+//           },
+//           onHover: (val) {
+//             if (val) {
+//               setState(() {
+//                 hoverTitle = text;
+//               });
+//             } else {
+//               setState(() {
+//                 hoverTitle = '';
+//               });
+//             }
+//           },
+//           child:
+//               clickedTitle == text
+//                   ? Row(
+//                     mainAxisAlignment: MainAxisAlignment.center,
+//                     children: [
+//                       Text(
+//                         text,
+//                         style: const TextStyle(
+//                           color: Colors.white,
+//                           fontWeight: FontWeight.bold,
+//                         ),
+//                       ),
+//                       isClicked
+//                           ? const Icon(
+//                             Icons.arrow_drop_down,
+//                             color: Colors.white,
+//                           )
+//                           : const Icon(
+//                             Icons.arrow_drop_up,
+//                             color: Colors.white,
+//                           ),
+//                     ],
+//                   )
+//                   : hoverTitle == text
+//                   ? Row(
+//                     mainAxisAlignment: MainAxisAlignment.center,
+//                     children: [
+//                       Text(
+//                         '$text...',
+//                         style: TextStyle(
+//                           color: Colors.white.withAlpha((0.5 * 255).toInt()),
+//                           fontWeight: FontWeight.bold,
+//                         ),
+//                       ),
+//                       Icon(
+//                         Icons.arrow_drop_down,
+//                         color: Colors.white.withAlpha((0.5 * 255).toInt()),
+//                       ),
+//                     ],
+//                   )
+//                   : Text(
+//                     text,
+//                     style: const TextStyle(
+//                       color: Colors.white,
+//                       fontWeight: FontWeight.bold,
+//                     ),
+//                   ),
+//         ),
+//       ),
+//     );
+//   }
+// }

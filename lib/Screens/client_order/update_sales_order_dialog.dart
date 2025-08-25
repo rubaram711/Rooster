@@ -268,7 +268,8 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
     // termsAndConditionsController.text =
     //     widget.info['termsAndConditions'] ?? '[{"insert":"\n"}]';
     if (widget.info['termsAndConditions'] == null ||
-        '${widget.info['termsAndConditions']}' == 'null') {
+        '${widget.info['termsAndConditions']}' == 'null' ||
+        '${widget.info['termsAndConditions']}' == '') {
       oldTermsAndConditionsString = '[{"insert":"\n"}]';
       termsAndConditionsController.text = '[{"insert":"\n"}]';
       _savedContent = '[{"insert":"\n"}]';
@@ -509,8 +510,7 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
 
                                   var res = await updateSalesOrder(
                                     '${widget.info['id']}',
-                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                    false,
+
                                     refController.text,
                                     selectedCustomerIds,
                                     validityController.text,
@@ -668,8 +668,7 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                   _saveContent();
                                   var res = await updateSalesOrder(
                                     '${widget.info['id']}',
-                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
-                                    false,
+
                                     refController.text,
                                     selectedCustomerIds,
                                     validityController.text,
@@ -823,8 +822,7 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                   _saveContent();
                                   var res = await updateSalesOrder(
                                     '${widget.info['id']}',
-                                    false,
-                                    // termsAndConditionsController.text!=oldTermsAndConditionsString,
+
                                     refController.text,
                                     selectedCustomerIds,
                                     validityController.text,
@@ -3083,14 +3081,8 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                           } else {
                             if (_formKey.currentState!.validate()) {
                               _saveContent();
-                              print("inUPdateSalesorder----------------");
-                              print(
-                                salesOrderController.rowsInListViewInSalesOrder,
-                              );
                               var res = await updateSalesOrder(
                                 '${widget.info['id']}',
-                                false,
-                                // termsAndConditionsController.text!=oldTermsAndConditionsString,
                                 refController.text,
                                 selectedCustomerIds,
                                 validityController.text,
@@ -3458,12 +3450,13 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
     if (widget.info['item_id'] != '') {
       qtyController.text = '${widget.info['item_quantity'] ?? '1'}';
       quantity = '${widget.info['item_quantity'] ?? '1'}';
-
-      warehouseNameController.text =
-          salesOrderController
-              .warehousesNames['${widget.info['item_warehouse_id']}'];
-      print("in item row in Update------");
-      print(warehouseNameController.text);
+      if (widget.info['item_warehouse_id'] == null) {
+        warehouseNameController.text = "";
+      } else {
+        warehouseNameController.text =
+            salesOrderController
+                .warehousesNames['${widget.info['item_warehouse_id']}'];
+      }
 
       discountController.text = widget.info['item_discount'] ?? '0.0';
       discount = widget.info['item_discount'] ?? '0.0';
@@ -4621,11 +4614,13 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
               .index]['item_quantity'] =
           '${widget.info['combo_quantity'] ?? '0.0'}';
 
-      warehouseComboController.text =
-          salesOrderController
-              .warehousesNames['${widget.info['combo_warehouse_id']}'];
-      print("in combo row in Update------");
-      print(warehouseComboController.text);
+      if (widget.info['combo_warehouse_id'] == null) {
+        warehouseComboController.text = "";
+      } else {
+        warehouseComboController.text =
+            salesOrderController
+                .warehousesNames['${widget.info['combo_warehouse_id']}'];
+      }
       discountController.text = widget.info['combo_discount'] ?? '';
       discount = widget.info['combo_discount'] ?? '0.0';
       salesOrderController.rowsInListViewInSalesOrder[widget

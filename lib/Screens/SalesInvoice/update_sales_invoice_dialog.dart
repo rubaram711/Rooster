@@ -712,6 +712,8 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   builder: (BuildContext context) {
                                     // print('widget.info[ ${widget.info['termsAndConditions']}');
                                     return PrintSalesInvoice(
+                                      vat: salesInvoiceCont.vat11,
+                                      fromPage: 'UpdateSi',
                                       quotationNumber: quotNumber,
                                       salesOrderNumber: salesOrderNumber,
                                       isPrintedAs0:

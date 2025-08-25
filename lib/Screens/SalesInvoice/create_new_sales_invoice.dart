@@ -449,7 +449,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                               );
                                               var combosmap =
                                                   salesInvoiceCont
-                                                      .combosMap[item['combo_id']
+                                                      .combosMap[item['combo']
                                                       .toString()];
                                               var comboImage =
                                                   '${combosmap['image']}' !=
@@ -460,12 +460,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                               .isNotEmpty
                                                       ? '${combosmap['image']}'
                                                       : '';
-                                              print("ComboImg when print");
-                                              print(comboImage);
                                               var combobrand =
                                                   combosmap['brand'] ?? '---';
-                                              print("Combobrand when print");
-                                              print(combobrand);
                                               totalAllItems += itemTotal;
                                               // double.parse(qty) * itemPrice;
                                               var quotationItemInfo = {
@@ -567,6 +563,9 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                           }
 
                                           return PrintSalesInvoice(
+                                            vat: salesInvoiceCont.vat11,
+                                            fromPage: 'createSi',
+
                                             quotationNumber: '',
                                             salesOrderNumber: '',
                                             isPrintedAs0:

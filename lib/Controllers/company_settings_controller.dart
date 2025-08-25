@@ -117,7 +117,6 @@ class CompanySettingsController extends GetxController {
 
   getCashTraysFromBack(bool isItHaveHeader2) async {
     headersList = [];
-    print('object xx$headersList');
     isHeadersFetched = false;
     var p = await getAllHeaders();
     if (p['success']==true) {
@@ -200,7 +199,6 @@ class CompanySettingsController extends GetxController {
         ];
       }
     }
-    print('object xx$headersList');
     isHeadersFetched = true;
     update();
   }

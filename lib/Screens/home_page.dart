@@ -235,7 +235,7 @@ class _MobileHomeBodyState extends State<MobileHomeBody> {
     'products': const MobileProductsPage(),
     // 'quotation': (Platform.isIOS || Platform.isAndroid)?CreateNewQuotationForMobileApp():  MobileCreateNewQuotation(),
     // 'new_quotation': const MobileCreateNewQuotation(),
-    'quotation_summary': const MobileQuotationSummary(),
+    // 'quotation_summary': const MobileQuotationSummary(),
     'add_new_client': const MobileAddNewClient(),
     'accounts': const MobileAccountsPage(),
     'clients': const MobileAccountsPage(),

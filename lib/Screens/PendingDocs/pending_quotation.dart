@@ -632,7 +632,6 @@ class QuotationAsRowInTable extends StatefulWidget {
 }
 
 class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
-
   String itemName = '';
   double itemPrice = 0;
   double itemTotal = 0;
@@ -1311,8 +1310,6 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     };
                                     itemsInfoPrint.add(quotationItemInfo);
                                   } else if ('${item['line_type_id']}' == '3') {
-                                    print("Combo-----");
-                                    print(item);
                                     var qty = item['combo_quantity'];
 
                                     var ind = cont.combosIdsList.indexOf(
@@ -1337,10 +1334,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                                 combosmap['image'].isNotEmpty
                                             ? '${combosmap['image']}'
                                             : '';
-                                    print("comboImage-----");
-                                    print(comboImage);
-                                    var combobrand =
-                                        combosmap['brand'] ?? 'brand not found';
+                                    var combobrand = combosmap['brand'] ?? '';
                                     totalAllItems += itemTotal;
                                     var quotationItemInfo = {
                                       'line_type_id': '3',
@@ -1449,14 +1443,6 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                 finalPriceByQuotationCurrency =
                                     totalPriceAfterSpecialDiscountByQuotationCurrency +
                                     vatByQuotationCurrency;
-                                print("vat in preview-----");
-                                print(
-                                  formatDoubleWithCommas(
-                                    vatByQuotationCurrency,
-                                  ),
-                                );
-                                print("itemsInfoPrint----");
-                                print(itemsInfoPrint);
 
                                 Navigator.push(
                                   context,
@@ -1493,6 +1479,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                         cancellationReason:
                                             widget.info['cancellationReason'] ??
                                             '',
+                                        vat: widget.info['vat'] ?? '',
+                                        fromPage: 'pendingQuotation',
                                         totalBeforeVat:
                                             widget.info['totalBeforeVat'] ?? '',
                                         discountOnAllItem:
@@ -1583,8 +1571,6 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                             message: 'modify'.tr,
                             child: InkWell(
                               onTap: () async {
-                                print('objectddx ${widget.info}');
-                                print('*******************************');
                                 showDialog<String>(
                                   context: context,
                                   builder:
@@ -1722,7 +1708,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                         '';
 
                                     orderLines1[i + 1]!['item_unit_price'] =
-                                        selectedOrderLine['combo_unit_price']
+                                        selectedOrderLine['combo_unit_price'] ??
+                                        selectedOrderLine['combo_price']
                                             ?.toString() ??
                                         '';
                                     orderLines1[i + 1]!['item_total'] =
@@ -1815,7 +1802,6 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     // Add more fields as needed
                                   }
                                 }
-
                                 var res = await updateQuotation(
                                   '${widget.info['id']}',
                                   // false,
@@ -2471,10 +2457,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                                 combosmap['image'].isNotEmpty
                                             ? '${combosmap['image']}'
                                             : '';
-                                    print("comboImage-----");
-                                    print(comboImage);
-                                    var combobrand =
-                                        combosmap['brand'] ?? 'brand not found';
+                                    var combobrand = combosmap['brand'] ?? '';
                                     totalAllItems += itemTotal;
                                     var quotationItemInfo = {
                                       'line_type_id': '3',
@@ -2583,12 +2566,6 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                 finalPriceByQuotationCurrency =
                                     totalPriceAfterSpecialDiscountByQuotationCurrency +
                                     vatByQuotationCurrency;
-                                print("vat in preview-----");
-                                print(
-                                  formatDoubleWithCommas(
-                                    vatByQuotationCurrency,
-                                  ),
-                                );
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -2624,6 +2601,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                         cancellationReason:
                                             widget.info['cancellationReason'] ??
                                             '',
+                                        vat: widget.info['vat'] ?? '',
+                                        fromPage: 'pendingQuotation',
                                         totalBeforeVat:
                                             widget.info['totalBeforeVat'] ?? '',
                                         discountOnAllItem:
@@ -2714,9 +2693,6 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                             message: 'modify'.tr,
                             child: InkWell(
                               onTap: () async {
-                                print('objectdggd ${ quotationController
-                                    .quotationsListPending}');
-                                print('*******************************');
                                 showDialog<String>(
                                   context: context,
                                   builder:
@@ -2859,7 +2835,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                         '';
 
                                     orderLines1[i + 1]!['item_unit_price'] =
-                                        selectedOrderLine['combo_unit_price']
+                                        selectedOrderLine['combo_unit_price'] ??
+                                        selectedOrderLine['combo_price']
                                             ?.toString() ??
                                         '';
                                     orderLines1[i + 1]!['item_total'] =
@@ -2952,7 +2929,6 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     // Add more fields as needed
                                   }
                                 }
-
                                 var res = await updateQuotation(
                                   '${widget.info['id']}',
                                   // false,

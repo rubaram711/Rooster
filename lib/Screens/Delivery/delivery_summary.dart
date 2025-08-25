@@ -3439,8 +3439,6 @@ class _UpdateDeliveryDialogState extends State<UpdateDeliveryDialog> {
                                 'You have an empty note',
                               );
                             } else {
-                              print("UpdAte delivery -----------");
-                              print(deliveryController.newRowMap);
                               var res = await updateDelivery(
                                 '${widget.info['id']}',
                                 selectedCustomerIds,
@@ -4928,8 +4926,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
                       cont.setEnteredQtyInDelivery(widget.index, val);
 
-                      print("-----on save but change qty---");
-                      print(cont.rowsInListViewInDelivery['item_quantity']);
                     },
                   ),
                 ),

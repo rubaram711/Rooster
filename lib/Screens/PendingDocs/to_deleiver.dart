@@ -934,8 +934,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                         ? '${combosmap['image']}'
                                         : '';
 
-                                var combobrand =
-                                    combosmap['brand'] ?? 'brand not found';
+                                var combobrand = combosmap['brand'] ?? '';
                                 totalAllItems += itemTotal;
 
                                 var quotationItemInfo = {
@@ -1057,6 +1056,8 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 builder: (BuildContext context) {
                                   // print('widget.info[ ${widget.info['termsAndConditions']}');
                                   return PrintSalesOrder(
+                                    fromPage: 'toDeliver',
+                                    vat: salesOrderController.vat11,
                                     quotationNumber: quotNumber,
                                     isPrintedAs0:
                                         '${widget.info['printedAsPercentage']}' ==
@@ -1401,7 +1402,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
                             var res = await updateSalesOrder(
                               '${widget.info['id']}',
-                              false,
+
                               '${widget.info['reference'] ?? ''}',
                               clientId,
 

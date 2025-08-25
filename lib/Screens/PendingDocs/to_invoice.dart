@@ -915,12 +915,8 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                                 combosmap['image'].isNotEmpty
                                             ? '${combosmap['image']}'
                                             : '';
-                                    print("ComboImg when print");
-                                    print(comboImage);
                                     var combobrand =
                                         combosmap['brand'] ?? '---';
-                                    print("Combobrand when print");
-                                    print(combobrand);
                                     totalAllItems += itemTotal;
 
                                     var quotationItemInfo = {
@@ -1042,13 +1038,9 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
-                                      print("Vat---------");
-                                      print(
-                                        formatDoubleWithCommas(
-                                          vatBySalesOrderCurrency,
-                                        ),
-                                      );
                                       return PrintSalesOrder(
+                                        fromPage: 'toInvoiced',
+                                        vat: salesOrderController.vat11,
                                         quotationNumber: quotNumber,
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
@@ -1421,7 +1413,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
                                 var res = await updateSalesOrder(
                                   '${widget.info['id']}',
-                                  false,
+
                                   '${widget.info['reference'] ?? ''}',
                                   clientId,
 
@@ -1707,7 +1699,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                 }
                                 var res = await updateSalesOrder(
                                   '${widget.info['id']}',
-                                  false,
+
                                   '${widget.info['reference'] ?? ''}',
                                   clientId,
 
@@ -2320,12 +2312,8 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                                 combosmap['image'].isNotEmpty
                                             ? '${combosmap['image']}'
                                             : '';
-                                    print("ComboImg when print");
-                                    print(comboImage);
                                     var combobrand =
                                         combosmap['brand'] ?? '---';
-                                    print("Combobrand when print");
-                                    print(combobrand);
                                     totalAllItems += itemTotal;
 
                                     var quotationItemInfo = {
@@ -2441,13 +2429,10 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
-                                      print("Vat---------");
-                                      print(
-                                        formatDoubleWithCommas(
-                                          vatBySalesOrderCurrency,
-                                        ),
-                                      );
+
                                       return PrintSalesOrder(
+                                        fromPage: 'toInvoiced',
+                                        vat: salesOrderController.vat11,
                                         quotationNumber: quotNumber,
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
@@ -2577,7 +2562,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                         elevation: 0,
                                         content: UpdateSalesOrderDialog(
                                           index: widget.index,
-                                          info:deepCloneMap(widget.info),
+                                          info: deepCloneMap(widget.info),
                                           fromPage: "toInvoice",
                                         ),
                                       ),
@@ -2816,7 +2801,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
                                 var res = await updateSalesOrder(
                                   '${widget.info['id']}',
-                                  false,
+
                                   '${widget.info['reference'] ?? ''}',
                                   clientId,
 
@@ -3104,7 +3089,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
                                 var res = await updateSalesOrder(
                                   '${widget.info['id']}',
-                                  false,
+
                                   '${widget.info['reference'] ?? ''}',
                                   clientId,
 
@@ -3393,7 +3378,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
                                 var res = await updateSalesOrder(
                                   '${widget.info['id']}',
-                                  false,
+
                                   '${widget.info['reference'] ?? ''}',
                                   clientId,
 

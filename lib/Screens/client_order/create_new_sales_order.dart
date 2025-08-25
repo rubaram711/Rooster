@@ -390,7 +390,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                           );
                                           var combosmap =
                                               salesOrderCont
-                                                  .combosMap[item['combo_id']
+                                                  .combosMap[item['combo']
                                                   .toString()];
                                           var comboImage =
                                               '${combosmap['image']}' != '' &&
@@ -497,6 +497,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       var quotNumber = '';
 
                                       return PrintSalesOrder(
+                                        vat: salesOrderController.vat11,
+                                        fromPage: 'createSo',
                                         quotationNumber: quotNumber,
                                         isPrintedAs0:
                                             salesOrderCont.isPrintedAs0,
@@ -673,8 +675,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                   );
                                 } else {
                                   _saveContent();
-                                  print("vat is store so-------------------");
-                                  print(salesOrderController.vat11.toString());
                                   var res = await storeSalesOrder(
                                     refController.text,
                                     selectedCustomerIds,
@@ -827,7 +827,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                               );
                                               var combosmap =
                                                   salesOrderCont
-                                                      .combosMap[item['combo_id']
+                                                      .combosMap[item['combo']
                                                       .toString()];
                                               var comboImage =
                                                   '${combosmap['image']}' !=
@@ -942,6 +942,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                           var quotNumber = '';
 
                                           return PrintSalesOrder(
+                                            fromPage: 'createSo',
+                                            vat: salesOrderCont.vat11,
                                             quotationNumber: quotNumber,
                                             isPrintedAs0:
                                                 salesOrderCont.isPrintedAs0,
@@ -3264,12 +3266,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                         'You have an empty note',
                                       );
                                     } else {
-                                      print(
-                                        "vat is store so-------------------",
-                                      );
-                                      print(
-                                        salesOrderController.vat11.toString(),
-                                      );
 
                                       var res = await storeSalesOrder(
                                         refController.text,

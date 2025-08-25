@@ -132,10 +132,6 @@ Future storeSalesOrder(
     ]);
     i++;
   }
-  print("InBackTo StoreSalesOrder------------");
-  print(formData.files);
-  print("------------------------------------");
-  print(formData.fields);
 
   Response response = await Dio()
       .post(

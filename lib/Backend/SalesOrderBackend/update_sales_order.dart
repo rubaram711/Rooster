@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 
 Future updateSalesOrder(
   String id,
-  bool isTermsAndConditionsUpdated,
+  // bool isTermsAndConditionsUpdated,
   String manualReference,
   String clientId,
   String validity,
@@ -46,7 +46,7 @@ Future updateSalesOrder(
     "paymentTerm": paymentTerm,
     "pricelistId": priceList,
     "currency": currency,
-    // "termsAndConditions":termsAndConditions,
+    "termsAndConditions": termsAndConditions,
     "salespersonId": salespersonId,
     "commissionMethodId": commissionMethodId,
     "cashingMethodId": cashingMethodId,
@@ -70,9 +70,9 @@ Future updateSalesOrder(
     "status": status,
   });
 
-  if (isTermsAndConditionsUpdated) {
-    formData.fields.add(MapEntry('termsAndConditions', termsAndConditions));
-  }
+  // if (isTermsAndConditionsUpdated) {
+  //   formData.fields.add(MapEntry('termsAndConditions', termsAndConditions));
+  // }
 
   int i = 1;
 

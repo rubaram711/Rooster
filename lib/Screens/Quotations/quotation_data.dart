@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
@@ -17,8 +16,6 @@ import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/table_title.dart';
 import '../../const/Delta/convert_from_delta_to_widget.dart';
 import '../../const/urls.dart';
-
-
 
 // import 'package:http/http.dart' as http;
 class QuotationData extends StatefulWidget {
@@ -77,16 +74,15 @@ class _QuotationDataState extends State<QuotationData> {
   String selectedCustomerIds = '';
   checkVatExempt() async {
     var companySubjectToVat = await getCompanySubjectToVatFromPref();
-    if(companySubjectToVat=='1'){
-      quotationController.setIsVatExempted(false, false,false);
+    if (companySubjectToVat == '1') {
+      quotationController.setIsVatExempted(false, false, false);
       quotationController.setIsVatExemptCheckBoxShouldAppear(true);
-    }else{
+    } else {
       quotationController.setIsVatExemptCheckBoxShouldAppear(false);
-      quotationController.setIsVatExempted(false, false,true);
+      quotationController.setIsVatExempted(false, false, true);
       quotationController.setIsVatExemptChecked(true);
     }
   }
-
 
   @override
   void initState() {
@@ -99,7 +95,6 @@ class _QuotationDataState extends State<QuotationData> {
         quotationController.selectedQuotationData['vatExempt'] == 1
             ? true
             : false;
-
 
     super.initState();
   }
@@ -202,9 +197,9 @@ class _QuotationDataState extends State<QuotationData> {
                                   'item_image': itemImage,
                                   'item_brand': brand,
                                   'title': '',
-                                  'isImageList':false,
+                                  'isImageList': false,
                                   'note': '',
-                                  'image':''
+                                  'image': '',
                                 };
                                 itemsInfoPrint.add(quotationItemInfo);
                               } else if ('${item['line_type_id']}' == '3') {
@@ -213,141 +208,152 @@ class _QuotationDataState extends State<QuotationData> {
                                 // quotationController
                                 //     .combosMap[item['combo_id']
                                 //     .toString()];
-                                var ind=quotationController
-                                    .combosIdsList.indexOf(item['combo_id']
-                                    .toString());
-                                var itemName = quotationController.combosNamesList[ind];
+                                var ind = quotationController.combosIdsList
+                                    .indexOf(item['combo_id'].toString());
+                                var itemName =
+                                    quotationController.combosNamesList[ind];
                                 var itemPrice = double.parse(
                                   '${item['combo_price'] ?? 0.0}',
                                 );
-                                var itemDescription =
-                                item['combo_description'];
-
+                                var itemDescription = item['combo_description'];
 
                                 var itemTotal = double.parse(
                                   '${item['combo_total']}',
                                 );
                                 // double.parse(qty) * itemPrice;
                                 var quotationItemInfo = {
-                                  'line_type_id':'3',
+                                  'line_type_id': '3',
                                   'item_name': itemName,
                                   'item_description': itemDescription,
                                   'item_quantity': qty,
-                                  'item_unit_price':
-                                  formatDoubleWithCommas(
+                                  'item_unit_price': formatDoubleWithCommas(
                                     itemPrice,
                                   ),
                                   'item_discount':
-                                  item['combo_discount'] ?? '0',
-                                  'item_total':
-                                  formatDoubleWithCommas(
+                                      item['combo_discount'] ?? '0',
+                                  'item_total': formatDoubleWithCommas(
                                     itemTotal,
                                   ),
                                   'note': '',
                                   'item_image': '',
                                   'item_brand': '',
-                                  'isImageList':false,
+                                  'isImageList': false,
                                   'title': '',
-                                  'image':''
+                                  'image': '',
                                 };
                                 itemsInfoPrint.add(quotationItemInfo);
-                              }
-                              else if('${item['line_type_id']}' == '1'){
-
+                              } else if ('${item['line_type_id']}' == '1') {
                                 var quotationItemInfo = {
-                                  'line_type_id':'1',
+                                  'line_type_id': '1',
                                   'item_name': '',
                                   'item_description': '',
                                   'item_quantity': '',
                                   'item_unit_price': '',
-                                  'item_discount':'0',
-                                  'item_total':'',
+                                  'item_discount': '0',
+                                  'item_total': '',
                                   'item_image': '',
                                   'item_brand': '',
                                   'note': '',
-                                  'isImageList':false,
-                                  'title':item['title'],
-                                  'image':''
+                                  'isImageList': false,
+                                  'title': item['title'],
+                                  'image': '',
                                 };
                                 itemsInfoPrint.add(quotationItemInfo);
-                              }
-                              else if('${item['line_type_id']}' == '5'){
+                              } else if ('${item['line_type_id']}' == '5') {
                                 var quotationItemInfo = {
-                                  'line_type_id':'5',
+                                  'line_type_id': '5',
                                   'item_name': '',
                                   'item_description': '',
                                   'item_quantity': '',
                                   'item_unit_price': '',
-                                  'item_discount':'0',
-                                  'item_total':'',
+                                  'item_discount': '0',
+                                  'item_total': '',
                                   'item_image': '',
                                   'item_brand': '',
                                   'title': '',
-                                  'note':item['note'],
-                                  'image':'',
-                                  'isImageList':false,
+                                  'note': item['note'],
+                                  'image': '',
+                                  'isImageList': false,
                                 };
                                 itemsInfoPrint.add(quotationItemInfo);
-                              }
-                              else if('${item['line_type_id']}' == '4'){
+                              } else if ('${item['line_type_id']}' == '4') {
                                 var quotationItemInfo = {
-                                  'line_type_id':'4',
+                                  'line_type_id': '4',
                                   'item_name': '',
                                   'item_description': '',
                                   'item_quantity': '',
                                   'item_unit_price': '',
-                                  'item_discount':'0',
-                                  'item_total':'',
+                                  'item_discount': '0',
+                                  'item_total': '',
                                   'item_image': '',
                                   'item_brand': '',
                                   'title': '',
                                   'note': '',
-                                  'image':'$baseImage${item['image']}',
-                                  'isImageList':false,
+                                  'image': '$baseImage${item['image']}',
+                                  'isImageList': false,
                                 };
                                 itemsInfoPrint.add(quotationItemInfo);
                               }
                             }
                             discountOnAllItem =
                                 totalAllItems *
-                                    double.parse(
-                                      quotationController.selectedQuotationData['globalDiscount'] ?? '0',
-                                    ) /
-                                    100;
+                                double.parse(
+                                  quotationController
+                                          .selectedQuotationData['globalDiscount'] ??
+                                      '0',
+                                ) /
+                                100;
 
                             totalPriceAfterDiscount =
                                 totalAllItems - discountOnAllItem;
                             additionalSpecialDiscount =
                                 totalPriceAfterDiscount *
-                                    double.parse(
-                                      quotationController.selectedQuotationData['specialDiscount'] ?? '0',
-                                    ) /
-                                    100;
+                                double.parse(
+                                  quotationController
+                                          .selectedQuotationData['specialDiscount'] ??
+                                      '0',
+                                ) /
+                                100;
                             totalPriceAfterSpecialDiscount =
                                 totalPriceAfterDiscount -
-                                    additionalSpecialDiscount;
+                                additionalSpecialDiscount;
                             totalPriceAfterSpecialDiscountByQuotationCurrency =
-                                totalPriceAfterSpecialDiscount ;
+                                totalPriceAfterSpecialDiscount;
                             vatByQuotationCurrency =
-                            '${quotationController.selectedQuotationData['vatExempt']}' == '1'
-                                ? 0
-                                : (totalPriceAfterSpecialDiscountByQuotationCurrency *
-                                double.parse(
-                                  await getCompanyVatFromPref(),
-                                )) /
-                                100;
+                                '${quotationController.selectedQuotationData['vatExempt']}' ==
+                                        '1'
+                                    ? 0
+                                    : (totalPriceAfterSpecialDiscountByQuotationCurrency *
+                                            double.parse(
+                                              await getCompanyVatFromPref(),
+                                            )) /
+                                        100;
                             finalPriceByQuotationCurrency =
                                 totalPriceAfterSpecialDiscountByQuotationCurrency +
-                                    vatByQuotationCurrency;
+                                vatByQuotationCurrency;
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
                                   return PrintQuotationData(
-                                    header: quotationController.selectedQuotationData['companyHeader'],
-                                    isPrintedAs0: '${quotationController.selectedQuotationData['printedAsPercentage']}'=='1'?true:false,
-                                    isVatNoPrinted: '${quotationController.selectedQuotationData['notPrinted']}'=='1'?true:false,
-                                    isPrintedAsVatExempt:'${quotationController.selectedQuotationData['printedAsVatExempt']}'=='1'?true:false,
+                                    header:
+                                        quotationController
+                                            .selectedQuotationData['companyHeader'],
+                                    isPrintedAs0:
+                                        '${quotationController.selectedQuotationData['printedAsPercentage']}' ==
+                                                '1'
+                                            ? true
+                                            : false,
+                                    isVatNoPrinted:
+                                        '${quotationController.selectedQuotationData['notPrinted']}' ==
+                                                '1'
+                                            ? true
+                                            : false,
+                                    isPrintedAsVatExempt:
+                                        '${quotationController.selectedQuotationData['printedAsVatExempt']}' ==
+                                                '1'
+                                            ? true
+                                            : false,
                                     isInQuotation: true,
                                     quotationNumber:
                                         quotationController
@@ -363,14 +369,18 @@ class _QuotationDataState extends State<QuotationData> {
                                         '',
                                     receivedUser: '',
                                     senderUser: homeController.userName,
-                                    cancellationReason:  quotationController
-                                        .selectedQuotationData['cancellationReason'] ??
+                                    cancellationReason:
+                                        quotationController
+                                            .selectedQuotationData['cancellationReason'] ??
                                         '',
                                     status:
                                         quotationController
                                             .selectedQuotationData['status'] ??
                                         '',
-                                    totalBeforeVat: '${quotationController.selectedQuotationData['totalBeforeVat']}',
+                                    vat: '',
+                                    fromPage: 'quotationData',
+                                    totalBeforeVat:
+                                        '${quotationController.selectedQuotationData['totalBeforeVat']}',
                                     discountOnAllItem:
                                         discountOnAllItem.toString(),
                                     totalAllItems:
@@ -830,10 +840,13 @@ class _QuotationDataState extends State<QuotationData> {
                                 gapH6,
                                 Row(
                                   children: [
-                                    quotationCont.isVatExemptCheckBoxShouldAppear?Text(
-                                      'vat'.tr,
-                                      style: const TextStyle(fontSize: 12),
-                                    ):SizedBox(),
+                                    quotationCont
+                                            .isVatExemptCheckBoxShouldAppear
+                                        ? Text(
+                                          'vat'.tr,
+                                          style: const TextStyle(fontSize: 12),
+                                        )
+                                        : SizedBox(),
                                     gapW10,
                                   ],
                                 ),
@@ -1106,9 +1119,11 @@ class _QuotationDataState extends State<QuotationData> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  quillDeltaToWidget('${quotationController.selectedQuotationData['termsAndConditions'] ?? ''} '),
+                                  quillDeltaToWidget(
+                                    '${quotationController.selectedQuotationData['termsAndConditions'] ?? ''} ',
+                                  ),
                                 ],
-                              )
+                              ),
                               // ReusableShowInfoCard(v v
                               //   text:
                               //       '${quotationController.selectedQuotationData['termsAndConditions'] ?? ''} ',
@@ -1153,35 +1168,35 @@ class _QuotationDataState extends State<QuotationData> {
                                     gapH6,
                                     Row(
                                       mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text('global_disc'.tr),
                                         Row(
                                           children: [
                                             SizedBox(
                                               width:
-                                              MediaQuery.of(
-                                                context,
-                                              ).size.width *
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
                                                   0.1,
                                               child: ReusableShowInfoCard(
                                                 text:
-                                                '${quotationController.selectedQuotationData['globalDiscount'] ?? '0'}',
+                                                    '${quotationController.selectedQuotationData['globalDiscount'] ?? '0'}',
                                                 width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
                                                     0.1,
                                               ),
                                             ),
                                             gapW10,
                                             ReusableShowInfoCard(
                                               text:
-                                              '${quotationController.selectedQuotationData['globalDiscountAmount'] ?? '0'}',
+                                                  '${quotationController.selectedQuotationData['globalDiscountAmount'] ?? '0'}',
                                               width:
-                                              MediaQuery.of(
-                                                context,
-                                              ).size.width *
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
                                                   0.1,
                                             ),
                                           ],
@@ -1191,35 +1206,35 @@ class _QuotationDataState extends State<QuotationData> {
                                     gapH6,
                                     Row(
                                       mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text('special_disc'.tr),
                                         Row(
                                           children: [
                                             SizedBox(
                                               width:
-                                              MediaQuery.of(
-                                                context,
-                                              ).size.width *
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
                                                   0.1,
                                               child: ReusableShowInfoCard(
                                                 text:
-                                                '${quotationController.selectedQuotationData['specialDiscount'] ?? ''}',
+                                                    '${quotationController.selectedQuotationData['specialDiscount'] ?? ''}',
                                                 width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
+                                                    MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
                                                     0.1,
                                               ),
                                             ),
                                             gapW10,
                                             ReusableShowInfoCard(
                                               text:
-                                              '${quotationController.selectedQuotationData['specialDiscountAmount'] ?? ''}',
+                                                  '${quotationController.selectedQuotationData['specialDiscountAmount'] ?? ''}',
                                               width:
-                                              MediaQuery.of(
-                                                context,
-                                              ).size.width *
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
                                                   0.1,
                                             ),
                                           ],
@@ -1227,44 +1242,55 @@ class _QuotationDataState extends State<QuotationData> {
                                       ],
                                     ),
                                     gapH6,
-                                    quotationCont.isVatNoPrinted ?SizedBox():Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(quotationCont.isPrintedAsVatExempt
-                                            ?'vat_exempt'.tr.toUpperCase()
-                                            :quotationCont.isPrintedAs0 ?
-                                        '${'vat'.tr} 0%'
-                                            :'vat'.tr),
-                                        Row(
+                                    quotationCont.isVatNoPrinted
+                                        ? SizedBox()
+                                        : Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            ReusableShowInfoCard(
-                                              text:quotationCont.isVatExemptChecked?'0':
-                                              '${quotationController.selectedQuotationData['vatLebanese']}',
-                                              width:
-                                              MediaQuery.of(
-                                                context,
-                                              ).size.width *
-                                                  0.1,
+                                            Text(
+                                              quotationCont.isPrintedAsVatExempt
+                                                  ? 'vat_exempt'.tr
+                                                      .toUpperCase()
+                                                  : quotationCont.isPrintedAs0
+                                                  ? '${'vat'.tr} 0%'
+                                                  : 'vat'.tr,
                                             ),
-                                            gapW10,
-                                            ReusableShowInfoCard(
-                                              text:quotationCont.isVatExemptChecked?'0':
-                                              '${quotationController.selectedQuotationData['vat']}',
-                                              width:
-                                              MediaQuery.of(
-                                                context,
-                                              ).size.width *
-                                                  0.1,
+                                            Row(
+                                              children: [
+                                                ReusableShowInfoCard(
+                                                  text:
+                                                      quotationCont
+                                                              .isVatExemptChecked
+                                                          ? '0'
+                                                          : '${quotationController.selectedQuotationData['vatLebanese']}',
+                                                  width:
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.1,
+                                                ),
+                                                gapW10,
+                                                ReusableShowInfoCard(
+                                                  text:
+                                                      quotationCont
+                                                              .isVatExemptChecked
+                                                          ? '0'
+                                                          : '${quotationController.selectedQuotationData['vat']}',
+                                                  width:
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.1,
+                                                ),
+                                              ],
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ),
                                     gapH10,
                                     Row(
                                       mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           'total_amount'.tr,
@@ -1275,9 +1301,7 @@ class _QuotationDataState extends State<QuotationData> {
                                           ),
                                         ),
                                         Text(
-                                          '${quotationCont.selectedQuotationData['currency']['name']} ${quotationCont.isVatExemptChecked
-                                              ?double.parse('${quotationController.selectedQuotationData['total']}')-double.parse('${quotationController.selectedQuotationData['vat']}')
-                                              :quotationController.selectedQuotationData['total']}',
+                                          '${quotationCont.selectedQuotationData['currency']['name']} ${quotationCont.isVatExemptChecked ? double.parse('${quotationController.selectedQuotationData['total']}') - double.parse('${quotationController.selectedQuotationData['vat']}') : quotationController.selectedQuotationData['total']}',
                                           style: TextStyle(
                                             fontSize: 16,
                                             color: Primary.primary,

@@ -1305,8 +1305,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                         ? '${combosmap['image']}'
                                         : '';
 
-                                var combobrand =
-                                    combosmap['brand'] ?? 'brand not found';
+                                var combobrand = combosmap['brand'] ?? '';
                                 totalAllItems += itemTotal;
                                 var quotationItemInfo = {
                                   'line_type_id': '3',
@@ -1446,6 +1445,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     status: widget.info['status'] ?? '',
                                     cancellationReason:
                                         widget.info['cancellationReason'] ?? '',
+                                    vat: widget.info['vat'] ?? '',
+                                    fromPage: 'toSalesOrder',
                                     totalBeforeVat:
                                         widget.info['totalBeforeVat'] ?? '',
                                     discountOnAllItem:

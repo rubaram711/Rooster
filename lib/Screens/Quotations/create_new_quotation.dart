@@ -18,6 +18,7 @@ import 'package:rooster_app/Screens/Quotations/print_quotation.dart';
 import 'package:rooster_app/Widgets/dialog_title.dart';
 import 'package:rooster_app/Widgets/loading.dart';
 import 'package:rooster_app/const/functions.dart';
+import 'package:rooster_app/const/urls.dart';
 import 'package:rooster_app/utils/image_picker_helper.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
@@ -267,9 +268,9 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
     quotationController.getAllUsersSalesPersonFromBack();
     quotationController.getAllTaxationGroupsFromBack();
     setVars();
+    quotationController.resetQuotation();
     quotationController.getFieldsForCreateQuotationFromBack();
     getCurrency();
-    quotationController.resetQuotation();
     quotationController.listViewLengthInQuotation = 50;
     validityController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     inputDateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -328,9 +329,25 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                               item['item_description'];
 
                                           var itemImage =
+                                              // '${map['images']}' != '[]'
+                                              //     ? map['images'][0]
+                                              //     : '';
                                               '${map['images']}' != '[]'
-                                                  ? map['images'][0]
+                                                  ? '$baseImage${map['images'][0]['img_url']}'
                                                   : '';
+                                          // var firstBrandObject =
+                                          //     map['itemGroups'].firstWhere(
+                                          //       (obj) =>
+                                          //           obj["root_name"]
+                                          //               ?.toLowerCase() ==
+                                          //           "brand".toLowerCase(),
+                                          //       orElse: () => null,
+                                          //     );
+                                          // var brand =
+                                          //     firstBrandObject == null
+                                          //         ? ''
+                                          //         : firstBrandObject['name'] ??
+                                          //             '';
                                           var firstBrandObject =
                                               map['itemGroups'].firstWhere(
                                                 (obj) =>
@@ -368,7 +385,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             'combo_image': '',
                                             'combo_brand': '',
                                             'title': '',
-                                            'isImageList': true,
+                                            'isImageList': false,
                                             'note': '',
                                             'image': '',
                                           };
@@ -394,7 +411,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                               item['item_description'];
                                           var combosmap =
                                               quotationCont
-                                                  .combosMap[item['combo_id']
+                                                  .combosMap[item['combo']
                                                   .toString()];
                                           var comboImage =
                                               '${combosmap['image']}' != '' &&
@@ -404,7 +421,6 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                           .isNotEmpty
                                                   ? '${combosmap['image']}'
                                                   : '';
-
                                           var combobrand =
                                               combosmap['brand'] ?? '';
 
@@ -432,7 +448,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             'item_brand': '',
                                             'combo_image': comboImage,
                                             'combo_brand': combobrand,
-                                            'isImageList': true,
+                                            'isImageList': false,
                                             'title': '',
                                             'image': '',
                                           };
@@ -499,6 +515,20 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                           itemsInfoPrint.add(quotationItemInfo);
                                         }
                                       }
+
+
+                                      // _saveContent();
+                                      final deltaJson = _controller.document.toDelta().toJson();
+                                      final jsonString = jsonEncode(deltaJson);
+                                        _savedContent = jsonString;
+                                      termsAndConditionsController.text = jsonString;
+
+                                      var terms =
+                                          termsAndConditionsController.text ==
+                                                  ' '
+                                              ? ' '
+                                              : termsAndConditionsController
+                                                  .text;
                                       return PrintQuotationData(
                                         header: quotationCont.selectedHeader,
                                         isPrintedAs0:
@@ -511,6 +541,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         quotationNumber:
                                             quotationCont.quotationNumber,
                                         creationDate: validityController.text,
+                                        vat: quotationCont.vat11,
+                                        fromPage: 'createQuotation',
                                         ref: refController.text,
                                         receivedUser: '',
                                         senderUser: homeController.userName,
@@ -568,6 +600,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                 quotationCont.totalQuotation,
                                               ),
                                             ),
+
                                         specialDisc: specialDisc.toString(),
                                         specialDiscount:
                                             specialDiscPercentController.text,
@@ -587,8 +620,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                 .phoneNumber[selectedCustomerIds] ??
                                             '---',
                                         clientName: clientNameController.text,
-                                        termsAndConditions:
-                                            termsAndConditionsController.text,
+                                        termsAndConditions: terms,
                                         itemsInfoPrint: itemsInfoPrint,
                                       );
                                     },
@@ -761,7 +793,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
 
                                               var itemImage =
                                                   '${map['images']}' != '[]'
-                                                      ? map['images'][0]
+                                                      ? map['images'][0]['img_url']
                                                       : '';
                                               var firstBrandObject =
                                                   map['itemGroups'].firstWhere(
@@ -829,22 +861,23 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                               );
                                               var itemDescription =
                                                   item['item_description'];
-                                              var combosmap =
+
+                                              var combosMap =
                                                   quotationCont
-                                                      .combosMap[item['combo_id']
+                                                      .combosMap[item['combo']
                                                       .toString()];
                                               var comboImage =
-                                                  '${combosmap['image']}' !=
+                                                  '${combosMap['image']}' !=
                                                               '' &&
-                                                          combosmap['image'] !=
+                                                          combosMap['image'] !=
                                                               null &&
-                                                          combosmap['image']
+                                                          combosMap['image']
                                                               .isNotEmpty
-                                                      ? '${combosmap['image']}'
+                                                      ? '${combosMap['image']}'
                                                       : '';
 
                                               var combobrand =
-                                                  combosmap['brand'] ?? '';
+                                                  combosMap['brand'] ?? '';
 
                                               itemTotal += double.parse(
                                                 '${item['item_total']}',
@@ -948,6 +981,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                               );
                                             }
                                           }
+
                                           return PrintQuotationData(
                                             header:
                                                 quotationCont.selectedHeader,
@@ -963,6 +997,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                 quotationCont.quotationNumber,
                                             creationDate:
                                                 validityController.text,
+                                            vat: quotationCont.vat11,
+                                            fromPage: 'createQuotation',
                                             ref: refController.text,
                                             receivedUser: '',
                                             senderUser: homeController.userName,
@@ -981,6 +1017,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             globalDiscount:
                                                 globalDiscPercentController
                                                     .text,
+
                                             //widget.info['globalDiscount'] ?? '0',
                                             totalPriceAfterDiscount:
                                                 quotationCont.preGlobalDisc ==
@@ -1186,533 +1223,483 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                       Text('currency'.tr),
                                       GetBuilder<ExchangeRatesController>(
                                         builder: (cont) {
-                                          return
-                                          //   CustomSearchableDropdown(hint: '',width:  homeController.isOpened.value? MediaQuery.of(context).size.width * 0.07:
-                                          //   MediaQuery.of(context).size.width * 0.1, items: cont.currenciesNamesList, onSelected: (String? val) {
-                                          //   setState(() {
-                                          //     selectedCurrency = val!;
-                                          //     var index = cont
-                                          //         .currenciesNamesList
-                                          //         .indexOf(val);
-                                          //     quotationCont.setSelectedCurrency(
-                                          //       cont.currenciesIdsList[index],
-                                          //       val,
-                                          //     );
-                                          //     quotationCont
-                                          //         .setSelectedCurrencySymbol(
-                                          //       cont.currenciesSymbolsList[index],
-                                          //     );
-                                          //     var matchedItems =
-                                          //     exchangeRatesController
-                                          //         .exchangeRatesList
-                                          //         .where(
-                                          //           (item) =>
-                                          //       item["currency"] ==
-                                          //           val,
-                                          //     );
-                                          //
-                                          //     var result =
-                                          //     matchedItems.isNotEmpty
-                                          //         ? matchedItems.reduce(
-                                          //           (a, b) =>
-                                          //       DateTime.parse(
-                                          //         a["start_date"],
-                                          //       ).isAfter(
-                                          //         DateTime.parse(
-                                          //           b["start_date"],
-                                          //         ),
-                                          //       )
-                                          //           ? a
-                                          //           : b,
-                                          //     )
-                                          //         : null;
-                                          //     quotationCont
-                                          //         .setExchangeRateForSelectedCurrency(
-                                          //       result != null
-                                          //           ? '${result["exchange_rate"]}'
-                                          //           : '1',
-                                          //     );
-                                          //   });
-                                          //   var keys =
-                                          //   quotationCont
-                                          //       .unitPriceControllers
-                                          //       .keys
-                                          //       .toList();
-                                          //   for (
-                                          //   int i = 0;
-                                          //   i <
-                                          //       quotationCont
-                                          //           .unitPriceControllers
-                                          //           .length;
-                                          //   i++
-                                          //   ) {
-                                          //     var selectedItemId =
-                                          //         '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
-                                          //     if (selectedItemId != '') {
-                                          //       if (quotationCont
-                                          //           .itemsPricesCurrencies[selectedItemId] ==
-                                          //           val) {
-                                          //         quotationCont
-                                          //             .unitPriceControllers[keys[i]]!
-                                          //             .text = quotationCont
-                                          //             .itemUnitPrice[selectedItemId]
-                                          //             .toString();
-                                          //       } else if (quotationCont
-                                          //           .selectedCurrencyName ==
-                                          //           'USD' &&
-                                          //           quotationCont
-                                          //               .itemsPricesCurrencies[selectedItemId] !=
-                                          //               val) {
-                                          //         var matchedItems =
-                                          //         exchangeRatesController
-                                          //             .exchangeRatesList
-                                          //             .where(
-                                          //               (item) =>
-                                          //           item["currency"] ==
-                                          //               quotationCont
-                                          //                   .itemsPricesCurrencies[selectedItemId],
-                                          //         );
-                                          //
-                                          //         var result =
-                                          //         matchedItems.isNotEmpty
-                                          //             ? matchedItems.reduce(
-                                          //               (a, b) =>
-                                          //           DateTime.parse(
-                                          //             a["start_date"],
-                                          //           ).isAfter(
-                                          //             DateTime.parse(
-                                          //               b["start_date"],
-                                          //             ),
-                                          //           )
-                                          //               ? a
-                                          //               : b,
-                                          //         )
-                                          //             : null;
-                                          //         var divider = '1';
-                                          //         if (result != null) {
-                                          //           divider =
-                                          //               result["exchange_rate"]
-                                          //                   .toString();
-                                          //         }
-                                          //         quotationCont
-                                          //             .unitPriceControllers[keys[i]]!
-                                          //             .text =
-                                          //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                          //       } else if (quotationCont
-                                          //           .selectedCurrencyName !=
-                                          //           'USD' &&
-                                          //           quotationCont
-                                          //               .itemsPricesCurrencies[selectedItemId] ==
-                                          //               'USD') {
-                                          //         quotationCont
-                                          //             .unitPriceControllers[keys[i]]!
-                                          //             .text =
-                                          //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                          //       } else {
-                                          //         var matchedItems =
-                                          //         exchangeRatesController
-                                          //             .exchangeRatesList
-                                          //             .where(
-                                          //               (item) =>
-                                          //           item["currency"] ==
-                                          //               quotationCont
-                                          //                   .itemsPricesCurrencies[selectedItemId],
-                                          //         );
-                                          //
-                                          //         var result =
-                                          //         matchedItems.isNotEmpty
-                                          //             ? matchedItems.reduce(
-                                          //               (a, b) =>
-                                          //           DateTime.parse(
-                                          //             a["start_date"],
-                                          //           ).isAfter(
-                                          //             DateTime.parse(
-                                          //               b["start_date"],
-                                          //             ),
-                                          //           )
-                                          //               ? a
-                                          //               : b,
-                                          //         )
-                                          //             : null;
-                                          //         var divider = '1';
-                                          //         if (result != null) {
-                                          //           divider =
-                                          //               result["exchange_rate"]
-                                          //                   .toString();
-                                          //         }
-                                          //         var usdPrice =
-                                          //             '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                          //         quotationCont
-                                          //             .unitPriceControllers[keys[i]]!
-                                          //             .text =
-                                          //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                          //       }
-                                          //       if (!quotationCont
-                                          //           .isBeforeVatPrices) {
-                                          //         var taxRate =
-                                          //             double.parse(
-                                          //               quotationCont
-                                          //                   .itemsVats[selectedItemId],
-                                          //             ) /
-                                          //                 100.0;
-                                          //         var taxValue =
-                                          //             taxRate *
-                                          //                 double.parse(
-                                          //                   quotationCont
-                                          //                       .unitPriceControllers[keys[i]]!
-                                          //                       .text,
-                                          //                 );
-                                          //
-                                          //         quotationCont
-                                          //             .unitPriceControllers[keys[i]]!
-                                          //             .text =
-                                          //         '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
-                                          //       }
-                                          //       quotationCont
-                                          //           .unitPriceControllers[keys[i]]!
-                                          //           .text = double.parse(
-                                          //         quotationCont
-                                          //             .unitPriceControllers[keys[i]]!
-                                          //             .text,
-                                          //       ).toStringAsFixed(2);
-                                          //       var totalLine =
-                                          //           '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-                                          //
-                                          //       quotationCont
-                                          //           .setEnteredUnitPriceInQuotation(
-                                          //         keys[i],
-                                          //         quotationCont
-                                          //             .unitPriceControllers[keys[i]]!
-                                          //             .text,
-                                          //       );
-                                          //       quotationCont
-                                          //           .setMainTotalInQuotation(
-                                          //         keys[i],
-                                          //         totalLine,
-                                          //       );
-                                          //       quotationCont.getTotalItems();
-                                          //     }
-                                          //   }
-                                          //   var comboKeys =
-                                          //   quotationCont
-                                          //       .combosPriceControllers
-                                          //       .keys
-                                          //       .toList();
-                                          //   for (
-                                          //   int i = 0;
-                                          //   i <
-                                          //       quotationCont
-                                          //           .combosPriceControllers
-                                          //           .length;
-                                          //   i++
-                                          //   ) {
-                                          //     var selectedComboId =
-                                          //         '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
-                                          //     if (selectedComboId != '') {
-                                          //       var ind = quotationCont
-                                          //           .combosIdsList
-                                          //           .indexOf(selectedComboId);
-                                          //       if (quotationCont
-                                          //           .combosPricesCurrencies[selectedComboId] ==
-                                          //           quotationCont
-                                          //               .selectedCurrencyName) {
-                                          //         quotationCont
-                                          //             .combosPriceControllers[comboKeys[i]]!
-                                          //             .text = quotationCont
-                                          //             .combosPricesList[ind]
-                                          //             .toString();
-                                          //       } else if (quotationCont
-                                          //           .selectedCurrencyName ==
-                                          //           'USD' &&
-                                          //           quotationCont
-                                          //               .combosPricesCurrencies[selectedComboId] !=
-                                          //               quotationCont
-                                          //                   .selectedCurrencyName) {
-                                          //         var matchedItems =
-                                          //         exchangeRatesController
-                                          //             .exchangeRatesList
-                                          //             .where(
-                                          //               (item) =>
-                                          //           item["currency"] ==
-                                          //               quotationCont
-                                          //                   .combosPricesCurrencies[selectedComboId],
-                                          //         );
-                                          //
-                                          //         var result =
-                                          //         matchedItems.isNotEmpty
-                                          //             ? matchedItems.reduce(
-                                          //               (a, b) =>
-                                          //           DateTime.parse(
-                                          //             a["start_date"],
-                                          //           ).isAfter(
-                                          //             DateTime.parse(
-                                          //               b["start_date"],
-                                          //             ),
-                                          //           )
-                                          //               ? a
-                                          //               : b,
-                                          //         )
-                                          //             : null;
-                                          //         var divider = '1';
-                                          //         if (result != null) {
-                                          //           divider =
-                                          //               result["exchange_rate"]
-                                          //                   .toString();
-                                          //         }
-                                          //         quotationCont
-                                          //             .combosPriceControllers[comboKeys[i]]!
-                                          //             .text =
-                                          //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                                          //       } else if (quotationCont
-                                          //           .selectedCurrencyName !=
-                                          //           'USD' &&
-                                          //           quotationCont
-                                          //               .combosPricesCurrencies[selectedComboId] ==
-                                          //               'USD') {
-                                          //         quotationCont
-                                          //             .combosPriceControllers[comboKeys[i]]!
-                                          //             .text =
-                                          //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                          //       } else {
-                                          //         var matchedItems =
-                                          //         exchangeRatesController
-                                          //             .exchangeRatesList
-                                          //             .where(
-                                          //               (item) =>
-                                          //           item["currency"] ==
-                                          //               quotationCont
-                                          //                   .combosPricesCurrencies[selectedComboId],
-                                          //         );
-                                          //
-                                          //         var result =
-                                          //         matchedItems.isNotEmpty
-                                          //             ? matchedItems.reduce(
-                                          //               (a, b) =>
-                                          //           DateTime.parse(
-                                          //             a["start_date"],
-                                          //           ).isAfter(
-                                          //             DateTime.parse(
-                                          //               b["start_date"],
-                                          //             ),
-                                          //           )
-                                          //               ? a
-                                          //               : b,
-                                          //         )
-                                          //             : null;
-                                          //         var divider = '1';
-                                          //         if (result != null) {
-                                          //           divider =
-                                          //               result["exchange_rate"]
-                                          //                   .toString();
-                                          //         }
-                                          //         var usdPrice =
-                                          //             '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                                          //         quotationCont
-                                          //             .combosPriceControllers[comboKeys[i]]!
-                                          //             .text =
-                                          //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                          //       }
-                                          //       quotationCont
-                                          //           .combosPriceControllers[comboKeys[i]]!
-                                          //           .text =
-                                          //       '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
-                                          //
-                                          //       quotationCont
-                                          //           .combosPriceControllers[comboKeys[i]]!
-                                          //           .text = double.parse(
-                                          //         quotationCont
-                                          //             .combosPriceControllers[comboKeys[i]]!
-                                          //             .text,
-                                          //       ).toStringAsFixed(2);
-                                          //       var totalLine =
-                                          //           '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-                                          //       quotationCont
-                                          //           .setEnteredQtyInQuotation(
-                                          //         comboKeys[i],
-                                          //         quotationCont
-                                          //             .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
-                                          //       );
-                                          //       quotationCont
-                                          //           .setMainTotalInQuotation(
-                                          //         comboKeys[i],
-                                          //         totalLine,
-                                          //       );
-                                          //       // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
-                                          //       quotationCont.getTotalItems();
-                                          //
-                                          //       quotationCont
-                                          //           .setEnteredUnitPriceInQuotation(
-                                          //         comboKeys[i],
-                                          //         quotationCont
-                                          //             .combosPriceControllers[comboKeys[i]]!
-                                          //             .text,
-                                          //       );
-                                          //       quotationCont
-                                          //           .setMainTotalInQuotation(
-                                          //         comboKeys[i],
-                                          //         totalLine,
-                                          //       );
-                                          //       quotationCont.getTotalItems();
-                                          //     }
-                                          //   }
-                                          // });
-                                          DropdownMenu<String>(
-                                            width:
-                                                homeController.isOpened.value
-                                                    ? MediaQuery.of(
-                                                          context,
-                                                        ).size.width *
-                                                        0.07
-                                                    : MediaQuery.of(
-                                                          context,
-                                                        ).size.width *
-                                                        0.1,
-                                            // requestFocusOnTap: false,
-                                            enableSearch: true,
-                                            controller: currencyController,
-                                            hintText: '',
-                                            textStyle: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                            inputDecorationTheme: InputDecorationTheme(
-                                              isDense: true,
-                                              // filled: true,
-                                              hintStyle: const TextStyle(
-                                                fontSize: 12,
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                              contentPadding:
-                                                  const EdgeInsets.fromLTRB(
-                                                    20,
-                                                    0,
-                                                    25,
-                                                    5,
+                                          return cont.isExchangeRatesFetched
+                                              ?
+                                              //   CustomSearchableDropdown(hint: '',width:  homeController.isOpened.value? MediaQuery.of(context).size.width * 0.07:
+                                              //   MediaQuery.of(context).size.width * 0.1, items: cont.currenciesNamesList, onSelected: (String? val) {
+                                              //   setState(() {
+                                              //     selectedCurrency = val!;
+                                              //     var index = cont
+                                              //         .currenciesNamesList
+                                              //         .indexOf(val);
+                                              //     quotationCont.setSelectedCurrency(
+                                              //       cont.currenciesIdsList[index],
+                                              //       val,
+                                              //     );
+                                              //     quotationCont
+                                              //         .setSelectedCurrencySymbol(
+                                              //       cont.currenciesSymbolsList[index],
+                                              //     );
+                                              //     var matchedItems =
+                                              //     exchangeRatesController
+                                              //         .exchangeRatesList
+                                              //         .where(
+                                              //           (item) =>
+                                              //       item["currency"] ==
+                                              //           val,
+                                              //     );
+                                              //
+                                              //     var result =
+                                              //     matchedItems.isNotEmpty
+                                              //         ? matchedItems.reduce(
+                                              //           (a, b) =>
+                                              //       DateTime.parse(
+                                              //         a["start_date"],
+                                              //       ).isAfter(
+                                              //         DateTime.parse(
+                                              //           b["start_date"],
+                                              //         ),
+                                              //       )
+                                              //           ? a
+                                              //           : b,
+                                              //     )
+                                              //         : null;
+                                              //     quotationCont
+                                              //         .setExchangeRateForSelectedCurrency(
+                                              //       result != null
+                                              //           ? '${result["exchange_rate"]}'
+                                              //           : '1',
+                                              //     );
+                                              //   });
+                                              //   var keys =
+                                              //   quotationCont
+                                              //       .unitPriceControllers
+                                              //       .keys
+                                              //       .toList();
+                                              //   for (
+                                              //   int i = 0;
+                                              //   i <
+                                              //       quotationCont
+                                              //           .unitPriceControllers
+                                              //           .length;
+                                              //   i++
+                                              //   ) {
+                                              //     var selectedItemId =
+                                              //         '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
+                                              //     if (selectedItemId != '') {
+                                              //       if (quotationCont
+                                              //           .itemsPricesCurrencies[selectedItemId] ==
+                                              //           val) {
+                                              //         quotationCont
+                                              //             .unitPriceControllers[keys[i]]!
+                                              //             .text = quotationCont
+                                              //             .itemUnitPrice[selectedItemId]
+                                              //             .toString();
+                                              //       } else if (quotationCont
+                                              //           .selectedCurrencyName ==
+                                              //           'USD' &&
+                                              //           quotationCont
+                                              //               .itemsPricesCurrencies[selectedItemId] !=
+                                              //               val) {
+                                              //         var matchedItems =
+                                              //         exchangeRatesController
+                                              //             .exchangeRatesList
+                                              //             .where(
+                                              //               (item) =>
+                                              //           item["currency"] ==
+                                              //               quotationCont
+                                              //                   .itemsPricesCurrencies[selectedItemId],
+                                              //         );
+                                              //
+                                              //         var result =
+                                              //         matchedItems.isNotEmpty
+                                              //             ? matchedItems.reduce(
+                                              //               (a, b) =>
+                                              //           DateTime.parse(
+                                              //             a["start_date"],
+                                              //           ).isAfter(
+                                              //             DateTime.parse(
+                                              //               b["start_date"],
+                                              //             ),
+                                              //           )
+                                              //               ? a
+                                              //               : b,
+                                              //         )
+                                              //             : null;
+                                              //         var divider = '1';
+                                              //         if (result != null) {
+                                              //           divider =
+                                              //               result["exchange_rate"]
+                                              //                   .toString();
+                                              //         }
+                                              //         quotationCont
+                                              //             .unitPriceControllers[keys[i]]!
+                                              //             .text =
+                                              //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                              //       } else if (quotationCont
+                                              //           .selectedCurrencyName !=
+                                              //           'USD' &&
+                                              //           quotationCont
+                                              //               .itemsPricesCurrencies[selectedItemId] ==
+                                              //               'USD') {
+                                              //         quotationCont
+                                              //             .unitPriceControllers[keys[i]]!
+                                              //             .text =
+                                              //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                              //       } else {
+                                              //         var matchedItems =
+                                              //         exchangeRatesController
+                                              //             .exchangeRatesList
+                                              //             .where(
+                                              //               (item) =>
+                                              //           item["currency"] ==
+                                              //               quotationCont
+                                              //                   .itemsPricesCurrencies[selectedItemId],
+                                              //         );
+                                              //
+                                              //         var result =
+                                              //         matchedItems.isNotEmpty
+                                              //             ? matchedItems.reduce(
+                                              //               (a, b) =>
+                                              //           DateTime.parse(
+                                              //             a["start_date"],
+                                              //           ).isAfter(
+                                              //             DateTime.parse(
+                                              //               b["start_date"],
+                                              //             ),
+                                              //           )
+                                              //               ? a
+                                              //               : b,
+                                              //         )
+                                              //             : null;
+                                              //         var divider = '1';
+                                              //         if (result != null) {
+                                              //           divider =
+                                              //               result["exchange_rate"]
+                                              //                   .toString();
+                                              //         }
+                                              //         var usdPrice =
+                                              //             '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                              //         quotationCont
+                                              //             .unitPriceControllers[keys[i]]!
+                                              //             .text =
+                                              //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                              //       }
+                                              //       if (!quotationCont
+                                              //           .isBeforeVatPrices) {
+                                              //         var taxRate =
+                                              //             double.parse(
+                                              //               quotationCont
+                                              //                   .itemsVats[selectedItemId],
+                                              //             ) /
+                                              //                 100.0;
+                                              //         var taxValue =
+                                              //             taxRate *
+                                              //                 double.parse(
+                                              //                   quotationCont
+                                              //                       .unitPriceControllers[keys[i]]!
+                                              //                       .text,
+                                              //                 );
+                                              //
+                                              //         quotationCont
+                                              //             .unitPriceControllers[keys[i]]!
+                                              //             .text =
+                                              //         '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                              //       }
+                                              //       quotationCont
+                                              //           .unitPriceControllers[keys[i]]!
+                                              //           .text = double.parse(
+                                              //         quotationCont
+                                              //             .unitPriceControllers[keys[i]]!
+                                              //             .text,
+                                              //       ).toStringAsFixed(2);
+                                              //       var totalLine =
+                                              //           '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                              //
+                                              //       quotationCont
+                                              //           .setEnteredUnitPriceInQuotation(
+                                              //         keys[i],
+                                              //         quotationCont
+                                              //             .unitPriceControllers[keys[i]]!
+                                              //             .text,
+                                              //       );
+                                              //       quotationCont
+                                              //           .setMainTotalInQuotation(
+                                              //         keys[i],
+                                              //         totalLine,
+                                              //       );
+                                              //       quotationCont.getTotalItems();
+                                              //     }
+                                              //   }
+                                              //   var comboKeys =
+                                              //   quotationCont
+                                              //       .combosPriceControllers
+                                              //       .keys
+                                              //       .toList();
+                                              //   for (
+                                              //   int i = 0;
+                                              //   i <
+                                              //       quotationCont
+                                              //           .combosPriceControllers
+                                              //           .length;
+                                              //   i++
+                                              //   ) {
+                                              //     var selectedComboId =
+                                              //         '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
+                                              //     if (selectedComboId != '') {
+                                              //       var ind = quotationCont
+                                              //           .combosIdsList
+                                              //           .indexOf(selectedComboId);
+                                              //       if (quotationCont
+                                              //           .combosPricesCurrencies[selectedComboId] ==
+                                              //           quotationCont
+                                              //               .selectedCurrencyName) {
+                                              //         quotationCont
+                                              //             .combosPriceControllers[comboKeys[i]]!
+                                              //             .text = quotationCont
+                                              //             .combosPricesList[ind]
+                                              //             .toString();
+                                              //       } else if (quotationCont
+                                              //           .selectedCurrencyName ==
+                                              //           'USD' &&
+                                              //           quotationCont
+                                              //               .combosPricesCurrencies[selectedComboId] !=
+                                              //               quotationCont
+                                              //                   .selectedCurrencyName) {
+                                              //         var matchedItems =
+                                              //         exchangeRatesController
+                                              //             .exchangeRatesList
+                                              //             .where(
+                                              //               (item) =>
+                                              //           item["currency"] ==
+                                              //               quotationCont
+                                              //                   .combosPricesCurrencies[selectedComboId],
+                                              //         );
+                                              //
+                                              //         var result =
+                                              //         matchedItems.isNotEmpty
+                                              //             ? matchedItems.reduce(
+                                              //               (a, b) =>
+                                              //           DateTime.parse(
+                                              //             a["start_date"],
+                                              //           ).isAfter(
+                                              //             DateTime.parse(
+                                              //               b["start_date"],
+                                              //             ),
+                                              //           )
+                                              //               ? a
+                                              //               : b,
+                                              //         )
+                                              //             : null;
+                                              //         var divider = '1';
+                                              //         if (result != null) {
+                                              //           divider =
+                                              //               result["exchange_rate"]
+                                              //                   .toString();
+                                              //         }
+                                              //         quotationCont
+                                              //             .combosPriceControllers[comboKeys[i]]!
+                                              //             .text =
+                                              //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                              //       } else if (quotationCont
+                                              //           .selectedCurrencyName !=
+                                              //           'USD' &&
+                                              //           quotationCont
+                                              //               .combosPricesCurrencies[selectedComboId] ==
+                                              //               'USD') {
+                                              //         quotationCont
+                                              //             .combosPriceControllers[comboKeys[i]]!
+                                              //             .text =
+                                              //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                              //       } else {
+                                              //         var matchedItems =
+                                              //         exchangeRatesController
+                                              //             .exchangeRatesList
+                                              //             .where(
+                                              //               (item) =>
+                                              //           item["currency"] ==
+                                              //               quotationCont
+                                              //                   .combosPricesCurrencies[selectedComboId],
+                                              //         );
+                                              //
+                                              //         var result =
+                                              //         matchedItems.isNotEmpty
+                                              //             ? matchedItems.reduce(
+                                              //               (a, b) =>
+                                              //           DateTime.parse(
+                                              //             a["start_date"],
+                                              //           ).isAfter(
+                                              //             DateTime.parse(
+                                              //               b["start_date"],
+                                              //             ),
+                                              //           )
+                                              //               ? a
+                                              //               : b,
+                                              //         )
+                                              //             : null;
+                                              //         var divider = '1';
+                                              //         if (result != null) {
+                                              //           divider =
+                                              //               result["exchange_rate"]
+                                              //                   .toString();
+                                              //         }
+                                              //         var usdPrice =
+                                              //             '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                              //         quotationCont
+                                              //             .combosPriceControllers[comboKeys[i]]!
+                                              //             .text =
+                                              //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                              //       }
+                                              //       quotationCont
+                                              //           .combosPriceControllers[comboKeys[i]]!
+                                              //           .text =
+                                              //       '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
+                                              //
+                                              //       quotationCont
+                                              //           .combosPriceControllers[comboKeys[i]]!
+                                              //           .text = double.parse(
+                                              //         quotationCont
+                                              //             .combosPriceControllers[comboKeys[i]]!
+                                              //             .text,
+                                              //       ).toStringAsFixed(2);
+                                              //       var totalLine =
+                                              //           '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                              //       quotationCont
+                                              //           .setEnteredQtyInQuotation(
+                                              //         comboKeys[i],
+                                              //         quotationCont
+                                              //             .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
+                                              //       );
+                                              //       quotationCont
+                                              //           .setMainTotalInQuotation(
+                                              //         comboKeys[i],
+                                              //         totalLine,
+                                              //       );
+                                              //       // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                                              //       quotationCont.getTotalItems();
+                                              //
+                                              //       quotationCont
+                                              //           .setEnteredUnitPriceInQuotation(
+                                              //         comboKeys[i],
+                                              //         quotationCont
+                                              //             .combosPriceControllers[comboKeys[i]]!
+                                              //             .text,
+                                              //       );
+                                              //       quotationCont
+                                              //           .setMainTotalInQuotation(
+                                              //         comboKeys[i],
+                                              //         totalLine,
+                                              //       );
+                                              //       quotationCont.getTotalItems();
+                                              //     }
+                                              //   }
+                                              // });
+                                              DropdownMenu<String>(
+                                                width:
+                                                    homeController
+                                                            .isOpened
+                                                            .value
+                                                        ? MediaQuery.of(
+                                                              context,
+                                                            ).size.width *
+                                                            0.07
+                                                        : MediaQuery.of(
+                                                              context,
+                                                            ).size.width *
+                                                            0.1,
+                                                // requestFocusOnTap: false,
+                                                enableSearch: true,
+                                                controller: currencyController,
+                                                hintText: '',
+                                                textStyle: const TextStyle(
+                                                  fontSize: 12,
+                                                ),
+                                                inputDecorationTheme: InputDecorationTheme(
+                                                  isDense: true,
+                                                  // filled: true,
+                                                  hintStyle: const TextStyle(
+                                                    fontSize: 12,
+                                                    fontStyle: FontStyle.italic,
                                                   ),
-                                              // outlineBorder: BorderSide(color: Colors.black,),
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Primary.primary
-                                                      .withAlpha(
-                                                        (0.2 * 255).toInt(),
+                                                  contentPadding:
+                                                      const EdgeInsets.fromLTRB(
+                                                        20,
+                                                        0,
+                                                        25,
+                                                        5,
                                                       ),
-                                                  width: 1,
-                                                ),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                      Radius.circular(9),
-                                                    ),
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Primary.primary
-                                                      .withAlpha(
-                                                        (0.4 * 255).toInt(),
+                                                  // outlineBorder: BorderSide(color: Colors.black,),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.2 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 1,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
                                                       ),
-                                                  width: 2,
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.4 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 2,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
+                                                      ),
                                                 ),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                      Radius.circular(9),
-                                                    ),
-                                              ),
-                                            ),
-                                            // menuStyle: ,
-                                            menuHeight: 250,
-                                            dropdownMenuEntries:
-                                                cont.currenciesNamesList.map<
-                                                  DropdownMenuEntry<String>
-                                                >((String option) {
-                                                  return DropdownMenuEntry<
-                                                    String
-                                                  >(
-                                                    value: option,
-                                                    label: option,
-                                                  );
-                                                }).toList(),
-                                            enableFilter: true,
-                                            onSelected: (String? val) {
-                                              setState(() {
-                                                selectedCurrency = val!;
-                                                var index = cont
-                                                    .currenciesNamesList
-                                                    .indexOf(val);
-                                                quotationCont.setSelectedCurrency(
-                                                  cont.currenciesIdsList[index],
-                                                  val,
-                                                );
-                                                quotationCont
-                                                    .setSelectedCurrencySymbol(
-                                                      cont.currenciesSymbolsList[index],
-                                                    );
-                                                var matchedItems =
-                                                    exchangeRatesController
-                                                        .exchangeRatesList
-                                                        .where(
-                                                          (item) =>
-                                                              item["currency"] ==
-                                                              val,
+                                                // menuStyle: ,
+                                                menuHeight: 250,
+                                                dropdownMenuEntries:
+                                                    cont.currenciesNamesList.map<
+                                                      DropdownMenuEntry<String>
+                                                    >((String option) {
+                                                      return DropdownMenuEntry<
+                                                        String
+                                                      >(
+                                                        value: option,
+                                                        label: option,
+                                                      );
+                                                    }).toList(),
+                                                enableFilter: true,
+                                                onSelected: (String? val) {
+                                                  setState(() {
+                                                    selectedCurrency = val!;
+                                                    var index = cont
+                                                        .currenciesNamesList
+                                                        .indexOf(val);
+                                                    quotationCont
+                                                        .setSelectedCurrency(
+                                                          cont.currenciesIdsList[index],
+                                                          val,
                                                         );
-
-                                                var result =
-                                                    matchedItems.isNotEmpty
-                                                        ? matchedItems.reduce(
-                                                          (a, b) =>
-                                                              DateTime.parse(
-                                                                    a["start_date"],
-                                                                  ).isAfter(
-                                                                    DateTime.parse(
-                                                                      b["start_date"],
-                                                                    ),
-                                                                  )
-                                                                  ? a
-                                                                  : b,
-                                                        )
-                                                        : null;
-                                                quotationCont
-                                                    .setExchangeRateForSelectedCurrency(
-                                                      result != null
-                                                          ? '${result["exchange_rate"]}'
-                                                          : '1',
-                                                    );
-                                              });
-                                              var keys =
-                                                  quotationCont
-                                                      .unitPriceControllers
-                                                      .keys
-                                                      .toList();
-                                              for (
-                                                int i = 0;
-                                                i <
                                                     quotationCont
-                                                        .unitPriceControllers
-                                                        .length;
-                                                i++
-                                              ) {
-                                                var selectedItemId =
-                                                    '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
-                                                if (selectedItemId != '') {
-                                                  if (quotationCont
-                                                          .itemsPricesCurrencies[selectedItemId] ==
-                                                      val) {
-                                                    quotationCont
-                                                        .unitPriceControllers[keys[i]]!
-                                                        .text = quotationCont
-                                                            .itemUnitPrice[selectedItemId]
-                                                            .toString();
-                                                  } else if (quotationCont
-                                                              .selectedCurrencyName ==
-                                                          'USD' &&
-                                                      quotationCont
-                                                              .itemsPricesCurrencies[selectedItemId] !=
-                                                          val) {
+                                                        .setSelectedCurrencySymbol(
+                                                          cont.currenciesSymbolsList[index],
+                                                        );
                                                     var matchedItems =
                                                         exchangeRatesController
                                                             .exchangeRatesList
                                                             .where(
                                                               (item) =>
                                                                   item["currency"] ==
-                                                                  quotationCont
-                                                                      .itemsPricesCurrencies[selectedItemId],
+                                                                  val,
                                                             );
 
                                                     var result =
@@ -1730,275 +1717,350 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                                       : b,
                                                             )
                                                             : null;
-                                                    var divider = '1';
-                                                    if (result != null) {
-                                                      divider =
-                                                          result["exchange_rate"]
-                                                              .toString();
-                                                    }
+
                                                     quotationCont
-                                                            .unitPriceControllers[keys[i]]!
-                                                            .text =
-                                                        '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                  } else if (quotationCont
-                                                              .selectedCurrencyName !=
-                                                          'USD' &&
+                                                        .setExchangeRateForSelectedCurrency(
+                                                          result != null
+                                                              ? '${result["exchange_rate"]}'
+                                                              : '1',
+                                                        );
+                                                  });
+
+                                                  var keys =
                                                       quotationCont
+                                                          .unitPriceControllers
+                                                          .keys
+                                                          .toList();
+                                                  for (
+                                                    int i = 0;
+                                                    i <
+                                                        quotationCont
+                                                            .unitPriceControllers
+                                                            .length;
+                                                    i++
+                                                  ) {
+                                                    var selectedItemId =
+                                                        '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
+                                                    if (selectedItemId != '') {
+                                                      if (quotationCont
                                                               .itemsPricesCurrencies[selectedItemId] ==
-                                                          'USD') {
-                                                    quotationCont
+                                                          val) {
+                                                        quotationCont
                                                             .unitPriceControllers[keys[i]]!
-                                                            .text =
-                                                        '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                  } else {
-                                                    var matchedItems =
-                                                        exchangeRatesController
-                                                            .exchangeRatesList
-                                                            .where(
-                                                              (item) =>
-                                                                  item["currency"] ==
-                                                                  quotationCont
-                                                                      .itemsPricesCurrencies[selectedItemId],
+                                                            .text = quotationCont
+                                                                .itemUnitPrice[selectedItemId]
+                                                                .toString();
+                                                      } else if (quotationCont
+                                                                  .selectedCurrencyName ==
+                                                              'USD' &&
+                                                          quotationCont
+                                                                  .itemsPricesCurrencies[selectedItemId] !=
+                                                              val) {
+                                                        var matchedItems =
+                                                            exchangeRatesController
+                                                                .exchangeRatesList
+                                                                .where(
+                                                                  (item) =>
+                                                                      item["currency"] ==
+                                                                      quotationCont
+                                                                          .itemsPricesCurrencies[selectedItemId],
+                                                                );
+
+                                                        var result =
+                                                            matchedItems
+                                                                    .isNotEmpty
+                                                                ? matchedItems.reduce(
+                                                                  (a, b) =>
+                                                                      DateTime.parse(
+                                                                            a["start_date"],
+                                                                          ).isAfter(
+                                                                            DateTime.parse(
+                                                                              b["start_date"],
+                                                                            ),
+                                                                          )
+                                                                          ? a
+                                                                          : b,
+                                                                )
+                                                                : null;
+                                                        var divider = '1';
+                                                        if (result != null) {
+                                                          divider =
+                                                              result["exchange_rate"]
+                                                                  .toString();
+                                                        }
+                                                        quotationCont
+                                                                .unitPriceControllers[keys[i]]!
+                                                                .text =
+                                                            '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                      } else if (quotationCont
+                                                                  .selectedCurrencyName !=
+                                                              'USD' &&
+                                                          quotationCont
+                                                                  .itemsPricesCurrencies[selectedItemId] ==
+                                                              'USD') {
+                                                        quotationCont
+                                                                .unitPriceControllers[keys[i]]!
+                                                                .text =
+                                                            '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                      } else {
+                                                        var matchedItems =
+                                                            exchangeRatesController
+                                                                .exchangeRatesList
+                                                                .where(
+                                                                  (item) =>
+                                                                      item["currency"] ==
+                                                                      quotationCont
+                                                                          .itemsPricesCurrencies[selectedItemId],
+                                                                );
+
+                                                        var result =
+                                                            matchedItems
+                                                                    .isNotEmpty
+                                                                ? matchedItems.reduce(
+                                                                  (a, b) =>
+                                                                      DateTime.parse(
+                                                                            a["start_date"],
+                                                                          ).isAfter(
+                                                                            DateTime.parse(
+                                                                              b["start_date"],
+                                                                            ),
+                                                                          )
+                                                                          ? a
+                                                                          : b,
+                                                                )
+                                                                : null;
+                                                        var divider = '1';
+                                                        if (result != null) {
+                                                          divider =
+                                                              result["exchange_rate"]
+                                                                  .toString();
+                                                        }
+                                                        var usdPrice =
+                                                            '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                        quotationCont
+                                                                .unitPriceControllers[keys[i]]!
+                                                                .text =
+                                                            '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                      }
+                                                      if (!quotationCont
+                                                          .isBeforeVatPrices) {
+                                                        var taxRate =
+                                                            double.parse(
+                                                              quotationCont
+                                                                  .itemsVats[selectedItemId],
+                                                            ) /
+                                                            100.0;
+                                                        var taxValue =
+                                                            taxRate *
+                                                            double.parse(
+                                                              quotationCont
+                                                                  .unitPriceControllers[keys[i]]!
+                                                                  .text,
                                                             );
 
-                                                    var result =
-                                                        matchedItems.isNotEmpty
-                                                            ? matchedItems.reduce(
-                                                              (a, b) =>
-                                                                  DateTime.parse(
-                                                                        a["start_date"],
-                                                                      ).isAfter(
-                                                                        DateTime.parse(
-                                                                          b["start_date"],
-                                                                        ),
-                                                                      )
-                                                                      ? a
-                                                                      : b,
-                                                            )
-                                                            : null;
-                                                    var divider = '1';
-                                                    if (result != null) {
-                                                      divider =
-                                                          result["exchange_rate"]
-                                                              .toString();
-                                                    }
-                                                    var usdPrice =
-                                                        '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                    quotationCont
-                                                            .unitPriceControllers[keys[i]]!
-                                                            .text =
-                                                        '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                  }
-                                                  if (!quotationCont
-                                                      .isBeforeVatPrices) {
-                                                    var taxRate =
-                                                        double.parse(
-                                                          quotationCont
-                                                              .itemsVats[selectedItemId],
-                                                        ) /
-                                                        100.0;
-                                                    var taxValue =
-                                                        taxRate *
-                                                        double.parse(
-                                                          quotationCont
-                                                              .unitPriceControllers[keys[i]]!
-                                                              .text,
-                                                        );
-
-                                                    quotationCont
-                                                            .unitPriceControllers[keys[i]]!
-                                                            .text =
-                                                        '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
-                                                  }
-                                                  quotationCont
-                                                      .unitPriceControllers[keys[i]]!
-                                                      .text = double.parse(
-                                                    quotationCont
-                                                        .unitPriceControllers[keys[i]]!
-                                                        .text,
-                                                  ).toStringAsFixed(2);
-                                                  var totalLine =
-                                                      '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-
-                                                  quotationCont
-                                                      .setEnteredUnitPriceInQuotation(
-                                                        keys[i],
+                                                        quotationCont
+                                                                .unitPriceControllers[keys[i]]!
+                                                                .text =
+                                                            '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                      }
+                                                      quotationCont
+                                                          .unitPriceControllers[keys[i]]!
+                                                          .text = double.parse(
                                                         quotationCont
                                                             .unitPriceControllers[keys[i]]!
                                                             .text,
-                                                      );
-                                                  quotationCont
-                                                      .setMainTotalInQuotation(
-                                                        keys[i],
-                                                        totalLine,
-                                                      );
-                                                  quotationCont.getTotalItems();
-                                                }
-                                              }
-                                              var comboKeys =
-                                                  quotationCont
-                                                      .combosPriceControllers
-                                                      .keys
-                                                      .toList();
-                                              for (
-                                                int i = 0;
-                                                i <
-                                                    quotationCont
-                                                        .combosPriceControllers
-                                                        .length;
-                                                i++
-                                              ) {
-                                                var selectedComboId =
-                                                    '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
-                                                if (selectedComboId != '') {
-                                                  var ind = quotationCont
-                                                      .combosIdsList
-                                                      .indexOf(selectedComboId);
-                                                  if (quotationCont
-                                                          .combosPricesCurrencies[selectedComboId] ==
+                                                      ).toStringAsFixed(2);
+                                                      var totalLine =
+                                                          '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+
                                                       quotationCont
-                                                          .selectedCurrencyName) {
-                                                    quotationCont
-                                                        .combosPriceControllers[comboKeys[i]]!
-                                                        .text = quotationCont
-                                                            .combosPricesList[ind]
-                                                            .toString();
-                                                  } else if (quotationCont
-                                                              .selectedCurrencyName ==
-                                                          'USD' &&
+                                                          .setEnteredUnitPriceInQuotation(
+                                                            keys[i],
+                                                            quotationCont
+                                                                .unitPriceControllers[keys[i]]!
+                                                                .text,
+                                                          );
                                                       quotationCont
-                                                              .combosPricesCurrencies[selectedComboId] !=
+                                                          .setMainTotalInQuotation(
+                                                            keys[i],
+                                                            totalLine,
+                                                          );
+                                                      quotationCont
+                                                          .getTotalItems();
+                                                    }
+                                                  }
+
+                                                  var comboKeys =
+                                                      quotationCont
+                                                          .combosPriceControllers
+                                                          .keys
+                                                          .toList();
+                                                  for (
+                                                    int i = 0;
+                                                    i <
+                                                        quotationCont
+                                                            .combosPriceControllers
+                                                            .length;
+                                                    i++
+                                                  ) {
+                                                    var selectedComboId =
+                                                        '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
+                                                    if (selectedComboId != '') {
+                                                      var ind = quotationCont
+                                                          .combosIdsList
+                                                          .indexOf(
+                                                            selectedComboId,
+                                                          );
+                                                      if (quotationCont
+                                                              .combosPricesCurrencies[selectedComboId] ==
                                                           quotationCont
                                                               .selectedCurrencyName) {
-                                                    var matchedItems =
-                                                        exchangeRatesController
-                                                            .exchangeRatesList
-                                                            .where(
-                                                              (item) =>
-                                                                  item["currency"] ==
-                                                                  quotationCont
-                                                                      .combosPricesCurrencies[selectedComboId],
-                                                            );
-
-                                                    var result =
-                                                        matchedItems.isNotEmpty
-                                                            ? matchedItems.reduce(
-                                                              (a, b) =>
-                                                                  DateTime.parse(
-                                                                        a["start_date"],
-                                                                      ).isAfter(
-                                                                        DateTime.parse(
-                                                                          b["start_date"],
-                                                                        ),
-                                                                      )
-                                                                      ? a
-                                                                      : b,
-                                                            )
-                                                            : null;
-                                                    var divider = '1';
-                                                    if (result != null) {
-                                                      divider =
-                                                          result["exchange_rate"]
-                                                              .toString();
-                                                    }
-                                                    quotationCont
-                                                            .combosPriceControllers[comboKeys[i]]!
-                                                            .text =
-                                                        '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                                                  } else if (quotationCont
-                                                              .selectedCurrencyName !=
-                                                          'USD' &&
-                                                      quotationCont
-                                                              .combosPricesCurrencies[selectedComboId] ==
-                                                          'USD') {
-                                                    quotationCont
-                                                            .combosPriceControllers[comboKeys[i]]!
-                                                            .text =
-                                                        '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                  } else {
-                                                    var matchedItems =
-                                                        exchangeRatesController
-                                                            .exchangeRatesList
-                                                            .where(
-                                                              (item) =>
-                                                                  item["currency"] ==
-                                                                  quotationCont
-                                                                      .combosPricesCurrencies[selectedComboId],
-                                                            );
-
-                                                    var result =
-                                                        matchedItems.isNotEmpty
-                                                            ? matchedItems.reduce(
-                                                              (a, b) =>
-                                                                  DateTime.parse(
-                                                                        a["start_date"],
-                                                                      ).isAfter(
-                                                                        DateTime.parse(
-                                                                          b["start_date"],
-                                                                        ),
-                                                                      )
-                                                                      ? a
-                                                                      : b,
-                                                            )
-                                                            : null;
-                                                    var divider = '1';
-                                                    if (result != null) {
-                                                      divider =
-                                                          result["exchange_rate"]
-                                                              .toString();
-                                                    }
-                                                    var usdPrice =
-                                                        '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                                                    quotationCont
-                                                            .combosPriceControllers[comboKeys[i]]!
-                                                            .text =
-                                                        '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                  }
-                                                  quotationCont
-                                                          .combosPriceControllers[comboKeys[i]]!
-                                                          .text =
-                                                      '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
-
-                                                  quotationCont
-                                                      .combosPriceControllers[comboKeys[i]]!
-                                                      .text = double.parse(
-                                                    quotationCont
-                                                        .combosPriceControllers[comboKeys[i]]!
-                                                        .text,
-                                                  ).toStringAsFixed(2);
-                                                  var totalLine =
-                                                      '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-                                                  quotationCont
-                                                      .setEnteredQtyInQuotation(
-                                                        comboKeys[i],
                                                         quotationCont
-                                                            .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
-                                                      );
-                                                  quotationCont
-                                                      .setMainTotalInQuotation(
-                                                        comboKeys[i],
-                                                        totalLine,
-                                                      );
-                                                  // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
-                                                  quotationCont.getTotalItems();
+                                                            .combosPriceControllers[comboKeys[i]]!
+                                                            .text = quotationCont
+                                                                .combosPricesList[ind]
+                                                                .toString();
+                                                      } else if (quotationCont
+                                                                  .selectedCurrencyName ==
+                                                              'USD' &&
+                                                          quotationCont
+                                                                  .combosPricesCurrencies[selectedComboId] !=
+                                                              quotationCont
+                                                                  .selectedCurrencyName) {
+                                                        var matchedItems =
+                                                            exchangeRatesController
+                                                                .exchangeRatesList
+                                                                .where(
+                                                                  (item) =>
+                                                                      item["currency"] ==
+                                                                      quotationCont
+                                                                          .combosPricesCurrencies[selectedComboId],
+                                                                );
 
-                                                  quotationCont
-                                                      .setEnteredUnitPriceInQuotation(
-                                                        comboKeys[i],
+                                                        var result =
+                                                            matchedItems
+                                                                    .isNotEmpty
+                                                                ? matchedItems.reduce(
+                                                                  (a, b) =>
+                                                                      DateTime.parse(
+                                                                            a["start_date"],
+                                                                          ).isAfter(
+                                                                            DateTime.parse(
+                                                                              b["start_date"],
+                                                                            ),
+                                                                          )
+                                                                          ? a
+                                                                          : b,
+                                                                )
+                                                                : null;
+                                                        var divider = '1';
+                                                        if (result != null) {
+                                                          divider =
+                                                              result["exchange_rate"]
+                                                                  .toString();
+                                                        }
+                                                        quotationCont
+                                                                .combosPriceControllers[comboKeys[i]]!
+                                                                .text =
+                                                            '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                      } else if (quotationCont
+                                                                  .selectedCurrencyName !=
+                                                              'USD' &&
+                                                          quotationCont
+                                                                  .combosPricesCurrencies[selectedComboId] ==
+                                                              'USD') {
+                                                        quotationCont
+                                                                .combosPriceControllers[comboKeys[i]]!
+                                                                .text =
+                                                            '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                      } else {
+                                                        var matchedItems =
+                                                            exchangeRatesController
+                                                                .exchangeRatesList
+                                                                .where(
+                                                                  (item) =>
+                                                                      item["currency"] ==
+                                                                      quotationCont
+                                                                          .combosPricesCurrencies[selectedComboId],
+                                                                );
+
+                                                        var result =
+                                                            matchedItems
+                                                                    .isNotEmpty
+                                                                ? matchedItems.reduce(
+                                                                  (a, b) =>
+                                                                      DateTime.parse(
+                                                                            a["start_date"],
+                                                                          ).isAfter(
+                                                                            DateTime.parse(
+                                                                              b["start_date"],
+                                                                            ),
+                                                                          )
+                                                                          ? a
+                                                                          : b,
+                                                                )
+                                                                : null;
+                                                        var divider = '1';
+                                                        if (result != null) {
+                                                          divider =
+                                                              result["exchange_rate"]
+                                                                  .toString();
+                                                        }
+                                                        var usdPrice =
+                                                            '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                        quotationCont
+                                                                .combosPriceControllers[comboKeys[i]]!
+                                                                .text =
+                                                            '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                      }
+                                                      quotationCont
+                                                              .combosPriceControllers[comboKeys[i]]!
+                                                              .text =
+                                                          '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
+
+                                                      quotationCont
+                                                          .combosPriceControllers[comboKeys[i]]!
+                                                          .text = double.parse(
                                                         quotationCont
                                                             .combosPriceControllers[comboKeys[i]]!
                                                             .text,
-                                                      );
-                                                  quotationCont
-                                                      .setMainTotalInQuotation(
-                                                        comboKeys[i],
-                                                        totalLine,
-                                                      );
-                                                  quotationCont.getTotalItems();
-                                                }
-                                              }
-                                            },
-                                          );
+                                                      ).toStringAsFixed(2);
+                                                      var totalLine =
+                                                          '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                                      quotationCont
+                                                          .setEnteredQtyInQuotation(
+                                                            comboKeys[i],
+                                                            quotationCont
+                                                                .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
+                                                          );
+                                                      quotationCont
+                                                          .setMainTotalInQuotation(
+                                                            comboKeys[i],
+                                                            totalLine,
+                                                          );
+                                                      // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                                                      quotationCont
+                                                          .getTotalItems();
+
+                                                      quotationCont
+                                                          .setEnteredUnitPriceInQuotation(
+                                                            comboKeys[i],
+                                                            quotationCont
+                                                                .combosPriceControllers[comboKeys[i]]!
+                                                                .text,
+                                                          );
+                                                      quotationCont
+                                                          .setMainTotalInQuotation(
+                                                            comboKeys[i],
+                                                            totalLine,
+                                                          );
+                                                      quotationCont
+                                                          .getTotalItems();
+                                                    }
+                                                  }
+                                                },
+                                              )
+                                              : loading();
                                         },
                                       ),
                                     ],
@@ -3255,6 +3317,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                     .selectedHeaderIndex,
                                             onChanged: (value) {
                                               setState(() {
+                                                quotationCont.selectedHeader=quotationCont
+                                                    .headersList[0];
                                                 quotationCont
                                                         .selectedHeaderIndex =
                                                     value!;
@@ -3282,6 +3346,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                     .selectedHeaderIndex,
                                             onChanged: (value) {
                                               setState(() {
+                                                quotationCont.selectedHeader=quotationCont
+                                                    .headersList[1];
                                                 quotationCont
                                                         .selectedHeaderIndex =
                                                     value!;

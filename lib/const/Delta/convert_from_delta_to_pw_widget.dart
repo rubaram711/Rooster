@@ -61,7 +61,7 @@ pw.Widget quillDeltaToPdfWidget(String jsonDelta) {
             pw.Row(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('$bullet ', style: pw.TextStyle(fontSize: 7)),
+                pw.Text('$bullet ', style: pw.TextStyle(fontSize: 11)),
                 pw.Expanded(child: lineWidget),
               ],
             ),
@@ -97,7 +97,7 @@ pw.Widget quillDeltaToPdfWidget(String jsonDelta) {
         pw.Row(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text('$bullet ', style: pw.TextStyle(fontSize: 7)),
+            pw.Text('$bullet ', style: pw.TextStyle(fontSize: 11)),
             pw.Expanded(child: lineWidget),
           ],
         ),
@@ -121,29 +121,29 @@ pw.Widget quillDeltaToPdfWidget(String jsonDelta) {
 }
 
 double _getFontSize(dynamic size) {
-  if (size == null) return 7;
+  if (size == null) return 11;
   if (size is num) return size.toDouble();
   switch (size) {
     case 'small':
-      return 5;
-    case 'large':
       return 9;
-    case 'huge':
+    case 'large':
       return 13;
+    case 'huge':
+      return 17;
     default:
-      return 7;
+      return 11;
   }
 }
 
 double _getHeaderFontSize(int? level) {
   switch (level) {
     case 1:
-      return 19;
+      return 23;
     case 2:
-      return 15;
+      return 19;
     case 3:
-      return 13;
+      return 17;
     default:
-      return 9;
+      return 13;
   }
 }

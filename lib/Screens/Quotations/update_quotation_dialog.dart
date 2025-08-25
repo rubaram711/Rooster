@@ -224,8 +224,6 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   void initState() {
     quotationController.rowsInListViewInQuotation = {};
     quotationController.orderedKeys = [];
-    print('selected');
-     print(  widget.info['orderLines']);
     quotationController.quotationCounter = 0;
     checkVatExempt();
     getCurrency();
@@ -360,7 +358,6 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
         quotationController.selectedQuotationData['orderLines'][i]['image'];
       }
     }
-    print('rowsInListViewInQuotation ${quotationController.rowsInListViewInQuotation}');
     //
     // for (int i = 0; i < widget.info['orderLines'].length; i++) {
     //   quotationController.orderedKeys.add(i + 1);
@@ -4490,11 +4487,10 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
   bool isImageFetched = false; // Add loading state
   double listViewLength = Sizes.deviceHeight * 0.08;
 
-  final _formKey = GlobalKey<FormState>();
+  // final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
-    print('infos ${widget.info['image']}');
     imageFile = Uint8List(0);
     _loadImage();
     super.initState();
@@ -4511,7 +4507,6 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
         final response = await http.get(
           Uri.parse('$baseImage${widget.info['image']}'),
         );
-        print('dfdf ${response.statusCode}');
 
         if (response.statusCode == 200) {
           setState(() {

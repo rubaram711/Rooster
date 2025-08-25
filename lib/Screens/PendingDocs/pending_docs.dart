@@ -1239,6 +1239,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                         cancellationReason:
                                             widget.info['cancellationReason'] ??
                                             '',
+                                        vat: widget.info['vat'] ?? '',
+                                        fromPage: 'pendingDocsQuotation',
                                         totalBeforeVat:
                                             widget.info['totalBeforeVat'] ?? '',
                                         discountOnAllItem:
@@ -3216,6 +3218,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
                                       return PrintSalesOrder(
+                                        fromPage: 'pendingDocs',
+                                        vat: salesOrderController.vat11,
                                         quotationNumber: quotNumber,
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
@@ -3587,7 +3591,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                 var res = await updateSalesOrder(
                                   '${widget.info['id']}',
-                                  false,
+
                                   '${widget.info['reference'] ?? ''}',
                                   clientId,
 
@@ -3875,7 +3879,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                 var res = await updateSalesOrder(
                                   '${widget.info['id']}',
-                                  false,
+
                                   '${widget.info['reference'] ?? ''}',
                                   clientId,
 
@@ -4164,7 +4168,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                 var res = await updateSalesOrder(
                                   '${widget.info['id']}',
-                                  false,
+
                                   '${widget.info['reference'] ?? ''}',
                                   clientId,
 
@@ -4612,6 +4616,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                               widget
                                                   .info['salesOrder']['quotation']['quotationNumber'];
                                       return PrintSalesInvoice(
+                                        vat: salesInvoiceController.vat11,
+                                        fromPage: 'pendingDocs',
                                         quotationNumber: quotNumber,
                                         salesOrderNumber: salesOrderNumber,
                                         isPrintedAs0:

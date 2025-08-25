@@ -36,7 +36,7 @@ Future storeSalesInvoice(
   String beforeVatPrices,
   String code,
   Map items,
-    List<int> orderedKeys ,
+  List<int> orderedKeys,
 ) async {
   String token = await getAccessTokenFromPref();
 
@@ -44,7 +44,7 @@ Future storeSalesInvoice(
     "reference": manualReference, //ok
     "clientId": clientId, //ok
     "valueDate": validity, //ok
-    "invoiceDeliveryDate": invoiceDeliveryDate, //ok
+    "inputDate": invoiceDeliveryDate, //ok
     "paymentTermId": null, //ok
     "salesInvoiceNumber": salesInvoiceNumber, //?????
     "priceList": priceList, //ok
@@ -97,7 +97,12 @@ Future storeSalesInvoice(
       MapEntry("orderLines[$i][title]", '${items[key]['title']}'),
       MapEntry("orderLines[$i][note]", '${items[key]['note']}'),
       MapEntry("orderLines[$i][combo]", '${items[key]['combo']}'),
-      MapEntry("orderLines[$i][comboPrice]",items[key]['combo']==''||items[key]['combo']==null?'': '${items[key]['item_unit_price']}'),
+      MapEntry(
+        "orderLines[$i][comboPrice]",
+        items[key]['combo'] == '' || items[key]['combo'] == null
+            ? ''
+            : '${items[key]['item_unit_price']}',
+      ),
     ]);
 
     formData.files.addAll([
@@ -111,7 +116,6 @@ Future storeSalesInvoice(
     ]);
 
     i++;
-
   }
 
   Response response = await Dio()

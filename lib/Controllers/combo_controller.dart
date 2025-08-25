@@ -404,7 +404,6 @@ class ComboController extends ComboControllerAbstract {
       CommonWidgets.snackBar('Success', res['message']);
       resultStorInDB = 'Success';
       getAllCombosFromBackWithSeach('');
-      print("---------isCombosPageIsLastPage${isCombosPageIsLastPage}");
       if (isCombosPageIsLastPage) {
         homeController.selectedTab.value = 'combo_summary';
       } else {

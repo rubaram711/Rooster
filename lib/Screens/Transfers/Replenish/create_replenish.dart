@@ -73,7 +73,6 @@ class _ReplenishState extends State<Replenish> {
       data = {};
       transferController.transferToInReplenishController.text = '';
       transferController.setTransferToIdInReplenish('');
-      currencyController.text = 'USD';
     });
     var p = await getReplenishmentsDataForCreate();
     if ('$p' != '[]') {
@@ -102,7 +101,13 @@ class _ReplenishState extends State<Replenish> {
 
 
 
-
+getCurrencies() async {
+  await exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
+  if(exchangeRatesController.isExchangeRatesFetched){
+    currencyController.text = exchangeRatesController.currenciesNamesList[0];
+    selectedCurrencyId = exchangeRatesController.currenciesIdsList[0];
+  }
+}
 
   @override
   void initState() {
@@ -113,7 +118,7 @@ class _ReplenishState extends State<Replenish> {
     });
     dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     getFieldsForCreateTransferFromBack();
-    exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
+    getCurrencies();
     // warehouseController.resetValues();
     warehouseController.getWarehousesFromBack();
     // transferController.getAllProductsFromBack('');
