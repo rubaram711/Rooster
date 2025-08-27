@@ -556,57 +556,60 @@ class _TransferOutState extends State<TransferOut> {
                                     color: Primary.primary,
                                     borderRadius: const BorderRadius.all(
                                         Radius.circular(6))),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    SizedBox(width:  MediaQuery.of(context).size.width * 0.02,),
-                                    TableTitle(
-                                      text: 'item'.tr,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.12,
-                                    ),
-                                    TableTitle(
-                                      text: 'description'.tr,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.15,
-                                    ),
-                                    TableTitle(
-                                      text: 'qty_available_at_src_wrhs'.tr,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.1,
-                                    ),
-                                    // TableTitle(
-                                    //   text: 'pack'.tr,
-                                    //   width: MediaQuery.of(context).size.width *
-                                    //       0.03,
-                                    // ),
-                                    TableTitle(
-                                      text: 'qty_available_at_dest_wrhs'.tr,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.1,
-                                    ),
-                                    // TableTitle(
-                                    //   text: 'pack'.tr,
-                                    //   width: MediaQuery.of(context).size.width *
-                                    //       0.03,
-                                    // ),
-                                    TableTitle(
-                                      text: 'qty_to_trx'.tr,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.07,
-                                    ),
-                                    TableTitle(
-                                      text: 'pack'.tr,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.07,
-                                    ),
-                                    TableTitle(
-                                      text: 'more_options'.tr,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.07,
-                                    ),
-                                  ],
+                                child: GetBuilder<HomeController>(
+                                    builder: (homeCont) {
+                                      double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.15:MediaQuery.of(context).size.width * 0.19;
+                                      double mediumWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.12:MediaQuery.of(context).size.width * 0.16;
+                                      double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.07:MediaQuery.of(context).size.width * 0.09;
+                                    return Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        SizedBox(width:  MediaQuery.of(context).size.width * 0.02,),
+                                        TableTitle(
+                                          text: 'item'.tr,
+                                          width: mediumWidth,
+                                        ),
+                                        TableTitle(
+                                          text: 'description'.tr,
+                                          width: bigWidth,
+                                        ),
+                                        TableTitle(
+                                          text: 'qty_available_at_src_wrhs'.tr,
+                                          width: MediaQuery.of(context).size.width *
+                                              0.1,
+                                        ),
+                                        // TableTitle(
+                                        //   text: 'pack'.tr,
+                                        //   width: MediaQuery.of(context).size.width *
+                                        //       0.03,
+                                        // ),
+                                        TableTitle(
+                                          text: 'qty_available_at_dest_wrhs'.tr,
+                                          width: MediaQuery.of(context).size.width *
+                                              0.1,
+                                        ),
+                                        // TableTitle(
+                                        //   text: 'pack'.tr,
+                                        //   width: MediaQuery.of(context).size.width *
+                                        //       0.03,
+                                        // ),
+                                        TableTitle(
+                                          text: 'qty_to_trx'.tr,
+                                          width: smallWidth,
+                                        ),
+                                        TableTitle(
+                                          text: 'pack'.tr,
+                                          width: smallWidth,
+                                        ),
+                                        TableTitle(
+                                          text: 'more_options'.tr,
+                                          width: MediaQuery.of(context).size.width *
+                                              0.07,
+                                        ),
+                                      ],
+                                    );
+                                  }
                                 ),
                               ),
                               Container(
@@ -1074,150 +1077,157 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
         ),
         child: Form(
           key: _formKey,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width:widget.isMobile?20: MediaQuery.of(context).size.width * 0.02,
-                height: 20,
-                margin: const EdgeInsets.symmetric(vertical: 15),
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/newRow.png'),
-                    fit: BoxFit.contain,
+          child: GetBuilder<HomeController>(
+              builder: (homeCont) {
+                double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.15:MediaQuery.of(context).size.width * 0.19;
+                double mediumWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.12:MediaQuery.of(context).size.width * 0.16;
+                double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.07:MediaQuery.of(context).size.width * 0.09;
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width:widget.isMobile?20: MediaQuery.of(context).size.width * 0.02,
+                    height: 20,
+                    margin: const EdgeInsets.symmetric(vertical: 15),
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/newRow.png'),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              widget.isMobile?gapW4:SizedBox(),
-              DropdownMenu<String>(
-                width:widget.isMobile?150: MediaQuery.of(context).size.width * 0.12,
-                // requestFocusOnTap: false,
-                enableSearch: true,
-                controller: productController,
-                hintText: '${'search'.tr}...',
-                inputDecorationTheme: InputDecorationTheme(
-                  // filled: true,
-                  hintStyle: const TextStyle(fontStyle: FontStyle.italic),
-                  contentPadding: const EdgeInsets.fromLTRB(20, 0, 25, 5),
-                  // outlineBorder: BorderSide(color: Colors.black,),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Primary.primary.withAlpha((0.2 * 255).toInt()), width: 1),
-                    borderRadius: const BorderRadius.all(Radius.circular(9)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Primary.primary.withAlpha((0.4 * 255).toInt()), width: 2),
-                    borderRadius: const BorderRadius.all(Radius.circular(9)),
-                  ),
-                ),
-                // menuStyle: ,
-                menuHeight: 250,
-                dropdownMenuEntries: cont.productsCodes
-                    .map<DropdownMenuEntry<String>>((String option) {
-                  return DropdownMenuEntry<String>(
-                    value: option,
-                    label: option,
-                  );
-                }).toList(),
-                enableFilter: true,
-                onSelected: (String? value) {
-                  productController.text = value!;
-                  setState(() {
-                    // pro = value;
-                    selectedItemId =
-                    '${cont.productsIds[cont.productsCodes.indexOf(value)]}';
-                  });
-                  cont.setItemIdInTransferOut(widget.index, selectedItemId);
-                  cont.setItemNameInTransferOut(widget.index, value);
-                  getQTyOfItemInSourceWarehouseFromBack();
-                  getQTyOfItemInDesWarehouseFromBack();
-                },
-              ),
-              widget.isMobile?gapW4:SizedBox(),
-              ReusableShowInfoCard(
-                  text: cont.rowsInListViewInTransferOut[widget.index]
-                  ['mainDescription'], width:widget.isMobile?200: MediaQuery.of(context).size.width * 0.15),
-              widget.isMobile?gapW4:SizedBox(),
-              ReusableShowInfoCard(
-                  text: cont.rowsInListViewInTransferOut[widget.index]
-                  ['qtyOnHandPackagesInSource'],
-                  width:widget.isMobile?200: MediaQuery.of(context).size.width * 0.1),
-              widget.isMobile?gapW4:SizedBox(),
-              ReusableShowInfoCard(
-                  text: cont.rowsInListViewInTransferOut[widget.index]
-                  ['qtyOnHandPackages'], width: widget.isMobile?200:MediaQuery.of(context).size.width * 0.1),
-              widget.isMobile?gapW4:SizedBox(),
-              SizedBox(
-                  width:widget.isMobile?150: MediaQuery.of(context).size.width * 0.07,
-                  child: ReusableNumberField(
-                    textEditingController: qtyController,
-                    isPasswordField: false,
-                    isCentered: true,
-                    hint: '0',
-                    onChangedFunc: (val) {
+                  widget.isMobile?gapW4:SizedBox(),
+                  DropdownMenu<String>(
+                    width:widget.isMobile?150: mediumWidth,
+                    // requestFocusOnTap: false,
+                    enableSearch: true,
+                    controller: productController,
+                    hintText: '${'search'.tr}...',
+                    inputDecorationTheme: InputDecorationTheme(
+                      // filled: true,
+                      hintStyle: const TextStyle(fontStyle: FontStyle.italic),
+                      contentPadding: const EdgeInsets.fromLTRB(20, 0, 25, 5),
+                      // outlineBorder: BorderSide(color: Colors.black,),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Primary.primary.withAlpha((0.2 * 255).toInt()), width: 1),
+                        borderRadius: const BorderRadius.all(Radius.circular(9)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Primary.primary.withAlpha((0.4 * 255).toInt()), width: 2),
+                        borderRadius: const BorderRadius.all(Radius.circular(9)),
+                      ),
+                    ),
+                    // menuStyle: ,
+                    menuHeight: 250,
+                    dropdownMenuEntries: cont.productsCodes
+                        .map<DropdownMenuEntry<String>>((String option) {
+                      return DropdownMenuEntry<String>(
+                        value: option,
+                        label: option,
+                      );
+                    }).toList(),
+                    enableFilter: true,
+                    onSelected: (String? value) {
+                      productController.text = value!;
                       setState(() {
-                        qty = val;
+                        // pro = value;
+                        selectedItemId =
+                        '${cont.productsIds[cont.productsCodes.indexOf(value)]}';
                       });
-                      _formKey.currentState!.validate();
-                      cont.setEnteredQtyInTransferOut(widget.index, qty);
+                      cont.setItemIdInTransferOut(widget.index, selectedItemId);
+                      cont.setItemNameInTransferOut(widget.index, value);
+                      getQTyOfItemInSourceWarehouseFromBack();
+                      getQTyOfItemInDesWarehouseFromBack();
                     },
-                    validationFunc: (String? value) {
-                      if( value!.isEmpty || double.parse(value)<=0 ){
-                        return 'must be >0';
-                      }
-                      return null;
-                    },
-                  )),
-              widget.isMobile?gapW4:SizedBox(),
-              DialogDropMenu(
-                optionsList:cont.rowsInListViewInTransferOut[widget.index]['productsPackages'] ,
-                text: '',
-                hint: '',
-                controller: packageController,
-                rowWidth:widget.isMobile?80: MediaQuery.of(context).size.width * 0.07,
-                textFieldWidth:widget.isMobile?80: MediaQuery.of(context).size.width * 0.07,
-                onSelected: (value) {
-                  cont.setPackageNameInTransferOut(widget.index, value);
-                  setState(() {
-                    selectedPackage = value;
-                  });
-                },
-              ),
-              widget.isMobile?gapW4:SizedBox(),
-              SizedBox(
-                width:widget.isMobile?100: MediaQuery.of(context).size.width * 0.07,
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width:widget.isMobile?50: MediaQuery.of(context).size.width * 0.03,
-                      child: const ReusableMore(
-                        itemsList: [],
-                      ),
-                    ),
-                    SizedBox(
-                      width:widget.isMobile?50: MediaQuery.of(context).size.width * 0.03,
-                      child: InkWell(
-                        onTap: () {
-                          // setState(() {
-                          // cont.removeFromOrderLinesInTransferOutList('${widget.index}');
-                          // cont.removeFromItemsListInTransferOut('${widget.index}');
-                          transferController.decrementListViewLengthInTransferOut(
-                              transferController.increment);
-                          transferController
-                              .removeFromRowsInListViewInTransferOut(widget.index);
-                          // });
+                  ),
+                  widget.isMobile?gapW4:SizedBox(),
+                  ReusableShowInfoCard(
+                      text: cont.rowsInListViewInTransferOut[widget.index]
+                      ['mainDescription'], width:widget.isMobile?200: bigWidth),
+                  widget.isMobile?gapW4:SizedBox(),
+                  ReusableShowInfoCard(
+                      text: cont.rowsInListViewInTransferOut[widget.index]
+                      ['qtyOnHandPackagesInSource'],
+                      width:widget.isMobile?200: MediaQuery.of(context).size.width * 0.1),
+                  widget.isMobile?gapW4:SizedBox(),
+                  ReusableShowInfoCard(
+                      text: cont.rowsInListViewInTransferOut[widget.index]
+                      ['qtyOnHandPackages'], width: widget.isMobile?200:MediaQuery.of(context).size.width * 0.1),
+                  widget.isMobile?gapW4:SizedBox(),
+                  SizedBox(
+                      width:widget.isMobile?150: smallWidth,
+                      child: ReusableNumberField(
+                        textEditingController: qtyController,
+                        isPasswordField: false,
+                        isCentered: true,
+                        hint: '0',
+                        onChangedFunc: (val) {
+                          setState(() {
+                            qty = val;
+                          });
+                          _formKey.currentState!.validate();
+                          cont.setEnteredQtyInTransferOut(widget.index, qty);
                         },
-                        child: Icon(
-                          Icons.delete_outline,
-                          color: Primary.primary,
+                        validationFunc: (String? value) {
+                          if( value!.isEmpty || double.parse(value)<=0 ){
+                            return 'must be >0';
+                          }
+                          return null;
+                        },
+                      )),
+                  widget.isMobile?gapW4:SizedBox(),
+                  DialogDropMenu(
+                    optionsList:cont.rowsInListViewInTransferOut[widget.index]['productsPackages'] ,
+                    text: '',
+                    hint: '',
+                    controller: packageController,
+                    rowWidth:widget.isMobile?80: smallWidth,
+                    textFieldWidth:widget.isMobile?80: smallWidth,
+                    onSelected: (value) {
+                      cont.setPackageNameInTransferOut(widget.index, value);
+                      setState(() {
+                        selectedPackage = value;
+                      });
+                    },
+                  ),
+                  widget.isMobile?gapW4:SizedBox(),
+                  SizedBox(
+                    width:widget.isMobile?100: MediaQuery.of(context).size.width * 0.07,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width:widget.isMobile?50: MediaQuery.of(context).size.width * 0.03,
+                          child: const ReusableMore(
+                            itemsList: [],
+                          ),
                         ),
-                      ),
+                        SizedBox(
+                          width:widget.isMobile?50: MediaQuery.of(context).size.width * 0.03,
+                          child: InkWell(
+                            onTap: () {
+                              // setState(() {
+                              // cont.removeFromOrderLinesInTransferOutList('${widget.index}');
+                              // cont.removeFromItemsListInTransferOut('${widget.index}');
+                              transferController.decrementListViewLengthInTransferOut(
+                                  transferController.increment);
+                              transferController
+                                  .removeFromRowsInListViewInTransferOut(widget.index);
+                              // });
+                            },
+                            child: Icon(
+                              Icons.delete_outline,
+                              color: Primary.primary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+                ],
+              );
+            }
           ),
         ),
       );

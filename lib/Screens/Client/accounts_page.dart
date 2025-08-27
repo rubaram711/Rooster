@@ -163,8 +163,7 @@ class _AccountsPageState extends State<AccountsPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.74,
+                    Expanded(
                       child: ReusableSearchTextField(
                         hint: '${"search".tr}...',
                         textEditingController: clientCont.searchController,
@@ -238,35 +237,44 @@ class _AccountsPageState extends State<AccountsPage> {
                               Radius.circular(6),
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              TableTitle(
-                                text: 'code'.tr,
-                                isCentered: false,
-                                width: MediaQuery.of(context).size.width * 0.09,
-                              ),
-                              TableTitle(
-                                text: 'name'.tr,
-                                isCentered: false,
-                                width: MediaQuery.of(context).size.width * 0.25,
-                              ),
-                              TableTitle(
-                                text: 'mobile_number'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
-                              ),
-                              TableTitle(
-                                text: 'balance_usd'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
-                              ),
-                              TableTitle(
-                                text: '${'balance'.tr} $primaryCurr',
-                                width: MediaQuery.of(context).size.width * 0.09,
-                              ),
-                              TableTitle(
-                                text: 'more_options'.tr,
-                                width: MediaQuery.of(context).size.width * 0.13,
-                              ),
-                            ],
+                          child: GetBuilder<HomeController>(
+                            builder: (homeCont) {
+                              double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.25:MediaQuery.of(context).size.width * 0.28;
+                              double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.12;
+                              return Row(
+                                children: [
+                                  TableTitle(
+                                    text: 'code'.tr,
+                                    isCentered: false,
+                                    width: smallWidth,
+                                  ),
+                                  TableTitle(
+                                    text: 'name'.tr,
+                                    isCentered: false,
+                                    width:bigWidth,
+                                  ),
+                                  TableTitle(
+                                    text: 'mobile_number'.tr,
+                                    width: smallWidth,
+                                  ),
+                                  TableTitle(
+                                    text: 'balance_usd'.tr,
+                                    width: smallWidth,
+                                  ),
+                                  TableTitle(
+                                    text: '${'balance'.tr} $primaryCurr',
+                                    width: smallWidth,
+                                  ),
+                                  TableTitle(
+                                    text: 'more_options'.tr,
+                                    width: MediaQuery.of(
+                                      context,
+                                    ).size.width *
+                                        0.13,
+                                  ),
+                                ],
+                              );
+                            }
                           ),
                         ),
                         clientCont.isClientsFetched
@@ -429,45 +437,51 @@ class _AccountsPageState extends State<AccountsPage> {
                               Radius.circular(6),
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              TableTitle(
-                                text: 'date'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
-                              ),
-                              TableTitle(
-                                text: 'serial'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
-                              ),
-                              TableTitle(
-                                text: 'manual_ref'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
-                              ),
-                              TableTitle(
-                                text: 'doctype'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
-                              ),
-                              TableTitle(
-                                text: 'transaction_label'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
-                              ),
-                              TableTitle(
-                                text: '${'value'.tr} (USD)',
-                                width: MediaQuery.of(context).size.width * 0.12,
-                              ),
-                              // TableTitle(
-                              //   text: 'Debit'.tr,
-                              //   width: MediaQuery.of(context).size.width * 0.09,
-                              // ),
-                              // TableTitle(
-                              //   text: 'Credit'.tr,
-                              //   width: MediaQuery.of(context).size.width * 0.09,
-                              // ),
-                              TableTitle(
-                                text: '${'value'.tr} (other currency)',
-                                width: MediaQuery.of(context).size.width * 0.12,
-                              ),
-                            ],
+                          child:  GetBuilder<HomeController>(
+                              builder: (homeCont) {
+                                double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.12:MediaQuery.of(context).size.width * 0.16;
+                                double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.11;
+                              return Row(
+                                children: [
+                                  TableTitle(
+                                    text: 'date'.tr,
+                                    width: smallWidth,
+                                  ),
+                                  TableTitle(
+                                    text: 'serial'.tr,
+                                    width: smallWidth,
+                                  ),
+                                  TableTitle(
+                                    text: 'manual_ref'.tr,
+                                    width: smallWidth,
+                                  ),
+                                  TableTitle(
+                                    text: 'doctype'.tr,
+                                    width: smallWidth,
+                                  ),
+                                  TableTitle(
+                                    text: 'transaction_label'.tr,
+                                    width: smallWidth,
+                                  ),
+                                  TableTitle(
+                                    text: '${'value'.tr} (USD)',
+                                    width: bigWidth,
+                                  ),
+                                  // TableTitle(
+                                  //   text: 'Debit'.tr,
+                                  //   width: MediaQuery.of(context).size.width * 0.09,
+                                  // ),
+                                  // TableTitle(
+                                  //   text: 'Credit'.tr,
+                                  //   width: MediaQuery.of(context).size.width * 0.09,
+                                  // ),
+                                  TableTitle(
+                                    text: '${'value'.tr} (other currency)',
+                                    width: bigWidth,
+                                  ),
+                                ],
+                              );
+                            }
                           ),
                         ),
                         clientCont.isTransactionsFetched
@@ -789,49 +803,55 @@ class ClientAsRowInTable extends StatelessWidget {
             decoration: const BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(0)),
             ),
-            child: Row(
-              children: [
-                TableItem(
-                  isCentered: false,
-                  text: '${info['clientNumber'] ?? ''}',
-                  width:
-                      isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
-                          : 140,
-                ),
-                TableItem(
-                  isCentered: false,
-                  text: '${info['name'] ?? ''}',
-                  width:
-                      isDesktop
-                          ? MediaQuery.of(context).size.width * 0.25
-                          : 140,
-                ),
-                TableItem(
-                  text:
-                      info['mobileNumber'] != null
-                          ? '(${info['mobileCode']})-${info['mobileNumber']}'
-                          : '',
-                  width:
-                      isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
-                          : 140,
-                ),
-                TableItem(
-                  text: '${info['balance_usd'] ?? ''}',
-                  width:
-                      isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
-                          : 140,
-                ),
-                TableItem(
-                  text: '${info['balance_lbp'] ?? ''}',
-                  width:
-                      isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
-                          : 140,
-                ),
-              ],
+            child:  GetBuilder<HomeController>(
+                builder: (homeCont) {
+                  double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.25:MediaQuery.of(context).size.width * 0.28;
+                  double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.12;
+                return Row(
+                  children: [
+                    TableItem(
+                      isCentered: false,
+                      text: '${info['clientNumber'] ?? ''}',
+                      width:
+                          isDesktop
+                              ? smallWidth
+                              : 140,
+                    ),
+                    TableItem(
+                      isCentered: false,
+                      text: '${info['name'] ?? ''}',
+                      width:
+                          isDesktop
+                              ? bigWidth
+                              : 140,
+                    ),
+                    TableItem(
+                      text:
+                          info['mobileNumber'] != null
+                              ? '(${info['mobileCode']})-${info['mobileNumber']}'
+                              : '',
+                      width:
+                          isDesktop
+                              ? smallWidth
+                              : 140,
+                    ),
+                    TableItem(
+                      text: '${info['balance_usd'] ?? ''}',
+                      width:
+                          isDesktop
+                              ? smallWidth
+                              : 140,
+                    ),
+                    TableItem(
+                      text: '${info['balance_lbp'] ?? ''}',
+                      width:
+                          isDesktop
+                              ? smallWidth
+                              : 140,
+                    ),
+                  ],
+                );
+              }
             ),
           ),
         );
@@ -851,6 +871,7 @@ class TransactionOrderAsRowInTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     HomeController homeController = Get.find();
+    print('info $info');
     return InkWell(
       onTap: () {
         showDialog<String>(
@@ -872,58 +893,65 @@ class TransactionOrderAsRowInTable extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(0)),
         ),
-        child: Row(
-          children: [
-            TableItem(
-              text: '${info['date'] ?? ''}',
-              width:
-                  homeController.isMobile.value
-                      ? 140
-                      : MediaQuery.of(context).size.width * 0.09,
-            ),
-            TableItem(
-              text: '${info['orderNumber'] ?? ''}',
-              width:
-                  homeController.isMobile.value
-                      ? 140
-                      : MediaQuery.of(context).size.width * 0.09,
-            ),
-            TableItem(
-              text: '',
-              width:
-                  homeController.isMobile.value
-                      ? 140
-                      : MediaQuery.of(context).size.width * 0.09,
-            ),
-            TableItem(
-              text: 'order',
-              width:
-                  homeController.isMobile.value
-                      ? 140
-                      : MediaQuery.of(context).size.width * 0.09,
-            ),
-            TableItem(
-              text: '', // '${info['transaction_label'] ?? ''}',
-              width:
-                  homeController.isMobile.value
-                      ? 250
-                      : MediaQuery.of(context).size.width * 0.09,
-            ),
-            TableItem(
-              text: numberWithComma('${info['usdTotal'] ?? ''}'),
-              width:
-                  homeController.isMobile.value
-                      ? 150
-                      : MediaQuery.of(context).size.width * 0.12,
-            ),
-            TableItem(
-              text: '${info['otherCurrencyTotal']!=null ? numberWithComma('${info['otherCurrencyTotal']}'):''} LBP',
-              width:
-                  homeController.isMobile.value
-                      ? 200
-                      : MediaQuery.of(context).size.width * 0.12,
-            ),
-          ],
+        child:  GetBuilder<HomeController>(
+            builder: (homeCont) {
+              double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.12:MediaQuery.of(context).size.width * 0.16;
+              double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.11;
+            return Row(
+              children: [
+                TableItem(
+                  text: '${info['date'] ?? ''}',
+                  width:
+                      homeController.isMobile.value
+                          ? 140
+                          : smallWidth,
+                ),
+                TableItem(
+                  text: '${info['orderNumber'] ?? ''}',
+                  width:
+                      homeController.isMobile.value
+                          ? 140
+                          :smallWidth,
+                ),
+                TableItem(
+                  text: '',
+                  width:
+                      homeController.isMobile.value
+                          ? 140
+                          : smallWidth,
+                ),
+                TableItem(
+                  text: 'order',
+                  width:
+                      homeController.isMobile.value
+                          ? 140
+                          : smallWidth,
+                ),
+                TableItem(
+                  text: '', // '${info['transaction_label'] ?? ''}',
+                  width:
+                      homeController.isMobile.value
+                          ? 250
+                          : smallWidth,
+                ),
+                TableItem(
+                  text: numberWithComma('${info['primaryCurrencyTotal'] ?? ''}'),
+                  width:
+                      homeController.isMobile.value
+                          ? 150
+                          : bigWidth,
+                ),
+                TableItem(
+                  text: '${info['posCurrencyTotal']!=null ? numberWithComma('${info['posCurrencyTotal']}'):''} '
+                      '${info['posCurrency']!=null?info['posCurrency']['name']:''}',
+                  width:
+                      homeController.isMobile.value
+                          ? 200
+                          : bigWidth,
+                ),
+              ],
+            );
+          }
         ),
       ),
     );
@@ -964,64 +992,70 @@ class TransactionQuotationsAsRowInTable extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(0)),
         ),
-        child: Row(
-          children: [
-            TableItem(
-              text: '${info['createdAtDate'] ?? ''}',
-              width:
-                  homeController.isMobile.value
-                      ? 140
-                      : MediaQuery.of(context).size.width * 0.09,
-            ),
-            TableItem(
-              text: '${info['quotationNumber'] ?? ''}',
-              width:
-                  homeController.isMobile.value
-                      ? 140
-                      : MediaQuery.of(context).size.width * 0.09,
-            ),
-            TableItem(
-              text: '${info['reference'] ?? ''}',
-              width:
-                  homeController.isMobile.value
-                      ? 140
-                      : MediaQuery.of(context).size.width * 0.09,
-            ),
-            TableItem(
-              text: 'quotation',
-              width:
-                  homeController.isMobile.value
-                      ? 140
-                      : MediaQuery.of(context).size.width * 0.09,
-            ),
-            TableItem(
-              text: '', // '${info['transaction_label'] ?? ''}',
-              width:
-                  homeController.isMobile.value
-                      ? 250
-                      : MediaQuery.of(context).size.width * 0.09,
-            ),
-            TableItem(
-              text:
-                  info['currency']['name'] == 'USD'
-                      ? '${info['total'] ?? ''}'
-                      : '',
-              width:
-                  homeController.isMobile.value
-                      ? 150
-                      : MediaQuery.of(context).size.width * 0.12,
-            ),
-            TableItem(
-              text:
-                  info['currency']['name'] == 'USD'
-                      ? ''
-                      : '${info['total'] ?? ''} ${info['currency']['name'] ?? ''}',
-              width:
-                  homeController.isMobile.value
-                      ? 200
-                      : MediaQuery.of(context).size.width * 0.12,
-            ),
-          ],
+        child: GetBuilder<HomeController>(
+            builder: (homeCont) {
+              double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.12:MediaQuery.of(context).size.width * 0.16;
+              double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.11;
+            return Row(
+              children: [
+                TableItem(
+                  text: '${info['createdAtDate'] ?? ''}',
+                  width:
+                      homeController.isMobile.value
+                          ? 140
+                          : smallWidth,
+                ),
+                TableItem(
+                  text: '${info['quotationNumber'] ?? ''}',
+                  width:
+                      homeController.isMobile.value
+                          ? 140
+                          : smallWidth,
+                ),
+                TableItem(
+                  text: '${info['reference'] ?? ''}',
+                  width:
+                      homeController.isMobile.value
+                          ? 140
+                          : smallWidth,
+                ),
+                TableItem(
+                  text: 'quotation',
+                  width:
+                      homeController.isMobile.value
+                          ? 140
+                          : smallWidth,
+                ),
+                TableItem(
+                  text: '', // '${info['transaction_label'] ?? ''}',
+                  width:
+                      homeController.isMobile.value
+                          ? 250
+                          : smallWidth,
+                ),
+                TableItem(
+                  text:
+                      info['currency']['name'] == 'USD'
+                          ? '${info['total'] ?? ''}'
+                          : '',
+                  width:
+                      homeController.isMobile.value
+                          ? 150
+                          : bigWidth,
+                ),
+                TableItem(
+                  text:
+                      info['currency']['name'] == 'USD'
+                          ? ''
+                          : '${info['total'] ?? ''} ${info['currency']['name'] ?? ''}',
+                  width:
+                      homeController.isMobile.value
+                          ? 200
+                          : bigWidth,
+                ),
+              ],
+            );
+          }
         ),
       ),
     );

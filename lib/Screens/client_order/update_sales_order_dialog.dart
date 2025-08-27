@@ -1214,7 +1214,8 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                               ),
                             ),
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.15,
+                              width: MediaQuery.of(context).size.width * 0.24,
+                              // width: MediaQuery.of(context).size.width * 0.15,
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -1223,7 +1224,10 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                   DropdownMenu<String>(
                                     width:
                                         MediaQuery.of(context).size.width *
-                                        0.10,
+                                        0.15,
+                                    // width:
+                                    //     MediaQuery.of(context).size.width *
+                                    //     0.10,
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
                                     controller: priceListController,
@@ -1331,17 +1335,19 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                             ),
                             //code
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.37,
+                              width: MediaQuery.of(context).size.width * 0.39,
+                              // width: MediaQuery.of(context).size.width * 0.37,
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text('code'.tr),
+                                  Text('    '),
                                   DropdownMenu<String>(
                                     width:
                                         MediaQuery.of(context).size.width *
-                                        0.15,
+                                        0.13,
+
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
                                     controller: codeController,
@@ -1515,10 +1521,16 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                     validationFunc: (value) {},
                                     rowWidth:
                                         MediaQuery.of(context).size.width *
-                                        0.15,
+                                        0.23,
+                                    // rowWidth:
+                                    //     MediaQuery.of(context).size.width *
+                                    //     0.15,
                                     textFieldWidth:
                                         MediaQuery.of(context).size.width *
-                                        0.14,
+                                        0.22,
+                                    // textFieldWidth:
+                                    //     MediaQuery.of(context).size.width *
+                                    //     0.14,
                                     clickableOptionText: 'create_new_client'.tr,
                                     isThereClickableOption: true,
                                     onTappedClickableOption: () {

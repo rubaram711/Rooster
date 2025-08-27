@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:get/get.dart';
+import 'package:rooster_app/Controllers/home_controller.dart';
 import 'package:rooster_app/Controllers/waste_reports_controller.dart';
 // ignore: depend_on_referenced_packages
 import 'package:syncfusion_flutter_pdf/pdf.dart';
@@ -23,8 +24,9 @@ class WasteReport extends StatefulWidget {
 class _WasteReportState extends State<WasteReport> {
   final GlobalKey<SfDataGridState> _key = GlobalKey<SfDataGridState>();
 
-  double width = 160;
+
   WasteReportsController wasteReportsController = Get.find();
+  HomeController homeController = Get.find();
   @override
   Widget build(BuildContext context) {
     final WasteDataSource wasteDataSource =
@@ -84,85 +86,90 @@ class _WasteReportState extends State<WasteReport> {
               ],
             ),
           ),
-          Expanded(
-            child: SfDataGrid(
-              key: _key,
-              source: wasteDataSource,
-              columns: <GridColumn>[
-                GridColumn(
-                  width: width,
-                  columnName: 'item_code',
-                  label: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    alignment: Alignment.center,
-                    child: Text('item_code'.tr),
-                  ),
-                ),
-                GridColumn(
-                  width: width,
-                  columnName: 'item_description',
-                  label: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    alignment: Alignment.center,
-                    child: Text('item_description'.tr),
-                  ),
-                ),
-                GridColumn(
-                  width: width,
-                  columnName: 'begin_quantity',
-                  label: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'begin_quantity'.tr,
-                      overflow: TextOverflow.ellipsis,
+          GetBuilder<HomeController>(
+            builder: (homeCont) {
+              double width = homeCont.isMenuOpened?160:200;
+              return Expanded(
+                child: SfDataGrid(
+                  key: _key,
+                  source: wasteDataSource,
+                  columns: <GridColumn>[
+                    GridColumn(
+                      width: width,
+                      columnName: 'item_code',
+                      label: Container(
+                        padding: const EdgeInsets.all(16.0),
+                        alignment: Alignment.center,
+                        child: Text('item_code'.tr),
+                      ),
                     ),
-                  ),
-                ),
-                GridColumn(
-                  width: width,
-                  columnName: 'replenished_qty',
-                  label: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'replenished_qty'.tr,
-                      overflow: TextOverflow.ellipsis,
+                    GridColumn(
+                      width: width,
+                      columnName: 'item_description',
+                      label: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text('item_description'.tr),
+                      ),
                     ),
-                  ),
-                ),
-                GridColumn(
-                  width: width,
-                  columnName: 'sales',
-                  label: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    alignment: Alignment.center,
-                    child: Text('sales'.tr),
-                  ),
-                ),
-                GridColumn(
-                  width: width,
-                  columnName: 'waste',
-                  label: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    alignment: Alignment.center,
-                    child: Text('waste'.tr, overflow: TextOverflow.ellipsis),
-                  ),
-                ),
-                GridColumn(
-                  width: width,
-                  columnName: 'qty_on_hand',
-                  label: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'qty_on_hand'.tr,
-                      overflow: TextOverflow.ellipsis,
+                    GridColumn(
+                      width: width,
+                      columnName: 'begin_quantity',
+                      label: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'begin_quantity'.tr,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
-                  ),
+                    GridColumn(
+                      width: width,
+                      columnName: 'replenished_qty',
+                      label: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'replenished_qty'.tr,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    GridColumn(
+                      width: width,
+                      columnName: 'sales',
+                      label: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text('sales'.tr),
+                      ),
+                    ),
+                    GridColumn(
+                      width: width,
+                      columnName: 'waste',
+                      label: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text('waste'.tr, overflow: TextOverflow.ellipsis),
+                      ),
+                    ),
+                    GridColumn(
+                      width: width,
+                      columnName: 'qty_on_hand',
+                      label: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'qty_on_hand'.tr,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            }
           ),
         ],
       ),

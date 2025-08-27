@@ -3,6 +3,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rooster_app/Binding/binding.dart';
@@ -45,68 +46,48 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     HomeController homeController=Get.put(HomeController());
-    // LanguagesController languagesController=Get.put(LanguagesController());
-    // // HomeController homeController=Get.put(HomeController());
-    // ProductController productController=Get.put(ProductController());
-    // CategoriesController categoriesController=Get.put(CategoriesController());
-    // QuotationsController quotationsController=Get.put(QuotationsController());
-    // TransferController transferController=Get.put(TransferController());
-    // PosController posController=Get.put(PosController());
-    // CashingMethodsController cashingMethodsController=Get.put(CashingMethodsController());
-    // WarehouseController warehouseController=Get.put(WarehouseController());
-    // ExchangeRatesController exchangeRatesController=Get.put(ExchangeRatesController());
-    // UsersController usersController=Get.put(UsersController());
-    // ClientController clientController=Get.put(ClientController());
-    // RolesAndPermissionsController rolesController=Get.put(RolesAndPermissionsController());
-    // GroupsController groupsController=Get.put(GroupsController());
-    // SessionController sessionController=Get.put(SessionController());
-    // InventoryController inventoryController=Get.put(InventoryController());
-    // SettingsController settingsController=Get.put(SettingsController());
-    // CompanySettingsController companySettingsController=Get.put(CompanySettingsController());
-    // TaskController taskController=Get.put(TaskController());
-    // QuotationController quotationController=Get.put(QuotationController());
-    // PriceListController priceListController=Get.put(PriceListController());
-    // WasteReportsController wasteReportsController=Get.put(WasteReportsController());
-    // PaymentTermsController paymentTermsController=Get.put(PaymentTermsController());
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialBinding: MyBinding(),
-      scrollBehavior: MyCustomScrollBehavior(),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
-        textTheme: GoogleFonts.openSansTextTheme(
-          Theme.of(context).textTheme.copyWith(
-            bodyLarge: TextStyle(fontSize: 12),  // Set body text to font size 12
-            bodyMedium: TextStyle(fontSize: 12),  // Set body text to font size 12
-            bodySmall: TextStyle(fontSize: 12),   // Set body text to font size 12
-            displayLarge: TextStyle(fontSize: 12),  // Set display text to font size 12
-            displayMedium: TextStyle(fontSize: 12), // Set display text to font size 12
-            displaySmall: TextStyle(fontSize: 12),  // Set display text to font size 12
-            headlineLarge: TextStyle(fontSize: 12),  // Set headline text to font size 12
-            headlineMedium: TextStyle(fontSize: 12), // Set headline text to font size 12
-            headlineSmall: TextStyle(fontSize: 12),  // Set headline text to font size 12
-            titleLarge: TextStyle(fontSize: 12),     // Set title text to font size 12
-            titleMedium: TextStyle(fontSize: 12),    // Set title text to font size 12
-            titleSmall: TextStyle(fontSize: 12),     // Set title text to font size 12
-            labelLarge: TextStyle(fontSize: 12),     // Set label text to font size 12
-            labelMedium: TextStyle(fontSize: 12),    // Set label text to font size 12
-            labelSmall: TextStyle(fontSize: 12),     // Set label text to font size 12
-          ),//// Apply Open Sans to all text
-        )
+    return ScreenUtilInit(
+      designSize: const Size(1300, 729),
+      child: GetMaterialApp(
+        debugShowCheckedModeBanner: false,
+        initialBinding: MyBinding(),
+        scrollBehavior: MyCustomScrollBehavior(),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+          useMaterial3: true,
+          textTheme: GoogleFonts.openSansTextTheme(
+            Theme.of(context).textTheme.copyWith(
+              bodyLarge: TextStyle(fontSize: 12),
+              bodyMedium: TextStyle(fontSize: 12),
+              bodySmall: TextStyle(fontSize: 12),
+              displayLarge: TextStyle(fontSize: 12),
+              displayMedium: TextStyle(fontSize: 12),
+              displaySmall: TextStyle(fontSize: 12),
+              headlineLarge: TextStyle(fontSize: 12),
+              headlineMedium: TextStyle(fontSize: 12),
+              headlineSmall: TextStyle(fontSize: 12),
+              titleLarge: TextStyle(fontSize: 12),
+              titleMedium: TextStyle(fontSize: 12),
+              titleSmall: TextStyle(fontSize: 12),
+              labelLarge: TextStyle(fontSize: 12),
+              labelMedium: TextStyle(fontSize: 12),
+              labelSmall: TextStyle(fontSize: 12),
+            ),//// Apply Open Sans to all text
+          )
+        ),
+        localizationsDelegates: const [
+          quill.FlutterQuillLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'), // English
+          Locale('ar'), // Arabic
+        ],
+        translations: AppLocalization(),
+        locale: const Locale('en'),
+        fallbackLocale: const Locale('en'),
+        useInheritedMediaQuery: true,
+        home:id!=''?const WelcomeScreen(): const SignUpScreen(),
       ),
-      localizationsDelegates: const [
-        quill.FlutterQuillLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en'), // English
-        Locale('ar'), // Arabic
-      ],
-      translations: AppLocalization(),
-      locale: const Locale('en'),
-      fallbackLocale: const Locale('en'),
-      useInheritedMediaQuery: true,
-      home:id!=''?const WelcomeScreen(): const SignUpScreen(),
     );
   }
 }

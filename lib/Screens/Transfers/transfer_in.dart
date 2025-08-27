@@ -346,55 +346,58 @@ class _TransferInState extends State<TransferIn> {
                           color: Primary.primary,
                           borderRadius: const BorderRadius.all(
                               Radius.circular(6))),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TableTitle(
-                            text: 'item'.tr,
-                            width: MediaQuery.of(context).size.width *
-                                0.1,
-                          ),
-                          TableTitle(
-                            text: 'description'.tr,
-                            width: MediaQuery.of(context).size.width *
-                                0.2,
-                          ),
-                          TableTitle(
-                            text: 'qty_transferred'.tr,
-                            width: MediaQuery.of(context).size.width *
-                                0.07,
-                          ),
-                          TableTitle(
-                            text: 'pack'.tr,
-                            width: MediaQuery.of(context).size.width *
-                                0.03,
-                          ),
-                          TableTitle(
-                            text: 'qty_received'.tr,
-                            width: MediaQuery.of(context).size.width *
-                                0.07,
-                          ),
-                          TableTitle(
-                            text: 'pack'.tr,
-                            width: MediaQuery.of(context).size.width *
-                                0.03,
-                          ),
-                          TableTitle(
-                            text: 'difference'.tr,
-                            width: MediaQuery.of(context).size.width *
-                                0.07,
-                          ),
-                          TableTitle(
-                            text: 'pack'.tr,
-                            width: MediaQuery.of(context).size.width *
-                                0.03,
-                          ),
-                          TableTitle(
-                            text: 'note'.tr,
-                            width: MediaQuery.of(context).size.width *
-                                0.1,
-                          ),
-                        ],
+                      child: GetBuilder<HomeController>(
+                          builder: (homeCont) {
+                            double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.2:MediaQuery.of(context).size.width * 0.24;
+                            double mediumWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.1:MediaQuery.of(context).size.width * 0.14;
+                            double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.07:MediaQuery.of(context).size.width * 0.09;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                          SizedBox(
+                          width:MediaQuery.of(context).size.width * 0.02,),
+                              TableTitle(
+                                text: 'item'.tr,
+                                width: smallWidth,
+                              ),
+                              TableTitle(
+                                text: 'description'.tr,
+                                width: bigWidth,
+                              ),
+                              TableTitle(
+                                text: 'qty_transferred'.tr,
+                                width: smallWidth,
+                              ),
+                              TableTitle(
+                                text: 'pack'.tr,
+                                width: MediaQuery.of(context).size.width *
+                                    0.03,
+                              ),
+                              TableTitle(
+                                text: 'qty_received'.tr,
+                                width: smallWidth,
+                              ),
+                              TableTitle(
+                                text: 'pack'.tr,
+                                width: MediaQuery.of(context).size.width *
+                                    0.03,
+                              ),
+                              TableTitle(
+                                text: 'difference'.tr,
+                                width: smallWidth,
+                              ),
+                              TableTitle(
+                                text: 'pack'.tr,
+                                width: MediaQuery.of(context).size.width *
+                                    0.03,
+                              ),
+                              TableTitle(
+                                text: 'note'.tr,
+                                width: mediumWidth,
+                              ),
+                            ],
+                          );
+                        }
                       ),
                     ),
                     GetBuilder<TransferController>(builder: (cont) {
@@ -565,73 +568,80 @@ class _ReusableItemRowInTransferInState extends State<ReusableItemRowInTransferI
           margin: const EdgeInsets.symmetric(vertical: 5),
           child: Form(
             key: _formKey,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width:widget.isMobile?20:  MediaQuery.of(context).size.width * 0.02,
-                  height: 20,
-                  margin:
-                  const EdgeInsets.symmetric(
-                      vertical: 15),
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(
-                          'assets/images/newRow.png'),
-                      fit: BoxFit.contain,
+            child: GetBuilder<HomeController>(
+                builder: (homeCont) {
+                  double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.2:MediaQuery.of(context).size.width * 0.24;
+                  double mediumWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.1:MediaQuery.of(context).size.width * 0.14;
+                  double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.07:MediaQuery.of(context).size.width * 0.09;
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width:widget.isMobile?20:  MediaQuery.of(context).size.width * 0.02,
+                      height: 20,
+                      margin:
+                      const EdgeInsets.symmetric(
+                          vertical: 15),
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(
+                              'assets/images/newRow.png'),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                ReusableShowInfoCard(text: widget.transferredItemInfo['itemCode']??'', width:widget.isMobile?150:  MediaQuery.of(context).size.width * 0.07),
-                widget.isMobile?gapW4:SizedBox(),
-                ReusableShowInfoCard(text: widget.transferredItemInfo['mainDescription']??'', width: widget.isMobile?200: MediaQuery.of(context).size.width * 0.2),
-                widget.isMobile?gapW4:SizedBox(),
-                ReusableShowInfoCard(text: '${widget.transferredItemInfo['transferredQty']??''}', width:widget.isMobile?150:  MediaQuery.of(context).size.width * 0.07),
-                widget.isMobile?gapW4:SizedBox(),
-                ReusableShowInfoCard(text: '${widget.transferredItemInfo['transferredQtyPackageName']??''}', width:widget.isMobile?80:  MediaQuery.of(context).size.width * 0.03),
-                widget.isMobile?gapW4:SizedBox(),
-                SizedBox(
-                    width:widget.isMobile?150:  MediaQuery.of(context).size.width * 0.07,
-                    child: ReusableNumberField(
-                      textEditingController: receivedQtyController,
-                      isPasswordField: false,
-                      isCentered: true,
-                      hint: '0',
-                      onChangedFunc: (val) {
-                        _formKey.currentState!.validate();
-                        cont.setEnteredQtyInTransferIn(widget.index, val);
-                        setState(() {
-                          deference='${double.parse('${widget.transferredItemInfo['transferredQty']}') - double.parse(val??'0')}';
-                        });
-                        cont.setDifferenceInTransferIn(widget.index, deference);
-                      },
-                      validationFunc: (String? value) {
-                        if( value!.isEmpty || double.parse(value)<=0 ){
-                          return 'must be >0';
-                        }
-                        return null;
-                      },
-                    )),
-                widget.isMobile?gapW4:SizedBox(),
-                ReusableShowInfoCard(text: '${widget.transferredItemInfo['transferredQtyPackageName']??''}', width:widget.isMobile?80: MediaQuery.of(context).size.width * 0.03),
-                widget.isMobile?gapW4:SizedBox(),
-                ReusableShowInfoCard(text: deference, width:widget.isMobile?150: MediaQuery.of(context).size.width * 0.07),
-                widget.isMobile?gapW4:SizedBox(),
-                ReusableShowInfoCard(text: '${widget.transferredItemInfo['transferredQtyPackageName']??''}', width:widget.isMobile?80: MediaQuery.of(context).size.width * 0.03),
-                widget.isMobile?gapW4:SizedBox(),
-                SizedBox(
-                    width:widget.isMobile?150: MediaQuery.of(context).size.width * 0.1,
-                    child: ReusableTextField(
-                      onChangedFunc: (val){
-                        cont.setNoteInTransferIn(widget.index, val);
-                      },
-                      validationFunc: (val){},
-                      hint: '',
-                      isPasswordField: false,
-                      textEditingController:noteController
-                  ),
-                )
-              ],
+                    ReusableShowInfoCard(text: widget.transferredItemInfo['itemCode']??'', width:widget.isMobile?150:  smallWidth),
+                    widget.isMobile?gapW4:SizedBox(),
+                    ReusableShowInfoCard(text: widget.transferredItemInfo['mainDescription']??'', width: widget.isMobile?200: bigWidth),
+                    widget.isMobile?gapW4:SizedBox(),
+                    ReusableShowInfoCard(text: '${widget.transferredItemInfo['transferredQty']??''}', width:widget.isMobile?150:  smallWidth),
+                    widget.isMobile?gapW4:SizedBox(),
+                    ReusableShowInfoCard(text: '${widget.transferredItemInfo['transferredQtyPackageName']??''}', width:widget.isMobile?80:  MediaQuery.of(context).size.width * 0.03),
+                    widget.isMobile?gapW4:SizedBox(),
+                    SizedBox(
+                        width:widget.isMobile?150:  smallWidth,
+                        child: ReusableNumberField(
+                          textEditingController: receivedQtyController,
+                          isPasswordField: false,
+                          isCentered: true,
+                          hint: '0',
+                          onChangedFunc: (val) {
+                            _formKey.currentState!.validate();
+                            cont.setEnteredQtyInTransferIn(widget.index, val);
+                            setState(() {
+                              deference='${double.parse('${widget.transferredItemInfo['transferredQty']}') - double.parse(val??'0')}';
+                            });
+                            cont.setDifferenceInTransferIn(widget.index, deference);
+                          },
+                          validationFunc: (String? value) {
+                            if( value!.isEmpty || double.parse(value)<=0 ){
+                              return 'must be >0';
+                            }
+                            return null;
+                          },
+                        )),
+                    widget.isMobile?gapW4:SizedBox(),
+                    ReusableShowInfoCard(text: '${widget.transferredItemInfo['transferredQtyPackageName']??''}', width:widget.isMobile?80: MediaQuery.of(context).size.width * 0.03),
+                    widget.isMobile?gapW4:SizedBox(),
+                    ReusableShowInfoCard(text: deference, width:widget.isMobile?150: smallWidth),
+                    widget.isMobile?gapW4:SizedBox(),
+                    ReusableShowInfoCard(text: '${widget.transferredItemInfo['transferredQtyPackageName']??''}', width:widget.isMobile?80: MediaQuery.of(context).size.width * 0.03),
+                    widget.isMobile?gapW4:SizedBox(),
+                    SizedBox(
+                        width:widget.isMobile?150: mediumWidth,
+                        child: ReusableTextField(
+                          onChangedFunc: (val){
+                            cont.setNoteInTransferIn(widget.index, val);
+                          },
+                          validationFunc: (val){},
+                          hint: '',
+                          isPasswordField: false,
+                          textEditingController:noteController
+                      ),
+                    )
+                  ],
+                );
+              }
             ),
           ),
         );

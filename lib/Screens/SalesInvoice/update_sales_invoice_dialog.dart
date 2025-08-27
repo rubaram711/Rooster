@@ -1620,7 +1620,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                               ),
                             ),
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.15,
+                              width: MediaQuery.of(context).size.width * 0.24,
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -1629,7 +1629,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                   DropdownMenu<String>(
                                     width:
                                         MediaQuery.of(context).size.width *
-                                        0.10,
+                                        0.15,
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
                                     controller: priceListController,
@@ -1738,12 +1738,15 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                             ),
                             //code
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.37,
+                              width: MediaQuery.of(context).size.width * 0.42,
+                              // width: MediaQuery.of(context).size.width * 0.37,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
+                                  Text('  '),
                                   Text('code'.tr),
+                                  Text('      '),
                                   DropdownMenu<String>(
                                     width:
                                         MediaQuery.of(context).size.width *
@@ -1921,10 +1924,16 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     validationFunc: (value) {},
                                     rowWidth:
                                         MediaQuery.of(context).size.width *
-                                        0.15,
+                                        0.25,
+                                    // rowWidth:
+                                    //     MediaQuery.of(context).size.width *
+                                    //     0.15,
                                     textFieldWidth:
                                         MediaQuery.of(context).size.width *
-                                        0.14,
+                                        0.24,
+                                    // textFieldWidth:
+                                    //     MediaQuery.of(context).size.width *
+                                    //     0.14,
                                     clickableOptionText: 'create_new_client'.tr,
                                     isThereClickableOption: true,
                                     onTappedClickableOption: () {

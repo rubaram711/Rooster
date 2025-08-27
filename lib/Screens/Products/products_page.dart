@@ -145,8 +145,8 @@ class _ProductsPageState extends State<ProductsPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.55,
+                  Expanded(
+                    // width: MediaQuery.of(context).size.width * 0.55,
                     child: ReusableSearchTextField(
                       hint: '${"search".tr}...',
                       textEditingController: searchControllerInProductsPage,
@@ -154,6 +154,7 @@ class _ProductsPageState extends State<ProductsPage> {
                       validationFunc: (val) {},
                     ),
                   ),
+                  gapW6,
                   // DropdownMenu<FilterItems>(
                   //   width: MediaQuery.of(context).size.width * 0.08,
                   //   // initialSelection: configItems.green,

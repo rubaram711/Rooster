@@ -5289,8 +5289,7 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.63,
+                Expanded(
                   child: ReusableTextField(
                     textEditingController: titleController,
                     isPasswordField: false,
@@ -5407,8 +5406,8 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
             //     ),
             //   ),
             // ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.63,
+            Expanded(
+              // width: MediaQuery.of(context).size.width * 0.63,
               child: ReusableTextField(
                 textEditingController: noteController,
                 isPasswordField: false,
@@ -5501,6 +5500,7 @@ class ReusableImageRow extends StatefulWidget {
 
 class _ReusableImageRowState extends State<ReusableImageRow> {
   final QuotationController quotationController = Get.find();
+  final HomeController homeController = Get.find();
   late Uint8List imageFile;
 
   double listViewLength = Sizes.deviceHeight * 0.08;
@@ -5565,44 +5565,44 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                       dashPattern: const [10, 10],
                       color: Others.borderColor,
                       radius: const Radius.circular(9),
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.62,
+                      child: Obx(() => SizedBox(
+                        width:homeController.isOpened.value? MediaQuery.of(context).size.width * 0.62:MediaQuery.of(context).size.width * 0.79,
                         height: cont.imageSpaceHeight,
                         child:
-                            imageFile.isNotEmpty
-                                ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Image.memory(
-                                      imageFile,
-                                      height: cont.imageSpaceHeight,
-                                    ),
-                                  ],
-                                )
-                                : Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    gapW20,
-                                    Icon(
-                                      Icons.cloud_upload_outlined,
-                                      color: Others.iconColor,
-                                      size: 32,
-                                    ),
-                                    gapW20,
-                                    Text(
-                                      'drag_drop_image'.tr,
-                                      style: TextStyle(
-                                        color: TypographyColor.textTable,
-                                      ),
-                                    ),
-                                    Text(
-                                      'browse'.tr,
-                                      style: TextStyle(color: Primary.primary),
-                                    ),
-                                  ],
-                                ),
-                      ),
+                        imageFile.isNotEmpty
+                            ? Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Image.memory(
+                              imageFile,
+                              height: cont.imageSpaceHeight,
+                            ),
+                          ],
+                        )
+                            : Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            gapW20,
+                            Icon(
+                              Icons.cloud_upload_outlined,
+                              color: Others.iconColor,
+                              size: 32,
+                            ),
+                            gapW20,
+                            Text(
+                              'drag_drop_image'.tr,
+                              style: TextStyle(
+                                color: TypographyColor.textTable,
+                              ),
+                            ),
+                            Text(
+                              'browse'.tr,
+                              style: TextStyle(color: Primary.primary),
+                            ),
+                          ],
+                        ),
+                      ),),
                     ),
                   ),
                 );

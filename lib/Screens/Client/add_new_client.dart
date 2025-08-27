@@ -17,6 +17,7 @@ import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
+
 List<String> titles = ['Doctor', 'Miss', 'Mister', 'Maitre', 'Professor'];
 
 class AddNewClient extends StatefulWidget {
@@ -53,9 +54,6 @@ class _AddNewClientState extends State<AddNewClient> {
       selectedCity = '';
   String selectedPhoneCode = '', selectedMobileCode = '';
   int selectedClientType = 1;
-
-
-
 
   int selectedTabIndex = 0;
   List tabsList = [
@@ -127,10 +125,12 @@ class _AddNewClientState extends State<AddNewClient> {
       isCitiesFetched = true;
     });
   }
-  ClientController clientController=Get.find();
+
+  ClientController clientController = Get.find();
+
   @override
   void initState() {
-    clientController.contactsList=[];
+    clientController.contactsList = [];
     clientController.salesPersonController.clear();
     clientController.getAllUsersSalesPersonFromBack();
     getFieldsForCreateClientsFromBack();
@@ -202,453 +202,458 @@ class _AddNewClientState extends State<AddNewClient> {
                   //   style: const TextStyle(
                   //       fontSize: 36, fontWeight: FontWeight.bold),
                   // ),
-                  DialogTextField(
-                    textEditingController: clientNumberController,
-                    text: '${'client_code'.tr}*',
-                    rowWidth: MediaQuery.of(context).size.width * 0.5,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.4,
-                    validationFunc: (value) {
-                      if (value.isEmpty) {
-                        return 'required_field'.tr;
-                      }
-                      return null;
-                    },
-                  ),
-                  gapH16,
-                  DialogTextField(
-                    textEditingController: clientNameController,
-                    text: '${'client_name'.tr}*',
-                    rowWidth: MediaQuery.of(context).size.width * 0.5,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.4,
-                    validationFunc: (value) {
-                      if (value.isEmpty) {
-                        return 'required_field'.tr;
-                      }
-                      return null;
-                    },
-                  ),
-                  gapH10,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      DialogTextField(
-                        textEditingController: referenceController,
-                        text: 'reference'.tr,
-                        rowWidth: MediaQuery.of(context).size.width * 0.22,
-                        textFieldWidth:
-                            MediaQuery.of(context).size.width * 0.15,
-                        validationFunc: (val) {},
-                      ),
-                      PhoneTextField(
-                        textEditingController: phoneController,
-                        text: 'phone'.tr,
-                        rowWidth: MediaQuery.of(context).size.width * 0.25,
-                        textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                        validationFunc: (String val) {
-                          if (val.isNotEmpty && val.length < 7) {
-                            return '7_digits'.tr;
-                          }
-                          return null;
-                        },
-                        onCodeSelected: (value) {
-                          setState(() {
-                            selectedPhoneCode = value;
-                          });
-                        },
-                        onChangedFunc: (value) {
-                          setState(() {
-                            // mainDescriptionController.text=value;
-                          });
-                        },
-                      ),
-                      DialogTextField(
-                        textEditingController: floorBldgController,
-                        text: 'floor_bldg'.tr,
-                        rowWidth: MediaQuery.of(context).size.width * 0.22,
-                        textFieldWidth:
-                            MediaQuery.of(context).size.width * 0.15,
-                        validationFunc: (val) {},
-                      ),
-                    ],
-                  ),
-                  gapH10,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.22,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  GetBuilder<HomeController>(
+                    builder:
+                        (homeCont) {
+                      double bigRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.5:MediaQuery.of(context).size.width * 0.7;
+                      double bigTextFieldWidth=homeCont.isMenuOpened?
+                          MediaQuery.of(context).size.width * 0.4
+                              : MediaQuery.of(context).size.width * 0.6;
+                      double smallRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.22:MediaQuery.of(context).size.width * 0.27;
+                      double smallTextFieldWidth=homeCont.isMenuOpened?
+                          MediaQuery.of(context).size.width * 0.15
+                              : MediaQuery.of(context).size.width * 0.19;
+                      double middleRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.25:MediaQuery.of(context).size.width * 0.29;
+                      double middleTextFieldWidth=homeCont.isMenuOpened?
+                          MediaQuery.of(context).size.width * 0.2
+                              : MediaQuery.of(context).size.width * 0.25;
+                          return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('title'.tr),
-                            DropdownMenu<String>(
-                              width: MediaQuery.of(context).size.width * 0.15,
-                              // requestFocusOnTap: false,
-                              enableSearch: true,
-                              controller: titleController,
-                              hintText: 'Doctor, Miss, Mister',
-                              inputDecorationTheme: InputDecorationTheme(
-                                // filled: true,
-                                hintStyle: const TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                ),
-                                contentPadding: const EdgeInsets.fromLTRB(
-                                  20,
-                                  0,
-                                  25,
-                                  5,
-                                ),
-                                // outlineBorder: BorderSide(color: Colors.black,),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Primary.primary.withAlpha(
-                                      (0.2 * 255).toInt(),
-                                    ),
-                                    width: 1,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Primary.primary.withAlpha(
-                                      (0.4 * 255).toInt(),
-                                    ),
-                                    width: 2,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(9),
-                                  ),
-                                ),
-                              ),
-                              // menuStyle: ,
-                              menuHeight: 250,
-                              dropdownMenuEntries:
-                                  titles.map<DropdownMenuEntry<String>>((
-                                    String option,
-                                  ) {
-                                    return DropdownMenuEntry<String>(
-                                      value: option,
-                                      label: option,
-                                    );
-                                  }).toList(),
-                              enableFilter: true,
-                              onSelected: (String? val) {
-                                setState(() {
-                                  selectedTitle = val!;
-                                });
+                            DialogTextField(
+                              textEditingController: clientNumberController,
+                              text: '${'client_code'.tr}*',
+                              rowWidth: bigRowWidth,
+                              textFieldWidth: bigTextFieldWidth,
+                              validationFunc: (value) {
+                                if (value.isEmpty) {
+                                  return 'required_field'.tr;
+                                }
+                                return null;
                               },
                             ),
-                          ],
-                        ),
-                      ),
-                      PhoneTextField(
-                        textEditingController: mobileController,
-                        text: 'mobile'.tr,
-                        rowWidth: MediaQuery.of(context).size.width * 0.25,
-                        textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                        validationFunc: (val) {
-                          if (val.isNotEmpty && val.length < 9) {
-                            return '7_digits'.tr;
-                          }
-                          return null;
-                        },
-                        onCodeSelected: (value) {
-                          setState(() {
-                            selectedMobileCode = value;
-                          });
-                        },
-                        onChangedFunc: (value) {
-                          setState(() {
-                            // mainDescriptionController.text=value;
-                          });
-                        },
-                      ),
-                      // DialogTextField(
-                      //   textEditingController: mobileController,
-                      //   text: 'mobile'.tr,
-                      //   rowWidth:  MediaQuery.of(context).size.width * 0.22,
-                      //   textFieldWidth:  MediaQuery.of(context).size.width * 0.15,
-                      //   validationFunc: (){},
-                      //   onChangedFunc: (value){
-                      //     setState(() {
-                      //       // mainDescriptionController.text=value;
-                      //     });
-                      //   },),
-                      DialogTextField(
-                        textEditingController: streetController,
-                        text: 'street'.tr,
-                        rowWidth: MediaQuery.of(context).size.width * 0.22,
-                        textFieldWidth:
-                            MediaQuery.of(context).size.width * 0.15,
-                        validationFunc: (val) {},
-                        // onChangedFunc: (value){
-                        //   setState(() {
-                        //     // mainDescriptionController.text=value;
-                        //   });
-                        // },
-                      ),
-                    ],
-                  ),
-                  gapH10,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      DialogTextField(
-                        textEditingController: jobPositionController,
-                        text: 'job_position'.tr,
-                        hint: 'Sales Director,Sales...',
-                        rowWidth: MediaQuery.of(context).size.width * 0.22,
-                        textFieldWidth:
-                            MediaQuery.of(context).size.width * 0.15,
-                        validationFunc: (val) {},
-                      ),
-                      DialogTextField(
-                        textEditingController: emailController,
-                        text: 'email'.tr,
-                        hint: 'example@gmail.com',
-                        rowWidth: MediaQuery.of(context).size.width * 0.25,
-                        textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                        validationFunc: (String value) {
-                          if (value.isNotEmpty &&
-                              !RegExp(
-                                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
-                              ).hasMatch(value)) {
-                            return 'check_format'.tr;
-                          }
-                        },
-                      ),
-                      // DialogTextField(
-                      //   textEditingController: cityController,
-                      //   text: 'city'.tr,
-                      //   rowWidth: MediaQuery.of(context).size.width * 0.22,
-                      //   textFieldWidth:
-                      //       MediaQuery.of(context).size.width * 0.15,
-                      //   validationFunc: (val) {},
-                      // ),
-                      isCountriesFetched
-                          ? SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.22,
-                            child: Row(
+                            gapH16,
+                            DialogTextField(
+                              textEditingController: clientNameController,
+                              text: '${'client_name'.tr}*',
+                              rowWidth: bigRowWidth,
+                              textFieldWidth: bigTextFieldWidth,
+                                  // MediaQuery.of(context).size.width * 0.4,
+                              validationFunc: (value) {
+                                if (value.isEmpty) {
+                                  return 'required_field'.tr;
+                                }
+                                return null;
+                              },
+                            ),
+                            gapH10,
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('country'.tr),
-                                DropdownMenu<String>(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.15,
-                                  // requestFocusOnTap: false,
-                                  enableSearch: true,
-                                  controller: countryController,
-                                  hintText: '',
-                                  inputDecorationTheme: InputDecorationTheme(
-                                    // filled: true,
-                                    hintStyle: const TextStyle(
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                    contentPadding: const EdgeInsets.fromLTRB(
-                                      20,
-                                      0,
-                                      25,
-                                      5,
-                                    ),
-                                    // outlineBorder: BorderSide(color: Colors.black,),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Primary.primary.withAlpha(
-                                          (0.2 * 255).toInt(),
-                                        ),
-                                        width: 1,
-                                      ),
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(9),
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Primary.primary.withAlpha(
-                                          (0.4 * 255).toInt(),
-                                        ),
-                                        width: 2,
-                                      ),
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(9),
-                                      ),
-                                    ),
-                                  ),
-                                  // menuStyle: ,
-                                  menuHeight: 250,
-                                  dropdownMenuEntries:
-                                      countriesNamesList
-                                          .map<DropdownMenuEntry<String>>((
-                                            String option,
-                                          ) {
-                                            return DropdownMenuEntry<String>(
-                                              value: option,
-                                              label: option,
-                                            );
-                                          })
-                                          .toList(),
-                                  enableFilter: true,
-                                  onSelected: (String? val) {
+                                DialogTextField(
+                                  textEditingController: referenceController,
+                                  text: 'reference'.tr,
+                                  rowWidth:smallRowWidth,
+                                  textFieldWidth:smallTextFieldWidth,
+                                  validationFunc: (val) {},
+                                ),
+                                PhoneTextField(
+                                  textEditingController: phoneController,
+                                  text: 'phone'.tr,
+                                  rowWidth:middleRowWidth,
+                                  textFieldWidth:middleTextFieldWidth,
+                                  validationFunc: (String val) {
+                                    if (val.isNotEmpty && val.length < 7) {
+                                      return '7_digits'.tr;
+                                    }
+                                    return null;
+                                  },
+                                  onCodeSelected: (value) {
                                     setState(() {
-                                      selectedCountry = val!;
-                                      getCitiesFromBack(val);
+                                      selectedPhoneCode = value;
+                                    });
+                                  },
+                                  onChangedFunc: (value) {
+                                    setState(() {
+                                      // mainDescriptionController.text=value;
                                     });
                                   },
                                 ),
+                                DialogTextField(
+                                  textEditingController: floorBldgController,
+                                  text: 'floor_bldg'.tr,
+                                  rowWidth:smallRowWidth,
+                                  textFieldWidth:smallTextFieldWidth,
+                                  validationFunc: (val) {},
+                                ),
                               ],
                             ),
-                          )
-                          : SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.22,
-                            child: loading(),
-                          ),
-                    ],
-                  ),
-                  gapH10,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      DialogTextField(
-                        textEditingController: taxNumberController,
-                        text: 'tax_number'.tr,
-                        rowWidth: MediaQuery.of(context).size.width * 0.22,
-                        textFieldWidth:
-                            MediaQuery.of(context).size.width * 0.15,
-                        validationFunc: (String val) {
-                          if (selectedClientType == 2 && val.isEmpty) {
-                            return 'required_field'.tr;
-                          }
-                          return null;
-                        },
-                      ),
-                      DialogTextField(
-                        textEditingController: websiteController,
-                        text: 'website'.tr,
-                        hint: 'www.example.com',
-                        rowWidth: MediaQuery.of(context).size.width * 0.25,
-                        textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                        validationFunc: (String value) {
-                          // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                          //     .hasMatch(value)) {
-                          //   return 'check_format'.tr ;
-                          // }return null;
-                        },
-                      ),
+                            gapH10,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  width:smallRowWidth,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text('title'.tr),
+                                      DropdownMenu<String>(
+                                        width:smallTextFieldWidth,
+                                        // requestFocusOnTap: false,
+                                        enableSearch: true,
+                                        controller: titleController,
+                                        hintText: 'Doctor, Miss, Mister',
+                                        inputDecorationTheme: InputDecorationTheme(
+                                          // filled: true,
+                                          hintStyle: const TextStyle(
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.fromLTRB(
+                                                20,
+                                                0,
+                                                25,
+                                                5,
+                                              ),
+                                          // outlineBorder: BorderSide(color: Colors.black,),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Primary.primary.withAlpha(
+                                                (0.2 * 255).toInt(),
+                                              ),
+                                              width: 1,
+                                            ),
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                                  Radius.circular(9),
+                                                ),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Primary.primary.withAlpha(
+                                                (0.4 * 255).toInt(),
+                                              ),
+                                              width: 2,
+                                            ),
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                                  Radius.circular(9),
+                                                ),
+                                          ),
+                                        ),
+                                        // menuStyle: ,
+                                        menuHeight: 250,
+                                        dropdownMenuEntries:
+                                            titles.map<
+                                              DropdownMenuEntry<String>
+                                            >((String option) {
+                                              return DropdownMenuEntry<String>(
+                                                value: option,
+                                                label: option,
+                                              );
+                                            }).toList(),
+                                        enableFilter: true,
+                                        onSelected: (String? val) {
+                                          setState(() {
+                                            selectedTitle = val!;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                PhoneTextField(
+                                  textEditingController: mobileController,
+                                  text: 'mobile'.tr,
+                                  rowWidth:middleRowWidth,
+                                  textFieldWidth:middleTextFieldWidth,
+                                  validationFunc: (val) {
+                                    if (val.isNotEmpty && val.length < 9) {
+                                      return '7_digits'.tr;
+                                    }
+                                    return null;
+                                  },
+                                  onCodeSelected: (value) {
+                                    setState(() {
+                                      selectedMobileCode = value;
+                                    });
+                                  },
+                                  onChangedFunc: (value) {
+                                    setState(() {
+                                      // mainDescriptionController.text=value;
+                                    });
+                                  },
+                                ),
+                                DialogTextField(
+                                  textEditingController: streetController,
+                                  text: 'street'.tr,
+                                  rowWidth:smallRowWidth,
+                                  textFieldWidth:smallTextFieldWidth,
+                                  validationFunc: (val) {},
+                                  // onChangedFunc: (value){
+                                  //   setState(() {
+                                  //     // mainDescriptionController.text=value;
+                                  //   });
+                                  // },
+                                ),
+                              ],
+                            ),
+                            gapH10,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                DialogTextField(
+                                  textEditingController: jobPositionController,
+                                  text: 'job_position'.tr,
+                                  hint: 'Sales Director,Sales...',
+                                  rowWidth:smallRowWidth,
+                                  textFieldWidth:smallTextFieldWidth,
+                                  validationFunc: (val) {},
+                                ),
+                                DialogTextField(
+                                  textEditingController: emailController,
+                                  text: 'email'.tr,
+                                  hint: 'example@gmail.com',
+                                  rowWidth:middleRowWidth,
+                                  textFieldWidth:middleTextFieldWidth,
+                                  validationFunc: (String value) {
+                                    if (value.isNotEmpty &&
+                                        !RegExp(
+                                          r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                        ).hasMatch(value)) {
+                                      return 'check_format'.tr;
+                                    }
+                                  },
+                                ),
+                                isCountriesFetched
+                                    ? SizedBox(
+                                      width:smallRowWidth,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text('country'.tr),
+                                          DropdownMenu<String>(
+                                            width:
+                                               smallTextFieldWidth,
+                                            // requestFocusOnTap: false,
+                                            enableSearch: true,
+                                            controller: countryController,
+                                            hintText: '',
+                                            inputDecorationTheme: InputDecorationTheme(
+                                              // filled: true,
+                                              hintStyle: const TextStyle(
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              contentPadding:
+                                                  const EdgeInsets.fromLTRB(
+                                                    20,
+                                                    0,
+                                                    25,
+                                                    5,
+                                                  ),
+                                              // outlineBorder: BorderSide(color: Colors.black,),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Primary.primary
+                                                      .withAlpha(
+                                                        (0.2 * 255).toInt(),
+                                                      ),
+                                                  width: 1,
+                                                ),
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                      Radius.circular(9),
+                                                    ),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Primary.primary
+                                                      .withAlpha(
+                                                        (0.4 * 255).toInt(),
+                                                      ),
+                                                  width: 2,
+                                                ),
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                      Radius.circular(9),
+                                                    ),
+                                              ),
+                                            ),
+                                            // menuStyle: ,
+                                            menuHeight: 250,
+                                            dropdownMenuEntries:
+                                                countriesNamesList.map<
+                                                  DropdownMenuEntry<String>
+                                                >((String option) {
+                                                  return DropdownMenuEntry<
+                                                    String
+                                                  >(
+                                                    value: option,
+                                                    label: option,
+                                                  );
+                                                }).toList(),
+                                            enableFilter: true,
+                                            onSelected: (String? val) {
+                                              setState(() {
+                                                selectedCountry = val!;
+                                                getCitiesFromBack(val);
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                    : SizedBox(
+                                      width:
+                                          smallRowWidth,
+                                      child: loading(),
+                                    ),
+                              ],
+                            ),
+                            gapH10,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                DialogTextField(
+                                  textEditingController: taxNumberController,
+                                  text: 'tax_number'.tr,
+                                  rowWidth:smallRowWidth,
+                                  textFieldWidth:smallTextFieldWidth,
+                                  validationFunc: (String val) {
+                                    if (selectedClientType == 2 &&
+                                        val.isEmpty) {
+                                      return 'required_field'.tr;
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                DialogTextField(
+                                  textEditingController: websiteController,
+                                  text: 'website'.tr,
+                                  hint: 'www.example.com',
+                                  rowWidth:middleRowWidth,
+                                  textFieldWidth:middleTextFieldWidth,
+                                  validationFunc: (String value) {
+                                    // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                    //     .hasMatch(value)) {
+                                    //   return 'check_format'.tr ;
+                                    // }return null;
+                                  },
+                                ),
 
-                      isCitiesFetched
-                          ? SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.22,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                isCitiesFetched
+                                    ? SizedBox(
+                                      width:
+                                         smallRowWidth,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text('city'.tr),
+                                          DropdownMenu<String>(
+                                            width:
+                                               smallTextFieldWidth,
+                                            // requestFocusOnTap: false,
+                                            enableSearch: true,
+                                            controller: cityController,
+                                            hintText: '',
+                                            inputDecorationTheme: InputDecorationTheme(
+                                              // filled: true,
+                                              hintStyle: const TextStyle(
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              contentPadding:
+                                                  const EdgeInsets.fromLTRB(
+                                                    20,
+                                                    0,
+                                                    25,
+                                                    5,
+                                                  ),
+                                              // outlineBorder: BorderSide(color: Colors.black,),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Primary.primary
+                                                      .withAlpha(
+                                                        (0.2 * 255).toInt(),
+                                                      ),
+                                                  width: 1,
+                                                ),
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                      Radius.circular(9),
+                                                    ),
+                                              ),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Primary.primary
+                                                      .withAlpha(
+                                                        (0.4 * 255).toInt(),
+                                                      ),
+                                                  width: 2,
+                                                ),
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                      Radius.circular(9),
+                                                    ),
+                                              ),
+                                            ),
+                                            // menuStyle: ,
+                                            menuHeight: 250,
+                                            dropdownMenuEntries:
+                                                citiesNamesList.map<
+                                                  DropdownMenuEntry<String>
+                                                >((String option) {
+                                                  return DropdownMenuEntry<
+                                                    String
+                                                  >(
+                                                    value: option,
+                                                    label: option,
+                                                  );
+                                                }).toList(),
+                                            enableFilter: true,
+                                            onSelected: (String? val) {
+                                              setState(() {
+                                                selectedCity = val!;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                    : SizedBox(
+                                      width:
+                                          smallRowWidth,
+                                      child: loading(),
+                                    ),
+                              ],
+                            ),
+                            gapH40,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Text('city'.tr),
-                                DropdownMenu<String>(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.15,
-                                  // requestFocusOnTap: false,
-                                  enableSearch: true,
-                                  controller: cityController,
-                                  hintText: '',
-                                  inputDecorationTheme: InputDecorationTheme(
-                                    // filled: true,
-                                    hintStyle: const TextStyle(
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                    contentPadding: const EdgeInsets.fromLTRB(
-                                      20,
-                                      0,
-                                      25,
-                                      5,
-                                    ),
-                                    // outlineBorder: BorderSide(color: Colors.black,),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Primary.primary.withAlpha(
-                                          (0.2 * 255).toInt(),
-                                        ),
-                                        width: 1,
-                                      ),
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(9),
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: Primary.primary.withAlpha(
-                                          (0.4 * 255).toInt(),
-                                        ),
-                                        width: 2,
-                                      ),
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(9),
-                                      ),
-                                    ),
-                                  ),
-                                  // menuStyle: ,
-                                  menuHeight: 250,
-                                  dropdownMenuEntries:
-                                      citiesNamesList
-                                          .map<DropdownMenuEntry<String>>((
-                                            String option,
-                                          ) {
-                                            return DropdownMenuEntry<String>(
-                                              value: option,
-                                              label: option,
-                                            );
-                                          })
+                                Wrap(
+                                  spacing: 0.0,
+                                  direction: Axis.horizontal,
+                                  children:
+                                      tabsList
+                                          .map(
+                                            (element) => _buildTabChipItem(
+                                              element,
+                                              // element['id'],
+                                              // element['name'],
+                                              tabsList.indexOf(element),
+                                            ),
+                                          )
                                           .toList(),
-                                  enableFilter: true,
-                                  onSelected: (String? val) {
-                                    setState(() {
-                                      selectedCity = val!;
-                                    });
-                                  },
                                 ),
                               ],
                             ),
-                          )
-                          //     ? DialogDropMenu(
-                          //   optionsList: citiesNamesList,
-                          //   controller: cityController,
-                          //   isDetectedHeight: true,
-                          //   text: 'city'.tr,
-                          //   hint:selectedCountry.isEmpty? 'select the country first':'',
-                          //   rowWidth: MediaQuery.of(context).size.width*0.22,
-                          //   textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                          //   onSelected: (val) {
-                          //     setState(() {
-                          //       selectedCity = val;
-                          //     });
-                          //   },
-                          // )
-                          : SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.22,
-                            child: loading(),
-                          ),
-                    ],
-                  ),
-                  gapH40,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: 0.0,
-                        direction: Axis.horizontal,
-                        children:
-                            tabsList
-                                .map(
-                                  (element) => _buildTabChipItem(
-                                    element,
-                                    // element['id'],
-                                    // element['name'],
-                                    tabsList.indexOf(element),
-                                  ),
-                                )
-                                .toList(),
-                      ),
-                    ],
+                          ],
+                        );
+                        },
                   ),
                   Container(
                     padding: EdgeInsets.symmetric(
@@ -665,177 +670,11 @@ class _AddNewClientState extends State<AddNewClient> {
                     ),
                     child: Column(
                       children: [
-                        // selectedTabIndex == 0
-                        //     ? Column(
-                        //         mainAxisAlignment: MainAxisAlignment.start,
-                        //         crossAxisAlignment: CrossAxisAlignment.start,
-                        //         children: [
-                        //           ReusableAddCard(
-                        //             text: 'add_contact'.tr,
-                        //             onTap: () {},
-                        //           ),
-                        //         ],
-                        //       )
-                        //     : selectedTabIndex == 1
-                        //         ? Row(
-                        //             mainAxisAlignment:
-                        //                 MainAxisAlignment.spaceBetween,
-                        //             crossAxisAlignment:
-                        //                 CrossAxisAlignment.start,
-                        //             children: [
-                        //               SizedBox(
-                        //                   width: MediaQuery.of(context)
-                        //                           .size
-                        //                           .width *
-                        //                       0.3,
-                        //                   child: Column(
-                        //                     children: [
-                        //                       DialogDropMenu(
-                        //                         optionsList: const [''],
-                        //                         text: '${'sales_person'.tr}*',
-                        //                         hint: '',
-                        //                         rowWidth: MediaQuery.of(context)
-                        //                                 .size
-                        //                                 .width *
-                        //                             0.3,
-                        //                         textFieldWidth:
-                        //                             MediaQuery.of(context)
-                        //                                     .size
-                        //                                     .width *
-                        //                                 0.17,
-                        //                         onSelected: () {},
-                        //                       ),
-                        //                       gapH16,
-                        //                       DialogDropMenu(
-                        //                         optionsList: [
-                        //                           'cash'.tr,
-                        //                           'on_account'.tr
-                        //                         ],
-                        //                         text: '${'payment_terms'.tr}*',
-                        //                         hint: '',
-                        //                         rowWidth: MediaQuery.of(context)
-                        //                                 .size
-                        //                                 .width *
-                        //                             0.3,
-                        //                         textFieldWidth:
-                        //                             MediaQuery.of(context)
-                        //                                     .size
-                        //                                     .width *
-                        //                                 0.17,
-                        //                         onSelected: (val) {
-                        //                           setState(() {
-                        //                             paymentTerm = val;
-                        //                           });
-                        //                         },
-                        //                       ),
-                        //                       gapH16,
-                        //                       DialogDropMenu(
-                        //                         optionsList: ['standard'.tr],
-                        //                         text: 'pricelist'.tr,
-                        //                         hint: '',
-                        //                         rowWidth: MediaQuery.of(context)
-                        //                                 .size
-                        //                                 .width *
-                        //                             0.3,
-                        //                         textFieldWidth:
-                        //                             MediaQuery.of(context)
-                        //                                     .size
-                        //                                     .width *
-                        //                                 0.17,
-                        //                         onSelected: (val) {
-                        //                           setState(() {
-                        //                             priceListSelected = val;
-                        //                           });
-                        //                         },
-                        //                       ),
-                        //                     ],
-                        //                   )),
-                        //             ],
-                        //           )
-                        //         : selectedTabIndex == 2
-                        //             ? Column(
-                        //                 mainAxisAlignment:
-                        //                     MainAxisAlignment.start,
-                        //                 crossAxisAlignment:
-                        //                     CrossAxisAlignment.start,
-                        //                 children: [
-                        //                   DialogTextField(
-                        //                     textEditingController:
-                        //                         internalNoteController,
-                        //                     text: '${'internal_note'.tr}*',
-                        //                     rowWidth: MediaQuery.of(context)
-                        //                             .size
-                        //                             .width *
-                        //                         0.7,
-                        //                     textFieldWidth:
-                        //                         MediaQuery.of(context)
-                        //                                 .size
-                        //                                 .width *
-                        //                             0.6,
-                        //                     validationFunc: (val) {},
-                        //                   ),
-                        //                 ],
-                        //               )
-                        //             :
                         selectedTabIndex == 0
                             ? Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // SizedBox(
-                                //   width:  MediaQuery.of(context)
-                                //       .size
-                                //       .width *
-                                //       0.25,
-                                //   child: Row(
-                                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                //     children: [
-                                //       Text(
-                                //         'granted_discount'.tr,
-                                //       ),
-                                //       SizedBox(
-                                //         width:   MediaQuery.of(context)
-                                //             .size
-                                //             .width *
-                                //             0.15,
-                                //         child: TextFormField(
-                                //           // textAlign: TextAlign.center,
-                                //           decoration: InputDecoration(
-                                //             contentPadding: const EdgeInsets.fromLTRB(20, 0, 25, 10),
-                                //             enabledBorder: OutlineInputBorder(
-                                //               borderSide: BorderSide(
-                                //                   color: Primary.primary.withAlpha((0.2 * 255).toInt()), width: 1),
-                                //               borderRadius:
-                                //               const BorderRadius.all(Radius.circular(9)),
-                                //             ),
-                                //             focusedBorder: OutlineInputBorder(
-                                //               borderSide: BorderSide(
-                                //                   color: Primary.primary.withAlpha((0.4 * 255).toInt()), width: 2),
-                                //               borderRadius:
-                                //               const BorderRadius.all(Radius.circular(9)),
-                                //             ),
-                                //             errorStyle: const TextStyle(
-                                //               fontSize: 10.0,
-                                //             ),
-                                //             focusedErrorBorder: const OutlineInputBorder(
-                                //               borderRadius: BorderRadius.all(Radius.circular(9)),
-                                //               borderSide: BorderSide(width: 1, color: Colors.red),
-                                //             ),
-                                //           ),
-                                //           controller: grantedDiscountController,
-                                //           keyboardType: const TextInputType.numberWithOptions(
-                                //             decimal: false,
-                                //             signed: true,
-                                //           ),
-                                //           inputFormatters: <TextInputFormatter>[
-                                //             FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
-                                //             // WhitelistingTextInputFormatter.digitsOnly
-                                //           ],
-                                //         ),
-                                //       ),
-                                //     ],
-                                //   ),
-                                // ),
                                 ReusableInputNumberField(
                                   controller: grantedDiscountController,
                                   textFieldWidth:
@@ -906,33 +745,40 @@ class _AddNewClientState extends State<AddNewClient> {
                                   child: Column(
                                     children: [
                                       GetBuilder<ClientController>(
-                                          builder: (cont) {
-                                            return DialogDropMenu(
-                                              controller: cont.salesPersonController,
-                                              optionsList:
-                                              clientController
-                                                  .salesPersonListNames,
-                                              text: 'sales_person'.tr,
-                                              hint: 'search'.tr,
-                                              rowWidth:
-                                              MediaQuery.of(context).size.width *
-                                                  0.3,
-                                              textFieldWidth:
-                                              MediaQuery.of(context).size.width *
-                                                  0.17,
-                                              onSelected: (String? val) {
-                                                setState(() {
-                                                  var index = clientController
-                                                      .salesPersonListNames
-                                                      .indexOf(val!);
-                                                  clientController.setSelectedSalesPerson
-                                                    (val,
+                                        builder: (cont) {
+                                          return DialogDropMenu(
+                                            controller:
+                                                cont.salesPersonController,
+                                            optionsList:
+                                                clientController
+                                                    .salesPersonListNames,
+                                            text: 'sales_person'.tr,
+                                            hint: 'search'.tr,
+                                            rowWidth:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.3,
+                                            textFieldWidth:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.17,
+                                            onSelected: (String? val) {
+                                              setState(() {
+                                                var index = clientController
+                                                    .salesPersonListNames
+                                                    .indexOf(val!);
+                                                clientController
+                                                    .setSelectedSalesPerson(
+                                                      val,
                                                       clientController
-                                                          .salesPersonListId[index]);
-                                                });
-                                              },
-                                            );
-                                          }
+                                                          .salesPersonListId[index],
+                                                    );
+                                              });
+                                            },
+                                          );
+                                        },
                                       ),
                                       gapH16,
                                       DialogDropMenu(
@@ -1075,12 +921,13 @@ class _AddNewClientState extends State<AddNewClient> {
                                     '',
                                     '',
                                     '',
-                                    clientController.selectedSalesPersonId.toString(),
+                                    clientController.selectedSalesPersonId
+                                        .toString(),
                                     paymentTerm,
                                     selectedPriceListId,
                                     internalNoteController.text,
                                     '',
-                                    clientController.contactsList
+                                    clientController.contactsList,
                                   );
                                   if (res['success'] == true) {
                                     CommonWidgets.snackBar(
@@ -1161,60 +1008,63 @@ class _AddNewClientState extends State<AddNewClient> {
       ),
     );
   }
-
 }
 
 class ContactsAndAddressesSection extends StatefulWidget {
-  const ContactsAndAddressesSection({super.key, });
-
+  const ContactsAndAddressesSection({super.key});
 
   @override
-  State<ContactsAndAddressesSection> createState() => _ContactsAndAddressesSectionState();
+  State<ContactsAndAddressesSection> createState() =>
+      _ContactsAndAddressesSectionState();
 }
 
-class _ContactsAndAddressesSectionState extends State<ContactsAndAddressesSection> {
-  ClientController clientController=Get.find();
-  addNewContact(){
-    Map contact={
-      'type':'1',
-      'name':'',
-      'title':'',
-      'jobPosition':'',
-      'deliveryAddress':'',
-      'phoneCode':'+961',
-      'phoneNumber':'',
-      'extension':'',
-      'mobileCode':'+961',
-      'mobileNumber':'',
-      'email':'',
-      'note':'',
-      'internalNote':'',
+class _ContactsAndAddressesSectionState
+    extends State<ContactsAndAddressesSection> {
+  ClientController clientController = Get.find();
+  addNewContact() {
+    Map contact = {
+      'type': '1',
+      'name': '',
+      'title': '',
+      'jobPosition': '',
+      'deliveryAddress': '',
+      'phoneCode': '+961',
+      'phoneNumber': '',
+      'extension': '',
+      'mobileCode': '+961',
+      'mobileNumber': '',
+      'email': '',
+      'note': '',
+      'internalNote': '',
     };
     clientController.addToContactsList(contact);
   }
+
   @override
   Widget build(BuildContext context) {
-      return GetBuilder<ClientController>(
-        builder: (cont) {
-          return Column(
-            children: [
-              SizedBox(
-                height: cont.contactsList.isEmpty?20:420,
-                child: ListView.builder(
-                  itemCount: cont.contactsList.length,
-                  itemBuilder: (context, index) => ReusableContactSection(index: index),),
+    return GetBuilder<ClientController>(
+      builder: (cont) {
+        return Column(
+          children: [
+            SizedBox(
+              height: cont.contactsList.isEmpty ? 20 : 420,
+              child: ListView.builder(
+                itemCount: cont.contactsList.length,
+                itemBuilder:
+                    (context, index) => ReusableContactSection(index: index),
               ),
-              gapH16,
-              ReusableAddCard(
-                text: 'add_new_contact'.tr,
-                onTap: () {
+            ),
+            gapH16,
+            ReusableAddCard(
+              text: 'add_new_contact'.tr,
+              onTap: () {
                 addNewContact();
-                },
-              )
-            ],
-          );
-        }
-      );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -1226,7 +1076,7 @@ class ReusableContactSection extends StatefulWidget {
 }
 
 class _ReusableContactSectionState extends State<ReusableContactSection> {
-  ClientController clientController=Get.find();
+  ClientController clientController = Get.find();
   String selectedContactsPhoneCode = '', selectedContactsMobileCode = '';
   int selectedContactAndAddressType = 1;
   String selectedContactsTitle = '';
@@ -1242,23 +1092,35 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
   TextEditingController contactsExtController = TextEditingController();
   @override
   void initState() {
-
-      // selectedContactAndAddressType=int.parse('${clientController.contactsList[widget.index]['type']??1}');
-      selectedContactsPhoneCode=clientController.contactsList[widget.index]['phoneCode']??'+961';
-      selectedContactsMobileCode=clientController.contactsList[widget.index]['mobileCode']??'+961';
-      contactsNameController.text=clientController.contactsList[widget.index]['name'];
-      contactsTitleController.text=clientController.contactsList[widget.index]['title'];
-      selectedContactsTitle=clientController.contactsList[widget.index]['title'];
-      contactsPhoneController.text=clientController.contactsList[widget.index]['phoneNumber'];
-      contactsMobileController.text=clientController.contactsList[widget.index]['mobileNumber'];
-      contactsJobPositionController.text=clientController.contactsList[widget.index]['jobPosition'];
-      contactsAddressController.text=clientController.contactsList[widget.index]['deliveryAddress'];
-      contactsEmailController.text=clientController.contactsList[widget.index]['email'];
-      contactsNoteController.text=clientController.contactsList[widget.index]['internalNote'];
-      contactsExtController.text=clientController.contactsList[widget.index]['extension'];
+    // selectedContactAndAddressType=int.parse('${clientController.contactsList[widget.index]['type']??1}');
+    selectedContactsPhoneCode =
+        clientController.contactsList[widget.index]['phoneCode'] ?? '+961';
+    selectedContactsMobileCode =
+        clientController.contactsList[widget.index]['mobileCode'] ?? '+961';
+    contactsNameController.text =
+        clientController.contactsList[widget.index]['name'];
+    contactsTitleController.text =
+        clientController.contactsList[widget.index]['title'];
+    selectedContactsTitle =
+        clientController.contactsList[widget.index]['title'];
+    contactsPhoneController.text =
+        clientController.contactsList[widget.index]['phoneNumber'];
+    contactsMobileController.text =
+        clientController.contactsList[widget.index]['mobileNumber'];
+    contactsJobPositionController.text =
+        clientController.contactsList[widget.index]['jobPosition'];
+    contactsAddressController.text =
+        clientController.contactsList[widget.index]['deliveryAddress'];
+    contactsEmailController.text =
+        clientController.contactsList[widget.index]['email'];
+    contactsNoteController.text =
+        clientController.contactsList[widget.index]['internalNote'];
+    contactsExtController.text =
+        clientController.contactsList[widget.index]['extension'];
 
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ClientController>(
@@ -1267,8 +1129,10 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
           margin: const EdgeInsets.only(top: 20.0),
           padding: EdgeInsets.all(5),
           decoration: BoxDecoration(
-            border: Border.all(color: Primary.primary.withAlpha((0.2 * 255).toInt())),
-            borderRadius:  BorderRadius.circular(9),
+            border: Border.all(
+              color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+            ),
+            borderRadius: BorderRadius.circular(9),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1320,195 +1184,214 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                 'Contact Selection used to add the contact information of personnel within the company (e.g., CEO, CFO, ...).',
               ),
               gapH28,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  DialogTextField(
-                    textEditingController: contactsNameController,
-                    text: 'name'.tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.22,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                    validationFunc: (val) {},
-                    onChangedFunc: (val) {
-                      cont.updateContactName(widget.index,val);
-                    },
-                  ),
-                  PhoneTextField(
-                    textEditingController: contactsPhoneController,
-                    text: 'phone'.tr,
-                    initialValue: selectedContactsPhoneCode,
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                    validationFunc: (String val) {
-                      if (val.isNotEmpty && val.length < 7) {
-                        return '7_digits'.tr;
-                      }
-                      return null;
-                    },
-                    onCodeSelected: (value) {
-                      cont.updateContactPhoneCode(widget.index,'$value');
-                      setState(() {
-                        selectedContactsPhoneCode = value;
-                      });
-                    },
-                    onChangedFunc: (value) {
-                      cont.updateContactPhoneNumber(widget.index,'$value');
-                    },
-                  ),
-                  DialogTextField(
-                    textEditingController: contactsExtController,
-                    text: 'ext'.tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.19,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                    validationFunc: (val) {},
-                    onChangedFunc: (val) {
-                      cont.updateContactExtension(widget.index,val);
-                    },
-                  ),
-                ],
-              ),
-              gapH10,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.22,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('title'.tr),
-                        DropdownMenu<String>(
-                          width: MediaQuery.of(context).size.width * 0.15,
-                          // requestFocusOnTap: false,
-                          enableSearch: true,
-                          controller: contactsTitleController,
-                          hintText: 'Doctor, Miss, Mister',
-                          inputDecorationTheme: InputDecorationTheme(
-                            // filled: true,
-                            hintStyle: const TextStyle(
-                              fontStyle: FontStyle.italic,
-                            ),
-                            contentPadding: const EdgeInsets.fromLTRB(
-                              20,
-                              0,
-                              25,
-                              5,
-                            ),
-                            // outlineBorder: BorderSide(color: Colors.black,),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Primary.primary.withAlpha(
-                                  (0.2 * 255).toInt(),
+              GetBuilder<HomeController>(
+                builder: (homeCont) {
+
+                  double miniRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.19:MediaQuery.of(context).size.width * 0.25;
+                  double smallRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.22:MediaQuery.of(context).size.width * 0.27;
+                  double smallTextFieldWidth=homeCont.isMenuOpened?
+                  MediaQuery.of(context).size.width * 0.15
+                      : MediaQuery.of(context).size.width * 0.19;
+                  double middleRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.25:MediaQuery.of(context).size.width * 0.29;
+                  double middleTextFieldWidth=homeCont.isMenuOpened?
+                  MediaQuery.of(context).size.width * 0.2
+                      : MediaQuery.of(context).size.width * 0.25;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          DialogTextField(
+                            textEditingController: contactsNameController,
+                            text: 'name'.tr,
+                            rowWidth:smallRowWidth,
+                            textFieldWidth:smallTextFieldWidth,
+                            validationFunc: (val) {},
+                            onChangedFunc: (val) {
+                              cont.updateContactName(widget.index, val);
+                            },
+                          ),
+                          PhoneTextField(
+                            textEditingController: contactsPhoneController,
+                            text: 'phone'.tr,
+                            initialValue: selectedContactsPhoneCode,
+                            rowWidth:middleRowWidth,
+                            textFieldWidth:middleTextFieldWidth,
+                            validationFunc: (String val) {
+                              if (val.isNotEmpty && val.length < 7) {
+                                return '7_digits'.tr;
+                              }
+                              return null;
+                            },
+                            onCodeSelected: (value) {
+                              cont.updateContactPhoneCode(widget.index, '$value');
+                              setState(() {
+                                selectedContactsPhoneCode = value;
+                              });
+                            },
+                            onChangedFunc: (value) {
+                              cont.updateContactPhoneNumber(widget.index, '$value');
+                            },
+                          ),
+                          DialogTextField(
+                            textEditingController: contactsExtController,
+                            text: 'ext'.tr,
+                            rowWidth: miniRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
+                            validationFunc: (val) {},
+                            onChangedFunc: (val) {
+                              cont.updateContactExtension(widget.index, val);
+                            },
+                          ),
+                        ],
+                      ),
+                      gapH10,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: smallRowWidth,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('title'.tr),
+                                DropdownMenu<String>(
+                                  width: smallTextFieldWidth,
+                                  // requestFocusOnTap: false,
+                                  enableSearch: true,
+                                  controller: contactsTitleController,
+                                  hintText: 'Doctor, Miss, Mister',
+                                  inputDecorationTheme: InputDecorationTheme(
+                                    // filled: true,
+                                    hintStyle: const TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                    contentPadding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      0,
+                                      25,
+                                      5,
+                                    ),
+                                    // outlineBorder: BorderSide(color: Colors.black,),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Primary.primary.withAlpha(
+                                          (0.2 * 255).toInt(),
+                                        ),
+                                        width: 1,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(9),
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Primary.primary.withAlpha(
+                                          (0.4 * 255).toInt(),
+                                        ),
+                                        width: 2,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(9),
+                                      ),
+                                    ),
+                                  ),
+                                  // menuStyle: ,
+                                  menuHeight: 250,
+                                  dropdownMenuEntries:
+                                      titles.map<DropdownMenuEntry<String>>((
+                                        String option,
+                                      ) {
+                                        return DropdownMenuEntry<String>(
+                                          value: option,
+                                          label: option,
+                                        );
+                                      }).toList(),
+                                  enableFilter: true,
+                                  onSelected: (String? val) {
+                                    setState(() {
+                                      selectedContactsTitle = val!;
+                                    });
+                                    cont.updateContactTitle(widget.index, val!);
+                                  },
                                 ),
-                                width: 1,
-                              ),
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(9),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Primary.primary.withAlpha(
-                                  (0.4 * 255).toInt(),
-                                ),
-                                width: 2,
-                              ),
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(9),
-                              ),
+                              ],
                             ),
                           ),
-                          // menuStyle: ,
-                          menuHeight: 250,
-                          dropdownMenuEntries:
-                          titles.map<DropdownMenuEntry<String>>((
-                              String option,
-                              ) {
-                            return DropdownMenuEntry<String>(
-                              value: option,
-                              label: option,
-                            );
-                          }).toList(),
-                          enableFilter: true,
-                          onSelected: (String? val) {
-                            setState(() {
-                              selectedContactsTitle = val!;
-                            });
-                            cont.updateContactTitle(widget.index,val!);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  PhoneTextField(
-                    textEditingController: contactsMobileController,
-                    text: 'mobile'.tr,
-                    initialValue: selectedContactsMobileCode,
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                    validationFunc: (val) {
-                      if (val.isNotEmpty && val.length < 9) {
-                        return '7_digits'.tr;
-                      }
-                      return null;
-                    },
-                    onCodeSelected: (value) {
-                      setState(() {
-                        selectedContactsMobileCode = value;
-                      });
-                      cont.updateContactMobileCode(widget.index,'${value!}');
-                    },
-                    onChangedFunc: (value) {
-                      cont.updateContactMobileNumber(widget.index,'${value!}');
-                    },
-                  ),
-                  DialogTextField(
-                    textEditingController: contactsAddressController,
-                    text: 'address'.tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.19,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                    validationFunc: (val) {},
-                    onChangedFunc: (val) {
-                      cont.updateContactDeliveryAddress(widget.index,val);
-                    },
-                  )
-                ],
-              ),
-              gapH10,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  DialogTextField(
-                    textEditingController: contactsJobPositionController,
-                    text: 'job_position'.tr,
-                    hint: 'Sales Director,Sales...',
-                    rowWidth: MediaQuery.of(context).size.width * 0.22,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                    validationFunc: (val) {},
-                    onChangedFunc: (val) {
-                      cont.updateContactJobPosition(widget.index,val);
-                    },
-                  ),
-                  DialogTextField(
-                    textEditingController: contactsEmailController,
-                    text: 'email'.tr,
-                    hint: 'example@gmail.com',
-                    rowWidth: MediaQuery.of(context).size.width * 0.25,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.2,
-                    validationFunc: (String value) {
-                      if (value.isNotEmpty &&
-                          !RegExp(
-                            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
-                          ).hasMatch(value)) {
-                        return 'check_format'.tr;
-                      }
-                    },
-                    onChangedFunc: (val) {
-                      cont.updateContactEmail(widget.index,val);
-                    },
-                  ),
-                  SizedBox(width: MediaQuery.of(context).size.width * 0.19),
-                ],
+                          PhoneTextField(
+                            textEditingController: contactsMobileController,
+                            text: 'mobile'.tr,
+                            initialValue: selectedContactsMobileCode,
+                            rowWidth:middleRowWidth,
+                            textFieldWidth:middleTextFieldWidth,
+                            validationFunc: (val) {
+                              if (val.isNotEmpty && val.length < 9) {
+                                return '7_digits'.tr;
+                              }
+                              return null;
+                            },
+                            onCodeSelected: (value) {
+                              setState(() {
+                                selectedContactsMobileCode = value;
+                              });
+                              cont.updateContactMobileCode(widget.index, '${value!}');
+                            },
+                            onChangedFunc: (value) {
+                              cont.updateContactMobileNumber(widget.index, '${value!}');
+                            },
+                          ),
+                          DialogTextField(
+                            textEditingController: contactsAddressController,
+                            text: 'address'.tr,
+                            rowWidth: miniRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
+                            validationFunc: (val) {},
+                            onChangedFunc: (val) {
+                              cont.updateContactDeliveryAddress(widget.index, val);
+                            },
+                          ),
+                        ],
+                      ),
+                      gapH10,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          DialogTextField(
+                            textEditingController: contactsJobPositionController,
+                            text: 'job_position'.tr,
+                            hint: 'Sales Director,Sales...',
+                            rowWidth:smallRowWidth,
+                            textFieldWidth:smallTextFieldWidth,
+                            validationFunc: (val) {},
+                            onChangedFunc: (val) {
+                              cont.updateContactJobPosition(widget.index, val);
+                            },
+                          ),
+                          DialogTextField(
+                            textEditingController: contactsEmailController,
+                            text: 'email'.tr,
+                            hint: 'example@gmail.com',
+                            rowWidth:middleRowWidth,
+                            textFieldWidth:middleTextFieldWidth,
+                            validationFunc: (String value) {
+                              if (value.isNotEmpty &&
+                                  !RegExp(
+                                    r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                  ).hasMatch(value)) {
+                                return 'check_format'.tr;
+                              }
+                            },
+                            onChangedFunc: (val) {
+                              cont.updateContactEmail(widget.index, val);
+                            },
+                          ),
+                          SizedBox(width: miniRowWidth),
+                        ],
+                      ),
+                    ],
+                  );
+                }
               ),
               gapH48,
               TextField(
@@ -1523,59 +1406,35 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                   contentPadding: const EdgeInsets.all(16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(9),
-                    borderSide:  BorderSide(color: Primary.primary.withAlpha((0.2 * 255).toInt())),
+                    borderSide: BorderSide(
+                      color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(9),
-                    borderSide: BorderSide(color: Primary.primary.withAlpha((0.2 * 255).toInt())),
+                    borderSide: BorderSide(
+                      color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(9),
-                    borderSide:  BorderSide(width:1,color: Primary.primary.withAlpha((0.4 * 255).toInt())),
+                    borderSide: BorderSide(
+                      width: 1,
+                      color: Primary.primary.withAlpha((0.4 * 255).toInt()),
+                    ),
                   ),
                 ),
                 onChanged: (val) {
-                  cont.updateContactNote(widget.index,val);
+                  cont.updateContactNote(widget.index, val);
                 },
               ),
             ],
           ),
         );
-      }
+      },
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class MobileAddNewClient extends StatefulWidget {
   const MobileAddNewClient({super.key});
@@ -1709,7 +1568,8 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
     getCountriesFromBack();
     super.initState();
   }
-ClientController clientController=Get.find();
+
+  ClientController clientController = Get.find();
   @override
   Widget build(BuildContext context) {
     return isClientsInfoFetched
@@ -1957,7 +1817,7 @@ ClientController clientController=Get.find();
                     validationFunc: (String value) {
                       if (value.isNotEmpty &&
                           !RegExp(
-                            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                            r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
                           ).hasMatch(value)) {
                         return 'check_format'.tr;
                       }
@@ -2404,12 +2264,13 @@ ClientController clientController=Get.find();
                                     '',
                                     '',
                                     '',
-                                      clientController.selectedSalesPersonId.toString(),
-                                      paymentTerm,
+                                    clientController.selectedSalesPersonId
+                                        .toString(),
+                                    paymentTerm,
                                     priceListSelected,
                                     internalNoteController.text,
                                     '',
-                                    clientController.contactsList
+                                    clientController.contactsList,
                                   );
                                   if (res['success'] == true) {
                                     CommonWidgets.snackBar(

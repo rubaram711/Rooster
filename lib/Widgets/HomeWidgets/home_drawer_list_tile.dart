@@ -1209,6 +1209,7 @@ class _SideBarBasicState extends State<SideBarBasic>
                     isCollapsed = !isCollapsed;
                     homeController.isOpened.value =
                         !homeController.isOpened.value;
+                    homeController.setIsMenuOpened(homeController.isOpened.value);
                     // isCollapsed
                     //     ?  homeController.forwardController()
                     //     :  homeController.reverseController();

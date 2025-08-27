@@ -202,6 +202,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
             : widget.quotationCurrencyLatestRate,
       ),
     );
+    print('companyMobileNumber $companyMobileNumber');
+    print('companyPhoneNumber $companyPhoneNumber');
   }
 
   // String itemImage = '';
@@ -874,13 +876,12 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               children: [
                                 gapH4,
                                 // reusableText('T 234-814-159 6534'),
-                                reusableText(
-                                  'T $companyPhoneCode $companyPhoneNumber $companyTrn',
+                                 reusableText(
+                                   companyPhoneNumber.isNotEmpty?'T $companyPhoneCode $companyPhoneNumber $companyTrn':'',
                                 ),
                                 gapH4,
-
                                 reusableText(
-                                  'T $companyMobileCode $companyMobileNumber',
+                                  companyMobileNumber.isNotEmpty? 'T $companyMobileCode $companyMobileNumber':'',
                                 ),
                                 gapH4,
                                 pw.SizedBox(

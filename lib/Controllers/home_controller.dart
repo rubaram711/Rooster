@@ -4,8 +4,14 @@ import 'package:get/get.dart';
 
 class HomeController extends GetxController {
   final isOpened = true.obs;
+  bool isMenuOpened = true;
   final isMobile = false.obs;
   final selectedTab = 'dashboard_summary'.obs;
+
+  setIsMenuOpened(bool value) {
+    isMenuOpened = value;
+    update();
+  }
 
   String userName = '';
   setName(String value){

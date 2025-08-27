@@ -442,162 +442,174 @@ class _FormPageState extends State<FormPage> {
                 color: Primary.primary,
                 borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(6), topRight: Radius.circular(6))),
-            child: Row(
-              children: [
-                TableTitle(
-                  text: 'item_code'.tr,
-                  width: MediaQuery.of(context).size.width * 0.1,
-                ),
-                TableTitle(
-                  text: 'item_name'.tr,
-                  width: MediaQuery.of(context).size.width * 0.1,
-                ),
-                TableTitle(
-                  text: 'theoretical_qty_on_hand'.tr,
-                  width: MediaQuery.of(context).size.width * 0.12,
-                ),
-                TableTitle(
-                  text: 'physical_qty_on_hand'.tr,
-                  width: MediaQuery.of(context).size.width * 0.12,
-                ),
-                TableTitle(
-                  text: 'difference'.tr,
-                  width: MediaQuery.of(context).size.width * 0.1,
-                ),
-                TableTitle(
-                  text: 'theoretical_cost'.tr,
-                  width: MediaQuery.of(context).size.width * 0.1,
-                ),
-                TableTitle(
-                  text: 'physical_cost'.tr,
-                  width: MediaQuery.of(context).size.width * 0.1,
-                ),
-              ],
+            child: GetBuilder<HomeController>(
+                builder: (homeCont) {
+                  double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.12:MediaQuery.of(context).size.width * 0.15;
+                  double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.1:MediaQuery.of(context).size.width * 0.12;
+                return Row(
+                  children: [
+                    TableTitle(
+                      text: 'item_code'.tr,
+                      width: smallWidth,
+                    ),
+                    TableTitle(
+                      text: 'item_name'.tr,
+                      width: smallWidth,
+                    ),
+                    TableTitle(
+                      text: 'theoretical_qty_on_hand'.tr,
+                      width:bigWidth,
+                    ),
+                    TableTitle(
+                      text: 'physical_qty_on_hand'.tr,
+                      width:bigWidth,
+                    ),
+                    TableTitle(
+                      text: 'difference'.tr,
+                      width: smallWidth,
+                    ),
+                    TableTitle(
+                      text: 'theoretical_cost'.tr,
+                      width:smallWidth,
+                    ),
+                    TableTitle(
+                      text: 'physical_cost'.tr,
+                      width: smallWidth,
+                    ),
+                  ],
+                );
+              }
             ),
           ),
           cont.isInventoryDataFetched
-              ? SizedBox(
-                  height:isBarcodeActive? MediaQuery.of(context).size.height * 0.3:MediaQuery.of(context).size.height * 0.35,
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: Table(
-                      border: TableBorder.all(color: Colors.grey),
-                      columnWidths: {
-                        0: FlexColumnWidth(
-                            MediaQuery.of(context).size.width * 0.1),
-                        1: FlexColumnWidth(
-                            MediaQuery.of(context).size.width * 0.1),
-                        2: FlexColumnWidth(
-                            MediaQuery.of(context).size.width * 0.12),
-                        3: FlexColumnWidth(
-                            MediaQuery.of(context).size.width * 0.12),
-                        4: FlexColumnWidth(
-                            MediaQuery.of(context).size.width * 0.1),
-                        5: FlexColumnWidth(
-                            MediaQuery.of(context).size.width * 0.1),
-                        6: FlexColumnWidth(
-                            MediaQuery.of(context).size.width * 0.1),
-                        // 7:FlexColumnWidth(MediaQuery.of(context).size.width * 0.1),
-                      }, // Table borders
-                      children: cont.inventoryData.map((item) {
-                        int rowIndex = cont.inventoryData.indexOf(item);
-                        // if(item.physicalQty!=null){
-                        //   physicalQtyController.text= '${item.physicalQty!}';
-                        // }
-                        // if(item.difference!=null){
-                        //   difference= item.difference!;
-                        // }
-                        // if(item.physicalCost!=null){
-                        //   physicalCost= item.physicalCost!;
-                        // }
-                        // if(item.theoreticalCost!=null){
-                        //   theoreticalCost= item.theoreticalCost!;
-                        // }else{
-                        //   theoreticalCost=item.quantity!*item.unitCost!;
-                        // }
-                        return TableRow(
-                          decoration: BoxDecoration(
-                            color: rowIndex == highlightedRowIndex
-                                ? Colors.red.withAlpha((0.5 * 255).toInt())
-                                : Colors.transparent,
-                          ),
-                          children: [
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(child: Text(item.mainCode ?? '')),
+              ? GetBuilder<HomeController>(
+              builder: (homeCont) {
+                double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.12:MediaQuery.of(context).size.width * 0.15;
+                double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.1:MediaQuery.of(context).size.width * 0.12;
+                  return SizedBox(
+                      height:isBarcodeActive? MediaQuery.of(context).size.height * 0.3:MediaQuery.of(context).size.height * 0.35,
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: Table(
+                          border: TableBorder.all(color: Colors.grey),
+                          columnWidths: {
+                            0: FlexColumnWidth(
+                                smallWidth),
+                            1: FlexColumnWidth(
+                                smallWidth),
+                            2: FlexColumnWidth(
+                               bigWidth),
+                            3: FlexColumnWidth(
+                                bigWidth),
+                            4: FlexColumnWidth(
+                                smallWidth),
+                            5: FlexColumnWidth(
+                                smallWidth),
+                            6: FlexColumnWidth(
+                                smallWidth),
+                            // 7:FlexColumnWidth(MediaQuery.of(context).size.width * 0.1),
+                          }, // Table borders
+                          children: cont.inventoryData.map((item) {
+                            int rowIndex = cont.inventoryData.indexOf(item);
+                            // if(item.physicalQty!=null){
+                            //   physicalQtyController.text= '${item.physicalQty!}';
+                            // }
+                            // if(item.difference!=null){
+                            //   difference= item.difference!;
+                            // }
+                            // if(item.physicalCost!=null){
+                            //   physicalCost= item.physicalCost!;
+                            // }
+                            // if(item.theoreticalCost!=null){
+                            //   theoreticalCost= item.theoreticalCost!;
+                            // }else{
+                            //   theoreticalCost=item.quantity!*item.unitCost!;
+                            // }
+                            return TableRow(
+                              decoration: BoxDecoration(
+                                color: rowIndex == highlightedRowIndex
+                                    ? Colors.red.withAlpha((0.5 * 255).toInt())
+                                    : Colors.transparent,
                               ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(child: Text(item.itemName ?? '')),
-                              ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                    child:
-                                        Text(numberWithComma('${cont.quantities[rowIndex]}'))),
-                              ),
-                            ),
-                            TableCell(
-                              child: TextField(
-                                  controller:
-                                      cont.physicalQtyControllersList[rowIndex],
-                                  textAlign: TextAlign.center,
-                                  cursorColor: Colors.black,
-                                  onChanged: (val) {
-                                    cont.setDifference(
-                                        rowIndex,
-                                        double.parse(val) -
-                                            cont.quantities[rowIndex]);
-                                    cont.setPhysicalCost(rowIndex,
-                                        double.parse(val) * item.unitCost!);
-                                  },
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                    decimal: false,
-                                    signed: true,
+                              children: [
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(child: Text(item.mainCode ?? '')),
                                   ),
-                                  inputFormatters: <TextInputFormatter>[
-                                    FilteringTextInputFormatter.allow(
-                                        RegExp('[0-9.]')),
-                                    // NumberFormatter(),
-                                    // WhitelistingTextInputFormatter.digitsOnly
-                                  ]),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                    child:
-                                        Text(numberWithComma('${cont.difference[rowIndex]}'))),
-                              ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                    child: Text(
-                        numberWithComma('${cont.theoreticalCost[rowIndex]}'))),
-                              ),
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                    child:
-                                        Text(numberWithComma('${cont.physicalCost[rowIndex]}'))),
-                              ),
-                            ),
-                          ],
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                )
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(child: Text(item.itemName ?? '')),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                        child:
+                                            Text(numberWithComma('${cont.quantities[rowIndex]}'))),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: TextField(
+                                      controller:
+                                          cont.physicalQtyControllersList[rowIndex],
+                                      textAlign: TextAlign.center,
+                                      cursorColor: Colors.black,
+                                      onChanged: (val) {
+                                        cont.setDifference(
+                                            rowIndex,
+                                            double.parse(val) -
+                                                cont.quantities[rowIndex]);
+                                        cont.setPhysicalCost(rowIndex,
+                                            double.parse(val) * item.unitCost!);
+                                      },
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                        decimal: false,
+                                        signed: true,
+                                      ),
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.allow(
+                                            RegExp('[0-9.]')),
+                                        // NumberFormatter(),
+                                        // WhitelistingTextInputFormatter.digitsOnly
+                                      ]),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                        child:
+                                            Text(numberWithComma('${cont.difference[rowIndex]}'))),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                        child: Text(
+                            numberWithComma('${cont.theoreticalCost[rowIndex]}'))),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                        child:
+                                            Text(numberWithComma('${cont.physicalCost[rowIndex]}'))),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    );
+                }
+              )
               : loading(),
         ],
       );

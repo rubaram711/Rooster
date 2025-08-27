@@ -117,59 +117,66 @@ class _TransfersState extends State<Transfers> {
                           color: Primary.primary,
                           borderRadius:
                           const BorderRadius.all(Radius.circular(6))),
-                      child: Row(
-                        children: [
-                          tableTitleWithOrderArrow('number'.tr,
-                              MediaQuery.of(context).size.width * 0.07, () {
-                                setState(() {
-                                  isNumberOrderedUp=!isNumberOrderedUp;
-                                  isNumberOrderedUp
-                                      ? cont.transfersList.sort((a, b) => a['transferNumber'].compareTo(b['transferNumber']))
-                                      : cont.transfersList.sort((a, b) => b['transferNumber'].compareTo(a['transferNumber']));
-                                });
-                              }),
-                          tableTitleWithOrderArrow('transfer_date'.tr,
-                              MediaQuery.of(context).size.width * 0.09, () {
-                                setState(() {
-                                  isCreationOrderedUp=!isCreationOrderedUp;
-                                  isCreationOrderedUp?
-                                  cont.transfersList.sort((a, b) => a['creationDate'].compareTo(b['creationDate']))
-                                      :cont.transfersList.sort((a, b) => b['creationDate'].compareTo(a['creationDate']));
-                                });
-                              }),
-                          TableTitle(
-                            text: 'src_whse'.tr,
-                            width: MediaQuery.of(context).size.width * 0.07,
-                          ),
-                          TableTitle(
-                            text: 'dest_whse'.tr,
-                            width: MediaQuery.of(context).size.width * 0.07,
-                          ),
-                          TableTitle(
-                            text: 'task'.tr,
-                            width: MediaQuery.of(context).size.width * 0.07,
-                          ),
-                          TableTitle(
-                            text: 'sender_user'.tr,
-                            width: MediaQuery.of(context).size.width * 0.07,
-                          ),
-                          TableTitle(
-                            text: 'receiver_user'.tr,
-                            width: MediaQuery.of(context).size.width * 0.07,
-                          ),
-                          TableTitle(
-                            text: 'received_date'.tr,
-                            width: MediaQuery.of(context).size.width * 0.07,
-                          ),
-                          TableTitle(
-                            text: 'status'.tr,
-                            width: MediaQuery.of(context).size.width * 0.13,
-                          ),
-                          TableTitle(
-                            text: 'more'.tr,
-                            width: MediaQuery.of(context).size.width * 0.03,
-                          ),
-                        ],
+                      child: GetBuilder<HomeController>(
+                          builder: (homeCont) {
+                            double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.13:MediaQuery.of(context).size.width * 0.14;
+                            double mediumWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.1;
+                            double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.07:MediaQuery.of(context).size.width * 0.09;
+                          return Row(
+                            children: [
+                              tableTitleWithOrderArrow('number'.tr,
+                                  smallWidth, () {
+                                    setState(() {
+                                      isNumberOrderedUp=!isNumberOrderedUp;
+                                      isNumberOrderedUp
+                                          ? cont.transfersList.sort((a, b) => a['transferNumber'].compareTo(b['transferNumber']))
+                                          : cont.transfersList.sort((a, b) => b['transferNumber'].compareTo(a['transferNumber']));
+                                    });
+                                  }),
+                              tableTitleWithOrderArrow('transfer_date'.tr,
+                                  mediumWidth, () {
+                                    setState(() {
+                                      isCreationOrderedUp=!isCreationOrderedUp;
+                                      isCreationOrderedUp?
+                                      cont.transfersList.sort((a, b) => a['creationDate'].compareTo(b['creationDate']))
+                                          :cont.transfersList.sort((a, b) => b['creationDate'].compareTo(a['creationDate']));
+                                    });
+                                  }),
+                              TableTitle(
+                                text: 'src_whse'.tr,
+                                width: smallWidth,
+                              ),
+                              TableTitle(
+                                text: 'dest_whse'.tr,
+                                width: smallWidth,
+                              ),
+                              TableTitle(
+                                text: 'task'.tr,
+                                width: smallWidth,
+                              ),
+                              TableTitle(
+                                text: 'sender_user'.tr,
+                                width: smallWidth,
+                              ),
+                              TableTitle(
+                                text: 'receiver_user'.tr,
+                                width:smallWidth,
+                              ),
+                              TableTitle(
+                                text: 'received_date'.tr,
+                                width: smallWidth,
+                              ),
+                              TableTitle(
+                                text: 'status'.tr,
+                                width: bigWidth,
+                              ),
+                              TableTitle(
+                                text: 'more'.tr,
+                                width: MediaQuery.of(context).size.width * 0.03,
+                              ),
+                            ],
+                          );
+                        }
                       ),
                     ),
                     cont.isTransactionsFetched
@@ -408,91 +415,98 @@ class TransfersAsRowInTable extends StatelessWidget {
         decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.all(Radius.circular(0))),
-        child: Row(
-          children: [
-            TableItem(
-              text: '${info['transferNumber'] ?? ''}',
-              width:isDesktop? MediaQuery.of(context).size.width * 0.07 :150,
-            ),
-            TableItem(
-              text: '${info['creationDate'] ?? ''}'.substring(0,11),
-              width:isDesktop? MediaQuery.of(context).size.width * 0.09 :150,
-            ),
-            TableItem(
-              text: '${info['sourceWarhouse'] ?? ''}',
-              width:isDesktop? MediaQuery.of(context).size.width * 0.07 :150,
-            ),
-            TableItem(
-              text: '${info['destWarhouse'] ?? ''}',
-              width: isDesktop? MediaQuery.of(context).size.width * 0.07 :150,
-            ),
-            TableItem(
-              text: '${info['task'] ?? 'No Records'}',
-              width:isDesktop? MediaQuery.of(context).size.width * 0.07 :150,
-            ),
-            TableItem(
-              text: '${info['sendingUser'] ?? ''}',
-              width: isDesktop? MediaQuery.of(context).size.width * 0.07 :150,
-            ),
-            TableItem(
-              text:'${info['receivingUser'] ?? ''}',
-              width: isDesktop? MediaQuery.of(context).size.width * 0.07 :150,
-            ),
-            TableItem(
-              text: '${info['receivingDate'] ?? ''}'.length>11 ? '${info['receivingDate'] ?? ''}'.substring(0,11) :'',
-              width: isDesktop? MediaQuery.of(context).size.width * 0.07 :150,
-            ),
-            SizedBox(
-              width:isDesktop? MediaQuery.of(context).size.width * 0.13 :100,
-              child: Center(
-                child: Container(
-                  width:isDesktop? '${info['status']}'.length * 12.0:100,
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  decoration: BoxDecoration(
-                      color: info['status'] == "fully received"
-                          ? Others.greenStatusColor
-                          : info['status'] == 'incomplete'
-                          ? Others.orangeStatusColor
-                          : info['status'] == 'canceled'
-                          ? Others.redStatusColor
-                          : Colors.blue,
-                      borderRadius: BorderRadius.circular(25)),
+        child: GetBuilder<HomeController>(
+            builder: (homeCont) {
+              double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.13:MediaQuery.of(context).size.width * 0.14;
+              double mediumWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.1;
+              double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.07:MediaQuery.of(context).size.width * 0.09;
+            return Row(
+              children: [
+                TableItem(
+                  text: '${info['transferNumber'] ?? ''}',
+                  width:isDesktop? smallWidth :150,
+                ),
+                TableItem(
+                  text: '${info['creationDate'] ?? ''}'.substring(0,11),
+                  width:isDesktop? mediumWidth :150,
+                ),
+                TableItem(
+                  text: '${info['sourceWarhouse'] ?? ''}',
+                  width:isDesktop? smallWidth :150,
+                ),
+                TableItem(
+                  text: '${info['destWarhouse'] ?? ''}',
+                  width: isDesktop? smallWidth :150,
+                ),
+                TableItem(
+                  text: '${info['task'] ?? 'No Records'}',
+                  width:isDesktop? smallWidth :150,
+                ),
+                TableItem(
+                  text: '${info['sendingUser'] ?? ''}',
+                  width: isDesktop? smallWidth :150,
+                ),
+                TableItem(
+                  text:'${info['receivingUser'] ?? ''}',
+                  width: isDesktop? smallWidth :150,
+                ),
+                TableItem(
+                  text: '${info['receivingDate'] ?? ''}'.length>11 ? '${info['receivingDate'] ?? ''}'.substring(0,11) :'',
+                  width: isDesktop? smallWidth :150,
+                ),
+                SizedBox(
+                  width:isDesktop? bigWidth :100,
                   child: Center(
-                      child: Text(
-                        '${info['status'] ?? ''}',
-                        style: const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      )),
+                    child: Container(
+                      width:isDesktop? '${info['status']}'.length * 12.0:100,
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(
+                          color: info['status'] == "fully received"
+                              ? Others.greenStatusColor
+                              : info['status'] == 'incomplete'
+                              ? Others.orangeStatusColor
+                              : info['status'] == 'canceled'
+                              ? Others.redStatusColor
+                              : Colors.blue,
+                          borderRadius: BorderRadius.circular(25)),
+                      child: Center(
+                          child: Text(
+                            '${info['status'] ?? ''}',
+                            style: const TextStyle(
+                                color: Colors.white, fontWeight: FontWeight.bold),
+                          )),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            SizedBox(
-              width:isDesktop?MediaQuery.of(context).size.width * 0.03:100,
-              child: ReusableMore(itemsList: [
-                PopupMenuItem<String>(
-                  value: '1',
-                  onTap: () async {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (BuildContext context) {
-                          return   PrintTransferIn(
-                            transferNumber:  info['transferNumber']??'',
-                            receivedDate:info['receivingDate']!=null? info['receivingDate'].substring(0,11):'',
-                            creationDate: info['creationDate'].substring(0,11),
-                            ref:info['reference']??'',
-                            transferTo: info['destWarhouse']??'',
-                            receivedUser: info['receivingUser']??'',
-                            senderUser:info['sendingUser']??'',
-                            status: info['status']??'',
-                            transferFrom: info['sourceWarhouse']??'',
-                            rowsInListViewInTransfer: info['transferItems'],
-                          );
-                        }));
-                  },
-                  child: Text('print'.tr),
-                ),
-              ]),
-            )
-          ],
+                SizedBox(
+                  width:isDesktop?MediaQuery.of(context).size.width * 0.03:100,
+                  child: ReusableMore(itemsList: [
+                    PopupMenuItem<String>(
+                      value: '1',
+                      onTap: () async {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (BuildContext context) {
+                              return   PrintTransferIn(
+                                transferNumber:  info['transferNumber']??'',
+                                receivedDate:info['receivingDate']!=null? info['receivingDate'].substring(0,11):'',
+                                creationDate: info['creationDate'].substring(0,11),
+                                ref:info['reference']??'',
+                                transferTo: info['destWarhouse']??'',
+                                receivedUser: info['receivingUser']??'',
+                                senderUser:info['sendingUser']??'',
+                                status: info['status']??'',
+                                transferFrom: info['sourceWarhouse']??'',
+                                rowsInListViewInTransfer: info['transferItems'],
+                              );
+                            }));
+                      },
+                      child: Text('print'.tr),
+                    ),
+                  ]),
+                )
+              ],
+            );
+          }
         ),
       ),
     );

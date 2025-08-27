@@ -138,7 +138,6 @@ class _HomeBodyState extends State<HomeBody> {
     'return_to_supplier_summary': const ReturnToSupplierSummary(),
     'return_from_client': const CreateNewReturnFromClient(),
     'return_from_client_summary': const ReturnFromClientSummary(),
-    // 'roles_and_permissions':const RolesAndPermissions(),
     'back-office': const RolesAndPermissions(),
     'purchase_invoice': const CreateNewPurchaseInvoice(),
     'new_purchase_invoice': const CreateNewPurchaseInvoice(),
@@ -165,6 +164,8 @@ class _HomeBodyState extends State<HomeBody> {
   @override
   void initState() {
     homeController.selectedTab.value='dashboard_summary';
+    homeController.isOpened.value = true;
+    homeController.isMenuOpened = true;
     super.initState();
   }
   @override

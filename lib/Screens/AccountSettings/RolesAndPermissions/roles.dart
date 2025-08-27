@@ -94,8 +94,8 @@ class _RolesPageState extends State<RolesPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(
-                        width:homeController.isMobile.value ?MediaQuery.of(context).size.width * 0.9: MediaQuery.of(context).size.width * 0.7,
+                      Expanded(
+                        // width:homeController.isMobile.value ?MediaQuery.of(context).size.width * 0.9: MediaQuery.of(context).size.width * 0.7,
                         child: ReusableSearchTextField(
                           hint: '${"search".tr}...',
                           textEditingController: cont.searchOnRoleController,

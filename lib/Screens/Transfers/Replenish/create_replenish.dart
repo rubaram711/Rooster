@@ -621,8 +621,8 @@ getCurrencies() async {
                     gapH16,
                     Row(
                       children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.55,
+                        Expanded(
+                          // width: MediaQuery.of(context).size.width * 0.55,
                           child: ReusableSearchTextField(
                             hint: '${"search".tr}...',
                             textEditingController: searchController,
@@ -753,59 +753,62 @@ getCurrencies() async {
                                   Radius.circular(6),
                                 ),
                               ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  TableTitle(
-                                    text: 'code'.tr,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.1,
-                                  ),
-                                  TableTitle(
-                                    text: 'item'.tr,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.1,
-                                  ),
-                                  TableTitle(
-                                    text: 'description'.tr,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.1,
-                                  ),
-                                  TableTitle(
-                                    text: 'qty_available_at_wrhs'.tr,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.1,
-                                  ),
-                                  TableTitle(
-                                    text: 'replenish_qty'.tr,
-                                    width:
-                                        MediaQuery.of(context).size.width *
-                                        0.07,
-                                  ),
-                                  TableTitle(
-                                    text: 'pack'.tr,
-                                    width:
-                                        MediaQuery.of(context).size.width *
-                                        0.07,
-                                  ),
-                                  TableTitle(
-                                    text: 'unit_cost'.tr,
-                                    width:
-                                        MediaQuery.of(context).size.width *
-                                        0.07,
-                                  ),
-                                  TableTitle(
-                                    text: 'note'.tr,
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.1,
-                                  ),
-                                  // TableTitle(
-                                  //   text: 'more_options'.tr,
-                                  //   width: MediaQuery.of(context).size.width *
-                                  //       0.07,
-                                  // ),
-                                ],
+                              child: GetBuilder<HomeController>(
+                                  builder: (homeCont) {
+                                    double mediumWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.1:MediaQuery.of(context).size.width * 0.13;
+                                    double smallWidth=MediaQuery.of(context).size.width * 0.07;
+                                  return Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      TableTitle(
+                                        text: 'code'.tr,
+                                        width:
+                                            mediumWidth,
+                                      ),
+                                      TableTitle(
+                                        text: 'item'.tr,
+                                        width:
+                                            mediumWidth,
+                                      ),
+                                      TableTitle(
+                                        text: 'description'.tr,
+                                        width:
+                                            mediumWidth,
+                                      ),
+                                      TableTitle(
+                                        text: 'qty_available_at_wrhs'.tr,
+                                        width:
+                                            mediumWidth,
+                                      ),
+                                      TableTitle(
+                                        text: 'replenish_qty'.tr,
+                                        width:
+                                           smallWidth,
+                                      ),
+                                      TableTitle(
+                                        text: 'pack'.tr,
+                                        width:
+                                            smallWidth,
+                                      ),
+                                      TableTitle(
+                                        text: 'unit_cost'.tr,
+                                        width:
+                                           smallWidth,
+                                      ),
+                                      TableTitle(
+                                        text: 'note'.tr,
+                                        width:
+                                            mediumWidth,
+                                      ),
+                                      // TableTitle(
+                                      //   text: 'more_options'.tr,
+                                      //   width: MediaQuery.of(context).size.width *
+                                      //       0.07,
+                                      // ),
+                                    ],
+                                  );
+                                }
                               ),
                             ),
                             Container(
@@ -1315,180 +1318,186 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
           margin: const EdgeInsets.symmetric(vertical: 5),
           child: Form(
             key: _formKey,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Container(
-                //   width: MediaQuery.of(context).size.width * 0.02,
-                //   height: 20,
-                //   margin: const EdgeInsets.symmetric(vertical: 15),
-                //   decoration: const BoxDecoration(
-                //     image: DecorationImage(
-                //       image: AssetImage('assets/images/newRow.png'),
-                //       fit: BoxFit.contain,
-                //     ),
-                //   ),
-                // ),
-                ReusableShowInfoCard(
-                  text: cont.productsList[widget.index]['mainCode'],
-                  width:widget.isMobile?150: MediaQuery.of(context).size.width * 0.1,
-                ),
-                widget.isMobile?gapW4:SizedBox(),
-                ReusableShowInfoCard(
-                  text: cont.productsList[widget.index]['item_name'],
-                  width:widget.isMobile?150: MediaQuery.of(context).size.width * 0.1,
-                ),
-                widget.isMobile?gapW4:SizedBox(),
-                ReusableShowInfoCard(
-                  text: cont.productsList[widget.index]['mainDescription'],
-                  width: widget.isMobile?150:MediaQuery.of(context).size.width * 0.1,
-                ),
-                widget.isMobile?gapW4:SizedBox(),
-                ReusableShowInfoCard(
-                  text: qtyOnHandPackagesInSource,
-                  width:widget.isMobile?150: MediaQuery.of(context).size.width * 0.1,
-                ),
-                widget.isMobile?gapW4:SizedBox(),
-                SizedBox(
-                  width:widget.isMobile?150: MediaQuery.of(context).size.width * 0.07,
-                  child:TextFormField(
-                    autofocus: cont.focusIndex==widget.index,
-                      focusNode:cont.focusIndex==widget.index? cont.focus:null,
-                      controller: qtyController,
-                      textAlign: TextAlign.center,
-                      cursorColor: Colors.black,
-                      decoration: InputDecoration(
-                        hintText: '0',
-                        contentPadding:widget.isMobile? const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0):const EdgeInsets.fromLTRB(10, 0, 25, 5),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                          BorderSide(color: Colors.black.withAlpha((0.1 * 255).toInt()), width: 1),
-                          borderRadius: const BorderRadius.all(Radius.circular(6)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                          BorderSide(color: Colors.black.withAlpha((0.1 * 255).toInt()), width: 1),
-                          borderRadius: const BorderRadius.all(Radius.circular(6)),
-                        ),
-                        errorStyle: const TextStyle(
-                          fontSize: 10.0,
-                        ),
-                        focusedErrorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(6)),
-                          borderSide: BorderSide(width: 1, color: Colors.red),
-                        ),
-                      ),
-                      validator: (String? value) {
-                        if (value!.isEmpty ) {
-                          return 'required field';
-                        }
-                        return null;
-                      },
-                      onChanged: (val) {
-                        _formKey.currentState!.validate();
+            child:GetBuilder<HomeController>(
+                builder: (homeCont) {
+                  double mediumWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.1:MediaQuery.of(context).size.width * 0.13;
+                  double smallWidth=MediaQuery.of(context).size.width * 0.07;
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Container(
+                    //   width: MediaQuery.of(context).size.width * 0.02,
+                    //   height: 20,
+                    //   margin: const EdgeInsets.symmetric(vertical: 15),
+                    //   decoration: const BoxDecoration(
+                    //     image: DecorationImage(
+                    //       image: AssetImage('assets/images/newRow.png'),
+                    //       fit: BoxFit.contain,
+                    //     ),
+                    //   ),
+                    // ),
+                    ReusableShowInfoCard(
+                      text: cont.productsList[widget.index]['mainCode'],
+                      width:widget.isMobile?150: mediumWidth,
+                    ),
+                    widget.isMobile?gapW4:SizedBox(),
+                    ReusableShowInfoCard(
+                      text: cont.productsList[widget.index]['item_name'],
+                      width:widget.isMobile?150: mediumWidth,
+                    ),
+                    widget.isMobile?gapW4:SizedBox(),
+                    ReusableShowInfoCard(
+                      text: cont.productsList[widget.index]['mainDescription'],
+                      width: widget.isMobile?150:mediumWidth,
+                    ),
+                    widget.isMobile?gapW4:SizedBox(),
+                    ReusableShowInfoCard(
+                      text: qtyOnHandPackagesInSource,
+                      width:widget.isMobile?150: mediumWidth,
+                    ),
+                    widget.isMobile?gapW4:SizedBox(),
+                    SizedBox(
+                      width:widget.isMobile?150: smallWidth,
+                      child:TextFormField(
+                        autofocus: cont.focusIndex==widget.index,
+                          focusNode:cont.focusIndex==widget.index? cont.focus:null,
+                          controller: qtyController,
+                          textAlign: TextAlign.center,
+                          cursorColor: Colors.black,
+                          decoration: InputDecoration(
+                            hintText: '0',
+                            contentPadding:widget.isMobile? const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0):const EdgeInsets.fromLTRB(10, 0, 25, 5),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                              BorderSide(color: Colors.black.withAlpha((0.1 * 255).toInt()), width: 1),
+                              borderRadius: const BorderRadius.all(Radius.circular(6)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                              BorderSide(color: Colors.black.withAlpha((0.1 * 255).toInt()), width: 1),
+                              borderRadius: const BorderRadius.all(Radius.circular(6)),
+                            ),
+                            errorStyle: const TextStyle(
+                              fontSize: 10.0,
+                            ),
+                            focusedErrorBorder: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(6)),
+                              borderSide: BorderSide(width: 1, color: Colors.red),
+                            ),
+                          ),
+                          validator: (String? value) {
+                            if (value!.isEmpty ) {
+                              return 'required field';
+                            }
+                            return null;
+                          },
+                          onChanged: (val) {
+                            _formKey.currentState!.validate();
+                            addTheItemToItemsListInReplenish();
+                            cont.setReplenishedQtyInReplenish('${widget.index}', val);
+                            setState(() {
+                              qty = val;
+                            });
+                          },
+                          // onFieldSubmitted: (_) {
+                          //   if (widget.nextFocusNode != null) {
+                          //     FocusScope.of(context).requestFocus(widget.nextFocusNode);
+                          //   }
+                          // },
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: false,
+                            signed: true,
+                          ),
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                            // NumberFormatter(),
+                            // WhitelistingTextInputFormatter.digitsOnly
+                          ])
+
+                      // ReusableNumberField(
+                      //   textEditingController: qtyController,
+                      //   isPasswordField: false,
+                      //   isCentered: true,
+                      //   hint: '0',
+                      //   onChangedFunc: (val) {
+                      //     _formKey.currentState!.validate();
+                      //     addTheItemToItemsListInReplenish();
+                      //     // cont.setItemIdInReplenish(
+                      //     //     '${widget.index}', '${cont.productsList[widget.index]['id']}');
+                      //     // cont.setItemNameInReplenish('${widget.index}',cont.productsList[widget.index]['item_name']);
+                      //     cont.setReplenishedQtyInReplenish('${widget.index}', val);
+                      //     setState(() {
+                      //       qty = val;
+                      //     });
+                      //   },
+                      //   validationFunc: (String? value) {
+                      //     if (value!.isEmpty || double.parse(value) <= 0) {
+                      //       return 'must be >0';
+                      //     }
+                      //     return null;
+                      //   },
+                      // ),
+                    ),
+                    widget.isMobile?gapW4:SizedBox(),
+                    DialogDropMenu(
+                      optionsList: productsPackages,
+                      text: '',
+                      hint: '',
+                      controller: packageController,
+                      rowWidth:widget.isMobile?120: smallWidth,
+                      textFieldWidth: widget.isMobile?120:smallWidth,
+                      onSelected: (value) {
                         addTheItemToItemsListInReplenish();
-                        cont.setReplenishedQtyInReplenish('${widget.index}', val);
+                        cont.setReplenishedQtyPackageIdInReplenish(
+                          '${widget.index}',
+                          value,
+                        );
                         setState(() {
-                          qty = val;
+                          selectedPackage = value;
                         });
                       },
-                      // onFieldSubmitted: (_) {
-                      //   if (widget.nextFocusNode != null) {
-                      //     FocusScope.of(context).requestFocus(widget.nextFocusNode);
-                      //   }
-                      // },
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: false,
-                        signed: true,
+                    ),
+                    widget.isMobile?gapW4:SizedBox(),
+                    SizedBox(
+                      width:widget.isMobile?150:smallWidth,
+                      child: ReusableNumberField(
+                        textEditingController: costController,
+                        isPasswordField: false,
+                        isCentered: true,
+                        hint: '0',
+                        onChangedFunc: (val) {
+                          addTheItemToItemsListInReplenish();
+                          _formKey.currentState!.validate();
+                          cont.setCostItemInReplenish('${widget.index}', val);
+                        },
+                        validationFunc: (String? value) {
+                          if (value!.isEmpty) {
+                            return 'required field';
+                          }
+                          return null;
+                        },
                       ),
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
-                        // NumberFormatter(),
-                        // WhitelistingTextInputFormatter.digitsOnly
-                      ])
-
-                  // ReusableNumberField(
-                  //   textEditingController: qtyController,
-                  //   isPasswordField: false,
-                  //   isCentered: true,
-                  //   hint: '0',
-                  //   onChangedFunc: (val) {
-                  //     _formKey.currentState!.validate();
-                  //     addTheItemToItemsListInReplenish();
-                  //     // cont.setItemIdInReplenish(
-                  //     //     '${widget.index}', '${cont.productsList[widget.index]['id']}');
-                  //     // cont.setItemNameInReplenish('${widget.index}',cont.productsList[widget.index]['item_name']);
-                  //     cont.setReplenishedQtyInReplenish('${widget.index}', val);
-                  //     setState(() {
-                  //       qty = val;
-                  //     });
-                  //   },
-                  //   validationFunc: (String? value) {
-                  //     if (value!.isEmpty || double.parse(value) <= 0) {
-                  //       return 'must be >0';
-                  //     }
-                  //     return null;
-                  //   },
-                  // ),
-                ),
-                widget.isMobile?gapW4:SizedBox(),
-                DialogDropMenu(
-                  optionsList: productsPackages,
-                  text: '',
-                  hint: '',
-                  controller: packageController,
-                  rowWidth:widget.isMobile?120: MediaQuery.of(context).size.width * 0.07,
-                  textFieldWidth: widget.isMobile?120:MediaQuery.of(context).size.width * 0.07,
-                  onSelected: (value) {
-                    addTheItemToItemsListInReplenish();
-                    cont.setReplenishedQtyPackageIdInReplenish(
-                      '${widget.index}',
-                      value,
-                    );
-                    setState(() {
-                      selectedPackage = value;
-                    });
-                  },
-                ),
-                widget.isMobile?gapW4:SizedBox(),
-                SizedBox(
-                  width:widget.isMobile?150: MediaQuery.of(context).size.width * 0.07,
-                  child: ReusableNumberField(
-                    textEditingController: costController,
-                    isPasswordField: false,
-                    isCentered: true,
-                    hint: '0',
-                    onChangedFunc: (val) {
-                      addTheItemToItemsListInReplenish();
-                      _formKey.currentState!.validate();
-                      cont.setCostItemInReplenish('${widget.index}', val);
-                    },
-                    validationFunc: (String? value) {
-                      if (value!.isEmpty) {
-                        return 'required field';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                widget.isMobile?gapW4:SizedBox(),
-                SizedBox(
-                  width:widget.isMobile?150: MediaQuery.of(context).size.width * 0.1,
-                  child: ReusableTextField(
-                    onChangedFunc: (val) {
-                      addTheItemToItemsListInReplenish();
-                      cont.setNoteInReplenish('${widget.index}', val);
-                      setState(() {
-                        note = val;
-                      });
-                    },
-                    validationFunc: (val) {},
-                    hint: '',
-                    isPasswordField: false,
-                    textEditingController: noteController,
-                  ),
-                ),
-              ],
+                    ),
+                    widget.isMobile?gapW4:SizedBox(),
+                    SizedBox(
+                      width:widget.isMobile?150: mediumWidth,
+                      child: ReusableTextField(
+                        onChangedFunc: (val) {
+                          addTheItemToItemsListInReplenish();
+                          cont.setNoteInReplenish('${widget.index}', val);
+                          setState(() {
+                            note = val;
+                          });
+                        },
+                        validationFunc: (val) {},
+                        hint: '',
+                        isPasswordField: false,
+                        textEditingController: noteController,
+                      ),
+                    ),
+                  ],
+                );
+              }
             ),
           ),
         );
