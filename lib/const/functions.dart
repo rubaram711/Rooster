@@ -143,3 +143,13 @@ List<T> deepCloneList<T>(List<T> original) {
   }
   return newList;
 }
+
+
+
+List<String> generateYears() {
+  int currentYear = DateTime.now().year;
+  return List<String>.generate(
+    currentYear - 1940 + 1,
+        (index) => '${1940 + index}',
+  ).reversed.toList();
+}

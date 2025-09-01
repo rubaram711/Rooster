@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -300,7 +301,12 @@ class _PendingDocsState extends State<PendingDocs> {
                               ),
                               TableTitle(
                                 text: 'more_options'.tr,
-                                width: MediaQuery.of(context).size.width * 0.11,
+                                width:
+                                    MediaQuery.of(context).size.width > 992
+                                        ? MediaQuery.of(context).size.width *
+                                            0.10
+                                        : MediaQuery.of(context).size.width *
+                                            0.08,
                               ),
                               SizedBox(
                                 width: MediaQuery.of(context).size.width * 0.03,
@@ -983,7 +989,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                       padding: EdgeInsets.only(left: 10),
                       width:
                           widget.isDesktop
-                              ? MediaQuery.of(context).size.width * 0.11
+                              ? MediaQuery.of(context).size.width > 992
+                                  ? MediaQuery.of(context).size.width * 0.10
+                                  : MediaQuery.of(context).size.width * 0.08
                               : 150,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1323,6 +1331,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               child: Icon(
                                 Icons.remove_red_eye_outlined,
                                 color: Primary.primary,
+                                size: 21.sp,
                               ),
                             ),
                           ),
@@ -1354,7 +1363,11 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       ),
                                 );
                               },
-                              child: Icon(Icons.edit, color: Primary.primary),
+                              child: Icon(
+                                Icons.edit,
+                                color: Primary.primary,
+                                size: 21.sp,
+                              ),
                             ),
                           ),
                           Tooltip(
@@ -1662,7 +1675,11 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   );
                                 }
                               },
-                              child: Icon(Icons.check, color: Primary.primary),
+                              child: Icon(
+                                Icons.check,
+                                color: Primary.primary,
+                                size: 21.sp,
+                              ),
                             ),
                           ),
                           Tooltip(
@@ -1940,7 +1957,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               child: Icon(
                                 Icons.send,
                                 color: Primary.primary,
-                                size: 17.00,
+                                size: 21.sp,
                               ),
                             ),
                           ),
@@ -2239,6 +2256,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               child: Icon(
                                 Icons.cancel_outlined,
                                 color: Primary.primary,
+                                size: 21.sp,
                               ),
                             ),
                           ),
@@ -2822,7 +2840,11 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                         CommonWidgets.snackBar('error', p['message']);
                       }
                     },
-                    child: Icon(Icons.delete_outline, color: Primary.primary),
+                    child: Icon(
+                      Icons.delete_outline,
+                      color: Primary.primary,
+                      size: 21.sp,
+                    ),
                   ),
                 ),
               ],
@@ -2960,7 +2982,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                       padding: EdgeInsets.only(left: 10),
                       width:
                           widget.isDesktop
-                              ? MediaQuery.of(context).size.width * 0.11
+                              ? MediaQuery.of(context).size.width > 992
+                                  ? MediaQuery.of(context).size.width * 0.10
+                                  : MediaQuery.of(context).size.width * 0.08
                               : 150,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -3328,6 +3352,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               child: Icon(
                                 Icons.remove_red_eye_outlined,
                                 color: Primary.primary,
+                                size: 21.sp,
                               ),
                             ),
                           ),
@@ -3359,7 +3384,11 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       ),
                                 );
                               },
-                              child: Icon(Icons.edit, color: Primary.primary),
+                              child: Icon(
+                                Icons.edit,
+                                color: Primary.primary,
+                                size: 21.sp,
+                              ),
                             ),
                           ),
                           Tooltip(
@@ -3646,7 +3675,11 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   );
                                 }
                               },
-                              child: Icon(Icons.check, color: Primary.primary),
+                              child: Icon(
+                                Icons.check,
+                                color: Primary.primary,
+                                size: 21.sp,
+                              ),
                             ),
                           ),
 
@@ -3934,7 +3967,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               child: Icon(
                                 Icons.send,
                                 color: Primary.primary,
-                                size: 17.00,
+                                size: 21.sp,
                               ),
                             ),
                           ),
@@ -4224,6 +4257,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               child: Icon(
                                 Icons.cancel_outlined,
                                 color: Primary.primary,
+                                size: 21.sp,
                               ),
                             ),
                           ),
@@ -4372,7 +4406,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                       padding: EdgeInsets.only(left: 10),
                       width:
                           widget.isDesktop
-                              ? MediaQuery.of(context).size.width * 0.11
+                              ? MediaQuery.of(context).size.width > 992
+                                  ? MediaQuery.of(context).size.width * 0.10
+                                  : MediaQuery.of(context).size.width * 0.08
                               : 150,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -4727,6 +4763,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               child: Icon(
                                 Icons.remove_red_eye_outlined,
                                 color: Primary.primary,
+                                size: 21.sp,
                               ),
                             ),
                           ),
@@ -4757,7 +4794,11 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       ),
                                 );
                               },
-                              child: Icon(Icons.edit, color: Primary.primary),
+                              child: Icon(
+                                Icons.edit,
+                                color: Primary.primary,
+                                size: 21.sp,
+                              ),
                             ),
                           ),
 
@@ -5035,7 +5076,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               child: Icon(
                                 Icons.send,
                                 color: Primary.primary,
-                                size: 17.00,
+                                size: 21.sp,
                               ),
                             ),
                           ),
@@ -5314,6 +5355,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               child: Icon(
                                 Icons.cancel_outlined,
                                 color: Primary.primary,
+                                size: 21.sp,
                               ),
                             ),
                           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pdf/pdf.dart';
 import 'package:http/http.dart' as http;
@@ -233,7 +234,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.05),
             SizedBox(
               width: Sizes.deviceWidth * 0.8,
-              height: Sizes.deviceHeight * 0.85,
+              height: Sizes.deviceHeight * 0.80,
               child: PdfPreview(
                 build: (format) => _generatePdf(format, context),
               ),
@@ -318,6 +319,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
     final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
     double width = MediaQuery.of(context).size.width;
     var gapW20 = pw.SizedBox(width: 20);
+    var gapW16 = pw.SizedBox(width: 16);
     var gapW180 = pw.SizedBox(width: 180);
     var gapH4 = pw.SizedBox(height: 4);
     // var gapH2 = pw.SizedBox(height: 2);
@@ -351,7 +353,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(
             color: PdfColors.black,
-            fontSize: 11,
+            fontSize: 9.sp,
             fontWeight: pw.FontWeight.normal,
           ),
         ),
@@ -365,7 +367,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
         child: pw.Center(
           child: pw.Text(
             text,
-            style: pw.TextStyle(fontSize: 11, font: arabicFont),
+            style: pw.TextStyle(fontSize: 9.sp, font: arabicFont),
           ),
         ),
       );
@@ -639,7 +641,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                       child: pw.Text(
                         'Note : ${salesInvoiceItemInfo['note'] ?? ''}',
                         style: pw.TextStyle(
-                          fontSize: 11,
+                          fontSize: 9.sp,
                           font: italicRobotoFont,
                         ),
                       ),
@@ -688,13 +690,13 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
     }
 
     reusableText(String text) {
-      return pw.Text(text, style: pw.TextStyle(fontSize: 11));
+      return pw.Text(text, style: pw.TextStyle(fontSize: 9.sp));
     }
 
     reusableNumber(String text) {
       return pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.end,
-        children: [pw.Text(text, style: pw.TextStyle(fontSize: 11))],
+        children: [pw.Text(text, style: pw.TextStyle(fontSize: 9.sp))],
       );
     }
 
@@ -760,9 +762,11 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                   padding: pw.EdgeInsets.fromLTRB(0, 10, 0, 0),
                   child: pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    mainAxisAlignment: pw.MainAxisAlignment.start,
                     children: [
                       pw.SizedBox(
-                        width: width * 0.15,
+                        width: 240.w,
+                        // width: width * 0.15,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
                           children: [
@@ -782,7 +786,8 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                         ),
                       ),
                       pw.SizedBox(
-                        width: width * 0.125,
+                        width: 200.w,
+                        // width: width * 0.125,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
                           children: [
@@ -794,7 +799,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                 pw.Text(
                                   fullCompanyName,
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -809,7 +814,8 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                       ),
 
                       pw.SizedBox(
-                        width: width * 0.1,
+                        width: 150.w,
+                        // width: width * 0.1,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
 
@@ -884,7 +890,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                 pw.Text(
                                   '${'to'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -893,7 +899,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                 pw.Text(
                                   '${'telephone'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -902,14 +908,14 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                 pw.Text(
                                   '${'address'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
                                 ),
                               ],
                             ),
-                            gapW20,
+                            gapW16,
                             pw.Column(
                               crossAxisAlignment: pw.CrossAxisAlignment.start,
 
@@ -940,7 +946,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                 pw.Text(
                                   '${'offer_no'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -949,7 +955,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                 pw.Text(
                                   '${'sales_person'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -958,7 +964,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                 pw.Text(
                                   '${'date'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -967,7 +973,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                 pw.Text(
                                   '${'currency'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -1341,7 +1347,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                       // '${additionalSpecialDiscount.toStringAsFixed(2)}',
                                       widget.additionalSpecialDiscount,
                                       // style: pw.TextStyle(
-                                      //   fontSize: 11,
+                                      //   fontSize: 9.sp,
                                       //   color: PdfColors.black,
                                       // ),
                                     ),
@@ -1498,7 +1504,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                     child: pw.Text(
                                       'final_price_incl_vat'.tr,
                                       style: pw.TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 9.sp,
                                         fontWeight: pw.FontWeight.normal,
                                         color: PdfColors.black,
                                       ),
@@ -1519,7 +1525,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                         pw.Text(
                                           widget.salesInvoiceCurrency,
                                           style: pw.TextStyle(
-                                            fontSize: 11,
+                                            fontSize: 9.sp,
                                             fontWeight: pw.FontWeight.normal,
                                             color: PdfColors.black,
                                           ),
@@ -1542,7 +1548,7 @@ class _PrintSalesInvoiceState extends State<PrintSalesInvoice> {
                                           widget
                                               .finalPriceBySalesInvoiceCurrency,
                                           style: pw.TextStyle(
-                                            fontSize: 11,
+                                            fontSize: 9.sp,
                                             fontWeight: pw.FontWeight.normal,
                                             color: PdfColors.black,
                                           ),

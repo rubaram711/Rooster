@@ -1,5 +1,6 @@
 import 'dart:async';
 // ignore: depend_on_referenced_packages
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
@@ -382,10 +383,10 @@ class _DeliverySummaryState extends State<DeliverySummary> {
                               ),
                               TableTitle(
                                 text: 'more_options'.tr,
-                                width: MediaQuery.of(context).size.width * 0.06,
+                                width: MediaQuery.of(context).size.width * 0.08,
                               ),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.03,
+                                width: MediaQuery.of(context).size.width * 0.01,
                               ),
                             ],
                           ),
@@ -846,7 +847,9 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                 return SizedBox(
                   width:
                       widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.08
+                          ? MediaQuery.of(context).size.width > 992
+                              ? MediaQuery.of(context).size.width * 0.08
+                              : MediaQuery.of(context).size.width * 0.07
                           : 150,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1034,6 +1037,7 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                           child: Icon(
                             Icons.remove_red_eye_outlined,
                             color: Primary.primary,
+                            size: 20.sp,
                           ),
                         ),
                       ),
@@ -1059,7 +1063,11 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                                   ),
                             );
                           },
-                          child: Icon(Icons.edit, color: Primary.primary),
+                          child: Icon(
+                            Icons.edit,
+                            color: Primary.primary,
+                            size: 20.sp,
+                          ),
                         ),
                       ),
                     ],
@@ -1086,7 +1094,11 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                   //   CommonWidgets.snackBar('error', p['message']);
                   // }
                 },
-                child: Icon(Icons.delete_outline, color: Primary.primary),
+                child: Icon(
+                  Icons.delete_outline,
+                  color: Primary.primary,
+                  size: 20.sp,
+                ),
               ),
             ),
             SizedBox(width: MediaQuery.of(context).size.width * 0.01),
@@ -1454,6 +1466,7 @@ class _MobileDeliverySummaryState extends State<MobileDeliverySummary> {
                                                               color:
                                                                   Primary
                                                                       .primary,
+                                                              size: 20.sp,
                                                             ),
                                                           ),
                                                         ),
@@ -4120,7 +4133,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         cont.getTotalItems();
                       }
                     },
-                    child: Icon(Icons.delete_outline, color: Primary.primary),
+                    child: Icon(
+                      Icons.delete_outline,
+                      color: Primary.primary,
+                      size: 20.sp,
+                    ),
                   ),
                 ),
               ],
@@ -4225,7 +4242,11 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                         (widget.index).toString(),
                       );
                     },
-                    child: Icon(Icons.delete_outline, color: Primary.primary),
+                    child: Icon(
+                      Icons.delete_outline,
+                      color: Primary.primary,
+                      size: 20.sp,
+                    ),
                   ),
                 ),
               ],
@@ -4346,7 +4367,11 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                     );
                   });
                 },
-                child: Icon(Icons.delete_outline, color: Primary.primary),
+                child: Icon(
+                  Icons.delete_outline,
+                  color: Primary.primary,
+                  size: 20.sp,
+                ),
               ),
             ),
           ],
@@ -4551,7 +4576,11 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
                         );
                       });
                     },
-                    child: Icon(Icons.delete_outline, color: Primary.primary),
+                    child: Icon(
+                      Icons.delete_outline,
+                      color: Primary.primary,
+                      size: 20.sp,
+                    ),
                   ),
                 ),
               ],
@@ -4925,7 +4954,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       _formKey.currentState!.validate();
 
                       cont.setEnteredQtyInDelivery(widget.index, val);
-
                     },
                   ),
                 ),
@@ -5045,7 +5073,11 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                         cont.getTotalItems();
                       }
                     },
-                    child: Icon(Icons.delete_outline, color: Primary.primary),
+                    child: Icon(
+                      Icons.delete_outline,
+                      color: Primary.primary,
+                      size: 20.sp,
+                    ),
                   ),
                 ),
               ],

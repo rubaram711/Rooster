@@ -8,15 +8,19 @@ import 'package:rooster_app/Backend/get_countries.dart';
 import 'package:rooster_app/Controllers/client_controller.dart';
 import 'package:rooster_app/Widgets/loading.dart';
 import 'package:rooster_app/Widgets/reusable_add_card.dart';
+import 'package:rooster_app/const/cars_constants.dart';
 import '../../Backend/ClientsBackend/store_client.dart';
 import '../../Controllers/home_controller.dart';
+import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/dialog_drop_menu.dart';
 import '../../Widgets/page_title.dart';
 import '../../Widgets/reusable_btn.dart';
+import '../../Widgets/reusable_drop_down_menu.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
+import '../../const/functions.dart';
 
 List<String> titles = ['Doctor', 'Miss', 'Mister', 'Maitre', 'Professor'];
 
@@ -61,7 +65,15 @@ class _AddNewClientState extends State<AddNewClient> {
     'settings',
     'contacts_and_addresses',
     'sales',
+    'accounting',
+    // 'cars',
   ];
+  setTabsList()async{
+    var isItGarage= await getIsItGarageFromPref();
+    if(isItGarage=='1'){
+      tabsList.add('cars');
+    }
+  }
   Map data = {};
   List<String> pricesListsNames = [];
   List<String> pricesListsCodes = [];
@@ -130,6 +142,7 @@ class _AddNewClientState extends State<AddNewClient> {
 
   @override
   void initState() {
+    setTabsList();
     clientController.contactsList = [];
     clientController.salesPersonController.clear();
     clientController.getAllUsersSalesPersonFromBack();
@@ -735,95 +748,99 @@ class _AddNewClientState extends State<AddNewClient> {
                             )
                             : selectedTabIndex == 1
                             ? ContactsAndAddressesSection()
-                            : Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  child: Column(
-                                    children: [
-                                      GetBuilder<ClientController>(
-                                        builder: (cont) {
-                                          return DialogDropMenu(
-                                            controller:
-                                                cont.salesPersonController,
-                                            optionsList:
-                                                clientController
-                                                    .salesPersonListNames,
-                                            text: 'sales_person'.tr,
-                                            hint: 'search'.tr,
-                                            rowWidth:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
-                                                0.3,
-                                            textFieldWidth:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
-                                                0.17,
-                                            onSelected: (String? val) {
-                                              setState(() {
-                                                var index = clientController
-                                                    .salesPersonListNames
-                                                    .indexOf(val!);
-                                                clientController
-                                                    .setSelectedSalesPerson(
-                                                      val,
-                                                      clientController
-                                                          .salesPersonListId[index],
-                                                    );
-                                              });
-                                            },
-                                          );
-                                        },
-                                      ),
-                                      gapH16,
-                                      DialogDropMenu(
-                                        optionsList: [''],
-                                        text: '${'payment_terms'.tr}*',
-                                        hint: '',
-                                        rowWidth:
-                                            MediaQuery.of(context).size.width *
-                                            0.3,
-                                        textFieldWidth:
-                                            MediaQuery.of(context).size.width *
-                                            0.17,
-                                        onSelected: (val) {
-                                          setState(() {
-                                            paymentTerm = val;
-                                          });
-                                        },
-                                      ),
-                                      gapH16,
-                                      DialogDropMenu(
-                                        controller: priceListController,
-                                        optionsList: pricesListsCodes,
-                                        text: 'pricelist'.tr,
-                                        hint: '',
-                                        rowWidth:
-                                            MediaQuery.of(context).size.width *
-                                            0.3,
-                                        textFieldWidth:
-                                            MediaQuery.of(context).size.width *
-                                            0.17,
-                                        onSelected: (val) {
-                                          var index = pricesListsCodes.indexOf(
-                                            val,
-                                          );
-                                          setState(() {
-                                            selectedPriceListId =
-                                                pricesListsIds[index];
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                            : selectedTabIndex == 2
+                            ? Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width:
+                  MediaQuery.of(context).size.width * 0.3,
+                  child: Column(
+                    children: [
+                      GetBuilder<ClientController>(
+                        builder: (cont) {
+                          return DialogDropMenu(
+                            controller:
+                            cont.salesPersonController,
+                            optionsList:
+                            clientController
+                                .salesPersonListNames,
+                            text: 'sales_person'.tr,
+                            hint: 'search'.tr,
+                            rowWidth:
+                            MediaQuery.of(
+                              context,
+                            ).size.width *
+                                0.3,
+                            textFieldWidth:
+                            MediaQuery.of(
+                              context,
+                            ).size.width *
+                                0.17,
+                            onSelected: (String? val) {
+                              setState(() {
+                                var index = clientController
+                                    .salesPersonListNames
+                                    .indexOf(val!);
+                                clientController
+                                    .setSelectedSalesPerson(
+                                  val,
+                                  clientController
+                                      .salesPersonListId[index],
+                                );
+                              });
+                            },
+                          );
+                        },
+                      ),
+                      gapH16,
+                      DialogDropMenu(
+                        optionsList: [''],
+                        text: '${'payment_terms'.tr}*',
+                        hint: '',
+                        rowWidth:
+                        MediaQuery.of(context).size.width *
+                            0.3,
+                        textFieldWidth:
+                        MediaQuery.of(context).size.width *
+                            0.17,
+                        onSelected: (val) {
+                          setState(() {
+                            paymentTerm = val;
+                          });
+                        },
+                      ),
+                      gapH16,
+                      DialogDropMenu(
+                        controller: priceListController,
+                        optionsList: pricesListsCodes,
+                        text: 'pricelist'.tr,
+                        hint: '',
+                        rowWidth:
+                        MediaQuery.of(context).size.width *
+                            0.3,
+                        textFieldWidth:
+                        MediaQuery.of(context).size.width *
+                            0.17,
+                        onSelected: (val) {
+                          var index = pricesListsCodes.indexOf(
+                            val,
+                          );
+                          setState(() {
+                            selectedPriceListId =
+                            pricesListsIds[index];
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+                            : selectedTabIndex == 3
+                            ? SizedBox()
+                            : CarsSection(),
                         const Spacer(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -1399,6 +1416,505 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                 maxLines: 6,
                 decoration: InputDecoration(
                   hintText: 'note.....',
+                  hintStyle: const TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey,
+                  ),
+                  contentPadding: const EdgeInsets.all(16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(9),
+                    borderSide: BorderSide(
+                      color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(9),
+                    borderSide: BorderSide(
+                      color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(9),
+                    borderSide: BorderSide(
+                      width: 1,
+                      color: Primary.primary.withAlpha((0.4 * 255).toInt()),
+                    ),
+                  ),
+                ),
+                onChanged: (val) {
+                  cont.updateContactNote(widget.index, val);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+
+class CarsSection extends StatefulWidget {
+  const CarsSection({super.key});
+
+  @override
+  State<CarsSection> createState() =>
+      _CarsSectionState();
+}
+
+class _CarsSectionState
+    extends State<CarsSection> {
+  ClientController clientController = Get.find();
+  addNewCar() {
+    Map car = {
+      'odometer': '',
+      'registration': '',//unique
+      'year': '',
+      'color': '',
+      'model': '',
+      'brand': '',
+      'chassis_no': '',//number
+      'rating': '',
+      'comment': '',
+      'car_fax': '',
+    };
+    clientController.addToCarsList(car);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<ClientController>(
+      builder: (cont) {
+        return Column(
+          children: [
+            SizedBox(
+              height: cont.carsList.isEmpty ? 20 : 360,
+              child: ListView.builder(
+                itemCount: cont.carsList.length,
+                itemBuilder:
+                    (context, index) => ReusableCarSection(index: index),
+              ),
+            ),
+            gapH16,
+            ReusableAddCard(
+              text: 'add_new_car'.tr,
+              onTap: () {
+                addNewCar();
+                // print('addCar');
+                // print(cont.carsList);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class ReusableCarSection extends StatefulWidget {
+  const ReusableCarSection({super.key, required this.index});
+  final int index;
+  @override
+  State<ReusableCarSection> createState() => _ReusableCarSectionState();
+}
+
+class _ReusableCarSectionState extends State<ReusableCarSection> {
+  ClientController clientController = Get.find();
+  String selectedYear = '', selectedModel = '', selectedColor = '',selectedBrand = '', selectedRating = '';
+  List<String> years = [];
+  TextEditingController faxController = TextEditingController();
+  TextEditingController odometerController = TextEditingController();
+  TextEditingController colorController = TextEditingController();
+  TextEditingController chassisNoController = TextEditingController();
+  TextEditingController registrationController = TextEditingController();
+  TextEditingController brandController = TextEditingController();
+  TextEditingController commentController = TextEditingController();
+  TextEditingController modelController = TextEditingController();
+  TextEditingController yearController = TextEditingController();
+  TextEditingController ratingController = TextEditingController();
+  @override
+  void initState() {
+    years = generateYears();
+    odometerController.text =
+        clientController.carsList[widget.index]['odometer'];
+    colorController.text =
+        clientController.carsList[widget.index]['color'];
+    chassisNoController.text =
+        clientController.carsList[widget.index]['chassis_no'];
+    registrationController.text =
+        clientController.carsList[widget.index]['registration'];
+    brandController.text =
+        clientController.carsList[widget.index]['brand'];
+    commentController.text =
+        clientController.carsList[widget.index]['comment'];
+    modelController.text =
+        clientController.carsList[widget.index]['model'];
+    yearController.text =
+        clientController.carsList[widget.index]['year'];
+    ratingController.text =
+        clientController.carsList[widget.index]['rating'];
+    faxController.text =
+        clientController.carsList[widget.index]['car_fax'];
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<ClientController>(
+      builder: (cont) {
+        return Container(
+          margin: const EdgeInsets.only(top: 20.0),
+          padding: EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+            ),
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // gapH28,
+              GetBuilder<HomeController>(
+                builder: (homeCont) {
+                  double smallRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.22:MediaQuery.of(context).size.width * 0.27;
+                  double smallTextFieldWidth=homeCont.isMenuOpened?
+                  MediaQuery.of(context).size.width * 0.15
+                      : MediaQuery.of(context).size.width * 0.19;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          DialogTextField(
+                            textEditingController: registrationController,
+                            text: 'registration'.tr,
+                            rowWidth: smallRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
+                            validationFunc: (val) {},
+                            onChangedFunc: (val) {
+                              cont.updateCarRegistration(widget.index, val);
+                            },
+                          ),
+                          DialogTextField(
+                            textEditingController: chassisNoController,
+                            text: 'chassis_no'.tr,
+                            hint: '',
+                            rowWidth:smallRowWidth,
+                            textFieldWidth:smallTextFieldWidth,
+                            validationFunc: (val) {},
+                            onChangedFunc: (val) {
+                              cont.updateCarChassisNo(widget.index, val);
+                            },
+                          ),
+                          DialogTextField(
+                            textEditingController: faxController,
+                            text: 'car_fax'.tr,
+                            rowWidth:smallRowWidth,
+                            textFieldWidth:smallTextFieldWidth,
+                            validationFunc: (val) {},
+                            onChangedFunc: (val) {
+                              cont.updateCarFax(widget.index, val);
+                            },
+                          ),
+                        ],
+                      ),
+                      gapH10,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ReusableDropDownMenuWithSearch(
+                            list: carBrands,
+                            text: 'brand'.tr,
+                            hint: '${'search'.tr}...',
+                            controller: brandController,
+                            onSelected: (String? val) {
+                              setState(() {
+                                selectedBrand=val!;
+                              });
+                              cont.updateCarBrand(widget.index, val!);
+                            },
+                            validationFunc: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'select_option'.tr;
+                              }
+                              return null;
+                            },
+                            rowWidth: smallRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
+                            clickableOptionText:
+                            'create_new_brand'.tr,
+                            isThereClickableOption: true,
+                            onTappedClickableOption: () {
+                              // showDialog<String>(
+                              //   context: context,
+                              //   builder:
+                              //       (
+                              //       BuildContext context,
+                              //       ) => const AlertDialog(
+                              //     backgroundColor: Colors.white,
+                              //     shape: RoundedRectangleBorder(
+                              //       borderRadius:
+                              //       BorderRadius.all(
+                              //         Radius.circular(9),
+                              //       ),
+                              //     ),
+                              //     elevation: 0,
+                              //     content: CreateBrandDialog(),
+                              //   ),
+                              // );
+                            },
+                          ),
+                          ReusableDropDownMenuWithSearch(
+                            list: carModels,
+                            text: 'model'.tr,
+                            hint: '${'search'.tr}...',
+                            controller: modelController,
+                            onSelected: (String? val) {
+                              setState(() {
+                                selectedModel=val!;
+                              });
+                              cont.updateCarModel(widget.index, val!);
+                            },
+                            validationFunc: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'select_option'.tr;
+                              }
+                              return null;
+                            },
+                            rowWidth: smallRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
+                            clickableOptionText:
+                            'create_new_model'.tr,
+                            isThereClickableOption: true,
+                            onTappedClickableOption: () {
+                              // showDialog<String>(
+                              //   context: context,
+                              //   builder:
+                              //       (
+                              //       BuildContext context,
+                              //       ) => const AlertDialog(
+                              //     backgroundColor: Colors.white,
+                              //     shape: RoundedRectangleBorder(
+                              //       borderRadius:
+                              //       BorderRadius.all(
+                              //         Radius.circular(9),
+                              //       ),
+                              //     ),
+                              //     elevation: 0,
+                              //     content: CreateModelDialog(),
+                              //   ),
+                              // );
+                            },
+                          ),
+                          SizedBox(
+                            width: smallRowWidth,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('year'.tr),
+                                DropdownMenu<String>(
+                                  width: smallTextFieldWidth,
+                                  enableSearch: true,
+                                  controller: yearController,
+                                  hintText: '${'search'.tr}...',
+                                  inputDecorationTheme: InputDecorationTheme(
+                                    hintStyle: const TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      color: Colors.grey,
+                                    ),
+                                    contentPadding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      0,
+                                      25,
+                                      5,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Primary.primary.withAlpha(
+                                          (0.2 * 255).toInt(),
+                                        ),
+                                        width: 1,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(9),
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Primary.primary.withAlpha(
+                                          (0.4 * 255).toInt(),
+                                        ),
+                                        width: 2,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(9),
+                                      ),
+                                    ),
+                                  ),
+                                  menuHeight: 250,
+                                  dropdownMenuEntries:
+                                  years.map<DropdownMenuEntry<String>>((
+                                      String option,
+                                      ) {
+                                    return DropdownMenuEntry<String>(
+                                      value: option,
+                                      label: option,
+                                    );
+                                  }).toList(),
+                                  enableFilter: true,
+                                  onSelected: (String? val) {
+                                    setState(() {
+                                      selectedYear = val!;
+                                    });
+                                    cont.updateCarYear(widget.index, val!);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      gapH10,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ReusableDropDownMenuWithSearch(
+                            list: carColors,
+                            text: 'color'.tr,
+                            hint: '${'search'.tr}...',
+                            controller: colorController,
+                            onSelected: (String? val) {
+                              setState(() {
+                                selectedColor=val!;
+                              });
+                              cont.updateCarColor(widget.index, val!);
+                            },
+                            validationFunc: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'select_option'.tr;
+                              }
+                              return null;
+                            },
+                            rowWidth: smallRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
+                            clickableOptionText:
+                            'create_new_color'.tr,
+                            isThereClickableOption: true,
+                            onTappedClickableOption: () {
+                              // showDialog<String>(
+                              //   context: context,
+                              //   builder:
+                              //       (
+                              //       BuildContext context,
+                              //       ) => const AlertDialog(
+                              //     backgroundColor: Colors.white,
+                              //     shape: RoundedRectangleBorder(
+                              //       borderRadius:
+                              //       BorderRadius.all(
+                              //         Radius.circular(9),
+                              //       ),
+                              //     ),
+                              //     elevation: 0,
+                              //     content: CreateColorDialog(),
+                              //   ),
+                              // );
+                            },
+                          ),
+                          SizedBox(
+                            width: smallRowWidth,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('rating'.tr),
+                                DropdownMenu<String>(
+                                  width: smallTextFieldWidth,
+                                  enableSearch: true,
+                                  controller: ratingController,
+                                  hintText: '${'search'.tr}...',
+                                  inputDecorationTheme: InputDecorationTheme(
+                                    hintStyle: const TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      color: Colors.grey,
+                                    ),
+                                    contentPadding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      0,
+                                      25,
+                                      5,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Primary.primary.withAlpha(
+                                          (0.2 * 255).toInt(),
+                                        ),
+                                        width: 1,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(9),
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Primary.primary.withAlpha(
+                                          (0.4 * 255).toInt(),
+                                        ),
+                                        width: 2,
+                                      ),
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(9),
+                                      ),
+                                    ),
+                                  ),
+                                  menuHeight: 250,
+                                  dropdownMenuEntries:
+                                  carRatings.map<DropdownMenuEntry<String>>((
+                                      String option,
+                                      ) {
+                                    return DropdownMenuEntry<String>(
+                                      value: option,
+                                      label: option,
+                                    );
+                                  }).toList(),
+                                  enableFilter: true,
+                                  onSelected: (String? val) {
+                                    setState(() {
+                                      selectedRating = val!;
+                                    });
+                                    cont.updateCarRating(widget.index, val!);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          DialogTextField(
+                            textEditingController: odometerController,
+                            text: 'odometer'.tr,
+                            rowWidth:smallRowWidth,
+                            textFieldWidth:smallTextFieldWidth,
+                            validationFunc: (val) {},
+                            onChangedFunc: (val) {
+                              cont.updateCarOdometer(widget.index, val);
+                            },
+                          ),
+
+                        ],
+                      ),
+                      gapH10,
+
+                    ],
+                  );
+                }
+              ),
+              gapH10,
+              TextField(
+                controller: commentController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'comment.....',
                   hintStyle: const TextStyle(
                     fontStyle: FontStyle.italic,
                     color: Colors.grey,

@@ -101,6 +101,7 @@ class ClientController extends GetxController {
      update();
    }
 
+
    updateContactType(int index,String newVal){
      contactsList[index]['type']=newVal;
    }
@@ -178,4 +179,57 @@ class ClientController extends GetxController {
     selectedSalesPersonId=id;
     update();
   }
+
+
+
+
+  List<Map> carsList=[
+//      'odometer': '',
+//       'registration': '',//unique
+//       'year': '',
+//       'color': '',
+//       'model': '',
+//       'brand': '',
+//       'chassis_no': '',//number
+//       'rating': '',
+//       'comment': '',
+//       'car_fax': '',
+  ];
+  addToCarsList(Map newMap){
+    carsList.add(newMap);
+    update();
+  }
+
+  updateCarOdometer(int index,String newVal){
+    carsList[index]['odometer']=newVal;
+  }
+  updateCarRegistration(int index,String newVal){
+    carsList[index]['registration']=newVal;
+  }
+  updateCarYear(int index,String newVal){
+    carsList[index]['year']=newVal;
+  }
+  updateCarColor(int index,String newVal){
+    carsList[index]['color']=newVal;
+  }
+  updateCarModel(int index,String newVal){
+    carsList[index]['model']=newVal;
+  }
+  updateCarBrand(int index,String newVal){
+    carsList[index]['brand']=newVal;
+  }
+  updateCarChassisNo(int index,String newVal){
+    carsList[index]['chassis_no']=newVal;
+  }
+  updateCarRating(int index,String newVal){
+    carsList[index]['rating']=newVal;
+  }
+  updateCarComment(int index,String newVal){
+    carsList[index]['comment']=newVal;
+  }
+  updateCarFax(int index,String newVal){
+    carsList[index]['car_fax']=newVal;
+  }
+
+
 }

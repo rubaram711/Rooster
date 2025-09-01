@@ -95,17 +95,18 @@ class _AccountsPageState extends State<AccountsPage> {
     }
   }
 
-  String primaryCurr='';
+  String primaryCurr = '';
   getCurrency() async {
-    var curr=await getCompanyPrimaryCurrencyFromPref();
-    primaryCurr=curr;
+    var curr = await getCompanyPrimaryCurrencyFromPref();
+    primaryCurr = curr;
   }
+
   @override
   void initState() {
     clientController.getAllUsersSalesPersonFromBack();
-    clientController.selectedSalesPerson='';
-    clientController.selectedSalesPersonId=0;
-    clientController.salesPersonController.text='';
+    clientController.selectedSalesPerson = '';
+    clientController.selectedSalesPersonId = 0;
+    clientController.salesPersonController.text = '';
     getCurrency();
     // generalListViewLength = accounts.length < 10
     //     ? Sizes.deviceHeight * (0.09 * accounts.length)
@@ -239,8 +240,16 @@ class _AccountsPageState extends State<AccountsPage> {
                           ),
                           child: GetBuilder<HomeController>(
                             builder: (homeCont) {
-                              double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.25:MediaQuery.of(context).size.width * 0.28;
-                              double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.12;
+                              double bigWidth =
+                                  homeCont.isMenuOpened
+                                      ? MediaQuery.of(context).size.width * 0.25
+                                      : MediaQuery.of(context).size.width *
+                                          0.28;
+                              double smallWidth =
+                                  homeCont.isMenuOpened
+                                      ? MediaQuery.of(context).size.width * 0.09
+                                      : MediaQuery.of(context).size.width *
+                                          0.12;
                               return Row(
                                 children: [
                                   TableTitle(
@@ -251,7 +260,7 @@ class _AccountsPageState extends State<AccountsPage> {
                                   TableTitle(
                                     text: 'name'.tr,
                                     isCentered: false,
-                                    width:bigWidth,
+                                    width: bigWidth,
                                   ),
                                   TableTitle(
                                     text: 'mobile_number'.tr,
@@ -267,14 +276,13 @@ class _AccountsPageState extends State<AccountsPage> {
                                   ),
                                   TableTitle(
                                     text: 'more_options'.tr,
-                                    width: MediaQuery.of(
-                                      context,
-                                    ).size.width *
+                                    width:
+                                        MediaQuery.of(context).size.width *
                                         0.13,
                                   ),
                                 ],
                               );
-                            }
+                            },
                           ),
                         ),
                         clientCont.isClientsFetched
@@ -437,10 +445,18 @@ class _AccountsPageState extends State<AccountsPage> {
                               Radius.circular(6),
                             ),
                           ),
-                          child:  GetBuilder<HomeController>(
-                              builder: (homeCont) {
-                                double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.12:MediaQuery.of(context).size.width * 0.16;
-                                double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.11;
+                          child: GetBuilder<HomeController>(
+                            builder: (homeCont) {
+                              double bigWidth =
+                                  homeCont.isMenuOpened
+                                      ? MediaQuery.of(context).size.width * 0.12
+                                      : MediaQuery.of(context).size.width *
+                                          0.16;
+                              double smallWidth =
+                                  homeCont.isMenuOpened
+                                      ? MediaQuery.of(context).size.width * 0.09
+                                      : MediaQuery.of(context).size.width *
+                                          0.11;
                               return Row(
                                 children: [
                                   TableTitle(
@@ -481,7 +497,7 @@ class _AccountsPageState extends State<AccountsPage> {
                                   ),
                                 ],
                               );
-                            }
+                            },
                           ),
                         ),
                         clientCont.isTransactionsFetched
@@ -803,55 +819,46 @@ class ClientAsRowInTable extends StatelessWidget {
             decoration: const BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(0)),
             ),
-            child:  GetBuilder<HomeController>(
-                builder: (homeCont) {
-                  double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.25:MediaQuery.of(context).size.width * 0.28;
-                  double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.12;
+            child: GetBuilder<HomeController>(
+              builder: (homeCont) {
+                double bigWidth =
+                    homeCont.isMenuOpened
+                        ? MediaQuery.of(context).size.width * 0.25
+                        : MediaQuery.of(context).size.width * 0.28;
+                double smallWidth =
+                    homeCont.isMenuOpened
+                        ? MediaQuery.of(context).size.width * 0.09
+                        : MediaQuery.of(context).size.width * 0.12;
                 return Row(
                   children: [
                     TableItem(
                       isCentered: false,
                       text: '${info['clientNumber'] ?? ''}',
-                      width:
-                          isDesktop
-                              ? smallWidth
-                              : 140,
+                      width: isDesktop ? smallWidth : 140,
                     ),
                     TableItem(
                       isCentered: false,
                       text: '${info['name'] ?? ''}',
-                      width:
-                          isDesktop
-                              ? bigWidth
-                              : 140,
+                      width: isDesktop ? bigWidth : 140,
                     ),
                     TableItem(
                       text:
                           info['mobileNumber'] != null
                               ? '(${info['mobileCode']})-${info['mobileNumber']}'
                               : '',
-                      width:
-                          isDesktop
-                              ? smallWidth
-                              : 140,
+                      width: isDesktop ? smallWidth : 140,
                     ),
                     TableItem(
                       text: '${info['balance_usd'] ?? ''}',
-                      width:
-                          isDesktop
-                              ? smallWidth
-                              : 140,
+                      width: isDesktop ? smallWidth : 140,
                     ),
                     TableItem(
                       text: '${info['balance_lbp'] ?? ''}',
-                      width:
-                          isDesktop
-                              ? smallWidth
-                              : 140,
+                      width: isDesktop ? smallWidth : 140,
                     ),
                   ],
                 );
-              }
+              },
             ),
           ),
         );
@@ -871,7 +878,6 @@ class TransactionOrderAsRowInTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     HomeController homeController = Get.find();
-    print('info $info');
     return InkWell(
       onTap: () {
         showDialog<String>(
@@ -893,65 +899,53 @@ class TransactionOrderAsRowInTable extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(0)),
         ),
-        child:  GetBuilder<HomeController>(
-            builder: (homeCont) {
-              double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.12:MediaQuery.of(context).size.width * 0.16;
-              double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.11;
+        child: GetBuilder<HomeController>(
+          builder: (homeCont) {
+            double bigWidth =
+                homeCont.isMenuOpened
+                    ? MediaQuery.of(context).size.width * 0.12
+                    : MediaQuery.of(context).size.width * 0.16;
+            double smallWidth =
+                homeCont.isMenuOpened
+                    ? MediaQuery.of(context).size.width * 0.09
+                    : MediaQuery.of(context).size.width * 0.11;
             return Row(
               children: [
                 TableItem(
                   text: '${info['date'] ?? ''}',
-                  width:
-                      homeController.isMobile.value
-                          ? 140
-                          : smallWidth,
+                  width: homeController.isMobile.value ? 140 : smallWidth,
                 ),
                 TableItem(
                   text: '${info['orderNumber'] ?? ''}',
-                  width:
-                      homeController.isMobile.value
-                          ? 140
-                          :smallWidth,
+                  width: homeController.isMobile.value ? 140 : smallWidth,
                 ),
                 TableItem(
                   text: '',
-                  width:
-                      homeController.isMobile.value
-                          ? 140
-                          : smallWidth,
+                  width: homeController.isMobile.value ? 140 : smallWidth,
                 ),
                 TableItem(
                   text: 'order',
-                  width:
-                      homeController.isMobile.value
-                          ? 140
-                          : smallWidth,
+                  width: homeController.isMobile.value ? 140 : smallWidth,
                 ),
                 TableItem(
                   text: '', // '${info['transaction_label'] ?? ''}',
-                  width:
-                      homeController.isMobile.value
-                          ? 250
-                          : smallWidth,
+                  width: homeController.isMobile.value ? 250 : smallWidth,
                 ),
                 TableItem(
-                  text: numberWithComma('${info['primaryCurrencyTotal'] ?? ''}'),
-                  width:
-                      homeController.isMobile.value
-                          ? 150
-                          : bigWidth,
+                  text: numberWithComma(
+                    '${info['primaryCurrencyTotal'] ?? ''}',
+                  ),
+                  width: homeController.isMobile.value ? 150 : bigWidth,
                 ),
                 TableItem(
-                  text: '${info['posCurrencyTotal']!=null ? numberWithComma('${info['posCurrencyTotal']}'):''} '
-                      '${info['posCurrency']!=null?info['posCurrency']['name']:''}',
-                  width:
-                      homeController.isMobile.value
-                          ? 200
-                          : bigWidth,
+                  text:
+                      '${info['posCurrencyTotal'] != null ? numberWithComma('${info['posCurrencyTotal']}') : ''} '
+                      '${info['posCurrency'] != null ? info['posCurrency']['name'] : ''}',
+                  width: homeController.isMobile.value ? 200 : bigWidth,
                 ),
               ],
             );
-          }
+          },
         ),
       ),
     );
@@ -980,9 +974,14 @@ class TransactionQuotationsAsRowInTable extends StatelessWidget {
                   borderRadius: BorderRadius.all(Radius.circular(9)),
                 ),
                 elevation: 0,
-                content:homeController.isMobile.value?MobileUpdateTransactionQuotationDialog(quotationIndex: index,): UpdateTransactionQuotationDialog(
-                  quotationIndex: index,
-                ),
+                content:
+                    homeController.isMobile.value
+                        ? MobileUpdateTransactionQuotationDialog(
+                          quotationIndex: index,
+                        )
+                        : UpdateTransactionQuotationDialog(
+                          quotationIndex: index,
+                        ),
               ),
         );
       },
@@ -993,69 +992,54 @@ class TransactionQuotationsAsRowInTable extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(0)),
         ),
         child: GetBuilder<HomeController>(
-            builder: (homeCont) {
-              double bigWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.12:MediaQuery.of(context).size.width * 0.16;
-              double smallWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.09:MediaQuery.of(context).size.width * 0.11;
+          builder: (homeCont) {
+            double bigWidth =
+                homeCont.isMenuOpened
+                    ? MediaQuery.of(context).size.width * 0.12
+                    : MediaQuery.of(context).size.width * 0.16;
+            double smallWidth =
+                homeCont.isMenuOpened
+                    ? MediaQuery.of(context).size.width * 0.09
+                    : MediaQuery.of(context).size.width * 0.11;
             return Row(
               children: [
                 TableItem(
                   text: '${info['createdAtDate'] ?? ''}',
-                  width:
-                      homeController.isMobile.value
-                          ? 140
-                          : smallWidth,
+                  width: homeController.isMobile.value ? 140 : smallWidth,
                 ),
                 TableItem(
                   text: '${info['quotationNumber'] ?? ''}',
-                  width:
-                      homeController.isMobile.value
-                          ? 140
-                          : smallWidth,
+                  width: homeController.isMobile.value ? 140 : smallWidth,
                 ),
                 TableItem(
                   text: '${info['reference'] ?? ''}',
-                  width:
-                      homeController.isMobile.value
-                          ? 140
-                          : smallWidth,
+                  width: homeController.isMobile.value ? 140 : smallWidth,
                 ),
                 TableItem(
                   text: 'quotation',
-                  width:
-                      homeController.isMobile.value
-                          ? 140
-                          : smallWidth,
+                  width: homeController.isMobile.value ? 140 : smallWidth,
                 ),
                 TableItem(
                   text: '', // '${info['transaction_label'] ?? ''}',
-                  width:
-                      homeController.isMobile.value
-                          ? 250
-                          : smallWidth,
+                  width: homeController.isMobile.value ? 250 : smallWidth,
                 ),
                 TableItem(
                   text:
                       info['currency']['name'] == 'USD'
                           ? '${info['total'] ?? ''}'
                           : '',
-                  width:
-                      homeController.isMobile.value
-                          ? 150
-                          : bigWidth,
+                  width: homeController.isMobile.value ? 150 : bigWidth,
                 ),
                 TableItem(
                   text:
                       info['currency']['name'] == 'USD'
                           ? ''
                           : '${info['total'] ?? ''} ${info['currency']['name'] ?? ''}',
-                  width:
-                      homeController.isMobile.value
-                          ? 200
-                          : bigWidth,
+                  width: homeController.isMobile.value ? 200 : bigWidth,
                 ),
               ],
             );
-          }
+          },
         ),
       ),
     );
@@ -1125,11 +1109,13 @@ class _MobileAccountsPageState extends State<MobileAccountsPage> {
       await clientController.getTransactionsFromBack();
     }
   }
-  String primaryCurr='';
+
+  String primaryCurr = '';
   getCurrency() async {
-    var curr=await getCompanyPrimaryCurrencyFromPref();
-    primaryCurr=curr;
+    var curr = await getCompanyPrimaryCurrencyFromPref();
+    primaryCurr = curr;
   }
+
   // TextEditingController searchController = TextEditingController();
   @override
   void initState() {
@@ -1282,7 +1268,8 @@ class _MobileAccountsPageState extends State<MobileAccountsPage> {
                                                 140, // MediaQuery.of(context).size.width * 0.09,
                                           ),
                                           TableTitle(
-                                            text: '${'balance'.tr} $primaryCurr',
+                                            text:
+                                                '${'balance'.tr} $primaryCurr',
                                             width:
                                                 140, // MediaQuery.of(context).size.width * 0.09,
                                           ),
@@ -2395,13 +2382,13 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
     });
   }
 
-  List<String> pricesListsNames=[];
-  List<String> pricesListsCodes=[];
-  List<String> pricesListsIds=[];
+  List<String> pricesListsNames = [];
+  List<String> pricesListsCodes = [];
+  List<String> pricesListsIds = [];
   getFieldsForCreateClientsFromBack() async {
     var p = await getFieldsForCreateClient();
     if ('$p' != '[]') {
-      for(var priceList in p['pricelists']){
+      for (var priceList in p['pricelists']) {
         setState(() {
           pricesListsNames.add(priceList['title']);
           pricesListsIds.add('${priceList['id']}');
@@ -2411,47 +2398,77 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
     }
   }
 
-  setContacts(){
-    clientController.contactsList=[];
-    for(var con in widget.info['deliveryAddresses']){
-      Map contact={
-        'type':con['type']??'1',
-        'name':con['name']??'',
-        'title':con['title']??'',
-        'jobPosition':con['job_position']??'',
-        'deliveryAddress':con['delivery_address']??'',
-        'phoneCode':con['phone_code']??'+961',
-        'phoneNumber':con['phone_number']??'',
-        'extension':con['extension']??'',
-        'mobileCode':con['mobile_code']??'+961',
-        'mobileNumber':con['mobile_number']??'',
-        'email':con['email']??'',
-        'note':con['note']??'',
-        'internalNote':con['internal_note']??'',
+  setContacts() {
+    clientController.contactsList = [];
+    for (var con in widget.info['deliveryAddresses']) {
+      Map contact = {
+        'type': con['type'] ?? '1',
+        'name': con['name'] ?? '',
+        'title': con['title'] ?? '',
+        'jobPosition': con['job_position'] ?? '',
+        'deliveryAddress': con['delivery_address'] ?? '',
+        'phoneCode': con['phone_code'] ?? '+961',
+        'phoneNumber': con['phone_number'] ?? '',
+        'extension': con['extension'] ?? '',
+        'mobileCode': con['mobile_code'] ?? '+961',
+        'mobileNumber': con['mobile_number'] ?? '',
+        'email': con['email'] ?? '',
+        'note': con['note'] ?? '',
+        'internalNote': con['internal_note'] ?? '',
       };
       clientController.contactsList.add(contact);
     }
   }
+  setCars() {
+    clientController.carsList = [];
+    // for (var con in widget.info['cars']) {
+    //   Map car = {
+    //     'odometer': con['odometer'] ?? '',
+    //     'registration': con['registration'] ?? '',
+    //     'year': con['year'] ?? '',
+    //     'color': con['color'] ?? '',
+    //     'model': con['model'] ?? '',
+    //     'brand': con['brand'] ?? '',
+    //     'chassis_no': con['chassis_no'] ?? '',
+    //     'rating': con['rating'] ?? '',
+    //     'comment': con['comment'] ?? '',
+    //     'car_fax': con['car_fax'] ?? '',
+    //   };
+    //   clientController.carsList.add(contact);
+    // }
+  }
+
   List tabsList = [
     'settings',
     'contacts_and_addresses',
     'sales',
+    'accounting',
+    // 'cars',
   ];
+  setTabsList()async{
+    var isItGarage= await getIsItGarageFromPref();
+    if(isItGarage=='1'){
+      tabsList.add('cars');
+    }
+  }
   @override
   void initState() {
+    setTabsList();
     getFieldsForCreateClientsFromBack();
     getCountriesFromBack();
     setContacts();
+    setCars();
     if (widget.info['country'] != null) {
       getCitiesOfASpecifiedCountry(widget.info['country']);
     }
-    if(widget.info['pricelist']!=null){
-      selectedPriceListId='${widget.info['pricelist']['id']}';
-      priceListController.text=widget.info['pricelist']['code'];
+    if (widget.info['pricelist'] != null) {
+      selectedPriceListId = '${widget.info['pricelist']['id']}';
+      priceListController.text = widget.info['pricelist']['code'];
     }
-    if(widget.info['salesperson']!=null){
-      clientController.selectedSalesPersonId=widget.info['salesperson']['id'];
-      clientController.salesPersonController.text=widget.info['salesperson']['name'];
+    if (widget.info['salesperson'] != null) {
+      clientController.selectedSalesPersonId = widget.info['salesperson']['id'];
+      clientController.salesPersonController.text =
+          widget.info['salesperson']['name'];
     }
     selectedClientType = widget.info['type'] == 'company' ? 2 : 1;
     clientNameController.text = widget.info['name'] ?? '';
@@ -2594,7 +2611,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           textEditingController: referenceController,
                           text: 'reference'.tr,
                           rowWidth: MediaQuery.of(context).size.width * 0.25,
-                          textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                          textFieldWidth:
+                              MediaQuery.of(context).size.width * 0.15,
                           validationFunc: (val) {},
                         ),
                         PhoneTextField(
@@ -2602,7 +2620,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           text: 'phone'.tr,
                           initialValue: selectedPhoneCode,
                           rowWidth: MediaQuery.of(context).size.width * 0.25,
-                          textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                          textFieldWidth:
+                              MediaQuery.of(context).size.width * 0.2,
                           validationFunc: (String val) {
                             if (val.isNotEmpty && val.length < 7) {
                               return '7_digits'.tr;
@@ -2624,7 +2643,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           textEditingController: floorBldgController,
                           text: 'floor_bldg'.tr,
                           rowWidth: MediaQuery.of(context).size.width * 0.25,
-                          textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                          textFieldWidth:
+                              MediaQuery.of(context).size.width * 0.15,
                           validationFunc: (val) {},
                         ),
                       ],
@@ -2706,7 +2726,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           text: 'mobile'.tr,
                           initialValue: selectedMobileCode,
                           rowWidth: MediaQuery.of(context).size.width * 0.25,
-                          textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                          textFieldWidth:
+                              MediaQuery.of(context).size.width * 0.2,
                           validationFunc: (val) {
                             if (val.isNotEmpty && val.length < 7) {
                               return '7_digits'.tr;
@@ -2728,7 +2749,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           textEditingController: streetController,
                           text: 'street'.tr,
                           rowWidth: MediaQuery.of(context).size.width * 0.25,
-                          textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                          textFieldWidth:
+                              MediaQuery.of(context).size.width * 0.15,
                           validationFunc: (val) {},
                           // onChangedFunc: (value){
                           //   setState(() {
@@ -2747,7 +2769,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           text: 'job_position'.tr,
                           hint: 'Sales Director,Sales...',
                           rowWidth: MediaQuery.of(context).size.width * 0.25,
-                          textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                          textFieldWidth:
+                              MediaQuery.of(context).size.width * 0.15,
                           validationFunc: (val) {},
                         ),
                         DialogTextField(
@@ -2755,7 +2778,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           text: 'email'.tr,
                           hint: 'example@gmail.com',
                           rowWidth: MediaQuery.of(context).size.width * 0.25,
-                          textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                          textFieldWidth:
+                              MediaQuery.of(context).size.width * 0.2,
                           validationFunc: (String value) {
                             if (value.isNotEmpty &&
                                 !RegExp(
@@ -2769,11 +2793,14 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                             ? SizedBox(
                               width: MediaQuery.of(context).size.width * 0.25,
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('country'.tr),
                                   DropdownMenu<String>(
-                                    width: MediaQuery.of(context).size.width * 0.15,
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.15,
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
                                     controller: countryController,
@@ -2851,7 +2878,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           textEditingController: taxNumberController,
                           text: 'tax_number'.tr,
                           rowWidth: MediaQuery.of(context).size.width * 0.25,
-                          textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                          textFieldWidth:
+                              MediaQuery.of(context).size.width * 0.15,
                           validationFunc: (val) {
                             if (selectedClientType == 2 && val.isEmpty) {
                               return 'required_field'.tr;
@@ -2864,7 +2892,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           text: 'website'.tr,
                           hint: 'www.example.com',
                           rowWidth: MediaQuery.of(context).size.width * 0.25,
-                          textFieldWidth: MediaQuery.of(context).size.width * 0.2,
+                          textFieldWidth:
+                              MediaQuery.of(context).size.width * 0.2,
                           validationFunc: (String value) {
                             // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                             //     .hasMatch(value)) {
@@ -2876,11 +2905,14 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                             ? SizedBox(
                               width: MediaQuery.of(context).size.width * 0.25,
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('city'.tr),
                                   DropdownMenu<String>(
-                                    width: MediaQuery.of(context).size.width * 0.15,
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.15,
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
                                     controller: cityController,
@@ -2957,16 +2989,16 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           spacing: 0.0,
                           direction: Axis.horizontal,
                           children:
-                          tabsList
-                              .map(
-                                (element) => _buildTabChipItem(
-                              element,
-                              // element['id'],
-                              // element['name'],
-                              tabsList.indexOf(element),
-                            ),
-                          )
-                              .toList(),
+                              tabsList
+                                  .map(
+                                    (element) => _buildTabChipItem(
+                                      element,
+                                      // element['id'],
+                                      // element['name'],
+                                      tabsList.indexOf(element),
+                                    ),
+                                  )
+                                  .toList(),
                         ),
                       ],
                     ),
@@ -3099,140 +3131,169 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           //             :
                           selectedTabIndex == 0
                               ? Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ReusableInputNumberField(
-                                controller: grantedDiscountController,
-                                textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                                rowWidth: MediaQuery.of(context).size.width * 0.25,
-                                onChangedFunc: (val) {},
-                                validationFunc: (value) {},
-                                text: 'granted_discount'.tr,
-                              ),
-                              gapH20,
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.25,
-                                child: ListTile(
-                                  title: Text(
-                                    '    ${'show_in_POS'.tr}',
-                                    style: const TextStyle(fontSize: 12),
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ReusableInputNumberField(
+                                    controller: grantedDiscountController,
+                                    textFieldWidth:
+                                        MediaQuery.of(context).size.width *
+                                        0.15,
+                                    rowWidth:
+                                        MediaQuery.of(context).size.width *
+                                        0.25,
+                                    onChangedFunc: (val) {},
+                                    validationFunc: (value) {},
+                                    text: 'granted_discount'.tr,
                                   ),
-                                  leading: Checkbox(
-                                    // checkColor: Colors.white,
-                                    // fillColor: MaterialStateProperty.resolveWith(getColor),
-                                    value: isActiveInPosChecked,
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        isActiveInPosChecked = value!;
-                                      });
-                                    },
+                                  gapH20,
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.25,
+                                    child: ListTile(
+                                      title: Text(
+                                        '    ${'show_in_POS'.tr}',
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                      leading: Checkbox(
+                                        // checkColor: Colors.white,
+                                        // fillColor: MaterialStateProperty.resolveWith(getColor),
+                                        value: isActiveInPosChecked,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            isActiveInPosChecked = value!;
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                              gapH20,
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.25,
-                                child: ListTile(
-                                  title: Text(
-                                    '    ${'blocked'.tr}',
-                                    style: const TextStyle(fontSize: 12),
+                                  gapH20,
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.25,
+                                    child: ListTile(
+                                      title: Text(
+                                        '    ${'blocked'.tr}',
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                      leading: Checkbox(
+                                        // checkColor: Colors.white,
+                                        // fillColor: MaterialStateProperty.resolveWith(getColor),
+                                        value: isBlockedChecked,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            isBlockedChecked = value!;
+                                          });
+                                        },
+                                      ),
+                                    ),
                                   ),
-                                  leading: Checkbox(
-                                    // checkColor: Colors.white,
-                                    // fillColor: MaterialStateProperty.resolveWith(getColor),
-                                    value: isBlockedChecked,
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        isBlockedChecked = value!;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
+                                ],
+                              )
                               : selectedTabIndex == 1
                               ? ContactsAndAddressesSection()
-                              : Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width:
-                                MediaQuery.of(context).size.width * 0.3,
-                                child: Column(
-                                  children: [
-                                    GetBuilder<ClientController>(
-                                        builder: (cont) {
-                                          return DialogDropMenu(
-                                            controller: cont.salesPersonController,
-                                            optionsList:
-                                            clientController
-                                                .salesPersonListNames,
-                                            text: 'sales_person'.tr,
-                                            hint: 'search'.tr,
-                                            rowWidth:
-                                            MediaQuery.of(context).size.width *
-                                                0.3,
-                                            textFieldWidth:
-                                            MediaQuery.of(context).size.width *
-                                                0.17,
-                                            onSelected: (String? val) {
-                                              setState(() {
-                                                var index = clientController
-                                                    .salesPersonListNames
-                                                    .indexOf(val!);
-                                                clientController.setSelectedSalesPerson
-                                                  (val,
-                                                    clientController
-                                                        .salesPersonListId[index]);
-                                              });
-                                            },
-                                          );
-                                        }
+                              : selectedTabIndex == 2
+                              ? Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: Column(
+                                      children: [
+                                        GetBuilder<ClientController>(
+                                          builder: (cont) {
+                                            return DialogDropMenu(
+                                              controller:
+                                                  cont.salesPersonController,
+                                              optionsList:
+                                                  clientController
+                                                      .salesPersonListNames,
+                                              text: 'sales_person'.tr,
+                                              hint: 'search'.tr,
+                                              rowWidth:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.3,
+                                              textFieldWidth:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.17,
+                                              onSelected: (String? val) {
+                                                setState(() {
+                                                  var index = clientController
+                                                      .salesPersonListNames
+                                                      .indexOf(val!);
+                                                  clientController
+                                                      .setSelectedSalesPerson(
+                                                        val,
+                                                        clientController
+                                                            .salesPersonListId[index],
+                                                      );
+                                                });
+                                              },
+                                            );
+                                          },
+                                        ),
+                                        gapH16,
+                                        DialogDropMenu(
+                                          optionsList: [''],
+                                          text: '${'payment_terms'.tr}*',
+                                          hint: '',
+                                          rowWidth:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.3,
+                                          textFieldWidth:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.17,
+                                          onSelected: (val) {
+                                            setState(() {
+                                              paymentTerm = val;
+                                            });
+                                          },
+                                        ),
+                                        gapH16,
+                                        DialogDropMenu(
+                                          controller: priceListController,
+                                          optionsList: pricesListsCodes,
+                                          text: 'pricelist'.tr,
+                                          hint: '',
+                                          rowWidth:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.3,
+                                          textFieldWidth:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.17,
+                                          onSelected: (val) {
+                                            var index = pricesListsCodes
+                                                .indexOf(val);
+                                            setState(() {
+                                              selectedPriceListId =
+                                                  pricesListsIds[index];
+                                            });
+                                          },
+                                        ),
+                                      ],
                                     ),
-                                    gapH16,
-                                    DialogDropMenu(
-                                      optionsList: [''],
-                                      text: '${'payment_terms'.tr}*',
-                                      hint: '',
-                                      rowWidth:
-                                      MediaQuery.of(context).size.width *
-                                          0.3,
-                                      textFieldWidth:
-                                      MediaQuery.of(context).size.width *
-                                          0.17,
-                                      onSelected: (val) {
-                                        setState(() {
-                                          paymentTerm = val;
-                                        });
-                                      },
-                                    ),
-                                    gapH16,
-                                    DialogDropMenu(
-                                      controller: priceListController,
-                                      optionsList:pricesListsCodes ,
-                                      text: 'pricelist'.tr,
-                                      hint: '',
-                                      rowWidth:
-                                      MediaQuery.of(context).size.width *
-                                          0.3,
-                                      textFieldWidth:
-                                      MediaQuery.of(context).size.width *
-                                          0.17,
-                                      onSelected: (val) {
-                                        var index=pricesListsCodes.indexOf(val);
-                                        setState(() {
-                                          selectedPriceListId = pricesListsIds[index];
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                                  ),
+                                ],
+                              )
+                              : selectedTabIndex == 3
+                              ? SizedBox()
+                              : CarsSection(),
                         ],
                       ),
                     ),
@@ -3253,25 +3314,26 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                       if (widget.info['country'] != null) {
                         getCitiesOfASpecifiedCountry(widget.info['country']);
                       }
-                      if(widget.info['pricelist']!=null){
-                        selectedPriceListId='${widget.info['pricelist']['id']}';
-                        priceListController.text=widget.info['pricelist']['code'];
+                      if (widget.info['pricelist'] != null) {
+                        selectedPriceListId =
+                            '${widget.info['pricelist']['id']}';
+                        priceListController.text =
+                            widget.info['pricelist']['code'];
                       }
                       selectedClientType =
-                      widget.info['type'] == 'company' ? 2 : 1;
+                          widget.info['type'] == 'company' ? 2 : 1;
                       clientNameController.text = widget.info['name'] ?? '';
                       internalNoteController.text =
                           widget.info['internalNote'] ?? '';
                       grantedDiscountController.text =
-                      '${widget.info['grantedDiscount'] ?? ''}';
+                          '${widget.info['grantedDiscount'] ?? ''}';
                       countryController.text = widget.info['country'] ?? '';
                       selectedCountry = widget.info['country'] ?? '';
                       countryValue = widget.info['country'] ?? '';
                       cityController.text = widget.info['city'] ?? '';
                       selectedCity = widget.info['city'] ?? '';
                       cityValue = widget.info['city'] ?? '';
-                      floorBldgController.text =
-                          widget.info['floorBldg'] ?? '';
+                      floorBldgController.text = widget.info['floorBldg'] ?? '';
                       streetController.text = widget.info['street'] ?? '';
                       jobPositionController.text =
                           widget.info['jobPosition'] ?? '';
@@ -3281,20 +3343,18 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                       stateValue = widget.info['state'] ?? '';
                       websiteController.text = widget.info['website'] ?? '';
                       isActiveInPosChecked =
-                      '${widget.info['showOnPos'] ?? ''}' == '1'
-                          ? true
-                          : false;
+                          '${widget.info['showOnPos'] ?? ''}' == '1'
+                              ? true
+                              : false;
                       isBlockedChecked =
-                      '${widget.info['isBlocked'] ?? ''}' == '1'
-                          ? true
-                          : false;
+                          '${widget.info['isBlocked'] ?? ''}' == '1'
+                              ? true
+                              : false;
                       titleController.text = widget.info['title'] ?? '';
-                      referenceController.text =
-                          widget.info['reference'] ?? '';
+                      referenceController.text = widget.info['reference'] ?? '';
                       phoneController.text = widget.info['phoneNumber'] ?? '';
                       selectedPhoneCode = widget.info['phoneCode'] ?? '';
-                      mobileController.text =
-                          widget.info['mobileNumber'] ?? '';
+                      mobileController.text = widget.info['mobileNumber'] ?? '';
                       selectedMobileCode = widget.info['mobileCode'] ?? '';
                       taxNumberController.text = widget.info['taxId'] ?? '';
                     });
@@ -3328,9 +3388,7 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                         streetController.text,
                         floorBldgController.text,
                         jobPositionController.text,
-                        selectedPhoneCode.isEmpty
-                            ? '+961'
-                            : selectedPhoneCode,
+                        selectedPhoneCode.isEmpty ? '+961' : selectedPhoneCode,
                         phoneController.text,
                         selectedMobileCode.isEmpty
                             ? '+961'
@@ -3353,12 +3411,14 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                         '',
                         '',
                         '',
-                        clientController.selectedSalesPersonId==0?'':clientController.selectedSalesPersonId.toString(),
+                        clientController.selectedSalesPersonId == 0
+                            ? ''
+                            : clientController.selectedSalesPersonId.toString(),
                         paymentTerm,
                         selectedPriceListId,
                         internalNoteController.text,
                         '',
-                        clientController.contactsList
+                        clientController.contactsList,
                       );
                       if (res['success'] == true) {
                         Get.back();
@@ -3380,6 +3440,7 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
       ),
     );
   }
+
   Widget _buildTabChipItem(String name, int index) {
     return GestureDetector(
       onTap: () {
@@ -3403,9 +3464,9 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
           decoration: BoxDecoration(
             color: selectedTabIndex == index ? Primary.p20 : Colors.white,
             border:
-            selectedTabIndex == index
-                ? Border(top: BorderSide(color: Primary.primary, width: 3))
-                : null,
+                selectedTabIndex == index
+                    ? Border(top: BorderSide(color: Primary.primary, width: 3))
+                    : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withAlpha((0.5 * 255).toInt()),
@@ -4217,8 +4278,9 @@ class UpdateTransactionQuotationDialog extends StatelessWidget {
                       gapH16,
                       ReusableShowInfoCard(
                         text:
-                            cont.transactionsQuotations[quotationIndex]['termsAndConditions']??'',
-                                // .toString(),
+                            cont.transactionsQuotations[quotationIndex]['termsAndConditions'] ??
+                            '',
+                        // .toString(),
                         width: MediaQuery.of(context).size.width,
                       ),
                       gapH16,
@@ -4404,7 +4466,7 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
           color: Colors.white,
           width: MediaQuery.of(context).size.width * 0.85,
           height: MediaQuery.of(context).size.height * 0.9,
-          margin: const EdgeInsets.symmetric( vertical: 30),
+          margin: const EdgeInsets.symmetric(vertical: 30),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -4414,8 +4476,8 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                   children: [
                     PageTitle(
                       text:
-                      'quotation'
-                          .tr, //cont.transactionsQuotations[quotationIndex]['quotationNumber']
+                          'quotation'
+                              .tr, //cont.transactionsQuotations[quotationIndex]['quotationNumber']
                     ),
                     InkWell(
                       onTap: () {
@@ -4464,10 +4526,9 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                             Text('ref'.tr),
                             ReusableShowInfoCard(
                               text:
-                              cont.transactionsQuotations[quotationIndex]['reference'] ??
+                                  cont.transactionsQuotations[quotationIndex]['reference'] ??
                                   '',
-                              width:
-                              MediaQuery.of(context).size.width * 0.4,
+                              width: MediaQuery.of(context).size.width * 0.4,
                             ),
                           ],
                         ),
@@ -4482,10 +4543,9 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                             Text('currency'.tr),
                             ReusableShowInfoCard(
                               text:
-                              cont.transactionsQuotations[quotationIndex]['currency']['name'] ??
+                                  cont.transactionsQuotations[quotationIndex]['currency']['name'] ??
                                   '',
-                              width:
-                              MediaQuery.of(context).size.width * 0.4,
+                              width: MediaQuery.of(context).size.width * 0.4,
                             ),
                           ],
                         ),
@@ -4500,10 +4560,9 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                             Text('validity'.tr),
                             ReusableShowInfoCard(
                               text:
-                              cont.transactionsQuotations[quotationIndex]['validity'] ??
+                                  cont.transactionsQuotations[quotationIndex]['validity'] ??
                                   '',
-                              width:
-                              MediaQuery.of(context).size.width * 0.4,
+                              width: MediaQuery.of(context).size.width * 0.4,
                             ),
                           ],
                         ),
@@ -4519,8 +4578,7 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                             Text('code'.tr),
                             ReusableShowInfoCard(
                               text: cont.selectedClient['clientNumber'],
-                              width:
-                              MediaQuery.of(context).size.width * 0.4,
+                              width: MediaQuery.of(context).size.width * 0.4,
                             ),
                           ],
                         ),
@@ -4535,10 +4593,9 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                             Text('name'.tr),
                             ReusableShowInfoCard(
                               text:
-                              cont.transactionsQuotations[quotationIndex]['client']['name'] ??
+                                  cont.transactionsQuotations[quotationIndex]['client']['name'] ??
                                   '',
-                              width:
-                              MediaQuery.of(context).size.width * 0.4,
+                              width: MediaQuery.of(context).size.width * 0.4,
                             ),
                           ],
                         ),
@@ -4565,9 +4622,7 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text('email'.tr),
-                                Text(
-                                  ': ${cont.selectedClient['email'] ?? ''}',
-                                ),
+                                Text(': ${cont.selectedClient['email'] ?? ''}'),
                               ],
                             ),
                           ),
@@ -4597,10 +4652,9 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                             Text('Vat exempt'.tr),
                             ReusableShowInfoCard(
                               text:
-                              cont.transactionsQuotations[quotationIndex]['vatExempt']
-                                  .toString(),
-                              width:
-                              MediaQuery.of(context).size.width * 0.4,
+                                  cont.transactionsQuotations[quotationIndex]['vatExempt']
+                                      .toString(),
+                              width: MediaQuery.of(context).size.width * 0.4,
                             ),
                           ],
                         ),
@@ -4617,69 +4671,71 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                       children: [
                         Flexible(
                           child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child:Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 15),
-                                    decoration: BoxDecoration(
-                                        color: Primary.primary,
-                                        borderRadius:
-                                        const BorderRadius.all(
-                                            Radius.circular(6))),
-                                    child: Row(
-                                      children: [
-                                        TableTitle(
-                                          text: 'item_code'.tr,
-                                          width: 140,
-                                        ),
-                                        TableTitle(
-                                          text: 'description'.tr,
-                                          width: 140,
-                                        ),
-                                        TableTitle(
-                                          text: 'quantity'.tr,
-                                          width: 140,
-                                        ),
-                                        TableTitle(
-                                          text : 'unit_price'.tr,
-                                          width: 140,
-                                        ),
-                                        TableTitle(
-                                          text: '${'discount'.tr}%',
-                                          width: 140,
-                                        ),
-                                        TableTitle(
-                                          text: 'total'.tr,
-                                          width: 140,
-                                        ),
-                                      ],
+                            scrollDirection: Axis.horizontal,
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 15,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Primary.primary,
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(6),
                                     ),
                                   ),
-                                  Container(
-                                      color: Colors.white,
-                                      child:Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        children:  List.generate(
-                                          cont.transactionsQuotations[quotationIndex]['orderLines']
-                                            .length,
-                                              (index) => ReusableRowInOrderLinesTable(
-                                                index: index,
-                                                info:
-                                                cont.transactionsQuotations[quotationIndex]['orderLines'][index],
-                                              ),
-                                        ),
-                                      )
+                                  child: Row(
+                                    children: [
+                                      TableTitle(
+                                        text: 'item_code'.tr,
+                                        width: 140,
+                                      ),
+                                      TableTitle(
+                                        text: 'description'.tr,
+                                        width: 140,
+                                      ),
+                                      TableTitle(
+                                        text: 'quantity'.tr,
+                                        width: 140,
+                                      ),
+                                      TableTitle(
+                                        text: 'unit_price'.tr,
+                                        width: 140,
+                                      ),
+                                      TableTitle(
+                                        text: '${'discount'.tr}%',
+                                        width: 140,
+                                      ),
+                                      TableTitle(text: 'total'.tr, width: 140),
+                                    ],
                                   ),
-                                ],
-                              )
+                                ),
+                                Container(
+                                  color: Colors.white,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: List.generate(
+                                      cont
+                                          .transactionsQuotations[quotationIndex]['orderLines']
+                                          .length,
+                                      (index) => ReusableRowInOrderLinesTable(
+                                        index: index,
+                                        info:
+                                            cont.transactionsQuotations[quotationIndex]['orderLines'][index],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  )),
+                  ),
+                ),
                 // Container(
                 //   // width: 4* MediaQuery.of(context).size.width * 0.1,
                 //   padding: const EdgeInsets.symmetric(vertical: 15),
@@ -4756,8 +4812,9 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                       gapH16,
                       ReusableShowInfoCard(
                         text:
-                        cont.transactionsQuotations[quotationIndex]['termsAndConditions']??'',
-                            // .toString(),
+                            cont.transactionsQuotations[quotationIndex]['termsAndConditions'] ??
+                            '',
+                        // .toString(),
                         width: MediaQuery.of(context).size.width,
                       ),
                       gapH16,
@@ -4782,11 +4839,10 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                           // ReusableShowInfoCard(text: '${quotationController.totalQuotation}', width: MediaQuery.of(context).size.width * 0.1),
                           ReusableShowInfoCard(
                             text:
-                            cont.transactionsQuotations[quotationIndex]['totalBeforeVat']
-                                .toString()
-                                .toString(),
-                            width:
-                            MediaQuery.of(context).size.width * 0.15,
+                                cont.transactionsQuotations[quotationIndex]['totalBeforeVat']
+                                    .toString()
+                                    .toString(),
+                            width: MediaQuery.of(context).size.width * 0.15,
                           ),
                         ],
                       ),
@@ -4798,27 +4854,22 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                           Row(
                             children: [
                               SizedBox(
-                                width:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
+                                width: MediaQuery.of(context).size.width * 0.15,
                                 child: ReusableShowInfoCard(
                                   text:
-                                  cont.transactionsQuotations[quotationIndex]['globalDiscount']
-                                      .toString()
-                                      .toString(),
+                                      cont.transactionsQuotations[quotationIndex]['globalDiscount']
+                                          .toString()
+                                          .toString(),
                                   width:
-                                  MediaQuery.of(context).size.width *
-                                      0.15,
+                                      MediaQuery.of(context).size.width * 0.15,
                                 ),
                               ),
                               gapW10,
                               ReusableShowInfoCard(
                                 text:
-                                cont.transactionsQuotations[quotationIndex]['globalDiscountAmount']
-                                    .toString(),
-                                width:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
+                                    cont.transactionsQuotations[quotationIndex]['globalDiscountAmount']
+                                        .toString(),
+                                width: MediaQuery.of(context).size.width * 0.15,
                               ),
                             ],
                           ),
@@ -4832,27 +4883,22 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                           Row(
                             children: [
                               SizedBox(
-                                width:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
+                                width: MediaQuery.of(context).size.width * 0.15,
                                 child: ReusableShowInfoCard(
                                   text:
-                                  cont.transactionsQuotations[quotationIndex]['specialDiscount']
-                                      .toString()
-                                      .toString(),
+                                      cont.transactionsQuotations[quotationIndex]['specialDiscount']
+                                          .toString()
+                                          .toString(),
                                   width:
-                                  MediaQuery.of(context).size.width *
-                                      0.15,
+                                      MediaQuery.of(context).size.width * 0.15,
                                 ),
                               ),
                               gapW10,
                               ReusableShowInfoCard(
                                 text:
-                                cont.transactionsQuotations[quotationIndex]['specialDiscountAmount']
-                                    .toString(),
-                                width:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
+                                    cont.transactionsQuotations[quotationIndex]['specialDiscountAmount']
+                                        .toString(),
+                                width: MediaQuery.of(context).size.width * 0.15,
                               ),
                             ],
                           ),
@@ -4867,20 +4913,16 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
                             children: [
                               ReusableShowInfoCard(
                                 text:
-                                cont.transactionsQuotations[quotationIndex]['vat']
-                                    .toString(),
-                                width:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
+                                    cont.transactionsQuotations[quotationIndex]['vat']
+                                        .toString(),
+                                width: MediaQuery.of(context).size.width * 0.15,
                               ),
                               gapW10,
                               ReusableShowInfoCard(
                                 text:
-                                cont.transactionsQuotations[quotationIndex]['vatLebanese']
-                                    .toString(),
-                                width:
-                                MediaQuery.of(context).size.width *
-                                    0.15,
+                                    cont.transactionsQuotations[quotationIndex]['vatLebanese']
+                                        .toString(),
+                                width: MediaQuery.of(context).size.width * 0.15,
                               ),
                             ],
                           ),
@@ -4921,7 +4963,6 @@ class MobileUpdateTransactionQuotationDialog extends StatelessWidget {
   }
 }
 
-
 class ReusableRowInOrderLinesTable extends StatefulWidget {
   const ReusableRowInOrderLinesTable({
     super.key,
@@ -4947,7 +4988,8 @@ class _ReusableRowInOrderLinesTableState
       });
     }
   }
-HomeController homeController=Get.find();
+
+  HomeController homeController = Get.find();
   @override
   void initState() {
     if (widget.info['line_type_id'] == 2) {
@@ -4970,7 +5012,10 @@ HomeController homeController=Get.find();
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    width: homeController.isMobile.value?20:MediaQuery.of(context).size.width * 0.02,
+                    width:
+                        homeController.isMobile.value
+                            ? 20
+                            : MediaQuery.of(context).size.width * 0.02,
                     height: 20,
                     margin: const EdgeInsets.symmetric(vertical: 15),
                     decoration: const BoxDecoration(
@@ -4982,27 +5027,45 @@ HomeController homeController=Get.find();
                   ),
                   ReusableShowInfoCard(
                     text: itemCode,
-                    width:homeController.isMobile.value?140: MediaQuery.of(context).size.width * 0.1,
+                    width:
+                        homeController.isMobile.value
+                            ? 140
+                            : MediaQuery.of(context).size.width * 0.1,
                   ),
                   ReusableShowInfoCard(
                     text: '${widget.info['item_description'] ?? ''}',
-                    width:homeController.isMobile.value?140: MediaQuery.of(context).size.width * 0.3,
+                    width:
+                        homeController.isMobile.value
+                            ? 140
+                            : MediaQuery.of(context).size.width * 0.3,
                   ),
                   ReusableShowInfoCard(
                     text: '${widget.info['item_quantity'] ?? '0'}',
-                    width: homeController.isMobile.value?140:MediaQuery.of(context).size.width * 0.1,
+                    width:
+                        homeController.isMobile.value
+                            ? 140
+                            : MediaQuery.of(context).size.width * 0.1,
                   ),
                   ReusableShowInfoCard(
                     text: '${widget.info['item_unit_price'] ?? '0'}',
-                    width:homeController.isMobile.value?140: MediaQuery.of(context).size.width * 0.1,
+                    width:
+                        homeController.isMobile.value
+                            ? 140
+                            : MediaQuery.of(context).size.width * 0.1,
                   ),
                   ReusableShowInfoCard(
                     text: '${widget.info['item_discount'] ?? '0'}',
-                    width: homeController.isMobile.value?140:MediaQuery.of(context).size.width * 0.1,
+                    width:
+                        homeController.isMobile.value
+                            ? 140
+                            : MediaQuery.of(context).size.width * 0.1,
                   ),
                   ReusableShowInfoCard(
                     text: '${widget.info['item_total'] ?? '0'}',
-                    width:homeController.isMobile.value?140: MediaQuery.of(context).size.width * 0.1,
+                    width:
+                        homeController.isMobile.value
+                            ? 140
+                            : MediaQuery.of(context).size.width * 0.1,
                   ),
                 ],
               )
@@ -5010,7 +5073,10 @@ HomeController homeController=Get.find();
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    width: homeController.isMobile.value?20:MediaQuery.of(context).size.width * 0.02,
+                    width:
+                        homeController.isMobile.value
+                            ? 20
+                            : MediaQuery.of(context).size.width * 0.02,
                     height: 20,
                     margin: const EdgeInsets.symmetric(vertical: 15),
                     decoration: const BoxDecoration(

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -245,6 +246,9 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
 
   @override
   void initState() {
+    salesOrderController
+        .rowsInListViewInSalesOrder={};
+    salesOrderController.orderedKeys=[];
     _controller = QuillController(
       document: Document(),
       selection: const TextSelection.collapsed(offset: 0),
@@ -273,6 +277,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
 
   @override
   Widget build(BuildContext context) {
+    // double screenWidth = MediaQuery.of(context).size.width;
     return GetBuilder<SalesOrderController>(
       builder: (salesOrderCont) {
         return salesOrderCont.isSalesOrderInfoFetched
@@ -294,7 +299,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                             : MediaQuery.of(context).size.width * 0.17;
                     double currencyRow =
                         homeCont.isMenuOpened
-                            ? MediaQuery.of(context).size.width * 0.11
+                            ? MediaQuery.of(context).size.width * 0.12
                             : MediaQuery.of(context).size.width * 0.15;
                     double currencyFieldWidth =
                         homeCont.isMenuOpened
@@ -2567,8 +2572,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                               child: ListTile(
                                                 title: Text(
                                                   'vat_exempt'.tr,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
                                                   ),
                                                 ),
                                                 leading: Checkbox(

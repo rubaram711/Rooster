@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -282,6 +283,9 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
 
   @override
   void initState() {
+    salesInvoiceController
+        .rowsInListViewInSalesInvoice={};
+    salesInvoiceController.orderedKeys=[];
     _controller = QuillController(
       document: Document(),
       selection: const TextSelection.collapsed(offset: 0),
@@ -337,7 +341,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                             : MediaQuery.of(context).size.width * 0.17;
                     double currencyRow =
                         homeCont.isMenuOpened
-                            ? MediaQuery.of(context).size.width * 0.11
+                            ? MediaQuery.of(context).size.width * 0.12
                             : MediaQuery.of(context).size.width * 0.15;
                     double currencyFieldWidth =
                         homeCont.isMenuOpened
@@ -2603,7 +2607,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                   SizedBox(
                                     width:
                                         MediaQuery.of(context).size.width *
-                                        0.20,
+                                        0.18,
                                     child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
@@ -2761,7 +2765,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                         //     0.26,
                                         width:
                                             MediaQuery.of(context).size.width *
-                                            0.26,
+                                            0.28,
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
@@ -2770,8 +2774,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                               child: ListTile(
                                                 title: Text(
                                                   'vat_exempt'.tr,
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
                                                   ),
                                                 ),
                                                 leading: Checkbox(
@@ -2824,7 +2828,12 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                         .isVatExemptChecked ==
                                                     false
                                                 ? DropdownMenu<String>(
-                                                  width: paymentTermsFieldWidth,
+                                                  width:
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.15,
+                                                  // width: paymentTermsFieldWidth,
                                                   // width:
                                                   //     MediaQuery.of(
                                                   //       context,

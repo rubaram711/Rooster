@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:rooster_app/Backend/SalesOrderBackend/update_sales_order.dart';
@@ -1156,6 +1157,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                           child: Icon(
                             Icons.remove_red_eye_outlined,
                             color: Primary.primary,
+                            size: 21.sp,
                           ),
                         ),
                       ),
@@ -1187,7 +1189,11 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                   ),
                             );
                           },
-                          child: Icon(Icons.edit, color: Primary.primary),
+                          child: Icon(
+                            Icons.edit,
+                            color: Primary.primary,
+                            size: 21.sp,
+                          ),
                         ),
                       ),
 
@@ -1451,7 +1457,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                           child: Icon(
                             Icons.send,
                             color: Primary.primary,
-                            size: 17.00,
+                            size: 21.sp,
                           ),
                         ),
                       ),

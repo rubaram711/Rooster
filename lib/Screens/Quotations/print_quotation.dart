@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pdf/pdf.dart';
 import 'package:http/http.dart' as http;
@@ -131,15 +132,14 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
   String primaryLatestRate = '';
   String finallyRate = '';
 
-
   Future<void> generatePdfFromImageUrl(String companyLogo) async {
     // 1. Download image
-    String helper='';
+    String helper = '';
     if (companyLogo.isEmpty) {
       companyLogo = 'https://share.google/images/jVwJ4FCsP2pxEK8vV';
-      helper='$baseImage$companyLogo';
-    }else{
-      helper='$baseImage$companyLogo';
+      helper = '$baseImage$companyLogo';
+    } else {
+      helper = '$baseImage$companyLogo';
     }
     final response = await http.get(Uri.parse(helper));
     if (response.statusCode != 200) {
@@ -150,7 +150,6 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
     }
     // quotationController.setLogo(imageBytes);
   }
-
 
   Future<void> headerRetrieve() async {
     fullCompanyName = await getFullCompanyNameFromPref();
@@ -278,7 +277,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.05),
             SizedBox(
               width: Sizes.deviceWidth * 0.8,
-              height: Sizes.deviceHeight * 0.85,
+              height: Sizes.deviceHeight * 0.80,
               child: PdfPreview(
                 build: (format) => _generatePdf(format, context),
               ),
@@ -306,11 +305,11 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
       if (item['line_type_id'] == '2') {
         if (item['item_image'] != null) {
           try {
-            var helper='';
-            if('${item['item_image']}'.startsWith('https://')){
-              helper='${item['item_image']}';
-            }else{
-              helper='$baseImage${item['item_image']}';
+            var helper = '';
+            if ('${item['item_image']}'.startsWith('https://')) {
+              helper = '${item['item_image']}';
+            } else {
+              helper = '$baseImage${item['item_image']}';
             }
             final response = await http.get(Uri.parse(helper));
             if (response.statusCode == 200) {
@@ -330,11 +329,11 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
       } else if (!item['isImageList']) {
         if (item['image'] != null) {
           try {
-            var helper='';
-            if('${item['image']}'.startsWith('https://')){
-              helper='${item['image']}';
-            }else{
-              helper='$baseImage${item['image']}';
+            var helper = '';
+            if ('${item['image']}'.startsWith('https://')) {
+              helper = '${item['image']}';
+            } else {
+              helper = '$baseImage${item['image']}';
             }
             final response = await http.get(Uri.parse(helper));
             if (response.statusCode == 200) {
@@ -376,6 +375,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
     final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
     double width = MediaQuery.of(context).size.width;
     var gapW20 = pw.SizedBox(width: 20);
+    var gapW16 = pw.SizedBox(width: 16);
     var gapW180 = pw.SizedBox(width: 180);
     var gapH4 = pw.SizedBox(height: 4);
     // var gapH2 = pw.SizedBox(height: 2);
@@ -393,7 +393,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(
             color: PdfColors.black,
-            fontSize: 11,
+            fontSize: 9.sp,
             fontWeight: pw.FontWeight.normal,
             // decoration: pw.TextDecoration.underline,
           ),
@@ -409,7 +409,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(
             color: PdfColors.black,
-            fontSize: 12,
+            fontSize: 9.sp,
             fontWeight: pw.FontWeight.normal,
             decoration: pw.TextDecoration.underline,
           ),
@@ -424,7 +424,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
         child: pw.Center(
           child: pw.Text(
             text,
-            style: pw.TextStyle(fontSize: 11, font: arabicFont),
+            style: pw.TextStyle(fontSize: 9.sp, font: arabicFont),
           ),
         ),
       );
@@ -696,7 +696,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                       child: pw.Text(
                         'Note :${quotationItemInfo['note'] ?? ''}',
                         style: pw.TextStyle(
-                          fontSize: 11,
+                          fontSize: 9.sp,
                           font: italicRobotoFont,
                         ),
                       ),
@@ -745,13 +745,13 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
     }
 
     reusableText(String text) {
-      return pw.Text(text, style: pw.TextStyle(fontSize: 11));
+      return pw.Text(text, style: pw.TextStyle(fontSize: 9.sp));
     }
 
     reusableNumber(String text) {
       return pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.end,
-        children: [pw.Text(text, style: pw.TextStyle(fontSize: 11))],
+        children: [pw.Text(text, style: pw.TextStyle(fontSize: 9.sp))],
       );
     }
 
@@ -817,9 +817,11 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                   padding: pw.EdgeInsets.fromLTRB(0, 10, 0, 0),
                   child: pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    mainAxisAlignment: pw.MainAxisAlignment.start,
                     children: [
                       pw.SizedBox(
-                        width: width * 0.15,
+                        width: 240.w,
+                        // width: width * 0.15,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
                           children: [
@@ -839,7 +841,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                         ),
                       ),
                       pw.SizedBox(
-                        width: width * 0.125,
+                        width: 200.w,
+                        // width: width * 0.125,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
                           children: [
@@ -851,7 +854,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 pw.Text(
                                   fullCompanyName,
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -866,7 +869,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                       ),
 
                       pw.SizedBox(
-                        width: width * 0.1,
+                        width: 150.w,
+                        // width: width * 0.1,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
 
@@ -876,12 +880,16 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               children: [
                                 gapH4,
                                 // reusableText('T 234-814-159 6534'),
-                                 reusableText(
-                                   companyPhoneNumber.isNotEmpty?'T $companyPhoneCode $companyPhoneNumber $companyTrn':'',
+                                reusableText(
+                                  companyPhoneNumber.isNotEmpty
+                                      ? 'T $companyPhoneCode $companyPhoneNumber $companyTrn'
+                                      : '',
                                 ),
                                 gapH4,
                                 reusableText(
-                                  companyMobileNumber.isNotEmpty? 'T $companyMobileCode $companyMobileNumber':'',
+                                  companyMobileNumber.isNotEmpty
+                                      ? 'T $companyMobileCode $companyMobileNumber'
+                                      : '',
                                 ),
                                 gapH4,
                                 pw.SizedBox(
@@ -919,7 +927,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                       //           pw.Text(
                       //             'quotation'.tr,
                       //             style: pw.TextStyle(
-                      //               fontSize: 11,
+                      //               fontSize: 9,
                       //               fontWeight: pw.FontWeight.bold,
                       //               color: PdfColors.black,
                       //             ),
@@ -940,7 +948,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 pw.Text(
                                   '${'to'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -949,7 +957,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 pw.Text(
                                   '${'telephone'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -958,7 +966,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 pw.Text(
                                   '${'address'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -996,7 +1004,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 pw.Text(
                                   '${'offer_no'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -1005,7 +1013,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 pw.Text(
                                   '${'sales_person'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -1014,7 +1022,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 pw.Text(
                                   '${'date'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -1023,7 +1031,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 pw.Text(
                                   '${'currency'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -1031,7 +1039,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 gapH4,
                               ],
                             ),
-                            gapW20,
+                            gapW16,
                             pw.Column(
                               crossAxisAlignment: pw.CrossAxisAlignment.start,
                               children: [
@@ -1528,7 +1536,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                     child: pw.Text(
                                       'final_price_incl_vat'.tr,
                                       style: pw.TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 9.sp,
                                         fontWeight: pw.FontWeight.normal,
                                         color: PdfColors.black,
                                       ),
@@ -1549,7 +1557,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                         pw.Text(
                                           widget.quotationCurrency,
                                           style: pw.TextStyle(
-                                            fontSize: 11,
+                                            fontSize: 9.sp,
                                             fontWeight: pw.FontWeight.normal,
                                             color: PdfColors.black,
                                           ),
@@ -1571,7 +1579,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                         pw.Text(
                                           widget.finalPriceByQuotationCurrency,
                                           style: pw.TextStyle(
-                                            fontSize: 11,
+                                            fontSize: 9.sp,
                                             fontWeight: pw.FontWeight.normal,
                                             color: PdfColors.black,
                                           ),
@@ -1610,7 +1618,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                     child: pw.Text(
                                       'final_price_incl_vat'.tr,
                                       style: pw.TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 9.sp,
                                         // fontWeight: pw.FontWeight.normal,
                                         color: PdfColors.black,
                                       ),
@@ -2201,7 +2209,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
 //           textAlign: pw.TextAlign.center,
 //           style: pw.TextStyle(
 //             color: PdfColors.black,
-//             fontSize: 11,
+//             fontSize: 9,
 //             fontWeight: pw.FontWeight.bold,
 //           ),
 //         ),
@@ -2213,7 +2221,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
 //         text,
 //         style: pw.TextStyle(
 //           color: PdfColors.black,
-//           fontSize: 11,
+//           fontSize: 9,
 //           fontWeight: pw.FontWeight.bold,
 //         ),
 //       );
@@ -2224,7 +2232,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
 //         width: width,
 //         padding: const pw.EdgeInsets.symmetric(horizontal: 2),
 //         child: pw.Center(
-//           child: pw.Text(text, style: const pw.TextStyle(fontSize: 11)),
+//           child: pw.Text(text, style: const pw.TextStyle(fontSize: 9)),
 //         ),
 //       );
 //     }
@@ -2274,7 +2282,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
 //     }
 //
 //     reusableText(String text) {
-//       return pw.Text(text, style: const pw.TextStyle(fontSize: 11));
+//       return pw.Text(text, style: const pw.TextStyle(fontSize: 9));
 //     }
 //
 //     pdf.addPage(

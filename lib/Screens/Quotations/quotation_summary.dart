@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -256,7 +257,8 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                             children: [
                               tableTitleWithOrderArrow(
                                 'number'.tr,
-                                MediaQuery.of(context).size.width * 0.08,
+                                90.w,
+                                // MediaQuery.of(context).size.width * 0.08,
                                 () {
                                   setState(() {
                                     isNumberOrderedUp = !isNumberOrderedUp;
@@ -274,7 +276,8 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                               ),
                               tableTitleWithOrderArrow(
                                 'creation'.tr,
-                                MediaQuery.of(context).size.width * 0.08,
+                                90.w,
+                                // MediaQuery.of(context).size.width * 0.08,
                                 () {
                                   setState(() {
                                     isCreationOrderedUp = !isCreationOrderedUp;
@@ -292,7 +295,8 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                               ),
                               tableTitleWithOrderArrow(
                                 'customer'.tr,
-                                MediaQuery.of(context).size.width * 0.08,
+                                90.w,
+                                // MediaQuery.of(context).size.width * 0.08,
                                 () {
                                   setState(() {
                                     isCustomerOrderedUp = !isCustomerOrderedUp;
@@ -314,7 +318,8 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                               ),
                               tableTitleWithOrderArrow(
                                 'salesperson'.tr,
-                                MediaQuery.of(context).size.width * 0.07,
+                                90.w,
+                                // MediaQuery.of(context).size.width * 0.07,
                                 () {
                                   setState(() {
                                     isSalespersonOrderedUp =
@@ -335,22 +340,22 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                               ),
                               TableTitle(
                                 text: 'chance'.tr,
-                                width:
-                                    MediaQuery.of(context).size.width *
-                                    0.07, //085
+                                width: 90.w, //085
+                                // MediaQuery.of(context).size.width *
+                                // 0.07, //085
                               ),
                               TableTitle(
                                 text: 'task'.tr,
-                                width:
-                                    MediaQuery.of(context).size.width *
-                                    0.07, //085
+                                width: 90.w, //085
+                                // MediaQuery.of(context).size.width *
+                                // 0.07, //085
                               ),
                               TableTitle(
                                 text: 'total'.tr,
                                 // isCentered: false,
-                                width:
-                                    MediaQuery.of(context).size.width *
-                                    0.06, //085
+                                width: 90.w, //085
+                                // MediaQuery.of(context).size.width *
+                                // 0.06, //085
                               ),
                               // SizedBox(
                               //     width:
@@ -371,21 +376,24 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                               TableTitle(
                                 text: 'cur'.tr,
                                 isCentered: false,
-                                width:
-                                    MediaQuery.of(context).size.width *
-                                    0.04, //085
+                                width: 50.w, //085
+                                // MediaQuery.of(context).size.width *
+                                // 0.04, //085
                               ),
                               TableTitle(
                                 text: 'status'.tr,
                                 // isCentered: false,
-                                width: 90, //085
+                                width: 90.w, //085
+                                // width: 90, //085
                               ),
                               TableTitle(
                                 text: 'more_options'.tr,
-                                width: MediaQuery.of(context).size.width * 0.09,
+                                width: 90.w,
+                                // width: MediaQuery.of(context).size.width * 0.09,
                               ),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.03,
+                                width: 30.w,
+                                // width: MediaQuery.of(context).size.width * 0.03,
                               ),
                             ],
                           ),
@@ -730,27 +738,25 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
           children: [
             TableItem(
               text: '${widget.info['quotationNumber'] ?? ''}',
-              width:
-                  widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.08
-                      : 150,
+              width: widget.isDesktop ? 90.w : 150,
+              // widget.isDesktop
+              //     ? MediaQuery.of(context).size.width * 0.08
+              //     : 150,
             ),
             TableItem(
               text: '${widget.info['createdAtDate'] ?? ''}',
-              width:
-                  widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.08
-                      : 150,
+              width: widget.isDesktop ? 90.w : 150,
+              // widget.isDesktop ? MediaQuery.of(context).size.width * 0.08 : 150,
             ),
             TableItem(
               text:
                   widget.info['client'] == null
                       ? ''
                       : '${widget.info['client']['name'] ?? ''}',
-              width:
-                  widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.08
-                      : 150,
+              width: widget.isDesktop ? 90.w : 150,
+              // widget.isDesktop
+              //     ? MediaQuery.of(context).size.width * 0.08
+              //     : 150,
             ),
             TableItem(
               text:
@@ -1012,10 +1018,11 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                   CommonWidgets.snackBar('error', res['message']);
                 }
               },
-              width:
-                  widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.07
-                      : 150,
+              // width:
+              //     widget.isDesktop
+              //         ? MediaQuery.of(context).size.width * 0.07
+              //         : 150,
+              width: widget.isDesktop ? 90.w : 150,
             ),
             MouseRegion(
               cursor: SystemMouseCursors.click,
@@ -1028,10 +1035,11 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                               .map((task) => task["summary"] as String)
                               .join(", ")
                           : 'No Records',
-                  width:
-                      widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.07
-                          : 150,
+                  // width:
+                  //     widget.isDesktop
+                  //         ? MediaQuery.of(context).size.width * 0.07
+                  //         : 150,
+                  width: widget.isDesktop ? 90.w : 150,
                 ),
               ),
             ),
@@ -1044,10 +1052,11 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
             //           : 150,
             // ),
             SizedBox(
-              width:
-                  widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.06
-                      : 150,
+              // width:
+              //     widget.isDesktop
+              //         ? MediaQuery.of(context).size.width * 0.06
+              //         : 150,
+              width: widget.isDesktop ? 90.w : 150,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1067,21 +1076,24 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
             TableItem(
               text: ' ${widget.info['currency']['name'] ?? ''}',
               isCentered: false,
-              width:
-                  widget.isDesktop
-                      ? MediaQuery.of(context).size.width * 0.04
-                      : 150,
+              // width:
+              //     widget.isDesktop
+              //         ? MediaQuery.of(context).size.width * 0.04
+              //         : 150,
+              width: widget.isDesktop ? 50.w : 150,
             ),
             SizedBox(
-              width: widget.isDesktop ? 90 : 150,
+              width: widget.isDesktop ? 90.w : 150,
+              // width: widget.isDesktop ? 90 : 150,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
-                    width: 90,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 1,
-                      vertical: 2,
+                    width: 90.w,
+                    // width: 90,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 1.w,
+                      vertical: 2.h,
                     ),
                     decoration: BoxDecoration(
                       color:
@@ -1116,10 +1128,10 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
             GetBuilder<QuotationController>(
               builder: (cont) {
                 return SizedBox(
-                  width:
-                      widget.isDesktop
-                          ? MediaQuery.of(context).size.width * 0.09
-                          : 150,
+                  width: widget.isDesktop ? 90.w : 150,
+                  // widget.isDesktop
+                  //     ? MediaQuery.of(context).size.width * 0.09
+                  //     : 150,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -1448,6 +1460,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                           child: Icon(
                             Icons.remove_red_eye_outlined,
                             color: Primary.primary,
+                            size: 22.sp,
                           ),
                         ),
                       ),
@@ -1474,7 +1487,11 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   ),
                             );
                           },
-                          child: Icon(Icons.edit, color: Primary.primary),
+                          child: Icon(
+                            Icons.edit,
+                            color: Primary.primary,
+                            size: 22.sp,
+                          ),
                         ),
                       ),
                     ],
@@ -1828,7 +1845,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
             //   },
             // ),
             SizedBox(
-              width: MediaQuery.of(context).size.width * 0.03,
+              width: 30.w,
+              // width: MediaQuery.of(context).size.width * 0.03,
               child: InkWell(
                 onTap: () async {
                   var res = await deleteQuotation(
@@ -1844,7 +1862,11 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                     CommonWidgets.snackBar('error', p['message']);
                   }
                 },
-                child: Icon(Icons.delete_outline, color: Primary.primary),
+                child: Icon(
+                  Icons.delete_outline,
+                  color: Primary.primary,
+                  size: 22.sp,
+                ),
               ),
             ),
           ],

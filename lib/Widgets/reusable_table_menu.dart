@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../const/colors.dart';
-
 
 class ReusableStatusDropdown extends StatefulWidget {
   final List<String> options;
@@ -13,7 +13,8 @@ class ReusableStatusDropdown extends StatefulWidget {
     super.key,
     required this.options,
     required this.onSelected,
-    this.width, required this.value,
+    this.width,
+    required this.value,
   });
 
   @override
@@ -35,12 +36,10 @@ class _ReusableStatusDropdownState extends State<ReusableStatusDropdown> {
   Widget build(BuildContext context) {
     Widget dropdown = DropdownButtonFormField<String>(
       value: _selected,
-      items: widget.options
-          .map((s) => DropdownMenuItem<String>(
-        value: s,
-        child: Text(s),
-      ))
-          .toList(),
+      items:
+          widget.options
+              .map((s) => DropdownMenuItem<String>(value: s, child: Text(s)))
+              .toList(),
       onChanged: (newValue) {
         if (newValue == null) return;
         setState(() {
@@ -50,7 +49,7 @@ class _ReusableStatusDropdownState extends State<ReusableStatusDropdown> {
       },
       decoration: InputDecoration(
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        contentPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
         enabledBorder: const UnderlineInputBorder(
           borderSide: BorderSide(color: Color(0xFFDDDDDD), width: 1.2),
         ),
@@ -58,8 +57,8 @@ class _ReusableStatusDropdownState extends State<ReusableStatusDropdown> {
           borderSide: BorderSide(color: Primary.primary, width: 1.2),
         ),
       ),
-      icon: const Icon(Icons.arrow_drop_down),
-      style: const TextStyle(fontSize: 12),
+      icon: Icon(Icons.arrow_drop_down, size: 17.sp),
+      style: TextStyle(fontSize: 12.sp),
     );
 
     if (widget.width != null) {

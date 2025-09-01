@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pdf/pdf.dart';
 import 'package:http/http.dart' as http;
@@ -162,7 +163,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.05),
             SizedBox(
               width: Sizes.deviceWidth * 0.8,
-              height: Sizes.deviceHeight * 0.85,
+              height: Sizes.deviceHeight * 0.80,
               child: PdfPreview(
                 build: (format) => _generatePdf(format, context),
               ),
@@ -605,9 +606,11 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                   padding: pw.EdgeInsets.fromLTRB(0, 10, 0, 0),
                   child: pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    mainAxisAlignment: pw.MainAxisAlignment.start,
                     children: [
                       pw.SizedBox(
-                        width: width * 0.15,
+                        width: 240.w,
+                        // width: width * 0.15,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
                           children: [
@@ -628,7 +631,8 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                       ),
 
                       pw.SizedBox(
-                        width: width * 0.125,
+                        width: 200.w,
+                        // width: width * 0.125,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
                           children: [
@@ -655,7 +659,8 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                       ),
 
                       pw.SizedBox(
-                        width: width * 0.1,
+                        width: 150.w,
+                        // width: width * 0.1,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
 

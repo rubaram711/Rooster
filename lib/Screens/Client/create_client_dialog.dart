@@ -11,6 +11,7 @@ import '../../Backend/get_cities_of_a_specified_country.dart';
 import '../../Backend/get_countries.dart';
 import '../../Controllers/client_controller.dart';
 import '../../Controllers/home_controller.dart';
+import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/dialog_drop_menu.dart';
 import '../../Widgets/loading.dart';
@@ -60,7 +61,15 @@ class _CreateClientDialogState
     'settings',
     'contacts_and_addresses',
     'sales',
+    'accounting',
+    // 'cars',
   ];
+  setTabsList()async{
+    var isItGarage= await getIsItGarageFromPref();
+    if(isItGarage=='1'){
+      tabsList.add('cars');
+    }
+  }
   Map data = {};
   bool isClientsInfoFetched = false;
   List<String> pricesListsNames=[];
@@ -121,7 +130,9 @@ class _CreateClientDialogState
 
   @override
   void initState() {
+    setTabsList();
     clientController.contactsList=[];
+    clientController.carsList=[];
     clientController.salesPersonController.clear();
     clientController.getAllUsersSalesPersonFromBack();
     getFieldsForCreateClientsFromBack();
@@ -398,7 +409,7 @@ class _CreateClientDialogState
                           rowWidth: MediaQuery.of(context).size.width * 0.25,
                           textFieldWidth: MediaQuery.of(context).size.width * 0.2,
                           validationFunc: (String value) {
-                            if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                                 .hasMatch(value)) {
                               return 'check_format'.tr ;
                             }
@@ -765,7 +776,8 @@ class _CreateClientDialogState
                           ):
                       selectedTabIndex==1
                           ?ContactsAndAddressesSection()
-                          :Row(
+                          :selectedTabIndex == 2
+                          ? Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -843,7 +855,10 @@ class _CreateClientDialogState
                                 ),
                               ),
                             ],
-                          ),
+                          )
+                          : selectedTabIndex == 3
+                          ? SizedBox()
+                          : CarsSection(),
                           const Spacer(),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,

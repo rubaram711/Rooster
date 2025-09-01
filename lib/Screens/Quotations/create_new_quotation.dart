@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'dart:io';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -248,6 +249,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
 
   @override
   void initState() {
+    quotationController.orderedKeys = [];
+    quotationController.rowsInListViewInQuotation = {};
     quotationController.selectedHeaderIndex = 0;
     chanceController.text = chanceLevels[0];
     quotationController.quotationCounter = 0;
@@ -281,6 +284,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GetBuilder<QuotationController>(
       builder: (quotationCont) {
         return quotationCont.isQuotationsInfoFetched
@@ -516,12 +520,15 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         }
                                       }
 
-
                                       // _saveContent();
-                                      final deltaJson = _controller.document.toDelta().toJson();
+                                      final deltaJson =
+                                          _controller.document
+                                              .toDelta()
+                                              .toJson();
                                       final jsonString = jsonEncode(deltaJson);
-                                        _savedContent = jsonString;
-                                      termsAndConditionsController.text = jsonString;
+                                      _savedContent = jsonString;
+                                      termsAndConditionsController.text =
+                                          jsonString;
 
                                       var terms =
                                           termsAndConditionsController.text ==
@@ -1180,420 +1187,1012 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                       child: Column(
                         children: [
                           Obx(
-                            () => Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  quotationCont.quotationNumber,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    color: TypographyColor.titleTable,
-                                  ),
-                                ),
-                                DialogTextField(
-                                  textEditingController: refController,
-                                  text: '${'ref'.tr}:',
-                                  hint: 'manual_reference'.tr,
-                                  rowWidth:
-                                      homeController.isOpened.value
-                                          ? MediaQuery.of(context).size.width *
-                                              0.12
-                                          : MediaQuery.of(context).size.width *
-                                              0.15,
-                                  textFieldWidth:
-                                      homeController.isOpened.value
-                                          ? MediaQuery.of(context).size.width *
-                                              0.09
-                                          : MediaQuery.of(context).size.width *
-                                              0.13,
-                                  validationFunc: (val) {},
-                                ),
-                                SizedBox(
-                                  width:
-                                      homeController.isOpened.value
-                                          ? MediaQuery.of(context).size.width *
-                                              0.11
-                                          : MediaQuery.of(context).size.width *
-                                              0.14,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('currency'.tr),
-                                      GetBuilder<ExchangeRatesController>(
-                                        builder: (cont) {
-                                          return cont.isExchangeRatesFetched
-                                              ?
-                                              //   CustomSearchableDropdown(hint: '',width:  homeController.isOpened.value? MediaQuery.of(context).size.width * 0.07:
-                                              //   MediaQuery.of(context).size.width * 0.1, items: cont.currenciesNamesList, onSelected: (String? val) {
-                                              //   setState(() {
-                                              //     selectedCurrency = val!;
-                                              //     var index = cont
-                                              //         .currenciesNamesList
-                                              //         .indexOf(val);
-                                              //     quotationCont.setSelectedCurrency(
-                                              //       cont.currenciesIdsList[index],
-                                              //       val,
-                                              //     );
-                                              //     quotationCont
-                                              //         .setSelectedCurrencySymbol(
-                                              //       cont.currenciesSymbolsList[index],
-                                              //     );
-                                              //     var matchedItems =
-                                              //     exchangeRatesController
-                                              //         .exchangeRatesList
-                                              //         .where(
-                                              //           (item) =>
-                                              //       item["currency"] ==
-                                              //           val,
-                                              //     );
-                                              //
-                                              //     var result =
-                                              //     matchedItems.isNotEmpty
-                                              //         ? matchedItems.reduce(
-                                              //           (a, b) =>
-                                              //       DateTime.parse(
-                                              //         a["start_date"],
-                                              //       ).isAfter(
-                                              //         DateTime.parse(
-                                              //           b["start_date"],
-                                              //         ),
-                                              //       )
-                                              //           ? a
-                                              //           : b,
-                                              //     )
-                                              //         : null;
-                                              //     quotationCont
-                                              //         .setExchangeRateForSelectedCurrency(
-                                              //       result != null
-                                              //           ? '${result["exchange_rate"]}'
-                                              //           : '1',
-                                              //     );
-                                              //   });
-                                              //   var keys =
-                                              //   quotationCont
-                                              //       .unitPriceControllers
-                                              //       .keys
-                                              //       .toList();
-                                              //   for (
-                                              //   int i = 0;
-                                              //   i <
-                                              //       quotationCont
-                                              //           .unitPriceControllers
-                                              //           .length;
-                                              //   i++
-                                              //   ) {
-                                              //     var selectedItemId =
-                                              //         '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
-                                              //     if (selectedItemId != '') {
-                                              //       if (quotationCont
-                                              //           .itemsPricesCurrencies[selectedItemId] ==
-                                              //           val) {
-                                              //         quotationCont
-                                              //             .unitPriceControllers[keys[i]]!
-                                              //             .text = quotationCont
-                                              //             .itemUnitPrice[selectedItemId]
-                                              //             .toString();
-                                              //       } else if (quotationCont
-                                              //           .selectedCurrencyName ==
-                                              //           'USD' &&
-                                              //           quotationCont
-                                              //               .itemsPricesCurrencies[selectedItemId] !=
-                                              //               val) {
-                                              //         var matchedItems =
-                                              //         exchangeRatesController
-                                              //             .exchangeRatesList
-                                              //             .where(
-                                              //               (item) =>
-                                              //           item["currency"] ==
-                                              //               quotationCont
-                                              //                   .itemsPricesCurrencies[selectedItemId],
-                                              //         );
-                                              //
-                                              //         var result =
-                                              //         matchedItems.isNotEmpty
-                                              //             ? matchedItems.reduce(
-                                              //               (a, b) =>
-                                              //           DateTime.parse(
-                                              //             a["start_date"],
-                                              //           ).isAfter(
-                                              //             DateTime.parse(
-                                              //               b["start_date"],
-                                              //             ),
-                                              //           )
-                                              //               ? a
-                                              //               : b,
-                                              //         )
-                                              //             : null;
-                                              //         var divider = '1';
-                                              //         if (result != null) {
-                                              //           divider =
-                                              //               result["exchange_rate"]
-                                              //                   .toString();
-                                              //         }
-                                              //         quotationCont
-                                              //             .unitPriceControllers[keys[i]]!
-                                              //             .text =
-                                              //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                              //       } else if (quotationCont
-                                              //           .selectedCurrencyName !=
-                                              //           'USD' &&
-                                              //           quotationCont
-                                              //               .itemsPricesCurrencies[selectedItemId] ==
-                                              //               'USD') {
-                                              //         quotationCont
-                                              //             .unitPriceControllers[keys[i]]!
-                                              //             .text =
-                                              //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                              //       } else {
-                                              //         var matchedItems =
-                                              //         exchangeRatesController
-                                              //             .exchangeRatesList
-                                              //             .where(
-                                              //               (item) =>
-                                              //           item["currency"] ==
-                                              //               quotationCont
-                                              //                   .itemsPricesCurrencies[selectedItemId],
-                                              //         );
-                                              //
-                                              //         var result =
-                                              //         matchedItems.isNotEmpty
-                                              //             ? matchedItems.reduce(
-                                              //               (a, b) =>
-                                              //           DateTime.parse(
-                                              //             a["start_date"],
-                                              //           ).isAfter(
-                                              //             DateTime.parse(
-                                              //               b["start_date"],
-                                              //             ),
-                                              //           )
-                                              //               ? a
-                                              //               : b,
-                                              //         )
-                                              //             : null;
-                                              //         var divider = '1';
-                                              //         if (result != null) {
-                                              //           divider =
-                                              //               result["exchange_rate"]
-                                              //                   .toString();
-                                              //         }
-                                              //         var usdPrice =
-                                              //             '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                              //         quotationCont
-                                              //             .unitPriceControllers[keys[i]]!
-                                              //             .text =
-                                              //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                              //       }
-                                              //       if (!quotationCont
-                                              //           .isBeforeVatPrices) {
-                                              //         var taxRate =
-                                              //             double.parse(
-                                              //               quotationCont
-                                              //                   .itemsVats[selectedItemId],
-                                              //             ) /
-                                              //                 100.0;
-                                              //         var taxValue =
-                                              //             taxRate *
-                                              //                 double.parse(
-                                              //                   quotationCont
-                                              //                       .unitPriceControllers[keys[i]]!
-                                              //                       .text,
-                                              //                 );
-                                              //
-                                              //         quotationCont
-                                              //             .unitPriceControllers[keys[i]]!
-                                              //             .text =
-                                              //         '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
-                                              //       }
-                                              //       quotationCont
-                                              //           .unitPriceControllers[keys[i]]!
-                                              //           .text = double.parse(
-                                              //         quotationCont
-                                              //             .unitPriceControllers[keys[i]]!
-                                              //             .text,
-                                              //       ).toStringAsFixed(2);
-                                              //       var totalLine =
-                                              //           '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-                                              //
-                                              //       quotationCont
-                                              //           .setEnteredUnitPriceInQuotation(
-                                              //         keys[i],
-                                              //         quotationCont
-                                              //             .unitPriceControllers[keys[i]]!
-                                              //             .text,
-                                              //       );
-                                              //       quotationCont
-                                              //           .setMainTotalInQuotation(
-                                              //         keys[i],
-                                              //         totalLine,
-                                              //       );
-                                              //       quotationCont.getTotalItems();
-                                              //     }
-                                              //   }
-                                              //   var comboKeys =
-                                              //   quotationCont
-                                              //       .combosPriceControllers
-                                              //       .keys
-                                              //       .toList();
-                                              //   for (
-                                              //   int i = 0;
-                                              //   i <
-                                              //       quotationCont
-                                              //           .combosPriceControllers
-                                              //           .length;
-                                              //   i++
-                                              //   ) {
-                                              //     var selectedComboId =
-                                              //         '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
-                                              //     if (selectedComboId != '') {
-                                              //       var ind = quotationCont
-                                              //           .combosIdsList
-                                              //           .indexOf(selectedComboId);
-                                              //       if (quotationCont
-                                              //           .combosPricesCurrencies[selectedComboId] ==
-                                              //           quotationCont
-                                              //               .selectedCurrencyName) {
-                                              //         quotationCont
-                                              //             .combosPriceControllers[comboKeys[i]]!
-                                              //             .text = quotationCont
-                                              //             .combosPricesList[ind]
-                                              //             .toString();
-                                              //       } else if (quotationCont
-                                              //           .selectedCurrencyName ==
-                                              //           'USD' &&
-                                              //           quotationCont
-                                              //               .combosPricesCurrencies[selectedComboId] !=
-                                              //               quotationCont
-                                              //                   .selectedCurrencyName) {
-                                              //         var matchedItems =
-                                              //         exchangeRatesController
-                                              //             .exchangeRatesList
-                                              //             .where(
-                                              //               (item) =>
-                                              //           item["currency"] ==
-                                              //               quotationCont
-                                              //                   .combosPricesCurrencies[selectedComboId],
-                                              //         );
-                                              //
-                                              //         var result =
-                                              //         matchedItems.isNotEmpty
-                                              //             ? matchedItems.reduce(
-                                              //               (a, b) =>
-                                              //           DateTime.parse(
-                                              //             a["start_date"],
-                                              //           ).isAfter(
-                                              //             DateTime.parse(
-                                              //               b["start_date"],
-                                              //             ),
-                                              //           )
-                                              //               ? a
-                                              //               : b,
-                                              //         )
-                                              //             : null;
-                                              //         var divider = '1';
-                                              //         if (result != null) {
-                                              //           divider =
-                                              //               result["exchange_rate"]
-                                              //                   .toString();
-                                              //         }
-                                              //         quotationCont
-                                              //             .combosPriceControllers[comboKeys[i]]!
-                                              //             .text =
-                                              //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                                              //       } else if (quotationCont
-                                              //           .selectedCurrencyName !=
-                                              //           'USD' &&
-                                              //           quotationCont
-                                              //               .combosPricesCurrencies[selectedComboId] ==
-                                              //               'USD') {
-                                              //         quotationCont
-                                              //             .combosPriceControllers[comboKeys[i]]!
-                                              //             .text =
-                                              //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                              //       } else {
-                                              //         var matchedItems =
-                                              //         exchangeRatesController
-                                              //             .exchangeRatesList
-                                              //             .where(
-                                              //               (item) =>
-                                              //           item["currency"] ==
-                                              //               quotationCont
-                                              //                   .combosPricesCurrencies[selectedComboId],
-                                              //         );
-                                              //
-                                              //         var result =
-                                              //         matchedItems.isNotEmpty
-                                              //             ? matchedItems.reduce(
-                                              //               (a, b) =>
-                                              //           DateTime.parse(
-                                              //             a["start_date"],
-                                              //           ).isAfter(
-                                              //             DateTime.parse(
-                                              //               b["start_date"],
-                                              //             ),
-                                              //           )
-                                              //               ? a
-                                              //               : b,
-                                              //         )
-                                              //             : null;
-                                              //         var divider = '1';
-                                              //         if (result != null) {
-                                              //           divider =
-                                              //               result["exchange_rate"]
-                                              //                   .toString();
-                                              //         }
-                                              //         var usdPrice =
-                                              //             '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                                              //         quotationCont
-                                              //             .combosPriceControllers[comboKeys[i]]!
-                                              //             .text =
-                                              //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                              //       }
-                                              //       quotationCont
-                                              //           .combosPriceControllers[comboKeys[i]]!
-                                              //           .text =
-                                              //       '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
-                                              //
-                                              //       quotationCont
-                                              //           .combosPriceControllers[comboKeys[i]]!
-                                              //           .text = double.parse(
-                                              //         quotationCont
-                                              //             .combosPriceControllers[comboKeys[i]]!
-                                              //             .text,
-                                              //       ).toStringAsFixed(2);
-                                              //       var totalLine =
-                                              //           '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-                                              //       quotationCont
-                                              //           .setEnteredQtyInQuotation(
-                                              //         comboKeys[i],
-                                              //         quotationCont
-                                              //             .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
-                                              //       );
-                                              //       quotationCont
-                                              //           .setMainTotalInQuotation(
-                                              //         comboKeys[i],
-                                              //         totalLine,
-                                              //       );
-                                              //       // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
-                                              //       quotationCont.getTotalItems();
-                                              //
-                                              //       quotationCont
-                                              //           .setEnteredUnitPriceInQuotation(
-                                              //         comboKeys[i],
-                                              //         quotationCont
-                                              //             .combosPriceControllers[comboKeys[i]]!
-                                              //             .text,
-                                              //       );
-                                              //       quotationCont
-                                              //           .setMainTotalInQuotation(
-                                              //         comboKeys[i],
-                                              //         totalLine,
-                                              //       );
-                                              //       quotationCont.getTotalItems();
-                                              //     }
-                                              //   }
-                                              // });
+                            () =>
+                                screenWidth > 1250
+                                    ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          quotationCont.quotationNumber,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            color: TypographyColor.titleTable,
+                                          ),
+                                        ),
+                                        DialogTextField(
+                                          textEditingController: refController,
+                                          text: '${'ref'.tr}:',
+                                          hint: 'manual_reference'.tr,
+                                          rowWidth:
+                                              homeController.isOpened.value
+                                                  ? MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.12
+                                                  : MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.15,
+                                          textFieldWidth:
+                                              homeController.isOpened.value
+                                                  ? MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.09
+                                                  : MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.13,
+                                          validationFunc: (val) {},
+                                        ),
+                                        SizedBox(
+                                          width:
+                                              homeController.isOpened.value
+                                                  ? MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.12
+                                                  : MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.14,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text('currency'.tr),
+                                              GetBuilder<
+                                                ExchangeRatesController
+                                              >(
+                                                builder: (cont) {
+                                                  return cont
+                                                          .isExchangeRatesFetched
+                                                      ?
+                                                      //   CustomSearchableDropdown(hint: '',width:  homeController.isOpened.value? MediaQuery.of(context).size.width * 0.07:
+                                                      //   MediaQuery.of(context).size.width * 0.1, items: cont.currenciesNamesList, onSelected: (String? val) {
+                                                      //   setState(() {
+                                                      //     selectedCurrency = val!;
+                                                      //     var index = cont
+                                                      //         .currenciesNamesList
+                                                      //         .indexOf(val);
+                                                      //     quotationCont.setSelectedCurrency(
+                                                      //       cont.currenciesIdsList[index],
+                                                      //       val,
+                                                      //     );
+                                                      //     quotationCont
+                                                      //         .setSelectedCurrencySymbol(
+                                                      //       cont.currenciesSymbolsList[index],
+                                                      //     );
+                                                      //     var matchedItems =
+                                                      //     exchangeRatesController
+                                                      //         .exchangeRatesList
+                                                      //         .where(
+                                                      //           (item) =>
+                                                      //       item["currency"] ==
+                                                      //           val,
+                                                      //     );
+                                                      //
+                                                      //     var result =
+                                                      //     matchedItems.isNotEmpty
+                                                      //         ? matchedItems.reduce(
+                                                      //           (a, b) =>
+                                                      //       DateTime.parse(
+                                                      //         a["start_date"],
+                                                      //       ).isAfter(
+                                                      //         DateTime.parse(
+                                                      //           b["start_date"],
+                                                      //         ),
+                                                      //       )
+                                                      //           ? a
+                                                      //           : b,
+                                                      //     )
+                                                      //         : null;
+                                                      //     quotationCont
+                                                      //         .setExchangeRateForSelectedCurrency(
+                                                      //       result != null
+                                                      //           ? '${result["exchange_rate"]}'
+                                                      //           : '1',
+                                                      //     );
+                                                      //   });
+                                                      //   var keys =
+                                                      //   quotationCont
+                                                      //       .unitPriceControllers
+                                                      //       .keys
+                                                      //       .toList();
+                                                      //   for (
+                                                      //   int i = 0;
+                                                      //   i <
+                                                      //       quotationCont
+                                                      //           .unitPriceControllers
+                                                      //           .length;
+                                                      //   i++
+                                                      //   ) {
+                                                      //     var selectedItemId =
+                                                      //         '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
+                                                      //     if (selectedItemId != '') {
+                                                      //       if (quotationCont
+                                                      //           .itemsPricesCurrencies[selectedItemId] ==
+                                                      //           val) {
+                                                      //         quotationCont
+                                                      //             .unitPriceControllers[keys[i]]!
+                                                      //             .text = quotationCont
+                                                      //             .itemUnitPrice[selectedItemId]
+                                                      //             .toString();
+                                                      //       } else if (quotationCont
+                                                      //           .selectedCurrencyName ==
+                                                      //           'USD' &&
+                                                      //           quotationCont
+                                                      //               .itemsPricesCurrencies[selectedItemId] !=
+                                                      //               val) {
+                                                      //         var matchedItems =
+                                                      //         exchangeRatesController
+                                                      //             .exchangeRatesList
+                                                      //             .where(
+                                                      //               (item) =>
+                                                      //           item["currency"] ==
+                                                      //               quotationCont
+                                                      //                   .itemsPricesCurrencies[selectedItemId],
+                                                      //         );
+                                                      //
+                                                      //         var result =
+                                                      //         matchedItems.isNotEmpty
+                                                      //             ? matchedItems.reduce(
+                                                      //               (a, b) =>
+                                                      //           DateTime.parse(
+                                                      //             a["start_date"],
+                                                      //           ).isAfter(
+                                                      //             DateTime.parse(
+                                                      //               b["start_date"],
+                                                      //             ),
+                                                      //           )
+                                                      //               ? a
+                                                      //               : b,
+                                                      //         )
+                                                      //             : null;
+                                                      //         var divider = '1';
+                                                      //         if (result != null) {
+                                                      //           divider =
+                                                      //               result["exchange_rate"]
+                                                      //                   .toString();
+                                                      //         }
+                                                      //         quotationCont
+                                                      //             .unitPriceControllers[keys[i]]!
+                                                      //             .text =
+                                                      //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                      //       } else if (quotationCont
+                                                      //           .selectedCurrencyName !=
+                                                      //           'USD' &&
+                                                      //           quotationCont
+                                                      //               .itemsPricesCurrencies[selectedItemId] ==
+                                                      //               'USD') {
+                                                      //         quotationCont
+                                                      //             .unitPriceControllers[keys[i]]!
+                                                      //             .text =
+                                                      //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                      //       } else {
+                                                      //         var matchedItems =
+                                                      //         exchangeRatesController
+                                                      //             .exchangeRatesList
+                                                      //             .where(
+                                                      //               (item) =>
+                                                      //           item["currency"] ==
+                                                      //               quotationCont
+                                                      //                   .itemsPricesCurrencies[selectedItemId],
+                                                      //         );
+                                                      //
+                                                      //         var result =
+                                                      //         matchedItems.isNotEmpty
+                                                      //             ? matchedItems.reduce(
+                                                      //               (a, b) =>
+                                                      //           DateTime.parse(
+                                                      //             a["start_date"],
+                                                      //           ).isAfter(
+                                                      //             DateTime.parse(
+                                                      //               b["start_date"],
+                                                      //             ),
+                                                      //           )
+                                                      //               ? a
+                                                      //               : b,
+                                                      //         )
+                                                      //             : null;
+                                                      //         var divider = '1';
+                                                      //         if (result != null) {
+                                                      //           divider =
+                                                      //               result["exchange_rate"]
+                                                      //                   .toString();
+                                                      //         }
+                                                      //         var usdPrice =
+                                                      //             '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                      //         quotationCont
+                                                      //             .unitPriceControllers[keys[i]]!
+                                                      //             .text =
+                                                      //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                      //       }
+                                                      //       if (!quotationCont
+                                                      //           .isBeforeVatPrices) {
+                                                      //         var taxRate =
+                                                      //             double.parse(
+                                                      //               quotationCont
+                                                      //                   .itemsVats[selectedItemId],
+                                                      //             ) /
+                                                      //                 100.0;
+                                                      //         var taxValue =
+                                                      //             taxRate *
+                                                      //                 double.parse(
+                                                      //                   quotationCont
+                                                      //                       .unitPriceControllers[keys[i]]!
+                                                      //                       .text,
+                                                      //                 );
+                                                      //
+                                                      //         quotationCont
+                                                      //             .unitPriceControllers[keys[i]]!
+                                                      //             .text =
+                                                      //         '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                      //       }
+                                                      //       quotationCont
+                                                      //           .unitPriceControllers[keys[i]]!
+                                                      //           .text = double.parse(
+                                                      //         quotationCont
+                                                      //             .unitPriceControllers[keys[i]]!
+                                                      //             .text,
+                                                      //       ).toStringAsFixed(2);
+                                                      //       var totalLine =
+                                                      //           '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                                      //
+                                                      //       quotationCont
+                                                      //           .setEnteredUnitPriceInQuotation(
+                                                      //         keys[i],
+                                                      //         quotationCont
+                                                      //             .unitPriceControllers[keys[i]]!
+                                                      //             .text,
+                                                      //       );
+                                                      //       quotationCont
+                                                      //           .setMainTotalInQuotation(
+                                                      //         keys[i],
+                                                      //         totalLine,
+                                                      //       );
+                                                      //       quotationCont.getTotalItems();
+                                                      //     }
+                                                      //   }
+                                                      //   var comboKeys =
+                                                      //   quotationCont
+                                                      //       .combosPriceControllers
+                                                      //       .keys
+                                                      //       .toList();
+                                                      //   for (
+                                                      //   int i = 0;
+                                                      //   i <
+                                                      //       quotationCont
+                                                      //           .combosPriceControllers
+                                                      //           .length;
+                                                      //   i++
+                                                      //   ) {
+                                                      //     var selectedComboId =
+                                                      //         '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
+                                                      //     if (selectedComboId != '') {
+                                                      //       var ind = quotationCont
+                                                      //           .combosIdsList
+                                                      //           .indexOf(selectedComboId);
+                                                      //       if (quotationCont
+                                                      //           .combosPricesCurrencies[selectedComboId] ==
+                                                      //           quotationCont
+                                                      //               .selectedCurrencyName) {
+                                                      //         quotationCont
+                                                      //             .combosPriceControllers[comboKeys[i]]!
+                                                      //             .text = quotationCont
+                                                      //             .combosPricesList[ind]
+                                                      //             .toString();
+                                                      //       } else if (quotationCont
+                                                      //           .selectedCurrencyName ==
+                                                      //           'USD' &&
+                                                      //           quotationCont
+                                                      //               .combosPricesCurrencies[selectedComboId] !=
+                                                      //               quotationCont
+                                                      //                   .selectedCurrencyName) {
+                                                      //         var matchedItems =
+                                                      //         exchangeRatesController
+                                                      //             .exchangeRatesList
+                                                      //             .where(
+                                                      //               (item) =>
+                                                      //           item["currency"] ==
+                                                      //               quotationCont
+                                                      //                   .combosPricesCurrencies[selectedComboId],
+                                                      //         );
+                                                      //
+                                                      //         var result =
+                                                      //         matchedItems.isNotEmpty
+                                                      //             ? matchedItems.reduce(
+                                                      //               (a, b) =>
+                                                      //           DateTime.parse(
+                                                      //             a["start_date"],
+                                                      //           ).isAfter(
+                                                      //             DateTime.parse(
+                                                      //               b["start_date"],
+                                                      //             ),
+                                                      //           )
+                                                      //               ? a
+                                                      //               : b,
+                                                      //         )
+                                                      //             : null;
+                                                      //         var divider = '1';
+                                                      //         if (result != null) {
+                                                      //           divider =
+                                                      //               result["exchange_rate"]
+                                                      //                   .toString();
+                                                      //         }
+                                                      //         quotationCont
+                                                      //             .combosPriceControllers[comboKeys[i]]!
+                                                      //             .text =
+                                                      //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                      //       } else if (quotationCont
+                                                      //           .selectedCurrencyName !=
+                                                      //           'USD' &&
+                                                      //           quotationCont
+                                                      //               .combosPricesCurrencies[selectedComboId] ==
+                                                      //               'USD') {
+                                                      //         quotationCont
+                                                      //             .combosPriceControllers[comboKeys[i]]!
+                                                      //             .text =
+                                                      //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                      //       } else {
+                                                      //         var matchedItems =
+                                                      //         exchangeRatesController
+                                                      //             .exchangeRatesList
+                                                      //             .where(
+                                                      //               (item) =>
+                                                      //           item["currency"] ==
+                                                      //               quotationCont
+                                                      //                   .combosPricesCurrencies[selectedComboId],
+                                                      //         );
+                                                      //
+                                                      //         var result =
+                                                      //         matchedItems.isNotEmpty
+                                                      //             ? matchedItems.reduce(
+                                                      //               (a, b) =>
+                                                      //           DateTime.parse(
+                                                      //             a["start_date"],
+                                                      //           ).isAfter(
+                                                      //             DateTime.parse(
+                                                      //               b["start_date"],
+                                                      //             ),
+                                                      //           )
+                                                      //               ? a
+                                                      //               : b,
+                                                      //         )
+                                                      //             : null;
+                                                      //         var divider = '1';
+                                                      //         if (result != null) {
+                                                      //           divider =
+                                                      //               result["exchange_rate"]
+                                                      //                   .toString();
+                                                      //         }
+                                                      //         var usdPrice =
+                                                      //             '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                      //         quotationCont
+                                                      //             .combosPriceControllers[comboKeys[i]]!
+                                                      //             .text =
+                                                      //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                      //       }
+                                                      //       quotationCont
+                                                      //           .combosPriceControllers[comboKeys[i]]!
+                                                      //           .text =
+                                                      //       '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
+                                                      //
+                                                      //       quotationCont
+                                                      //           .combosPriceControllers[comboKeys[i]]!
+                                                      //           .text = double.parse(
+                                                      //         quotationCont
+                                                      //             .combosPriceControllers[comboKeys[i]]!
+                                                      //             .text,
+                                                      //       ).toStringAsFixed(2);
+                                                      //       var totalLine =
+                                                      //           '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                                      //       quotationCont
+                                                      //           .setEnteredQtyInQuotation(
+                                                      //         comboKeys[i],
+                                                      //         quotationCont
+                                                      //             .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
+                                                      //       );
+                                                      //       quotationCont
+                                                      //           .setMainTotalInQuotation(
+                                                      //         comboKeys[i],
+                                                      //         totalLine,
+                                                      //       );
+                                                      //       // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                                                      //       quotationCont.getTotalItems();
+                                                      //
+                                                      //       quotationCont
+                                                      //           .setEnteredUnitPriceInQuotation(
+                                                      //         comboKeys[i],
+                                                      //         quotationCont
+                                                      //             .combosPriceControllers[comboKeys[i]]!
+                                                      //             .text,
+                                                      //       );
+                                                      //       quotationCont
+                                                      //           .setMainTotalInQuotation(
+                                                      //         comboKeys[i],
+                                                      //         totalLine,
+                                                      //       );
+                                                      //       quotationCont.getTotalItems();
+                                                      //     }
+                                                      //   }
+                                                      // });
+                                                      DropdownMenu<String>(
+                                                        width:
+                                                            homeController
+                                                                    .isOpened
+                                                                    .value
+                                                                ? MediaQuery.of(
+                                                                      context,
+                                                                    ).size.width *
+                                                                    0.07
+                                                                : MediaQuery.of(
+                                                                      context,
+                                                                    ).size.width *
+                                                                    0.1,
+                                                        // requestFocusOnTap: false,
+                                                        enableSearch: true,
+                                                        controller:
+                                                            currencyController,
+                                                        hintText: '',
+                                                        textStyle:
+                                                            const TextStyle(
+                                                              fontSize: 12,
+                                                            ),
+                                                        inputDecorationTheme: InputDecorationTheme(
+                                                          isDense: true,
+                                                          // filled: true,
+                                                          hintStyle:
+                                                              const TextStyle(
+                                                                fontSize: 12,
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic,
+                                                              ),
+                                                          contentPadding:
+                                                              const EdgeInsets.fromLTRB(
+                                                                20,
+                                                                0,
+                                                                25,
+                                                                5,
+                                                              ),
+                                                          // outlineBorder: BorderSide(color: Colors.black,),
+                                                          enabledBorder: OutlineInputBorder(
+                                                            borderSide: BorderSide(
+                                                              color: Primary
+                                                                  .primary
+                                                                  .withAlpha(
+                                                                    (0.2 * 255)
+                                                                        .toInt(),
+                                                                  ),
+                                                              width: 1,
+                                                            ),
+                                                            borderRadius:
+                                                                const BorderRadius.all(
+                                                                  Radius.circular(
+                                                                    9,
+                                                                  ),
+                                                                ),
+                                                          ),
+                                                          focusedBorder: OutlineInputBorder(
+                                                            borderSide: BorderSide(
+                                                              color: Primary
+                                                                  .primary
+                                                                  .withAlpha(
+                                                                    (0.4 * 255)
+                                                                        .toInt(),
+                                                                  ),
+                                                              width: 2,
+                                                            ),
+                                                            borderRadius:
+                                                                const BorderRadius.all(
+                                                                  Radius.circular(
+                                                                    9,
+                                                                  ),
+                                                                ),
+                                                          ),
+                                                        ),
+                                                        // menuStyle: ,
+                                                        menuHeight: 250,
+                                                        dropdownMenuEntries:
+                                                            cont.currenciesNamesList.map<
+                                                              DropdownMenuEntry<
+                                                                String
+                                                              >
+                                                            >((String option) {
+                                                              return DropdownMenuEntry<
+                                                                String
+                                                              >(
+                                                                value: option,
+                                                                label: option,
+                                                              );
+                                                            }).toList(),
+                                                        enableFilter: true,
+                                                        onSelected: (
+                                                          String? val,
+                                                        ) {
+                                                          setState(() {
+                                                            selectedCurrency =
+                                                                val!;
+                                                            var index = cont
+                                                                .currenciesNamesList
+                                                                .indexOf(val);
+                                                            quotationCont
+                                                                .setSelectedCurrency(
+                                                                  cont.currenciesIdsList[index],
+                                                                  val,
+                                                                );
+                                                            quotationCont
+                                                                .setSelectedCurrencySymbol(
+                                                                  cont.currenciesSymbolsList[index],
+                                                                );
+                                                            var matchedItems =
+                                                                exchangeRatesController
+                                                                    .exchangeRatesList
+                                                                    .where(
+                                                                      (item) =>
+                                                                          item["currency"] ==
+                                                                          val,
+                                                                    );
+
+                                                            var result =
+                                                                matchedItems
+                                                                        .isNotEmpty
+                                                                    ? matchedItems.reduce(
+                                                                      (a, b) =>
+                                                                          DateTime.parse(
+                                                                                a["start_date"],
+                                                                              ).isAfter(
+                                                                                DateTime.parse(
+                                                                                  b["start_date"],
+                                                                                ),
+                                                                              )
+                                                                              ? a
+                                                                              : b,
+                                                                    )
+                                                                    : null;
+
+                                                            quotationCont
+                                                                .setExchangeRateForSelectedCurrency(
+                                                                  result != null
+                                                                      ? '${result["exchange_rate"]}'
+                                                                      : '1',
+                                                                );
+                                                          });
+
+                                                          var keys =
+                                                              quotationCont
+                                                                  .unitPriceControllers
+                                                                  .keys
+                                                                  .toList();
+                                                          for (
+                                                            int i = 0;
+                                                            i <
+                                                                quotationCont
+                                                                    .unitPriceControllers
+                                                                    .length;
+                                                            i++
+                                                          ) {
+                                                            var selectedItemId =
+                                                                '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
+                                                            if (selectedItemId !=
+                                                                '') {
+                                                              if (quotationCont
+                                                                      .itemsPricesCurrencies[selectedItemId] ==
+                                                                  val) {
+                                                                quotationCont
+                                                                        .unitPriceControllers[keys[i]]!
+                                                                        .text =
+                                                                    quotationCont
+                                                                        .itemUnitPrice[selectedItemId]
+                                                                        .toString();
+                                                              } else if (quotationCont
+                                                                          .selectedCurrencyName ==
+                                                                      'USD' &&
+                                                                  quotationCont
+                                                                          .itemsPricesCurrencies[selectedItemId] !=
+                                                                      val) {
+                                                                var matchedItems = exchangeRatesController
+                                                                    .exchangeRatesList
+                                                                    .where(
+                                                                      (item) =>
+                                                                          item["currency"] ==
+                                                                          quotationCont
+                                                                              .itemsPricesCurrencies[selectedItemId],
+                                                                    );
+
+                                                                var result =
+                                                                    matchedItems
+                                                                            .isNotEmpty
+                                                                        ? matchedItems.reduce(
+                                                                          (
+                                                                            a,
+                                                                            b,
+                                                                          ) =>
+                                                                              DateTime.parse(
+                                                                                    a["start_date"],
+                                                                                  ).isAfter(
+                                                                                    DateTime.parse(
+                                                                                      b["start_date"],
+                                                                                    ),
+                                                                                  )
+                                                                                  ? a
+                                                                                  : b,
+                                                                        )
+                                                                        : null;
+                                                                var divider =
+                                                                    '1';
+                                                                if (result !=
+                                                                    null) {
+                                                                  divider =
+                                                                      result["exchange_rate"]
+                                                                          .toString();
+                                                                }
+                                                                quotationCont
+                                                                        .unitPriceControllers[keys[i]]!
+                                                                        .text =
+                                                                    '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                              } else if (quotationCont
+                                                                          .selectedCurrencyName !=
+                                                                      'USD' &&
+                                                                  quotationCont
+                                                                          .itemsPricesCurrencies[selectedItemId] ==
+                                                                      'USD') {
+                                                                quotationCont
+                                                                        .unitPriceControllers[keys[i]]!
+                                                                        .text =
+                                                                    '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                              } else {
+                                                                var matchedItems = exchangeRatesController
+                                                                    .exchangeRatesList
+                                                                    .where(
+                                                                      (item) =>
+                                                                          item["currency"] ==
+                                                                          quotationCont
+                                                                              .itemsPricesCurrencies[selectedItemId],
+                                                                    );
+
+                                                                var result =
+                                                                    matchedItems
+                                                                            .isNotEmpty
+                                                                        ? matchedItems.reduce(
+                                                                          (
+                                                                            a,
+                                                                            b,
+                                                                          ) =>
+                                                                              DateTime.parse(
+                                                                                    a["start_date"],
+                                                                                  ).isAfter(
+                                                                                    DateTime.parse(
+                                                                                      b["start_date"],
+                                                                                    ),
+                                                                                  )
+                                                                                  ? a
+                                                                                  : b,
+                                                                        )
+                                                                        : null;
+                                                                var divider =
+                                                                    '1';
+                                                                if (result !=
+                                                                    null) {
+                                                                  divider =
+                                                                      result["exchange_rate"]
+                                                                          .toString();
+                                                                }
+                                                                var usdPrice =
+                                                                    '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                                quotationCont
+                                                                        .unitPriceControllers[keys[i]]!
+                                                                        .text =
+                                                                    '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                              }
+                                                              if (!quotationCont
+                                                                  .isBeforeVatPrices) {
+                                                                var taxRate =
+                                                                    double.parse(
+                                                                      quotationCont
+                                                                          .itemsVats[selectedItemId],
+                                                                    ) /
+                                                                    100.0;
+                                                                var taxValue =
+                                                                    taxRate *
+                                                                    double.parse(
+                                                                      quotationCont
+                                                                          .unitPriceControllers[keys[i]]!
+                                                                          .text,
+                                                                    );
+
+                                                                quotationCont
+                                                                        .unitPriceControllers[keys[i]]!
+                                                                        .text =
+                                                                    '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                              }
+                                                              quotationCont
+                                                                  .unitPriceControllers[keys[i]]!
+                                                                  .text = double.parse(
+                                                                quotationCont
+                                                                    .unitPriceControllers[keys[i]]!
+                                                                    .text,
+                                                              ).toStringAsFixed(
+                                                                2,
+                                                              );
+                                                              var totalLine =
+                                                                  '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+
+                                                              quotationCont
+                                                                  .setEnteredUnitPriceInQuotation(
+                                                                    keys[i],
+                                                                    quotationCont
+                                                                        .unitPriceControllers[keys[i]]!
+                                                                        .text,
+                                                                  );
+                                                              quotationCont
+                                                                  .setMainTotalInQuotation(
+                                                                    keys[i],
+                                                                    totalLine,
+                                                                  );
+                                                              quotationCont
+                                                                  .getTotalItems();
+                                                            }
+                                                          }
+
+                                                          var comboKeys =
+                                                              quotationCont
+                                                                  .combosPriceControllers
+                                                                  .keys
+                                                                  .toList();
+                                                          for (
+                                                            int i = 0;
+                                                            i <
+                                                                quotationCont
+                                                                    .combosPriceControllers
+                                                                    .length;
+                                                            i++
+                                                          ) {
+                                                            var selectedComboId =
+                                                                '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
+                                                            if (selectedComboId !=
+                                                                '') {
+                                                              var ind = quotationCont
+                                                                  .combosIdsList
+                                                                  .indexOf(
+                                                                    selectedComboId,
+                                                                  );
+                                                              if (quotationCont
+                                                                      .combosPricesCurrencies[selectedComboId] ==
+                                                                  quotationCont
+                                                                      .selectedCurrencyName) {
+                                                                quotationCont
+                                                                        .combosPriceControllers[comboKeys[i]]!
+                                                                        .text =
+                                                                    quotationCont
+                                                                        .combosPricesList[ind]
+                                                                        .toString();
+                                                              } else if (quotationCont
+                                                                          .selectedCurrencyName ==
+                                                                      'USD' &&
+                                                                  quotationCont
+                                                                          .combosPricesCurrencies[selectedComboId] !=
+                                                                      quotationCont
+                                                                          .selectedCurrencyName) {
+                                                                var matchedItems = exchangeRatesController
+                                                                    .exchangeRatesList
+                                                                    .where(
+                                                                      (item) =>
+                                                                          item["currency"] ==
+                                                                          quotationCont
+                                                                              .combosPricesCurrencies[selectedComboId],
+                                                                    );
+
+                                                                var result =
+                                                                    matchedItems
+                                                                            .isNotEmpty
+                                                                        ? matchedItems.reduce(
+                                                                          (
+                                                                            a,
+                                                                            b,
+                                                                          ) =>
+                                                                              DateTime.parse(
+                                                                                    a["start_date"],
+                                                                                  ).isAfter(
+                                                                                    DateTime.parse(
+                                                                                      b["start_date"],
+                                                                                    ),
+                                                                                  )
+                                                                                  ? a
+                                                                                  : b,
+                                                                        )
+                                                                        : null;
+                                                                var divider =
+                                                                    '1';
+                                                                if (result !=
+                                                                    null) {
+                                                                  divider =
+                                                                      result["exchange_rate"]
+                                                                          .toString();
+                                                                }
+                                                                quotationCont
+                                                                        .combosPriceControllers[comboKeys[i]]!
+                                                                        .text =
+                                                                    '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                              } else if (quotationCont
+                                                                          .selectedCurrencyName !=
+                                                                      'USD' &&
+                                                                  quotationCont
+                                                                          .combosPricesCurrencies[selectedComboId] ==
+                                                                      'USD') {
+                                                                quotationCont
+                                                                        .combosPriceControllers[comboKeys[i]]!
+                                                                        .text =
+                                                                    '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                              } else {
+                                                                var matchedItems = exchangeRatesController
+                                                                    .exchangeRatesList
+                                                                    .where(
+                                                                      (item) =>
+                                                                          item["currency"] ==
+                                                                          quotationCont
+                                                                              .combosPricesCurrencies[selectedComboId],
+                                                                    );
+
+                                                                var result =
+                                                                    matchedItems
+                                                                            .isNotEmpty
+                                                                        ? matchedItems.reduce(
+                                                                          (
+                                                                            a,
+                                                                            b,
+                                                                          ) =>
+                                                                              DateTime.parse(
+                                                                                    a["start_date"],
+                                                                                  ).isAfter(
+                                                                                    DateTime.parse(
+                                                                                      b["start_date"],
+                                                                                    ),
+                                                                                  )
+                                                                                  ? a
+                                                                                  : b,
+                                                                        )
+                                                                        : null;
+                                                                var divider =
+                                                                    '1';
+                                                                if (result !=
+                                                                    null) {
+                                                                  divider =
+                                                                      result["exchange_rate"]
+                                                                          .toString();
+                                                                }
+                                                                var usdPrice =
+                                                                    '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                                quotationCont
+                                                                        .combosPriceControllers[comboKeys[i]]!
+                                                                        .text =
+                                                                    '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                              }
+                                                              quotationCont
+                                                                      .combosPriceControllers[comboKeys[i]]!
+                                                                      .text =
+                                                                  '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
+
+                                                              quotationCont
+                                                                  .combosPriceControllers[comboKeys[i]]!
+                                                                  .text = double.parse(
+                                                                quotationCont
+                                                                    .combosPriceControllers[comboKeys[i]]!
+                                                                    .text,
+                                                              ).toStringAsFixed(
+                                                                2,
+                                                              );
+                                                              var totalLine =
+                                                                  '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                                              quotationCont
+                                                                  .setEnteredQtyInQuotation(
+                                                                    comboKeys[i],
+                                                                    quotationCont
+                                                                        .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
+                                                                  );
+                                                              quotationCont
+                                                                  .setMainTotalInQuotation(
+                                                                    comboKeys[i],
+                                                                    totalLine,
+                                                                  );
+                                                              // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                                                              quotationCont
+                                                                  .getTotalItems();
+
+                                                              quotationCont
+                                                                  .setEnteredUnitPriceInQuotation(
+                                                                    comboKeys[i],
+                                                                    quotationCont
+                                                                        .combosPriceControllers[comboKeys[i]]!
+                                                                        .text,
+                                                                  );
+                                                              quotationCont
+                                                                  .setMainTotalInQuotation(
+                                                                    comboKeys[i],
+                                                                    totalLine,
+                                                                  );
+                                                              quotationCont
+                                                                  .getTotalItems();
+                                                            }
+                                                          }
+                                                        },
+                                                      )
+                                                      : loading();
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width:
+                                              homeController.isOpened.value
+                                                  ? MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.14
+                                                  : MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.15,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text('validity'.tr),
+                                              DialogDateTextField(
+                                                textEditingController:
+                                                    validityController,
+                                                text: '',
+                                                textFieldWidth:
+                                                    homeController
+                                                            .isOpened
+                                                            .value
+                                                        ? MediaQuery.of(
+                                                              context,
+                                                            ).size.width *
+                                                            0.1
+                                                        : MediaQuery.of(
+                                                              context,
+                                                            ).size.width *
+                                                            0.11,
+                                                // MediaQuery.of(context).size.width * 0.25,
+                                                validationFunc: (val) {},
+                                                onChangedFunc: (val) {
+                                                  validityController.text = val;
+                                                },
+                                                onDateSelected: (value) {
+                                                  validityController.text =
+                                                      value;
+                                                  setState(() {
+                                                    // LocalDate a=LocalDate.today();
+                                                    // LocalDate b = LocalDate.dateTime(value);
+                                                    // Period diff = b.periodSince(a);
+                                                    // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width:
+                                              homeController.isOpened.value
+                                                  ? MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.11
+                                                  : MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.14,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text('chance'.tr),
                                               DropdownMenu<String>(
                                                 width:
                                                     homeController
@@ -1609,16 +2208,11 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                             0.1,
                                                 // requestFocusOnTap: false,
                                                 enableSearch: true,
-                                                controller: currencyController,
+                                                controller: chanceController,
                                                 hintText: '',
-                                                textStyle: const TextStyle(
-                                                  fontSize: 12,
-                                                ),
                                                 inputDecorationTheme: InputDecorationTheme(
-                                                  isDense: true,
                                                   // filled: true,
                                                   hintStyle: const TextStyle(
-                                                    fontSize: 12,
                                                     fontStyle: FontStyle.italic,
                                                   ),
                                                   contentPadding:
@@ -1667,7 +2261,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                 // menuStyle: ,
                                                 menuHeight: 250,
                                                 dropdownMenuEntries:
-                                                    cont.currenciesNamesList.map<
+                                                    chanceLevels.map<
                                                       DropdownMenuEntry<String>
                                                     >((String option) {
                                                       return DropdownMenuEntry<
@@ -1679,664 +2273,1512 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                     }).toList(),
                                                 enableFilter: true,
                                                 onSelected: (String? val) {
-                                                  setState(() {
-                                                    selectedCurrency = val!;
-                                                    var index = cont
-                                                        .currenciesNamesList
-                                                        .indexOf(val);
-                                                    quotationCont
-                                                        .setSelectedCurrency(
-                                                          cont.currenciesIdsList[index],
-                                                          val,
-                                                        );
-                                                    quotationCont
-                                                        .setSelectedCurrencySymbol(
-                                                          cont.currenciesSymbolsList[index],
-                                                        );
-                                                    var matchedItems =
-                                                        exchangeRatesController
-                                                            .exchangeRatesList
-                                                            .where(
-                                                              (item) =>
-                                                                  item["currency"] ==
-                                                                  val,
-                                                            );
-
-                                                    var result =
-                                                        matchedItems.isNotEmpty
-                                                            ? matchedItems.reduce(
-                                                              (a, b) =>
-                                                                  DateTime.parse(
-                                                                        a["start_date"],
-                                                                      ).isAfter(
-                                                                        DateTime.parse(
-                                                                          b["start_date"],
-                                                                        ),
-                                                                      )
-                                                                      ? a
-                                                                      : b,
-                                                            )
-                                                            : null;
-
-                                                    quotationCont
-                                                        .setExchangeRateForSelectedCurrency(
-                                                          result != null
-                                                              ? '${result["exchange_rate"]}'
-                                                              : '1',
-                                                        );
-                                                  });
-
-                                                  var keys =
-                                                      quotationCont
-                                                          .unitPriceControllers
-                                                          .keys
-                                                          .toList();
-                                                  for (
-                                                    int i = 0;
-                                                    i <
-                                                        quotationCont
-                                                            .unitPriceControllers
-                                                            .length;
-                                                    i++
-                                                  ) {
-                                                    var selectedItemId =
-                                                        '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
-                                                    if (selectedItemId != '') {
-                                                      if (quotationCont
-                                                              .itemsPricesCurrencies[selectedItemId] ==
-                                                          val) {
-                                                        quotationCont
-                                                            .unitPriceControllers[keys[i]]!
-                                                            .text = quotationCont
-                                                                .itemUnitPrice[selectedItemId]
-                                                                .toString();
-                                                      } else if (quotationCont
-                                                                  .selectedCurrencyName ==
-                                                              'USD' &&
-                                                          quotationCont
-                                                                  .itemsPricesCurrencies[selectedItemId] !=
-                                                              val) {
-                                                        var matchedItems =
-                                                            exchangeRatesController
-                                                                .exchangeRatesList
-                                                                .where(
-                                                                  (item) =>
-                                                                      item["currency"] ==
-                                                                      quotationCont
-                                                                          .itemsPricesCurrencies[selectedItemId],
-                                                                );
-
-                                                        var result =
-                                                            matchedItems
-                                                                    .isNotEmpty
-                                                                ? matchedItems.reduce(
-                                                                  (a, b) =>
-                                                                      DateTime.parse(
-                                                                            a["start_date"],
-                                                                          ).isAfter(
-                                                                            DateTime.parse(
-                                                                              b["start_date"],
-                                                                            ),
-                                                                          )
-                                                                          ? a
-                                                                          : b,
-                                                                )
-                                                                : null;
-                                                        var divider = '1';
-                                                        if (result != null) {
-                                                          divider =
-                                                              result["exchange_rate"]
-                                                                  .toString();
-                                                        }
-                                                        quotationCont
-                                                                .unitPriceControllers[keys[i]]!
-                                                                .text =
-                                                            '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                      } else if (quotationCont
-                                                                  .selectedCurrencyName !=
-                                                              'USD' &&
-                                                          quotationCont
-                                                                  .itemsPricesCurrencies[selectedItemId] ==
-                                                              'USD') {
-                                                        quotationCont
-                                                                .unitPriceControllers[keys[i]]!
-                                                                .text =
-                                                            '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                      } else {
-                                                        var matchedItems =
-                                                            exchangeRatesController
-                                                                .exchangeRatesList
-                                                                .where(
-                                                                  (item) =>
-                                                                      item["currency"] ==
-                                                                      quotationCont
-                                                                          .itemsPricesCurrencies[selectedItemId],
-                                                                );
-
-                                                        var result =
-                                                            matchedItems
-                                                                    .isNotEmpty
-                                                                ? matchedItems.reduce(
-                                                                  (a, b) =>
-                                                                      DateTime.parse(
-                                                                            a["start_date"],
-                                                                          ).isAfter(
-                                                                            DateTime.parse(
-                                                                              b["start_date"],
-                                                                            ),
-                                                                          )
-                                                                          ? a
-                                                                          : b,
-                                                                )
-                                                                : null;
-                                                        var divider = '1';
-                                                        if (result != null) {
-                                                          divider =
-                                                              result["exchange_rate"]
-                                                                  .toString();
-                                                        }
-                                                        var usdPrice =
-                                                            '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                        quotationCont
-                                                                .unitPriceControllers[keys[i]]!
-                                                                .text =
-                                                            '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                      }
-                                                      if (!quotationCont
-                                                          .isBeforeVatPrices) {
-                                                        var taxRate =
-                                                            double.parse(
-                                                              quotationCont
-                                                                  .itemsVats[selectedItemId],
-                                                            ) /
-                                                            100.0;
-                                                        var taxValue =
-                                                            taxRate *
-                                                            double.parse(
-                                                              quotationCont
-                                                                  .unitPriceControllers[keys[i]]!
-                                                                  .text,
-                                                            );
-
-                                                        quotationCont
-                                                                .unitPriceControllers[keys[i]]!
-                                                                .text =
-                                                            '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
-                                                      }
-                                                      quotationCont
-                                                          .unitPriceControllers[keys[i]]!
-                                                          .text = double.parse(
-                                                        quotationCont
-                                                            .unitPriceControllers[keys[i]]!
-                                                            .text,
-                                                      ).toStringAsFixed(2);
-                                                      var totalLine =
-                                                          '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-
-                                                      quotationCont
-                                                          .setEnteredUnitPriceInQuotation(
-                                                            keys[i],
-                                                            quotationCont
-                                                                .unitPriceControllers[keys[i]]!
-                                                                .text,
-                                                          );
-                                                      quotationCont
-                                                          .setMainTotalInQuotation(
-                                                            keys[i],
-                                                            totalLine,
-                                                          );
-                                                      quotationCont
-                                                          .getTotalItems();
-                                                    }
-                                                  }
-
-                                                  var comboKeys =
-                                                      quotationCont
-                                                          .combosPriceControllers
-                                                          .keys
-                                                          .toList();
-                                                  for (
-                                                    int i = 0;
-                                                    i <
-                                                        quotationCont
-                                                            .combosPriceControllers
-                                                            .length;
-                                                    i++
-                                                  ) {
-                                                    var selectedComboId =
-                                                        '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
-                                                    if (selectedComboId != '') {
-                                                      var ind = quotationCont
-                                                          .combosIdsList
-                                                          .indexOf(
-                                                            selectedComboId,
-                                                          );
-                                                      if (quotationCont
-                                                              .combosPricesCurrencies[selectedComboId] ==
-                                                          quotationCont
-                                                              .selectedCurrencyName) {
-                                                        quotationCont
-                                                            .combosPriceControllers[comboKeys[i]]!
-                                                            .text = quotationCont
-                                                                .combosPricesList[ind]
-                                                                .toString();
-                                                      } else if (quotationCont
-                                                                  .selectedCurrencyName ==
-                                                              'USD' &&
-                                                          quotationCont
-                                                                  .combosPricesCurrencies[selectedComboId] !=
-                                                              quotationCont
-                                                                  .selectedCurrencyName) {
-                                                        var matchedItems =
-                                                            exchangeRatesController
-                                                                .exchangeRatesList
-                                                                .where(
-                                                                  (item) =>
-                                                                      item["currency"] ==
-                                                                      quotationCont
-                                                                          .combosPricesCurrencies[selectedComboId],
-                                                                );
-
-                                                        var result =
-                                                            matchedItems
-                                                                    .isNotEmpty
-                                                                ? matchedItems.reduce(
-                                                                  (a, b) =>
-                                                                      DateTime.parse(
-                                                                            a["start_date"],
-                                                                          ).isAfter(
-                                                                            DateTime.parse(
-                                                                              b["start_date"],
-                                                                            ),
-                                                                          )
-                                                                          ? a
-                                                                          : b,
-                                                                )
-                                                                : null;
-                                                        var divider = '1';
-                                                        if (result != null) {
-                                                          divider =
-                                                              result["exchange_rate"]
-                                                                  .toString();
-                                                        }
-                                                        quotationCont
-                                                                .combosPriceControllers[comboKeys[i]]!
-                                                                .text =
-                                                            '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                                                      } else if (quotationCont
-                                                                  .selectedCurrencyName !=
-                                                              'USD' &&
-                                                          quotationCont
-                                                                  .combosPricesCurrencies[selectedComboId] ==
-                                                              'USD') {
-                                                        quotationCont
-                                                                .combosPriceControllers[comboKeys[i]]!
-                                                                .text =
-                                                            '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                      } else {
-                                                        var matchedItems =
-                                                            exchangeRatesController
-                                                                .exchangeRatesList
-                                                                .where(
-                                                                  (item) =>
-                                                                      item["currency"] ==
-                                                                      quotationCont
-                                                                          .combosPricesCurrencies[selectedComboId],
-                                                                );
-
-                                                        var result =
-                                                            matchedItems
-                                                                    .isNotEmpty
-                                                                ? matchedItems.reduce(
-                                                                  (a, b) =>
-                                                                      DateTime.parse(
-                                                                            a["start_date"],
-                                                                          ).isAfter(
-                                                                            DateTime.parse(
-                                                                              b["start_date"],
-                                                                            ),
-                                                                          )
-                                                                          ? a
-                                                                          : b,
-                                                                )
-                                                                : null;
-                                                        var divider = '1';
-                                                        if (result != null) {
-                                                          divider =
-                                                              result["exchange_rate"]
-                                                                  .toString();
-                                                        }
-                                                        var usdPrice =
-                                                            '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                                                        quotationCont
-                                                                .combosPriceControllers[comboKeys[i]]!
-                                                                .text =
-                                                            '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                      }
-                                                      quotationCont
-                                                              .combosPriceControllers[comboKeys[i]]!
-                                                              .text =
-                                                          '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
-
-                                                      quotationCont
-                                                          .combosPriceControllers[comboKeys[i]]!
-                                                          .text = double.parse(
-                                                        quotationCont
-                                                            .combosPriceControllers[comboKeys[i]]!
-                                                            .text,
-                                                      ).toStringAsFixed(2);
-                                                      var totalLine =
-                                                          '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-                                                      quotationCont
-                                                          .setEnteredQtyInQuotation(
-                                                            comboKeys[i],
-                                                            quotationCont
-                                                                .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
-                                                          );
-                                                      quotationCont
-                                                          .setMainTotalInQuotation(
-                                                            comboKeys[i],
-                                                            totalLine,
-                                                          );
-                                                      // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
-                                                      quotationCont
-                                                          .getTotalItems();
-
-                                                      quotationCont
-                                                          .setEnteredUnitPriceInQuotation(
-                                                            comboKeys[i],
-                                                            quotationCont
-                                                                .combosPriceControllers[comboKeys[i]]!
-                                                                .text,
-                                                          );
-                                                      quotationCont
-                                                          .setMainTotalInQuotation(
-                                                            comboKeys[i],
-                                                            totalLine,
-                                                          );
-                                                      quotationCont
-                                                          .getTotalItems();
-                                                    }
-                                                  }
+                                                  //   var index = quotationCont
+                                                  //       .priceListsCodes
+                                                  //       .indexOf(val!);
+                                                  //   quotationCont.setSelectedPriceListId(
+                                                  //     quotationCont.priceListsIds[index],
+                                                  //   );
+                                                  //   setState(() {
+                                                  //     quotationCont
+                                                  //         .resetItemsAfterChangePriceList();
+                                                  //   });
                                                 },
-                                              )
-                                              : loading();
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width:
-                                      homeController.isOpened.value
-                                          ? MediaQuery.of(context).size.width *
-                                              0.12
-                                          : MediaQuery.of(context).size.width *
-                                              0.15,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('validity'.tr),
-                                      DialogDateTextField(
-                                        textEditingController:
-                                            validityController,
-                                        text: '',
-                                        textFieldWidth:
-                                            homeController.isOpened.value
-                                                ? MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
-                                                    0.09
-                                                : MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
-                                                    0.11,
-                                        // MediaQuery.of(context).size.width * 0.25,
-                                        validationFunc: (val) {},
-                                        onChangedFunc: (val) {
-                                          validityController.text = val;
-                                        },
-                                        onDateSelected: (value) {
-                                          validityController.text = value;
-                                          setState(() {
-                                            // LocalDate a=LocalDate.today();
-                                            // LocalDate b = LocalDate.dateTime(value);
-                                            // Period diff = b.periodSince(a);
-                                            // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width:
-                                      homeController.isOpened.value
-                                          ? MediaQuery.of(context).size.width *
-                                              0.10
-                                          : MediaQuery.of(context).size.width *
-                                              0.14,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('chance'.tr),
-                                      DropdownMenu<String>(
-                                        width:
-                                            homeController.isOpened.value
-                                                ? MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
-                                                    0.07
-                                                : MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
-                                                    0.1,
-                                        // requestFocusOnTap: false,
-                                        enableSearch: true,
-                                        controller: chanceController,
-                                        hintText: '',
-                                        inputDecorationTheme: InputDecorationTheme(
-                                          // filled: true,
-                                          hintStyle: const TextStyle(
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                          contentPadding:
-                                              const EdgeInsets.fromLTRB(
-                                                20,
-                                                0,
-                                                25,
-                                                5,
                                               ),
-                                          // outlineBorder: BorderSide(color: Colors.black,),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Primary.primary.withAlpha(
-                                                (0.2 * 255).toInt(),
-                                              ),
-                                              width: 1,
-                                            ),
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
-                                                ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Primary.primary.withAlpha(
-                                                (0.4 * 255).toInt(),
-                                              ),
-                                              width: 2,
-                                            ),
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
-                                                ),
+                                            ],
                                           ),
                                         ),
-                                        // menuStyle: ,
-                                        menuHeight: 250,
-                                        dropdownMenuEntries:
-                                            chanceLevels.map<
-                                              DropdownMenuEntry<String>
-                                            >((String option) {
-                                              return DropdownMenuEntry<String>(
-                                                value: option,
-                                                label: option,
-                                              );
-                                            }).toList(),
-                                        enableFilter: true,
-                                        onSelected: (String? val) {
-                                          //   var index = quotationCont
-                                          //       .priceListsCodes
-                                          //       .indexOf(val!);
-                                          //   quotationCont.setSelectedPriceListId(
-                                          //     quotationCont.priceListsIds[index],
-                                          //   );
-                                          //   setState(() {
-                                          //     quotationCont
-                                          //         .resetItemsAfterChangePriceList();
-                                          //   });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width:
-                                      homeController.isOpened.value
-                                          ? MediaQuery.of(context).size.width *
-                                              0.11
-                                          : MediaQuery.of(context).size.width *
-                                              0.15,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('pricelist'.tr),
-                                      DropdownMenu<String>(
-                                        width:
-                                            homeController.isOpened.value
-                                                ? MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
-                                                    0.08
-                                                : MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
-                                                    0.11,
-                                        // requestFocusOnTap: false,
-                                        enableSearch: true,
-                                        controller: priceListController,
-                                        hintText: '',
-                                        inputDecorationTheme: InputDecorationTheme(
-                                          // filled: true,
-                                          hintStyle: const TextStyle(
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                          contentPadding:
-                                              const EdgeInsets.fromLTRB(
-                                                20,
-                                                0,
-                                                25,
-                                                5,
-                                              ),
-                                          // outlineBorder: BorderSide(color: Colors.black,),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Primary.primary.withAlpha(
-                                                (0.2 * 255).toInt(),
-                                              ),
-                                              width: 1,
-                                            ),
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
+                                        SizedBox(
+                                          width:
+                                              homeController.isOpened.value
+                                                  ? MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.12
+                                                  : MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.15,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text('pricelist'.tr),
+                                              DropdownMenu<String>(
+                                                width:
+                                                    homeController
+                                                            .isOpened
+                                                            .value
+                                                        ? MediaQuery.of(
+                                                              context,
+                                                            ).size.width *
+                                                            0.08
+                                                        : MediaQuery.of(
+                                                              context,
+                                                            ).size.width *
+                                                            0.11,
+                                                // requestFocusOnTap: false,
+                                                enableSearch: true,
+                                                controller: priceListController,
+                                                hintText: '',
+                                                inputDecorationTheme: InputDecorationTheme(
+                                                  // filled: true,
+                                                  hintStyle: const TextStyle(
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                  contentPadding:
+                                                      const EdgeInsets.fromLTRB(
+                                                        20,
+                                                        0,
+                                                        25,
+                                                        5,
+                                                      ),
+                                                  // outlineBorder: BorderSide(color: Colors.black,),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.2 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 1,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.4 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 2,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
+                                                      ),
                                                 ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Primary.primary.withAlpha(
-                                                (0.4 * 255).toInt(),
+                                                // menuStyle: ,
+                                                menuHeight: 250,
+                                                dropdownMenuEntries:
+                                                    quotationCont
+                                                        .priceListsCodes
+                                                        .map<
+                                                          DropdownMenuEntry<
+                                                            String
+                                                          >
+                                                        >((String option) {
+                                                          return DropdownMenuEntry<
+                                                            String
+                                                          >(
+                                                            value: option,
+                                                            label: option,
+                                                          );
+                                                        })
+                                                        .toList(),
+                                                enableFilter: true,
+                                                onSelected: (String? val) {
+                                                  var index = quotationCont
+                                                      .priceListsCodes
+                                                      .indexOf(val!);
+                                                  quotationCont
+                                                      .setSelectedPriceListId(
+                                                        quotationCont
+                                                            .priceListsIds[index],
+                                                      );
+                                                  setState(() {
+                                                    quotationCont
+                                                        .resetItemsAfterChangePriceList();
+                                                  });
+                                                },
                                               ),
-                                              width: 2,
-                                            ),
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
-                                                ),
+                                            ],
                                           ),
                                         ),
-                                        // menuStyle: ,
-                                        menuHeight: 250,
-                                        dropdownMenuEntries:
-                                            quotationCont.priceListsCodes.map<
-                                              DropdownMenuEntry<String>
-                                            >((String option) {
-                                              return DropdownMenuEntry<String>(
-                                                value: option,
-                                                label: option,
-                                              );
-                                            }).toList(),
-                                        enableFilter: true,
-                                        onSelected: (String? val) {
-                                          var index = quotationCont
-                                              .priceListsCodes
-                                              .indexOf(val!);
-                                          quotationCont.setSelectedPriceListId(
-                                            quotationCont.priceListsIds[index],
-                                          );
-                                          setState(() {
-                                            quotationCont
-                                                .resetItemsAfterChangePriceList();
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                                      ],
+                                    )
+                                    : Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              quotationCont.quotationNumber,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20.sp,
+                                                color:
+                                                    TypographyColor.titleTable,
+                                              ),
+                                            ),
+                                            DialogTextField(
+                                              textEditingController:
+                                                  refController,
+                                              text: '${'ref'.tr}:',
+                                              hint: 'manual_reference'.tr,
+                                              rowWidth:
+                                                  homeController.isOpened.value
+                                                      ? MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.18
+                                                      : MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.21,
+                                              textFieldWidth:
+                                                  homeController.isOpened.value
+                                                      ? MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.15
+                                                      : MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.18,
+                                              validationFunc: (val) {},
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  homeController.isOpened.value
+                                                      ? MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.15
+                                                      : MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.18,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text('currency'.tr),
+                                                  GetBuilder<
+                                                    ExchangeRatesController
+                                                  >(
+                                                    builder: (cont) {
+                                                      return cont
+                                                              .isExchangeRatesFetched
+                                                          ?
+                                                          //   CustomSearchableDropdown(hint: '',width:  homeController.isOpened.value? MediaQuery.of(context).size.width * 0.07:
+                                                          //   MediaQuery.of(context).size.width * 0.1, items: cont.currenciesNamesList, onSelected: (String? val) {
+                                                          //   setState(() {
+                                                          //     selectedCurrency = val!;
+                                                          //     var index = cont
+                                                          //         .currenciesNamesList
+                                                          //         .indexOf(val);
+                                                          //     quotationCont.setSelectedCurrency(
+                                                          //       cont.currenciesIdsList[index],
+                                                          //       val,
+                                                          //     );
+                                                          //     quotationCont
+                                                          //         .setSelectedCurrencySymbol(
+                                                          //       cont.currenciesSymbolsList[index],
+                                                          //     );
+                                                          //     var matchedItems =
+                                                          //     exchangeRatesController
+                                                          //         .exchangeRatesList
+                                                          //         .where(
+                                                          //           (item) =>
+                                                          //       item["currency"] ==
+                                                          //           val,
+                                                          //     );
+                                                          //
+                                                          //     var result =
+                                                          //     matchedItems.isNotEmpty
+                                                          //         ? matchedItems.reduce(
+                                                          //           (a, b) =>
+                                                          //       DateTime.parse(
+                                                          //         a["start_date"],
+                                                          //       ).isAfter(
+                                                          //         DateTime.parse(
+                                                          //           b["start_date"],
+                                                          //         ),
+                                                          //       )
+                                                          //           ? a
+                                                          //           : b,
+                                                          //     )
+                                                          //         : null;
+                                                          //     quotationCont
+                                                          //         .setExchangeRateForSelectedCurrency(
+                                                          //       result != null
+                                                          //           ? '${result["exchange_rate"]}'
+                                                          //           : '1',
+                                                          //     );
+                                                          //   });
+                                                          //   var keys =
+                                                          //   quotationCont
+                                                          //       .unitPriceControllers
+                                                          //       .keys
+                                                          //       .toList();
+                                                          //   for (
+                                                          //   int i = 0;
+                                                          //   i <
+                                                          //       quotationCont
+                                                          //           .unitPriceControllers
+                                                          //           .length;
+                                                          //   i++
+                                                          //   ) {
+                                                          //     var selectedItemId =
+                                                          //         '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
+                                                          //     if (selectedItemId != '') {
+                                                          //       if (quotationCont
+                                                          //           .itemsPricesCurrencies[selectedItemId] ==
+                                                          //           val) {
+                                                          //         quotationCont
+                                                          //             .unitPriceControllers[keys[i]]!
+                                                          //             .text = quotationCont
+                                                          //             .itemUnitPrice[selectedItemId]
+                                                          //             .toString();
+                                                          //       } else if (quotationCont
+                                                          //           .selectedCurrencyName ==
+                                                          //           'USD' &&
+                                                          //           quotationCont
+                                                          //               .itemsPricesCurrencies[selectedItemId] !=
+                                                          //               val) {
+                                                          //         var matchedItems =
+                                                          //         exchangeRatesController
+                                                          //             .exchangeRatesList
+                                                          //             .where(
+                                                          //               (item) =>
+                                                          //           item["currency"] ==
+                                                          //               quotationCont
+                                                          //                   .itemsPricesCurrencies[selectedItemId],
+                                                          //         );
+                                                          //
+                                                          //         var result =
+                                                          //         matchedItems.isNotEmpty
+                                                          //             ? matchedItems.reduce(
+                                                          //               (a, b) =>
+                                                          //           DateTime.parse(
+                                                          //             a["start_date"],
+                                                          //           ).isAfter(
+                                                          //             DateTime.parse(
+                                                          //               b["start_date"],
+                                                          //             ),
+                                                          //           )
+                                                          //               ? a
+                                                          //               : b,
+                                                          //         )
+                                                          //             : null;
+                                                          //         var divider = '1';
+                                                          //         if (result != null) {
+                                                          //           divider =
+                                                          //               result["exchange_rate"]
+                                                          //                   .toString();
+                                                          //         }
+                                                          //         quotationCont
+                                                          //             .unitPriceControllers[keys[i]]!
+                                                          //             .text =
+                                                          //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                          //       } else if (quotationCont
+                                                          //           .selectedCurrencyName !=
+                                                          //           'USD' &&
+                                                          //           quotationCont
+                                                          //               .itemsPricesCurrencies[selectedItemId] ==
+                                                          //               'USD') {
+                                                          //         quotationCont
+                                                          //             .unitPriceControllers[keys[i]]!
+                                                          //             .text =
+                                                          //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                          //       } else {
+                                                          //         var matchedItems =
+                                                          //         exchangeRatesController
+                                                          //             .exchangeRatesList
+                                                          //             .where(
+                                                          //               (item) =>
+                                                          //           item["currency"] ==
+                                                          //               quotationCont
+                                                          //                   .itemsPricesCurrencies[selectedItemId],
+                                                          //         );
+                                                          //
+                                                          //         var result =
+                                                          //         matchedItems.isNotEmpty
+                                                          //             ? matchedItems.reduce(
+                                                          //               (a, b) =>
+                                                          //           DateTime.parse(
+                                                          //             a["start_date"],
+                                                          //           ).isAfter(
+                                                          //             DateTime.parse(
+                                                          //               b["start_date"],
+                                                          //             ),
+                                                          //           )
+                                                          //               ? a
+                                                          //               : b,
+                                                          //         )
+                                                          //             : null;
+                                                          //         var divider = '1';
+                                                          //         if (result != null) {
+                                                          //           divider =
+                                                          //               result["exchange_rate"]
+                                                          //                   .toString();
+                                                          //         }
+                                                          //         var usdPrice =
+                                                          //             '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                          //         quotationCont
+                                                          //             .unitPriceControllers[keys[i]]!
+                                                          //             .text =
+                                                          //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                          //       }
+                                                          //       if (!quotationCont
+                                                          //           .isBeforeVatPrices) {
+                                                          //         var taxRate =
+                                                          //             double.parse(
+                                                          //               quotationCont
+                                                          //                   .itemsVats[selectedItemId],
+                                                          //             ) /
+                                                          //                 100.0;
+                                                          //         var taxValue =
+                                                          //             taxRate *
+                                                          //                 double.parse(
+                                                          //                   quotationCont
+                                                          //                       .unitPriceControllers[keys[i]]!
+                                                          //                       .text,
+                                                          //                 );
+                                                          //
+                                                          //         quotationCont
+                                                          //             .unitPriceControllers[keys[i]]!
+                                                          //             .text =
+                                                          //         '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                          //       }
+                                                          //       quotationCont
+                                                          //           .unitPriceControllers[keys[i]]!
+                                                          //           .text = double.parse(
+                                                          //         quotationCont
+                                                          //             .unitPriceControllers[keys[i]]!
+                                                          //             .text,
+                                                          //       ).toStringAsFixed(2);
+                                                          //       var totalLine =
+                                                          //           '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                                          //
+                                                          //       quotationCont
+                                                          //           .setEnteredUnitPriceInQuotation(
+                                                          //         keys[i],
+                                                          //         quotationCont
+                                                          //             .unitPriceControllers[keys[i]]!
+                                                          //             .text,
+                                                          //       );
+                                                          //       quotationCont
+                                                          //           .setMainTotalInQuotation(
+                                                          //         keys[i],
+                                                          //         totalLine,
+                                                          //       );
+                                                          //       quotationCont.getTotalItems();
+                                                          //     }
+                                                          //   }
+                                                          //   var comboKeys =
+                                                          //   quotationCont
+                                                          //       .combosPriceControllers
+                                                          //       .keys
+                                                          //       .toList();
+                                                          //   for (
+                                                          //   int i = 0;
+                                                          //   i <
+                                                          //       quotationCont
+                                                          //           .combosPriceControllers
+                                                          //           .length;
+                                                          //   i++
+                                                          //   ) {
+                                                          //     var selectedComboId =
+                                                          //         '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
+                                                          //     if (selectedComboId != '') {
+                                                          //       var ind = quotationCont
+                                                          //           .combosIdsList
+                                                          //           .indexOf(selectedComboId);
+                                                          //       if (quotationCont
+                                                          //           .combosPricesCurrencies[selectedComboId] ==
+                                                          //           quotationCont
+                                                          //               .selectedCurrencyName) {
+                                                          //         quotationCont
+                                                          //             .combosPriceControllers[comboKeys[i]]!
+                                                          //             .text = quotationCont
+                                                          //             .combosPricesList[ind]
+                                                          //             .toString();
+                                                          //       } else if (quotationCont
+                                                          //           .selectedCurrencyName ==
+                                                          //           'USD' &&
+                                                          //           quotationCont
+                                                          //               .combosPricesCurrencies[selectedComboId] !=
+                                                          //               quotationCont
+                                                          //                   .selectedCurrencyName) {
+                                                          //         var matchedItems =
+                                                          //         exchangeRatesController
+                                                          //             .exchangeRatesList
+                                                          //             .where(
+                                                          //               (item) =>
+                                                          //           item["currency"] ==
+                                                          //               quotationCont
+                                                          //                   .combosPricesCurrencies[selectedComboId],
+                                                          //         );
+                                                          //
+                                                          //         var result =
+                                                          //         matchedItems.isNotEmpty
+                                                          //             ? matchedItems.reduce(
+                                                          //               (a, b) =>
+                                                          //           DateTime.parse(
+                                                          //             a["start_date"],
+                                                          //           ).isAfter(
+                                                          //             DateTime.parse(
+                                                          //               b["start_date"],
+                                                          //             ),
+                                                          //           )
+                                                          //               ? a
+                                                          //               : b,
+                                                          //         )
+                                                          //             : null;
+                                                          //         var divider = '1';
+                                                          //         if (result != null) {
+                                                          //           divider =
+                                                          //               result["exchange_rate"]
+                                                          //                   .toString();
+                                                          //         }
+                                                          //         quotationCont
+                                                          //             .combosPriceControllers[comboKeys[i]]!
+                                                          //             .text =
+                                                          //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                          //       } else if (quotationCont
+                                                          //           .selectedCurrencyName !=
+                                                          //           'USD' &&
+                                                          //           quotationCont
+                                                          //               .combosPricesCurrencies[selectedComboId] ==
+                                                          //               'USD') {
+                                                          //         quotationCont
+                                                          //             .combosPriceControllers[comboKeys[i]]!
+                                                          //             .text =
+                                                          //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                          //       } else {
+                                                          //         var matchedItems =
+                                                          //         exchangeRatesController
+                                                          //             .exchangeRatesList
+                                                          //             .where(
+                                                          //               (item) =>
+                                                          //           item["currency"] ==
+                                                          //               quotationCont
+                                                          //                   .combosPricesCurrencies[selectedComboId],
+                                                          //         );
+                                                          //
+                                                          //         var result =
+                                                          //         matchedItems.isNotEmpty
+                                                          //             ? matchedItems.reduce(
+                                                          //               (a, b) =>
+                                                          //           DateTime.parse(
+                                                          //             a["start_date"],
+                                                          //           ).isAfter(
+                                                          //             DateTime.parse(
+                                                          //               b["start_date"],
+                                                          //             ),
+                                                          //           )
+                                                          //               ? a
+                                                          //               : b,
+                                                          //         )
+                                                          //             : null;
+                                                          //         var divider = '1';
+                                                          //         if (result != null) {
+                                                          //           divider =
+                                                          //               result["exchange_rate"]
+                                                          //                   .toString();
+                                                          //         }
+                                                          //         var usdPrice =
+                                                          //             '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                          //         quotationCont
+                                                          //             .combosPriceControllers[comboKeys[i]]!
+                                                          //             .text =
+                                                          //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                          //       }
+                                                          //       quotationCont
+                                                          //           .combosPriceControllers[comboKeys[i]]!
+                                                          //           .text =
+                                                          //       '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
+                                                          //
+                                                          //       quotationCont
+                                                          //           .combosPriceControllers[comboKeys[i]]!
+                                                          //           .text = double.parse(
+                                                          //         quotationCont
+                                                          //             .combosPriceControllers[comboKeys[i]]!
+                                                          //             .text,
+                                                          //       ).toStringAsFixed(2);
+                                                          //       var totalLine =
+                                                          //           '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                                          //       quotationCont
+                                                          //           .setEnteredQtyInQuotation(
+                                                          //         comboKeys[i],
+                                                          //         quotationCont
+                                                          //             .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
+                                                          //       );
+                                                          //       quotationCont
+                                                          //           .setMainTotalInQuotation(
+                                                          //         comboKeys[i],
+                                                          //         totalLine,
+                                                          //       );
+                                                          //       // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                                                          //       quotationCont.getTotalItems();
+                                                          //
+                                                          //       quotationCont
+                                                          //           .setEnteredUnitPriceInQuotation(
+                                                          //         comboKeys[i],
+                                                          //         quotationCont
+                                                          //             .combosPriceControllers[comboKeys[i]]!
+                                                          //             .text,
+                                                          //       );
+                                                          //       quotationCont
+                                                          //           .setMainTotalInQuotation(
+                                                          //         comboKeys[i],
+                                                          //         totalLine,
+                                                          //       );
+                                                          //       quotationCont.getTotalItems();
+                                                          //     }
+                                                          //   }
+                                                          // });
+                                                          DropdownMenu<String>(
+                                                            width:
+                                                                homeController
+                                                                        .isOpened
+                                                                        .value
+                                                                    ? MediaQuery.of(
+                                                                          context,
+                                                                        ).size.width *
+                                                                        0.1
+                                                                    : MediaQuery.of(
+                                                                          context,
+                                                                        ).size.width *
+                                                                        0.13,
+                                                            // requestFocusOnTap: false,
+                                                            enableSearch: true,
+                                                            controller:
+                                                                currencyController,
+                                                            hintText: '',
+                                                            textStyle:
+                                                                const TextStyle(
+                                                                  fontSize: 12,
+                                                                ),
+                                                            inputDecorationTheme: InputDecorationTheme(
+                                                              isDense: true,
+                                                              // filled: true,
+                                                              hintStyle:
+                                                                  const TextStyle(
+                                                                    fontSize:
+                                                                        12,
+                                                                    fontStyle:
+                                                                        FontStyle
+                                                                            .italic,
+                                                                  ),
+                                                              contentPadding:
+                                                                  const EdgeInsets.fromLTRB(
+                                                                    20,
+                                                                    0,
+                                                                    25,
+                                                                    5,
+                                                                  ),
+                                                              // outlineBorder: BorderSide(color: Colors.black,),
+                                                              enabledBorder: OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                  color: Primary
+                                                                      .primary
+                                                                      .withAlpha(
+                                                                        (0.2 * 255)
+                                                                            .toInt(),
+                                                                      ),
+                                                                  width: 1,
+                                                                ),
+                                                                borderRadius:
+                                                                    const BorderRadius.all(
+                                                                      Radius.circular(
+                                                                        9,
+                                                                      ),
+                                                                    ),
+                                                              ),
+                                                              focusedBorder: OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                  color: Primary
+                                                                      .primary
+                                                                      .withAlpha(
+                                                                        (0.4 * 255)
+                                                                            .toInt(),
+                                                                      ),
+                                                                  width: 2,
+                                                                ),
+                                                                borderRadius:
+                                                                    const BorderRadius.all(
+                                                                      Radius.circular(
+                                                                        9,
+                                                                      ),
+                                                                    ),
+                                                              ),
+                                                            ),
+                                                            // menuStyle: ,
+                                                            menuHeight: 250,
+                                                            dropdownMenuEntries:
+                                                                cont.currenciesNamesList.map<
+                                                                  DropdownMenuEntry<
+                                                                    String
+                                                                  >
+                                                                >((
+                                                                  String option,
+                                                                ) {
+                                                                  return DropdownMenuEntry<
+                                                                    String
+                                                                  >(
+                                                                    value:
+                                                                        option,
+                                                                    label:
+                                                                        option,
+                                                                  );
+                                                                }).toList(),
+                                                            enableFilter: true,
+                                                            onSelected: (
+                                                              String? val,
+                                                            ) {
+                                                              setState(() {
+                                                                selectedCurrency =
+                                                                    val!;
+                                                                var index = cont
+                                                                    .currenciesNamesList
+                                                                    .indexOf(
+                                                                      val,
+                                                                    );
+                                                                quotationCont
+                                                                    .setSelectedCurrency(
+                                                                      cont.currenciesIdsList[index],
+                                                                      val,
+                                                                    );
+                                                                quotationCont
+                                                                    .setSelectedCurrencySymbol(
+                                                                      cont.currenciesSymbolsList[index],
+                                                                    );
+                                                                var matchedItems =
+                                                                    exchangeRatesController
+                                                                        .exchangeRatesList
+                                                                        .where(
+                                                                          (
+                                                                            item,
+                                                                          ) =>
+                                                                              item["currency"] ==
+                                                                              val,
+                                                                        );
+
+                                                                var result =
+                                                                    matchedItems
+                                                                            .isNotEmpty
+                                                                        ? matchedItems.reduce(
+                                                                          (
+                                                                            a,
+                                                                            b,
+                                                                          ) =>
+                                                                              DateTime.parse(
+                                                                                    a["start_date"],
+                                                                                  ).isAfter(
+                                                                                    DateTime.parse(
+                                                                                      b["start_date"],
+                                                                                    ),
+                                                                                  )
+                                                                                  ? a
+                                                                                  : b,
+                                                                        )
+                                                                        : null;
+
+                                                                quotationCont
+                                                                    .setExchangeRateForSelectedCurrency(
+                                                                      result !=
+                                                                              null
+                                                                          ? '${result["exchange_rate"]}'
+                                                                          : '1',
+                                                                    );
+                                                              });
+
+                                                              var keys =
+                                                                  quotationCont
+                                                                      .unitPriceControllers
+                                                                      .keys
+                                                                      .toList();
+                                                              for (
+                                                                int i = 0;
+                                                                i <
+                                                                    quotationCont
+                                                                        .unitPriceControllers
+                                                                        .length;
+                                                                i++
+                                                              ) {
+                                                                var selectedItemId =
+                                                                    '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
+                                                                if (selectedItemId !=
+                                                                    '') {
+                                                                  if (quotationCont
+                                                                          .itemsPricesCurrencies[selectedItemId] ==
+                                                                      val) {
+                                                                    quotationCont
+                                                                            .unitPriceControllers[keys[i]]!
+                                                                            .text =
+                                                                        quotationCont
+                                                                            .itemUnitPrice[selectedItemId]
+                                                                            .toString();
+                                                                  } else if (quotationCont
+                                                                              .selectedCurrencyName ==
+                                                                          'USD' &&
+                                                                      quotationCont
+                                                                              .itemsPricesCurrencies[selectedItemId] !=
+                                                                          val) {
+                                                                    var matchedItems = exchangeRatesController
+                                                                        .exchangeRatesList
+                                                                        .where(
+                                                                          (
+                                                                            item,
+                                                                          ) =>
+                                                                              item["currency"] ==
+                                                                              quotationCont.itemsPricesCurrencies[selectedItemId],
+                                                                        );
+
+                                                                    var result =
+                                                                        matchedItems.isNotEmpty
+                                                                            ? matchedItems.reduce(
+                                                                              (
+                                                                                a,
+                                                                                b,
+                                                                              ) =>
+                                                                                  DateTime.parse(
+                                                                                        a["start_date"],
+                                                                                      ).isAfter(
+                                                                                        DateTime.parse(
+                                                                                          b["start_date"],
+                                                                                        ),
+                                                                                      )
+                                                                                      ? a
+                                                                                      : b,
+                                                                            )
+                                                                            : null;
+                                                                    var divider =
+                                                                        '1';
+                                                                    if (result !=
+                                                                        null) {
+                                                                      divider =
+                                                                          result["exchange_rate"]
+                                                                              .toString();
+                                                                    }
+                                                                    quotationCont
+                                                                            .unitPriceControllers[keys[i]]!
+                                                                            .text =
+                                                                        '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                                  } else if (quotationCont
+                                                                              .selectedCurrencyName !=
+                                                                          'USD' &&
+                                                                      quotationCont
+                                                                              .itemsPricesCurrencies[selectedItemId] ==
+                                                                          'USD') {
+                                                                    quotationCont
+                                                                            .unitPriceControllers[keys[i]]!
+                                                                            .text =
+                                                                        '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                                  } else {
+                                                                    var matchedItems = exchangeRatesController
+                                                                        .exchangeRatesList
+                                                                        .where(
+                                                                          (
+                                                                            item,
+                                                                          ) =>
+                                                                              item["currency"] ==
+                                                                              quotationCont.itemsPricesCurrencies[selectedItemId],
+                                                                        );
+
+                                                                    var result =
+                                                                        matchedItems.isNotEmpty
+                                                                            ? matchedItems.reduce(
+                                                                              (
+                                                                                a,
+                                                                                b,
+                                                                              ) =>
+                                                                                  DateTime.parse(
+                                                                                        a["start_date"],
+                                                                                      ).isAfter(
+                                                                                        DateTime.parse(
+                                                                                          b["start_date"],
+                                                                                        ),
+                                                                                      )
+                                                                                      ? a
+                                                                                      : b,
+                                                                            )
+                                                                            : null;
+                                                                    var divider =
+                                                                        '1';
+                                                                    if (result !=
+                                                                        null) {
+                                                                      divider =
+                                                                          result["exchange_rate"]
+                                                                              .toString();
+                                                                    }
+                                                                    var usdPrice =
+                                                                        '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                                    quotationCont
+                                                                            .unitPriceControllers[keys[i]]!
+                                                                            .text =
+                                                                        '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                                  }
+                                                                  if (!quotationCont
+                                                                      .isBeforeVatPrices) {
+                                                                    var taxRate =
+                                                                        double.parse(
+                                                                          quotationCont
+                                                                              .itemsVats[selectedItemId],
+                                                                        ) /
+                                                                        100.0;
+                                                                    var taxValue =
+                                                                        taxRate *
+                                                                        double.parse(
+                                                                          quotationCont
+                                                                              .unitPriceControllers[keys[i]]!
+                                                                              .text,
+                                                                        );
+
+                                                                    quotationCont
+                                                                            .unitPriceControllers[keys[i]]!
+                                                                            .text =
+                                                                        '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
+                                                                  }
+                                                                  quotationCont
+                                                                      .unitPriceControllers[keys[i]]!
+                                                                      .text = double.parse(
+                                                                    quotationCont
+                                                                        .unitPriceControllers[keys[i]]!
+                                                                        .text,
+                                                                  ).toStringAsFixed(
+                                                                    2,
+                                                                  );
+                                                                  var totalLine =
+                                                                      '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+
+                                                                  quotationCont.setEnteredUnitPriceInQuotation(
+                                                                    keys[i],
+                                                                    quotationCont
+                                                                        .unitPriceControllers[keys[i]]!
+                                                                        .text,
+                                                                  );
+                                                                  quotationCont
+                                                                      .setMainTotalInQuotation(
+                                                                        keys[i],
+                                                                        totalLine,
+                                                                      );
+                                                                  quotationCont
+                                                                      .getTotalItems();
+                                                                }
+                                                              }
+
+                                                              var comboKeys =
+                                                                  quotationCont
+                                                                      .combosPriceControllers
+                                                                      .keys
+                                                                      .toList();
+                                                              for (
+                                                                int i = 0;
+                                                                i <
+                                                                    quotationCont
+                                                                        .combosPriceControllers
+                                                                        .length;
+                                                                i++
+                                                              ) {
+                                                                var selectedComboId =
+                                                                    '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
+                                                                if (selectedComboId !=
+                                                                    '') {
+                                                                  var ind = quotationCont
+                                                                      .combosIdsList
+                                                                      .indexOf(
+                                                                        selectedComboId,
+                                                                      );
+                                                                  if (quotationCont
+                                                                          .combosPricesCurrencies[selectedComboId] ==
+                                                                      quotationCont
+                                                                          .selectedCurrencyName) {
+                                                                    quotationCont
+                                                                            .combosPriceControllers[comboKeys[i]]!
+                                                                            .text =
+                                                                        quotationCont
+                                                                            .combosPricesList[ind]
+                                                                            .toString();
+                                                                  } else if (quotationCont
+                                                                              .selectedCurrencyName ==
+                                                                          'USD' &&
+                                                                      quotationCont
+                                                                              .combosPricesCurrencies[selectedComboId] !=
+                                                                          quotationCont
+                                                                              .selectedCurrencyName) {
+                                                                    var matchedItems = exchangeRatesController
+                                                                        .exchangeRatesList
+                                                                        .where(
+                                                                          (
+                                                                            item,
+                                                                          ) =>
+                                                                              item["currency"] ==
+                                                                              quotationCont.combosPricesCurrencies[selectedComboId],
+                                                                        );
+
+                                                                    var result =
+                                                                        matchedItems.isNotEmpty
+                                                                            ? matchedItems.reduce(
+                                                                              (
+                                                                                a,
+                                                                                b,
+                                                                              ) =>
+                                                                                  DateTime.parse(
+                                                                                        a["start_date"],
+                                                                                      ).isAfter(
+                                                                                        DateTime.parse(
+                                                                                          b["start_date"],
+                                                                                        ),
+                                                                                      )
+                                                                                      ? a
+                                                                                      : b,
+                                                                            )
+                                                                            : null;
+                                                                    var divider =
+                                                                        '1';
+                                                                    if (result !=
+                                                                        null) {
+                                                                      divider =
+                                                                          result["exchange_rate"]
+                                                                              .toString();
+                                                                    }
+                                                                    quotationCont
+                                                                            .combosPriceControllers[comboKeys[i]]!
+                                                                            .text =
+                                                                        '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                                  } else if (quotationCont
+                                                                              .selectedCurrencyName !=
+                                                                          'USD' &&
+                                                                      quotationCont
+                                                                              .combosPricesCurrencies[selectedComboId] ==
+                                                                          'USD') {
+                                                                    quotationCont
+                                                                            .combosPriceControllers[comboKeys[i]]!
+                                                                            .text =
+                                                                        '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                                  } else {
+                                                                    var matchedItems = exchangeRatesController
+                                                                        .exchangeRatesList
+                                                                        .where(
+                                                                          (
+                                                                            item,
+                                                                          ) =>
+                                                                              item["currency"] ==
+                                                                              quotationCont.combosPricesCurrencies[selectedComboId],
+                                                                        );
+
+                                                                    var result =
+                                                                        matchedItems.isNotEmpty
+                                                                            ? matchedItems.reduce(
+                                                                              (
+                                                                                a,
+                                                                                b,
+                                                                              ) =>
+                                                                                  DateTime.parse(
+                                                                                        a["start_date"],
+                                                                                      ).isAfter(
+                                                                                        DateTime.parse(
+                                                                                          b["start_date"],
+                                                                                        ),
+                                                                                      )
+                                                                                      ? a
+                                                                                      : b,
+                                                                            )
+                                                                            : null;
+                                                                    var divider =
+                                                                        '1';
+                                                                    if (result !=
+                                                                        null) {
+                                                                      divider =
+                                                                          result["exchange_rate"]
+                                                                              .toString();
+                                                                    }
+                                                                    var usdPrice =
+                                                                        '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                                                                    quotationCont
+                                                                            .combosPriceControllers[comboKeys[i]]!
+                                                                            .text =
+                                                                        '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
+                                                                  }
+                                                                  quotationCont
+                                                                          .combosPriceControllers[comboKeys[i]]!
+                                                                          .text =
+                                                                      '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
+
+                                                                  quotationCont
+                                                                      .combosPriceControllers[comboKeys[i]]!
+                                                                      .text = double.parse(
+                                                                    quotationCont
+                                                                        .combosPriceControllers[comboKeys[i]]!
+                                                                        .text,
+                                                                  ).toStringAsFixed(
+                                                                    2,
+                                                                  );
+                                                                  var totalLine =
+                                                                      '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+                                                                  quotationCont.setEnteredQtyInQuotation(
+                                                                    comboKeys[i],
+                                                                    quotationCont
+                                                                        .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
+                                                                  );
+                                                                  quotationCont
+                                                                      .setMainTotalInQuotation(
+                                                                        comboKeys[i],
+                                                                        totalLine,
+                                                                      );
+                                                                  // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                                                                  quotationCont
+                                                                      .getTotalItems();
+
+                                                                  quotationCont.setEnteredUnitPriceInQuotation(
+                                                                    comboKeys[i],
+                                                                    quotationCont
+                                                                        .combosPriceControllers[comboKeys[i]]!
+                                                                        .text,
+                                                                  );
+                                                                  quotationCont
+                                                                      .setMainTotalInQuotation(
+                                                                        comboKeys[i],
+                                                                        totalLine,
+                                                                      );
+                                                                  quotationCont
+                                                                      .getTotalItems();
+                                                                }
+                                                              }
+                                                            },
+                                                          )
+                                                          : loading();
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+
+                                            SizedBox(
+                                              width:
+                                                  homeController.isOpened.value
+                                                      ? MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.17
+                                                      : MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.18,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text('validity'.tr),
+                                                  DialogDateTextField(
+                                                    textEditingController:
+                                                        validityController,
+                                                    text: '',
+                                                    textFieldWidth:
+                                                        homeController
+                                                                .isOpened
+                                                                .value
+                                                            ? MediaQuery.of(
+                                                                  context,
+                                                                ).size.width *
+                                                                0.13
+                                                            : MediaQuery.of(
+                                                                  context,
+                                                                ).size.width *
+                                                                0.15,
+                                                    // MediaQuery.of(context).size.width * 0.25,
+                                                    validationFunc: (val) {},
+                                                    onChangedFunc: (val) {
+                                                      validityController.text =
+                                                          val;
+                                                    },
+                                                    onDateSelected: (value) {
+                                                      validityController.text =
+                                                          value;
+                                                      setState(() {
+                                                        // LocalDate a=LocalDate.today();
+                                                        // LocalDate b = LocalDate.dateTime(value);
+                                                        // Period diff = b.periodSince(a);
+                                                        // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                                      });
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        gapH16,
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            SizedBox(
+                                              width:
+                                                  homeController.isOpened.value
+                                                      ? MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.15
+                                                      : MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.18,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text('chance'.tr),
+                                                  DropdownMenu<String>(
+                                                    width:
+                                                        homeController
+                                                                .isOpened
+                                                                .value
+                                                            ? MediaQuery.of(
+                                                                  context,
+                                                                ).size.width *
+                                                                0.11
+                                                            : MediaQuery.of(
+                                                                  context,
+                                                                ).size.width *
+                                                                0.14,
+                                                    // requestFocusOnTap: false,
+                                                    enableSearch: true,
+                                                    controller:
+                                                        chanceController,
+                                                    hintText: '',
+                                                    inputDecorationTheme: InputDecorationTheme(
+                                                      // filled: true,
+                                                      hintStyle:
+                                                          const TextStyle(
+                                                            fontStyle:
+                                                                FontStyle
+                                                                    .italic,
+                                                          ),
+                                                      contentPadding:
+                                                          const EdgeInsets.fromLTRB(
+                                                            20,
+                                                            0,
+                                                            25,
+                                                            5,
+                                                          ),
+                                                      // outlineBorder: BorderSide(color: Colors.black,),
+                                                      enabledBorder: OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.2 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 1,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                      focusedBorder: OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.4 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 2,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                    ),
+                                                    // menuStyle: ,
+                                                    menuHeight: 250,
+                                                    dropdownMenuEntries:
+                                                        chanceLevels.map<
+                                                          DropdownMenuEntry<
+                                                            String
+                                                          >
+                                                        >((String option) {
+                                                          return DropdownMenuEntry<
+                                                            String
+                                                          >(
+                                                            value: option,
+                                                            label: option,
+                                                          );
+                                                        }).toList(),
+                                                    enableFilter: true,
+                                                    onSelected: (String? val) {
+                                                      //   var index = quotationCont
+                                                      //       .priceListsCodes
+                                                      //       .indexOf(val!);
+                                                      //   quotationCont.setSelectedPriceListId(
+                                                      //     quotationCont.priceListsIds[index],
+                                                      //   );
+                                                      //   setState(() {
+                                                      //     quotationCont
+                                                      //         .resetItemsAfterChangePriceList();
+                                                      //   });
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  homeController.isOpened.value
+                                                      ? screenWidth > 1250
+                                                          ? MediaQuery.of(
+                                                                context,
+                                                              ).size.width *
+                                                              0.17
+                                                          : MediaQuery.of(
+                                                                context,
+                                                              ).size.width *
+                                                              0.21
+                                                      : MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.20,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text('pricelist'.tr),
+                                                  DropdownMenu<String>(
+                                                    width:
+                                                        homeController
+                                                                .isOpened
+                                                                .value
+                                                            ? screenWidth > 1250
+                                                                ? MediaQuery.of(
+                                                                      context,
+                                                                    ).size.width *
+                                                                    0.13
+                                                                : MediaQuery.of(
+                                                                      context,
+                                                                    ).size.width *
+                                                                    0.15
+                                                            : MediaQuery.of(
+                                                                  context,
+                                                                ).size.width *
+                                                                0.16,
+                                                    // requestFocusOnTap: false,
+                                                    enableSearch: true,
+                                                    controller:
+                                                        priceListController,
+                                                    hintText: '',
+                                                    inputDecorationTheme: InputDecorationTheme(
+                                                      // filled: true,
+                                                      hintStyle:
+                                                          const TextStyle(
+                                                            fontStyle:
+                                                                FontStyle
+                                                                    .italic,
+                                                          ),
+                                                      contentPadding:
+                                                          const EdgeInsets.fromLTRB(
+                                                            20,
+                                                            0,
+                                                            25,
+                                                            5,
+                                                          ),
+                                                      // outlineBorder: BorderSide(color: Colors.black,),
+                                                      enabledBorder: OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.2 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 1,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                      focusedBorder: OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: Primary.primary
+                                                              .withAlpha(
+                                                                (0.4 * 255)
+                                                                    .toInt(),
+                                                              ),
+                                                          width: 2,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                    ),
+                                                    // menuStyle: ,
+                                                    menuHeight: 250,
+                                                    dropdownMenuEntries:
+                                                        quotationCont
+                                                            .priceListsCodes
+                                                            .map<
+                                                              DropdownMenuEntry<
+                                                                String
+                                                              >
+                                                            >((String option) {
+                                                              return DropdownMenuEntry<
+                                                                String
+                                                              >(
+                                                                value: option,
+                                                                label: option,
+                                                              );
+                                                            })
+                                                            .toList(),
+                                                    enableFilter: true,
+                                                    onSelected: (String? val) {
+                                                      var index = quotationCont
+                                                          .priceListsCodes
+                                                          .indexOf(val!);
+                                                      quotationCont
+                                                          .setSelectedPriceListId(
+                                                            quotationCont
+                                                                .priceListsIds[index],
+                                                          );
+                                                      setState(() {
+                                                        quotationCont
+                                                            .resetItemsAfterChangePriceList();
+                                                      });
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                                  homeController.isOpened.value
+                                                      ? MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.18
+                                                      : MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.22,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text('input_date'.tr),
+                                                  DialogDateTextField(
+                                                    textEditingController:
+                                                        inputDateController,
+                                                    text: '',
+                                                    textFieldWidth:
+                                                        homeController
+                                                                .isOpened
+                                                                .value
+                                                            ? MediaQuery.of(
+                                                                  context,
+                                                                ).size.width *
+                                                                0.13
+                                                            : MediaQuery.of(
+                                                                  context,
+                                                                ).size.width *
+                                                                0.17,
+                                                    // MediaQuery.of(context).size.width * 0.25,
+                                                    validationFunc: (val) {},
+                                                    onChangedFunc: (val) {
+                                                      inputDateController.text =
+                                                          val;
+                                                    },
+                                                    onDateSelected: (value) {
+                                                      inputDateController.text =
+                                                          value;
+                                                      setState(() {
+                                                        // LocalDate a=LocalDate.today();
+                                                        // LocalDate b = LocalDate.dateTime(value);
+                                                        // Period diff = b.periodSince(a);
+                                                        // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                                      });
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                           ),
                           gapH16,
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.15,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('input_date'.tr),
-                                    DialogDateTextField(
-                                      textEditingController:
-                                          inputDateController,
-                                      text: '',
-                                      textFieldWidth:
-                                          MediaQuery.of(context).size.width *
-                                          0.10,
-                                      // MediaQuery.of(context).size.width * 0.25,
-                                      validationFunc: (val) {},
-                                      onChangedFunc: (val) {
-                                        inputDateController.text = val;
-                                      },
-                                      onDateSelected: (value) {
-                                        inputDateController.text = value;
-                                        setState(() {
-                                          // LocalDate a=LocalDate.today();
-                                          // LocalDate b = LocalDate.dateTime(value);
-                                          // Period diff = b.periodSince(a);
-                                          // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
-                                        });
-                                      },
+                              screenWidth > 1250
+                                  ? SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width *
+                                        0.15,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('input_date'.tr),
+                                        DialogDateTextField(
+                                          textEditingController:
+                                              inputDateController,
+                                          text: '',
+                                          textFieldWidth:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.1,
+                                          // MediaQuery.of(context).size.width * 0.25,
+                                          validationFunc: (val) {},
+                                          onChangedFunc: (val) {
+                                            inputDateController.text = val;
+                                          },
+                                          onDateSelected: (value) {
+                                            inputDateController.text = value;
+                                            setState(() {
+                                              // LocalDate a=LocalDate.today();
+                                              // LocalDate b = LocalDate.dateTime(value);
+                                              // Period diff = b.periodSince(a);
+                                              // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                            });
+                                          },
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  )
+                                  : Text(""),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.30,
+                                width:
+                                    screenWidth > 1250
+                                        ? MediaQuery.of(context).size.width *
+                                            0.32
+                                        : MediaQuery.of(context).size.width *
+                                            0.48,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
@@ -2413,11 +3855,25 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         return null;
                                       },
                                       rowWidth:
-                                          MediaQuery.of(context).size.width *
-                                          0.13,
+                                          screenWidth > 1250
+                                              ? MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.13
+                                              : MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.18,
                                       textFieldWidth:
-                                          MediaQuery.of(context).size.width *
-                                          0.10,
+                                          screenWidth > 1250
+                                              ? MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.10
+                                              : MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.15,
                                       clickableOptionText:
                                           'create_new_client'.tr,
                                       isThereClickableOption: true,
@@ -2505,11 +3961,25 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         return null;
                                       },
                                       rowWidth:
-                                          MediaQuery.of(context).size.width *
-                                          0.15,
+                                          screenWidth > 1250
+                                              ? MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.17
+                                              : MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.27,
                                       textFieldWidth:
-                                          MediaQuery.of(context).size.width *
-                                          0.14,
+                                          screenWidth > 1250
+                                              ? MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.16
+                                              : MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.26,
                                       clickableOptionText:
                                           'create_new_client'.tr,
                                       isThereClickableOption: true,
@@ -2542,9 +4012,23 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                 text: 'payment_terms'.tr,
                                 hint: '',
                                 rowWidth:
-                                    MediaQuery.of(context).size.width * 0.24,
+                                    screenWidth > 1250
+                                        ? MediaQuery.of(context).size.width *
+                                            0.20
+                                        : screenWidth > 1049
+                                        ? MediaQuery.of(context).size.width *
+                                            0.23
+                                        : MediaQuery.of(context).size.width *
+                                            0.22,
                                 textFieldWidth:
-                                    MediaQuery.of(context).size.width * 0.15,
+                                    screenWidth > 1250
+                                        ? MediaQuery.of(context).size.width *
+                                            0.11
+                                        : screenWidth > 1049
+                                        ? MediaQuery.of(context).size.width *
+                                            0.13
+                                        : MediaQuery.of(context).size.width *
+                                            0.12,
                                 validationFunc: (val) {},
                               ),
                               // ReusableDropDownMenuWithSearch(
@@ -2685,12 +4169,12 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                       children: [
                                         Text(
                                           '${'Street_building_floor'.tr} ',
-                                          style: const TextStyle(fontSize: 12),
+                                          style: TextStyle(fontSize: 12.sp),
                                         ),
                                         gapW10,
                                         Text(
                                           " ${quotationCont.street[selectedCustomerIds] ?? ''} ",
-                                          style: const TextStyle(fontSize: 12),
+                                          style: TextStyle(fontSize: 12.sp),
                                         ),
                                         Text(
                                           quotationCont.floorAndBuilding[selectedCustomerIds] ==
@@ -2703,7 +4187,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         ),
                                         Text(
                                           " ${quotationCont.floorAndBuilding[selectedCustomerIds] ?? ''}",
-                                          style: const TextStyle(fontSize: 12),
+                                          style: TextStyle(fontSize: 12.sp),
                                         ),
                                       ],
                                     ),
@@ -2713,12 +4197,12 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                       children: [
                                         Text(
                                           'Phone Number'.tr,
-                                          style: const TextStyle(fontSize: 12),
+                                          style: TextStyle(fontSize: 12.sp),
                                         ),
                                         gapW10,
                                         Text(
                                           "${quotationCont.phoneNumber[selectedCustomerIds] ?? ''}",
-                                          style: const TextStyle(fontSize: 12),
+                                          style: TextStyle(fontSize: 12.sp),
                                         ),
                                       ],
                                     ),
@@ -2753,12 +4237,12 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                       children: [
                                         Text(
                                           'email'.tr,
-                                          style: const TextStyle(fontSize: 12),
+                                          style: TextStyle(fontSize: 12.sp),
                                         ),
                                         gapW10,
                                         Text(
                                           "${quotationCont.email[selectedCustomerIds] ?? ''}",
-                                          style: const TextStyle(fontSize: 12),
+                                          style: TextStyle(fontSize: 12.sp),
                                         ),
                                       ],
                                     ),
@@ -2770,9 +4254,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                           children: [
                                             Text(
                                               'vat'.tr,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                              ),
+                                              style: TextStyle(fontSize: 12.sp),
                                             ),
                                             gapW10,
                                           ],
@@ -2808,7 +4290,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                           enableSearch: true,
                                           controller: priceConditionController,
                                           hintText: '',
-                                          textStyle: TextStyle(fontSize: 12),
+                                          textStyle: TextStyle(fontSize: 12.sp),
                                           inputDecorationTheme: InputDecorationTheme(
                                             // filled: true,
                                             hintStyle: const TextStyle(
@@ -3066,9 +4548,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                           child: ListTile(
                                             title: Text(
                                               'vat_exempt'.tr,
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                              ),
+                                              style: TextStyle(fontSize: 12.sp),
                                             ),
                                             leading: Checkbox(
                                               // checkColor: Colors.white,
@@ -3128,7 +4608,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                               controller: vatExemptController,
                                               hintText: '',
                                               textStyle: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 12.sp,
                                               ),
                                               inputDecorationTheme: InputDecorationTheme(
                                                 hintStyle: const TextStyle(
@@ -3306,9 +4786,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                           title: Text(
                                             quotationCont
                                                 .headersList[0]['header_name'],
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
+                                            style: TextStyle(fontSize: 12.sp),
                                           ),
                                           leading: Radio(
                                             value: 0,
@@ -3317,8 +4795,9 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                     .selectedHeaderIndex,
                                             onChanged: (value) {
                                               setState(() {
-                                                quotationCont.selectedHeader=quotationCont
-                                                    .headersList[0];
+                                                quotationCont.selectedHeader =
+                                                    quotationCont
+                                                        .headersList[0];
                                                 quotationCont
                                                         .selectedHeaderIndex =
                                                     value!;
@@ -3335,9 +4814,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                           title: Text(
                                             quotationCont
                                                 .headersList[1]['header_name'],
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
+                                            style: TextStyle(fontSize: 12.sp),
                                           ),
                                           leading: Radio(
                                             value: 1,
@@ -3346,8 +4823,9 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                                     .selectedHeaderIndex,
                                             onChanged: (value) {
                                               setState(() {
-                                                quotationCont.selectedHeader=quotationCont
-                                                    .headersList[1];
+                                                quotationCont.selectedHeader =
+                                                    quotationCont
+                                                        .headersList[1];
                                                 quotationCont
                                                         .selectedHeaderIndex =
                                                     value!;
@@ -4578,7 +6056,6 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   final quantityFocus = FocusNode(); //quantity
   double taxRate = 1;
   double taxValue = 0;
-  final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     // discountController.text = '0';
@@ -4639,449 +6116,343 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
         return Container(
           height: 50,
           margin: const EdgeInsets.symmetric(vertical: 5),
-          child: Form(
-            key: _formKey,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Obx(
-                  () => ReusableDropDownMenusWithSearch(
-                    list:
-                        cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
-                    text: ''.tr,
-                    hint: 'Item Code'.tr,
-                    controller: itemCodeController,
-                    onSelected: (String? value) async {
-                      itemCodeController.text = value!;
-                      setState(() {
-                        selectedItemId =
-                            '${cont.itemsIds[cont.itemsCode.indexOf(value.split(" | ")[0])]}'; //get the id by the first element of the list.
-                        mainDescriptionVar =
-                            cont.itemsDescription[selectedItemId];
-                        mainCode = cont.itemsCodes[selectedItemId];
-                        itemName = cont.itemsNames[selectedItemId];
-                        descriptionController.text =
-                            cont.itemsDescription[selectedItemId]!;
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Obx(
+                () => ReusableDropDownMenusWithSearch(
+                  list:
+                      cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
+                  text: ''.tr,
+                  hint: 'Item Code'.tr,
+                  controller: itemCodeController,
+                  onSelected: (String? value) async {
+                    itemCodeController.text = value!;
+                    setState(() {
+                      selectedItemId =
+                          '${cont.itemsIds[cont.itemsCode.indexOf(value.split(" | ")[0])]}'; //get the id by the first element of the list.
+                      mainDescriptionVar =
+                          cont.itemsDescription[selectedItemId];
+                      mainCode = cont.itemsCodes[selectedItemId];
+                      itemName = cont.itemsNames[selectedItemId];
+                      descriptionController.text =
+                          cont.itemsDescription[selectedItemId]!;
 
-                        if (cont.itemsPricesCurrencies[selectedItemId] ==
-                            cont.selectedCurrencyName) {
-                          cont.unitPriceControllers[widget.index]!.text =
-                              cont.itemUnitPrice[selectedItemId].toString();
-                        } else if (cont.selectedCurrencyName == 'USD' &&
-                            cont.itemsPricesCurrencies[selectedItemId] !=
-                                cont.selectedCurrencyName) {
-                          var matchedItems = exchangeRatesController
-                              .exchangeRatesList
-                              .where(
-                                (item) =>
-                                    item["currency"] ==
-                                    cont.itemsPricesCurrencies[selectedItemId],
-                              );
+                      if (cont.itemsPricesCurrencies[selectedItemId] ==
+                          cont.selectedCurrencyName) {
+                        cont.unitPriceControllers[widget.index]!.text =
+                            cont.itemUnitPrice[selectedItemId].toString();
+                      } else if (cont.selectedCurrencyName == 'USD' &&
+                          cont.itemsPricesCurrencies[selectedItemId] !=
+                              cont.selectedCurrencyName) {
+                        var matchedItems = exchangeRatesController
+                            .exchangeRatesList
+                            .where(
+                              (item) =>
+                                  item["currency"] ==
+                                  cont.itemsPricesCurrencies[selectedItemId],
+                            );
 
-                          var result =
-                              matchedItems.isNotEmpty
-                                  ? matchedItems.reduce(
-                                    (a, b) =>
-                                        DateTime.parse(a["start_date"]).isAfter(
-                                              DateTime.parse(b["start_date"]),
-                                            )
-                                            ? a
-                                            : b,
-                                  )
-                                  : null;
-                          var divider = '1';
-                          if (result != null) {
-                            divider = result["exchange_rate"].toString();
-                          }
-                          cont.unitPriceControllers[widget.index]!.text =
-                              '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                        } else if (cont.selectedCurrencyName != 'USD' &&
-                            cont.itemsPricesCurrencies[selectedItemId] ==
-                                'USD') {
-                          cont.unitPriceControllers[widget.index]!.text =
-                              '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                        } else {
-                          var matchedItems = exchangeRatesController
-                              .exchangeRatesList
-                              .where(
-                                (item) =>
-                                    item["currency"] ==
-                                    cont.itemsPricesCurrencies[selectedItemId],
-                              );
-
-                          var result =
-                              matchedItems.isNotEmpty
-                                  ? matchedItems.reduce(
-                                    (a, b) =>
-                                        DateTime.parse(a["start_date"]).isAfter(
-                                              DateTime.parse(b["start_date"]),
-                                            )
-                                            ? a
-                                            : b,
-                                  )
-                                  : null;
-                          var divider = '1';
-                          if (result != null) {
-                            divider = result["exchange_rate"].toString();
-                          }
-                          var usdPrice =
-                              '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                          cont.unitPriceControllers[widget.index]!.text =
-                              '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                        }
-                        if (cont.isBeforeVatPrices) {
-                          taxRate = 1;
-                          taxValue = 0;
-                        } else {
-                          taxRate =
-                              double.parse(cont.itemsVats[selectedItemId]) /
-                              100.0;
-                          taxValue =
-                              taxRate *
-                              double.parse(
-                                cont.unitPriceControllers[widget.index]!.text,
-                              );
+                        var result =
+                            matchedItems.isNotEmpty
+                                ? matchedItems.reduce(
+                                  (a, b) =>
+                                      DateTime.parse(a["start_date"]).isAfter(
+                                            DateTime.parse(b["start_date"]),
+                                          )
+                                          ? a
+                                          : b,
+                                )
+                                : null;
+                        var divider = '1';
+                        if (result != null) {
+                          divider = result["exchange_rate"].toString();
                         }
                         cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse(cont.unitPriceControllers[widget.index]!.text) + taxValue}';
-                        qtyController.text = '1';
-                        quantity = '1';
-                        discountController.text = '0';
-                        discount = '0';
-                        cont
-                            .unitPriceControllers[widget.index]!
-                            .text = double.parse(
-                          cont.unitPriceControllers[widget.index]!.text,
-                        ).toStringAsFixed(2);
-                        totalLine =
-                            '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                        cont.setEnteredQtyInQuotation(widget.index, quantity);
-                        cont.setMainTotalInQuotation(widget.index, totalLine);
-                        // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
-                        cont.getTotalItems();
-                      });
-                      cont.setEnteredUnitPriceInQuotation(
-                        widget.index,
+                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                      } else if (cont.selectedCurrencyName != 'USD' &&
+                          cont.itemsPricesCurrencies[selectedItemId] ==
+                              'USD') {
+                        cont.unitPriceControllers[widget.index]!.text =
+                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                      } else {
+                        var matchedItems = exchangeRatesController
+                            .exchangeRatesList
+                            .where(
+                              (item) =>
+                                  item["currency"] ==
+                                  cont.itemsPricesCurrencies[selectedItemId],
+                            );
+
+                        var result =
+                            matchedItems.isNotEmpty
+                                ? matchedItems.reduce(
+                                  (a, b) =>
+                                      DateTime.parse(a["start_date"]).isAfter(
+                                            DateTime.parse(b["start_date"]),
+                                          )
+                                          ? a
+                                          : b,
+                                )
+                                : null;
+                        var divider = '1';
+                        if (result != null) {
+                          divider = result["exchange_rate"].toString();
+                        }
+                        var usdPrice =
+                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                        cont.unitPriceControllers[widget.index]!.text =
+                            '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                      }
+                      if (cont.isBeforeVatPrices) {
+                        taxRate = 1;
+                        taxValue = 0;
+                      } else {
+                        taxRate =
+                            double.parse(cont.itemsVats[selectedItemId]) /
+                            100.0;
+                        taxValue =
+                            taxRate *
+                            double.parse(
+                              cont.unitPriceControllers[widget.index]!.text,
+                            );
+                      }
+                      cont.unitPriceControllers[widget.index]!.text =
+                          '${double.parse(cont.unitPriceControllers[widget.index]!.text) + taxValue}';
+                      qtyController.text = '1';
+                      quantity = '1';
+                      discountController.text = '0';
+                      discount = '0';
+                      cont
+                          .unitPriceControllers[widget.index]!
+                          .text = double.parse(
                         cont.unitPriceControllers[widget.index]!.text,
-                      );
-                      cont.setItemIdInQuotation(widget.index, selectedItemId);
-                      cont.setItemNameInQuotation(
-                        widget.index,
-                        itemName,
-                        // value.split(" | ")[0],
-                      ); // set only first element as name
-                      cont.setMainCodeInQuotation(widget.index, mainCode);
-                      cont.setTypeInQuotation(widget.index, '2');
-                      cont.setMainDescriptionInQuotation(
-                        widget.index,
-                        mainDescriptionVar,
-                      );
-                    },
-                    validationFunc: (value) {
-                      if (quotationController.rowsInListViewInQuotation[widget
-                                  .index]['item_main_code'] !=
-                              '' ||
-                          quotationController.rowsInListViewInQuotation[widget
-                                  .index]['item_main_code'] !=
-                              null) {
-                        return null;
-                      } else if (value == null || value.isEmpty) {
-                        return 'select_option'.tr;
-                      }
-                      return null;
-                    },
-                    rowWidth:
-                        homeController.isOpened.value
-                            ? MediaQuery.of(context).size.width * 0.13
-                            : MediaQuery.of(context).size.width * 0.16,
-                    textFieldWidth:
-                        homeController.isOpened.value
-                            ? MediaQuery.of(context).size.width * 0.13
-                            : MediaQuery.of(context).size.width * 0.16,
-                    clickableOptionText: 'create_virtual_item'.tr,
-                    isThereClickableOption: true,
-                    onTappedClickableOption: () {
-                      productController.clearData();
-                      productController.getFieldsForCreateProductFromBack();
-                      productController.setIsItUpdateProduct(false);
-                      showDialog<String>(
-                        context: context,
-                        builder:
-                            (BuildContext context) => const AlertDialog(
-                              backgroundColor: Colors.white,
-                              contentPadding: EdgeInsets.all(0),
-                              titlePadding: EdgeInsets.all(0),
-                              actionsPadding: EdgeInsets.all(0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(9),
-                                ),
-                              ),
-                              elevation: 0,
-                              content: CreateProductDialogContent(),
-                            ),
-                      );
-                    },
-                    columnWidths: [
-                      100.0,
-                      200.0,
-                      550.0,
-                      100.0,
-                    ], // Set column widths
-                    focusNode: dropFocus,
-                    nextFocusNode: quantityFocus,
-                  ),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.27,
-                  child: TextFormField(
-                    style: GoogleFonts.openSans(fontSize: 12),
-                    onFieldSubmitted: (value) {
-                      FocusScope.of(context).requestFocus(focus);
-                    },
-                    controller: descriptionController,
-                    cursorColor: Colors.black,
-                    decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                          width: 1,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                          width: 1,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
-                        ),
-                      ),
-                      errorStyle: const TextStyle(fontSize: 10.0),
-                      focusedErrorBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(6)),
-                        borderSide: BorderSide(width: 1, color: Colors.red),
-                      ),
-                    ),
-                    validator: (String? value) {
-                      return null;
-                    },
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: false,
-                      signed: true,
-                    ),
-                    onChanged: (val) {
-                      setState(() {
-                        mainDescriptionVar = val;
-                      });
-                      _formKey.currentState!.validate();
-                      cont.setMainDescriptionInQuotation(
-                        widget.index,
-                        mainDescriptionVar,
-                      );
-                    },
-                  ),
-                ),
-
-                //quantity
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.05,
-
-                  child: TextFormField(
-                    style: GoogleFonts.openSans(
-                      fontSize: 12,
-                      // fontWeight: FontWeight.w500,
-                    ),
-                    focusNode: quantityFocus,
-                    onFieldSubmitted: (value) {
-                      FocusScope.of(context).requestFocus(focus);
-                    },
-                    textAlign: TextAlign.center,
-                    controller: qtyController,
-                    cursorColor: Colors.black,
-                    decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                          width: 1,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                          width: 1,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
-                        ),
-                      ),
-                      errorStyle: const TextStyle(fontSize: 10.0),
-                      focusedErrorBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(6)),
-                        borderSide: BorderSide(width: 1, color: Colors.red),
-                      ),
-                    ),
-                    validator: (String? value) {
-                      if (value!.isEmpty || double.parse(value) <= 0) {
-                        return 'must be >0';
-                      }
-                      return null;
-                    },
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: false,
-                      signed: true,
-                    ),
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
-                      // WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (val) {
-                      setState(() {
-                        quantity = val;
-                        totalLine =
-                            '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                        // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
-                      });
-
-                      _formKey.currentState!.validate();
-                      // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-
-                      cont.setEnteredQtyInQuotation(widget.index, val);
+                      ).toStringAsFixed(2);
+                      totalLine =
+                          '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                      cont.setEnteredQtyInQuotation(widget.index, quantity);
                       cont.setMainTotalInQuotation(widget.index, totalLine);
                       // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
                       cont.getTotalItems();
-                    },
-                  ),
+                    });
+                    cont.setEnteredUnitPriceInQuotation(
+                      widget.index,
+                      cont.unitPriceControllers[widget.index]!.text,
+                    );
+                    cont.setItemIdInQuotation(widget.index, selectedItemId);
+                    cont.setItemNameInQuotation(
+                      widget.index,
+                      itemName,
+                      // value.split(" | ")[0],
+                    ); // set only first element as name
+                    cont.setMainCodeInQuotation(widget.index, mainCode);
+                    cont.setTypeInQuotation(widget.index, '2');
+                    cont.setMainDescriptionInQuotation(
+                      widget.index,
+                      mainDescriptionVar,
+                    );
+                  },
+                  validationFunc: (value) {
+                    if (quotationController.rowsInListViewInQuotation[widget
+                                .index]['item_main_code'] !=
+                            '' ||
+                        quotationController.rowsInListViewInQuotation[widget
+                                .index]['item_main_code'] !=
+                            null) {
+                      return null;
+                    } else if (value == null || value.isEmpty) {
+                      return 'select_option'.tr;
+                    }
+                    return null;
+                  },
+                  rowWidth:
+                      homeController.isOpened.value
+                          ? MediaQuery.of(context).size.width * 0.13
+                          : MediaQuery.of(context).size.width * 0.16,
+                  textFieldWidth:
+                      homeController.isOpened.value
+                          ? MediaQuery.of(context).size.width * 0.13
+                          : MediaQuery.of(context).size.width * 0.16,
+                  clickableOptionText: 'create_virtual_item'.tr,
+                  isThereClickableOption: true,
+                  onTappedClickableOption: () {
+                    productController.clearData();
+                    productController.getFieldsForCreateProductFromBack();
+                    productController.setIsItUpdateProduct(false);
+                    showDialog<String>(
+                      context: context,
+                      builder:
+                          (BuildContext context) => const AlertDialog(
+                            backgroundColor: Colors.white,
+                            contentPadding: EdgeInsets.all(0),
+                            titlePadding: EdgeInsets.all(0),
+                            actionsPadding: EdgeInsets.all(0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(9),
+                              ),
+                            ),
+                            elevation: 0,
+                            content: CreateProductDialogContent(),
+                          ),
+                    );
+                  },
+                  columnWidths: [
+                    100.0,
+                    200.0,
+                    550.0,
+                    100.0,
+                  ], // Set column widths
+                  focusNode: dropFocus,
+                  nextFocusNode: quantityFocus,
                 ),
-                // unitPrice
-                Obx(
-                  () => SizedBox(
-                    width:
-                        homeController.isOpened.value
-                            ? MediaQuery.of(context).size.width * 0.05
-                            : MediaQuery.of(context).size.width * 0.1,
-                    child: TextFormField(
-                      style: GoogleFonts.openSans(
-                        fontSize: 12,
-                        // fontWeight: FontWeight.w500,
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.27,
+                child: TextFormField(
+                  style: GoogleFonts.openSans(fontSize: 12),
+                  onFieldSubmitted: (value) {
+                    FocusScope.of(context).requestFocus(focus);
+                  },
+                  controller: descriptionController,
+                  cursorColor: Colors.black,
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
                       ),
-                      focusNode: focus,
-                      onFieldSubmitted: (value) {
-                        FocusScope.of(context).requestFocus(focus1);
-                      },
-                      textAlign: TextAlign.center,
-                      controller: cont.unitPriceControllers[widget.index],
-                      cursorColor: Colors.black,
-                      decoration: InputDecoration(
-                        hintText: "".tr,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                            width: 1,
-                          ),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(6),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                            width: 1,
-                          ),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(6),
-                          ),
-                        ),
-                        errorStyle: const TextStyle(fontSize: 10.0),
-                        focusedErrorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(6)),
-                          borderSide: BorderSide(width: 1, color: Colors.red),
-                        ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
                       ),
-                      validator: (String? value) {
-                        return null;
-                      },
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: false,
-                        signed: true,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
                       ),
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
-                        // WhitelistingTextInputFormatter.digitsOnly
-                      ],
-                      onChanged: (val) {
-                        setState(() {
-                          if (val == '') {
-                            cont.unitPriceControllers[widget.index]!.text = '0';
-                          } else {
-                            // cont.unitPriceControllers[widget.index]!.text = val;
-                          }
-                          // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
-                          totalLine =
-                              '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                        });
-                        _formKey.currentState!.validate();
-                        // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                        cont.setEnteredUnitPriceInQuotation(widget.index, val);
-                        cont.setMainTotalInQuotation(widget.index, totalLine);
-                        cont.getTotalItems();
-                      },
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
+                      ),
+                    ),
+                    errorStyle: const TextStyle(fontSize: 10.0),
+                    focusedErrorBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                      borderSide: BorderSide(width: 1, color: Colors.red),
                     ),
                   ),
+                  validator: (String? value) {
+                    return null;
+                  },
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: false,
+                    signed: true,
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      mainDescriptionVar = val;
+                    });
+                    // _formKey.currentState!.validate();
+                    cont.setMainDescriptionInQuotation(
+                      widget.index,
+                      mainDescriptionVar,
+                    );
+                  },
                 ),
-                //discount
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.05,
+              ),
+
+              //quantity
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.05,
+
+                child: TextFormField(
+                  style: GoogleFonts.openSans(
+                    fontSize: 12,
+                    // fontWeight: FontWeight.w500,
+                  ),
+                  focusNode: quantityFocus,
+                  onFieldSubmitted: (value) {
+                    FocusScope.of(context).requestFocus(focus);
+                  },
+                  textAlign: TextAlign.center,
+                  controller: qtyController,
+                  cursorColor: Colors.black,
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
+                      ),
+                    ),
+                    errorStyle: const TextStyle(fontSize: 10.0),
+                    focusedErrorBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                      borderSide: BorderSide(width: 1, color: Colors.red),
+                    ),
+                  ),
+                  validator: (String? value) {
+                    if (value!.isEmpty || double.parse(value) <= 0) {
+                      return 'must be >0';
+                    }
+                    return null;
+                  },
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: false,
+                    signed: true,
+                  ),
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                    // WhitelistingTextInputFormatter.digitsOnly
+                  ],
+                  onChanged: (val) {
+                    setState(() {
+                      quantity = val;
+                      totalLine =
+                          '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                      // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
+                    });
+
+                    // _formKey.currentState!.validate();
+                    // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
+
+                    cont.setEnteredQtyInQuotation(widget.index, val);
+                    cont.setMainTotalInQuotation(widget.index, totalLine);
+                    // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                    cont.getTotalItems();
+                  },
+                ),
+              ),
+              // unitPrice
+              Obx(
+                () => SizedBox(
+                  width:
+                      homeController.isOpened.value
+                          ? MediaQuery.of(context).size.width * 0.05
+                          : MediaQuery.of(context).size.width * 0.1,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
                       fontSize: 12,
                       // fontWeight: FontWeight.w500,
                     ),
-                    focusNode: focus1,
+                    focusNode: focus,
                     onFieldSubmitted: (value) {
-                      setState(() {
-                        quotationController.quotationCounter += 1;
-                      });
-                      quotationController.incrementListViewLengthInQuotation(
-                        quotationController.increment,
-                      );
-                      quotationController.addToRowsInListViewInQuotation(
-                        quotationController.quotationCounter,
-                        {
-                          'line_type_id': '2',
-                          'item_id': '',
-                          'itemName': '',
-                          'item_main_code': '',
-                          'item_discount': '0',
-                          'item_description': '',
-                          'item_quantity': '0',
-                          'item_unit_price': '0',
-                          'item_total': '0',
-                          'title': '',
-                          'note': '',
-                          'combo': '',
-                        },
-                      );
-                      quotationController.addToUnitPriceControllers(
-                        quotationController.quotationCounter,
-                      );
-                      // Widget p = ReusableItemRow(
-                      //   index: quotationController.quotationCounter,
-                      // );
-                      // quotationController.addToOrderLinesInQuotationList(
-                      //   '${quotationController.quotationCounter}',
-                      //   p,
-                      // );
+                      FocusScope.of(context).requestFocus(focus1);
                     },
-                    controller: discountController,
-                    cursorColor: Colors.black,
                     textAlign: TextAlign.center,
+                    controller: cont.unitPriceControllers[widget.index],
+                    cursorColor: Colors.black,
                     decoration: InputDecoration(
                       hintText: "".tr,
                       enabledBorder: OutlineInputBorder(
@@ -5119,135 +6490,238 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
                       // WhitelistingTextInputFormatter.digitsOnly
                     ],
-                    onChanged: (val) async {
+                    onChanged: (val) {
                       setState(() {
                         if (val == '') {
-                          discountController.text = '0';
-                          discount = '0';
+                          cont.unitPriceControllers[widget.index]!.text = '0';
                         } else {
-                          discount = val;
+                          // cont.unitPriceControllers[widget.index]!.text = val;
                         }
-
                         // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
-
                         totalLine =
                             '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
-                      _formKey.currentState!.validate();
-
+                      // _formKey.currentState!.validate();
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                      cont.setEnteredDiscInQuotation(widget.index, val);
+                      cont.setEnteredUnitPriceInQuotation(widget.index, val);
                       cont.setMainTotalInQuotation(widget.index, totalLine);
-                      await cont.getTotalItems();
+                      cont.getTotalItems();
                     },
                   ),
                 ),
-
-                //total
-                Obx(
-                  () => ReusableShowInfoCard(
-                    text: formatDoubleWithCommas(
-                      double.parse(
-                        cont.rowsInListViewInQuotation[widget
-                            .index]['item_total'],
+              ),
+              //discount
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.05,
+                child: TextFormField(
+                  style: GoogleFonts.openSans(
+                    fontSize: 12,
+                    // fontWeight: FontWeight.w500,
+                  ),
+                  focusNode: focus1,
+                  onFieldSubmitted: (value) {
+                    setState(() {
+                      quotationController.quotationCounter += 1;
+                    });
+                    quotationController.incrementListViewLengthInQuotation(
+                      quotationController.increment,
+                    );
+                    quotationController.addToRowsInListViewInQuotation(
+                      quotationController.quotationCounter,
+                      {
+                        'line_type_id': '2',
+                        'item_id': '',
+                        'itemName': '',
+                        'item_main_code': '',
+                        'item_discount': '0',
+                        'item_description': '',
+                        'item_quantity': '0',
+                        'item_unit_price': '0',
+                        'item_total': '0',
+                        'title': '',
+                        'note': '',
+                        'combo': '',
+                      },
+                    );
+                    quotationController.addToUnitPriceControllers(
+                      quotationController.quotationCounter,
+                    );
+                    // Widget p = ReusableItemRow(
+                    //   index: quotationController.quotationCounter,
+                    // );
+                    // quotationController.addToOrderLinesInQuotationList(
+                    //   '${quotationController.quotationCounter}',
+                    //   p,
+                    // );
+                  },
+                  controller: discountController,
+                  cursorColor: Colors.black,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    hintText: "".tr,
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
                       ),
                     ),
-                    width:
-                        homeController.isOpened.value
-                            ? MediaQuery.of(context).size.width * 0.07
-                            : MediaQuery.of(context).size.width * 0.1,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
+                      ),
+                    ),
+                    errorStyle: const TextStyle(fontSize: 10.0),
+                    focusedErrorBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                      borderSide: BorderSide(width: 1, color: Colors.red),
+                    ),
                   ),
-                ),
+                  validator: (String? value) {
+                    return null;
+                  },
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: false,
+                    signed: true,
+                  ),
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                    // WhitelistingTextInputFormatter.digitsOnly
+                  ],
+                  onChanged: (val) async {
+                    setState(() {
+                      if (val == '') {
+                        discountController.text = '0';
+                        discount = '0';
+                      } else {
+                        discount = val;
+                      }
 
-                //more
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.07,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.02,
-                        child: ReusableMore(
-                          itemsList:
-                              selectedItemId.isEmpty
-                                  ? []
-                                  : [
-                                    PopupMenuItem<String>(
-                                      value: '1',
-                                      onTap: () async {
-                                        showDialog<String>(
-                                          context: context,
-                                          builder:
-                                              (
-                                                BuildContext context,
-                                              ) => AlertDialog(
-                                                backgroundColor: Colors.white,
-                                                shape:
-                                                    const RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                            Radius.circular(9),
-                                                          ),
-                                                    ),
-                                                elevation: 0,
-                                                content:
-                                                    ShowItemQuantitiesDialog(
-                                                      selectedItemId:
-                                                          selectedItemId,
-                                                    ),
-                                              ),
-                                        );
-                                      },
-                                      child: const Text('Show Quantity'),
-                                    ),
-                                  ],
+                      // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
+
+                      totalLine =
+                          '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                    });
+                    // _formKey.currentState!.validate();
+
+                    // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
+                    cont.setEnteredDiscInQuotation(widget.index, val);
+                    cont.setMainTotalInQuotation(widget.index, totalLine);
+                    await cont.getTotalItems();
+                  },
+                ),
+              ),
+
+              //total
+              Obx(
+                () => ReusableShowInfoCard(
+                  text: formatDoubleWithCommas(
+                    double.parse(
+                      cont.rowsInListViewInQuotation[widget
+                          .index]['item_total'],
+                    ),
+                  ),
+                  width:
+                      homeController.isOpened.value
+                          ? MediaQuery.of(context).size.width * 0.07
+                          : MediaQuery.of(context).size.width * 0.1,
+                ),
+              ),
+
+              //more
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.07,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.02,
+                      child: ReusableMore(
+                        itemsList:
+                            selectedItemId.isEmpty
+                                ? []
+                                : [
+                                  PopupMenuItem<String>(
+                                    value: '1',
+                                    onTap: () async {
+                                      showDialog<String>(
+                                        context: context,
+                                        builder:
+                                            (
+                                              BuildContext context,
+                                            ) => AlertDialog(
+                                              backgroundColor: Colors.white,
+                                              shape:
+                                                  const RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                          Radius.circular(9),
+                                                        ),
+                                                  ),
+                                              elevation: 0,
+                                              content:
+                                                  ShowItemQuantitiesDialog(
+                                                    selectedItemId:
+                                                        selectedItemId,
+                                                  ),
+                                            ),
+                                      );
+                                    },
+                                    child: const Text('Show Quantity'),
+                                  ),
+                                ],
+                      ),
+                    ),
+
+                    //delete
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.03,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            quotationController
+                                .decrementListViewLengthInQuotation(
+                                  quotationController.increment,
+                                );
+                            quotationController
+                                .removeFromRowsInListViewInQuotation(
+                                  widget.index,
+                                );
+                            // quotationController
+                            //     .removeFromOrderLinesInQuotationList(
+                            //       widget.index.toString(),
+                            //     );
+                          });
+                          setState(() {
+                            cont.totalItems = 0.0;
+                            cont.globalDisc = "0.0";
+                            cont.globalDiscountPercentageValue = "0.0";
+                            cont.specialDisc = "0.0";
+                            cont.specialDiscountPercentageValue = "0.0";
+                            cont.vat11 = "0.0";
+                            cont.vatInPrimaryCurrency = "0.0";
+                            cont.totalQuotation = "0.0";
+                          });
+                          if (cont.rowsInListViewInQuotation != {}) {
+                            cont.getTotalItems();
+                          }
+                        },
+                        child: Icon(
+                          Icons.delete_outline,
+                          color: Primary.primary,
                         ),
                       ),
-
-                      //delete
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.03,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              quotationController
-                                  .decrementListViewLengthInQuotation(
-                                    quotationController.increment,
-                                  );
-                              quotationController
-                                  .removeFromRowsInListViewInQuotation(
-                                    widget.index,
-                                  );
-                              // quotationController
-                              //     .removeFromOrderLinesInQuotationList(
-                              //       widget.index.toString(),
-                              //     );
-                            });
-                            setState(() {
-                              cont.totalItems = 0.0;
-                              cont.globalDisc = "0.0";
-                              cont.globalDiscountPercentageValue = "0.0";
-                              cont.specialDisc = "0.0";
-                              cont.specialDiscountPercentageValue = "0.0";
-                              cont.vat11 = "0.0";
-                              cont.vatInPrimaryCurrency = "0.0";
-                              cont.totalQuotation = "0.0";
-                            });
-                            if (cont.rowsInListViewInQuotation != {}) {
-                              cont.getTotalItems();
-                            }
-                          },
-                          child: Icon(
-                            Icons.delete_outline,
-                            color: Primary.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -5268,7 +6742,6 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
   TextEditingController titleController = TextEditingController();
   final QuotationController quotationController = Get.find();
   String titleValue = '0';
-  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -5284,77 +6757,74 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
         return Container(
           height: 50,
           margin: const EdgeInsets.symmetric(vertical: 5),
-          child: Form(
-            key: _formKey,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: ReusableTextField(
-                    textEditingController: titleController,
-                    isPasswordField: false,
-                    hint: 'title'.tr,
-                    onChangedFunc: (val) {
-                      setState(() {
-                        titleValue = val;
-                      });
-                      cont.setTypeInQuotation(widget.index, '1');
-                      cont.setTitleInQuotation(widget.index, val);
-                    },
-                    validationFunc: (val) {},
-                  ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: ReusableTextField(
+                  textEditingController: titleController,
+                  isPasswordField: false,
+                  hint: 'title'.tr,
+                  onChangedFunc: (val) {
+                    setState(() {
+                      titleValue = val;
+                    });
+                    cont.setTypeInQuotation(widget.index, '1');
+                    cont.setTitleInQuotation(widget.index, val);
+                  },
+                  validationFunc: (val) {},
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.07,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.02,
-                        child: const ReusableMore(
-                          itemsList: [
-                            // PopupMenuItem<String>(
-                            //   value: '1',
-                            //   onTap: () async {},
-                            //   child: Row(
-                            //     children: [
-                            //       Text(''),
-                            //     ],
-                            //   ),
-                            // ),
-                          ],
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.07,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.02,
+                      child: const ReusableMore(
+                        itemsList: [
+                          // PopupMenuItem<String>(
+                          //   value: '1',
+                          //   onTap: () async {},
+                          //   child: Row(
+                          //     children: [
+                          //       Text(''),
+                          //     ],
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.03,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            quotationController
+                                .decrementListViewLengthInQuotation(
+                                  quotationController.increment,
+                                );
+                            quotationController
+                                .removeFromRowsInListViewInQuotation(
+                                  widget.index,
+                                );
+                            // quotationController
+                            //     .removeFromOrderLinesInQuotationList(
+                            //       widget.index.toString(),
+                            //     );
+                          });
+                        },
+                        child: Icon(
+                          Icons.delete_outline,
+                          color: Primary.primary,
                         ),
                       ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.03,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              quotationController
-                                  .decrementListViewLengthInQuotation(
-                                    quotationController.increment,
-                                  );
-                              quotationController
-                                  .removeFromRowsInListViewInQuotation(
-                                    widget.index,
-                                  );
-                              // quotationController
-                              //     .removeFromOrderLinesInQuotationList(
-                              //       widget.index.toString(),
-                              //     );
-                            });
-                          },
-                          child: Icon(
-                            Icons.delete_outline,
-                            color: Primary.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -5375,7 +6845,6 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
   TextEditingController noteController = TextEditingController();
   final QuotationController quotationController = Get.find();
   String noteValue = '';
-  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -5389,102 +6858,99 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
     return Container(
       height: 50,
       margin: const EdgeInsets.symmetric(vertical: 5),
-      child: Form(
-        key: _formKey,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            //image
-            // Container(
-            //   width: MediaQuery.of(context).size.width * 0.02,
-            //   height: 20,
-            //   margin: const EdgeInsets.symmetric(vertical: 15),
-            //   decoration: const BoxDecoration(
-            //     image: DecorationImage(
-            //       image: AssetImage('assets/images/newRow.png'),
-            //       fit: BoxFit.contain,
-            //     ),
-            //   ),
-            // ),
-            Expanded(
-              // width: MediaQuery.of(context).size.width * 0.63,
-              child: ReusableTextField(
-                textEditingController: noteController,
-                isPasswordField: false,
-                hint: 'note'.tr,
-                onChangedFunc: (val) {
-                  setState(() {
-                    noteValue = val;
-                  });
-                  quotationController.setTypeInQuotation(widget.index, '5');
-                  quotationController.setNoteInQuotation(widget.index, val);
-                },
-                validationFunc: (val) {},
-              ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          //image
+          // Container(
+          //   width: MediaQuery.of(context).size.width * 0.02,
+          //   height: 20,
+          //   margin: const EdgeInsets.symmetric(vertical: 15),
+          //   decoration: const BoxDecoration(
+          //     image: DecorationImage(
+          //       image: AssetImage('assets/images/newRow.png'),
+          //       fit: BoxFit.contain,
+          //     ),
+          //   ),
+          // ),
+          Expanded(
+            // width: MediaQuery.of(context).size.width * 0.63,
+            child: ReusableTextField(
+              textEditingController: noteController,
+              isPasswordField: false,
+              hint: 'note'.tr,
+              onChangedFunc: (val) {
+                setState(() {
+                  noteValue = val;
+                });
+                quotationController.setTypeInQuotation(widget.index, '5');
+                quotationController.setNoteInQuotation(widget.index, val);
+              },
+              validationFunc: (val) {},
             ),
-            //delete
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.07,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.02,
-                    child: ReusableMore(
-                      itemsList: [
-                        // PopupMenuItem<String>(
-                        //   value: '1',
-                        //   onTap: () async {
-                        //     showDialog<String>(
-                        //         context: context,
-                        //         builder: (BuildContext context) => AlertDialog(
-                        //           backgroundColor: Colors.white,
-                        //           shape: const RoundedRectangleBorder(
-                        //             borderRadius:
-                        //             BorderRadius.all(Radius.circular(9)),
-                        //           ),
-                        //           elevation: 0,
-                        //           content: Column(
-                        //             mainAxisAlignment: MainAxisAlignment.center,
-                        //             children: [
-                        //
-                        //             ],
-                        //           ),
-                        //         ));
-                        //   },
-                        //   child: const Text('Show Quantity'),
-                        // ),
-                      ],
-                    ),
+          ),
+          //delete
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.07,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.02,
+                  child: ReusableMore(
+                    itemsList: [
+                      // PopupMenuItem<String>(
+                      //   value: '1',
+                      //   onTap: () async {
+                      //     showDialog<String>(
+                      //         context: context,
+                      //         builder: (BuildContext context) => AlertDialog(
+                      //           backgroundColor: Colors.white,
+                      //           shape: const RoundedRectangleBorder(
+                      //             borderRadius:
+                      //             BorderRadius.all(Radius.circular(9)),
+                      //           ),
+                      //           elevation: 0,
+                      //           content: Column(
+                      //             mainAxisAlignment: MainAxisAlignment.center,
+                      //             children: [
+                      //
+                      //             ],
+                      //           ),
+                      //         ));
+                      //   },
+                      //   child: const Text('Show Quantity'),
+                      // ),
+                    ],
                   ),
-                  //delete
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.03,
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          quotationController
-                              .decrementListViewLengthInQuotation(
-                                quotationController.increment,
-                              );
-                          quotationController
-                              .removeFromRowsInListViewInQuotation(
-                                widget.index,
-                              );
-                          // quotationController
-                          //     .removeFromOrderLinesInQuotationList(
-                          //       widget.index.toString(),
-                          //     );
-                        });
-                      },
-                      child: Icon(Icons.delete_outline, color: Primary.primary),
-                    ),
+                ),
+                //delete
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.03,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        quotationController
+                            .decrementListViewLengthInQuotation(
+                              quotationController.increment,
+                            );
+                        quotationController
+                            .removeFromRowsInListViewInQuotation(
+                              widget.index,
+                            );
+                        // quotationController
+                        //     .removeFromOrderLinesInQuotationList(
+                        //       widget.index.toString(),
+                        //     );
+                      });
+                    },
+                    child: Icon(Icons.delete_outline, color: Primary.primary),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -5505,7 +6971,6 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
 
   double listViewLength = Sizes.deviceHeight * 0.08;
 
-  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -5526,152 +6991,157 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
     return Container(
       height: 100,
       margin: const EdgeInsets.symmetric(vertical: 2),
-      child: Form(
-        key: _formKey,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            //image
-            // Container(
-            //   width: MediaQuery.of(context).size.width * 0.02,
-            //   height: 20,
-            //   margin: const EdgeInsets.symmetric(vertical: 15),
-            //   decoration: const BoxDecoration(
-            //     image: DecorationImage(
-            //       image: AssetImage('assets/images/newRow.png'),
-            //       fit: BoxFit.contain,
-            //     ),
-            //   ),
-            // ),
-            GetBuilder<QuotationController>(
-              builder: (cont) {
-                return InkWell(
-                  onTap: () async {
-                    final image = await ImagePickerHelper.pickImage();
-                    setState(() {
-                      imageFile = image!;
-                      cont.changeBoolVar(true);
-                      cont.increaseImageSpace(30);
-                    });
-                    cont.setTypeInQuotation(widget.index, '4');
-                    cont.setImageInQuotation(widget.index, imageFile);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 5,
-                      horizontal: 5,
-                    ),
-                    child: DottedBorder(
-                      dashPattern: const [10, 10],
-                      color: Others.borderColor,
-                      radius: const Radius.circular(9),
-                      child: Obx(() => SizedBox(
-                        width:homeController.isOpened.value? MediaQuery.of(context).size.width * 0.62:MediaQuery.of(context).size.width * 0.79,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          //image
+          // Container(
+          //   width: MediaQuery.of(context).size.width * 0.02,
+          //   height: 20,
+          //   margin: const EdgeInsets.symmetric(vertical: 15),
+          //   decoration: const BoxDecoration(
+          //     image: DecorationImage(
+          //       image: AssetImage('assets/images/newRow.png'),
+          //       fit: BoxFit.contain,
+          //     ),
+          //   ),
+          // ),
+          GetBuilder<QuotationController>(
+            builder: (cont) {
+              return InkWell(
+                onTap: () async {
+                  final image = await ImagePickerHelper.pickImage();
+                  setState(() {
+                    imageFile = image!;
+                    cont.changeBoolVar(true);
+                    cont.increaseImageSpace(30);
+                  });
+                  cont.setTypeInQuotation(widget.index, '4');
+                  cont.setImageInQuotation(widget.index, imageFile);
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 5,
+                    horizontal: 5,
+                  ),
+                  child: DottedBorder(
+                    dashPattern: const [10, 10],
+                    color: Others.borderColor,
+                    radius: const Radius.circular(9),
+                    child: Obx(
+                      () => SizedBox(
+                        width:
+                            homeController.isOpened.value
+                                ? MediaQuery.of(context).size.width * 0.62
+                                : MediaQuery.of(context).size.width * 0.79,
                         height: cont.imageSpaceHeight,
                         child:
-                        imageFile.isNotEmpty
-                            ? Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Image.memory(
-                              imageFile,
-                              height: cont.imageSpaceHeight,
-                            ),
-                          ],
-                        )
-                            : Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            gapW20,
-                            Icon(
-                              Icons.cloud_upload_outlined,
-                              color: Others.iconColor,
-                              size: 32,
-                            ),
-                            gapW20,
-                            Text(
-                              'drag_drop_image'.tr,
-                              style: TextStyle(
-                                color: TypographyColor.textTable,
-                              ),
-                            ),
-                            Text(
-                              'browse'.tr,
-                              style: TextStyle(color: Primary.primary),
-                            ),
-                          ],
-                        ),
-                      ),),
+                            imageFile.isNotEmpty
+                                ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Image.memory(
+                                      imageFile,
+                                      height: cont.imageSpaceHeight,
+                                    ),
+                                  ],
+                                )
+                                : Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.center,
+                                  children: [
+                                    gapW20,
+                                    Icon(
+                                      Icons.cloud_upload_outlined,
+                                      color: Others.iconColor,
+                                      size: 32,
+                                    ),
+                                    gapW20,
+                                    Text(
+                                      'drag_drop_image'.tr,
+                                      style: TextStyle(
+                                        color: TypographyColor.textTable,
+                                      ),
+                                    ),
+                                    Text(
+                                      'browse'.tr,
+                                      style: TextStyle(
+                                        color: Primary.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                      ),
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
+          ),
 
-            //more
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.07,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.02,
-                    child: ReusableMore(
-                      itemsList: [
-                        // PopupMenuItem<String>(
-                        //   value: '1',
-                        //   onTap: () async {
-                        //     showDialog<String>(
-                        //         context: context,
-                        //         builder: (BuildContext context) => AlertDialog(
-                        //           backgroundColor: Colors.white,
-                        //           shape: const RoundedRectangleBorder(
-                        //             borderRadius:
-                        //             BorderRadius.all(Radius.circular(9)),
-                        //           ),
-                        //           elevation: 0,
-                        //           content: Column(
-                        //             mainAxisAlignment: MainAxisAlignment.center,
-                        //             children: [
-                        //
-                        //             ],
-                        //           ),
-                        //         ));
-                        //   },
-                        //   child: const Text('Show Quantity'),
-                        // ),
-                      ],
-                    ),
+          //more
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.07,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.02,
+                  child: ReusableMore(
+                    itemsList: [
+                      // PopupMenuItem<String>(
+                      //   value: '1',
+                      //   onTap: () async {
+                      //     showDialog<String>(
+                      //         context: context,
+                      //         builder: (BuildContext context) => AlertDialog(
+                      //           backgroundColor: Colors.white,
+                      //           shape: const RoundedRectangleBorder(
+                      //             borderRadius:
+                      //             BorderRadius.all(Radius.circular(9)),
+                      //           ),
+                      //           elevation: 0,
+                      //           content: Column(
+                      //             mainAxisAlignment: MainAxisAlignment.center,
+                      //             children: [
+                      //
+                      //             ],
+                      //           ),
+                      //         ));
+                      //   },
+                      //   child: const Text('Show Quantity'),
+                      // ),
+                    ],
                   ),
-                  //delete
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.03,
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          quotationController
-                              .decrementListViewLengthInQuotation(
-                                quotationController.increment + 50,
-                              );
-                          quotationController
-                              .removeFromRowsInListViewInQuotation(
-                                widget.index,
-                              );
-                          // quotationController
-                          //     .removeFromOrderLinesInQuotationList(
-                          //       widget.index.toString(),
-                          //     );
-                        });
-                      },
-                      child: Icon(Icons.delete_outline, color: Primary.primary),
-                    ),
+                ),
+                //delete
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.03,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        quotationController
+                            .decrementListViewLengthInQuotation(
+                              quotationController.increment + 50,
+                            );
+                        quotationController
+                            .removeFromRowsInListViewInQuotation(
+                              widget.index,
+                            );
+                        // quotationController
+                        //     .removeFromOrderLinesInQuotationList(
+                        //       widget.index.toString(),
+                        //     );
+                      });
+                    },
+                    child: Icon(Icons.delete_outline, color: Primary.primary),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -5716,7 +7186,6 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
   final quantityFocus = FocusNode(); //quantity
   double taxRate = 1;
   double taxValue = 0;
-  final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     if (quotationController.rowsInListViewInQuotation[widget.index]['combo'] !=
@@ -5769,436 +7238,320 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
         return Container(
           height: 50,
           margin: const EdgeInsets.symmetric(vertical: 5),
-          child: Form(
-            key: _formKey,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Obx(
-                  () => ReusableDropDownMenusWithSearch(
-                    list:
-                        cont.combosMultiPartList, // Assuming multiList is List<List<String>>
-                    text: ''.tr,
-                    hint: 'combo'.tr,
-                    controller: comboCodeController,
-                    onSelected: (String? value) async {
-                      comboCodeController.text = value!;
-                      setState(() {
-                        var ind = cont.combosCodesList.indexOf(
-                          value.split(" | ")[0],
-                        );
-                        selectedComboId = cont.combosIdsList[ind];
-                        descriptionVar = cont.combosDescriptionList[ind];
-                        mainCode = cont.combosCodesList[ind];
-                        comboName = cont.combosNamesList[ind];
-                        descriptionController.text =
-                            cont.combosDescriptionList[ind];
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Obx(
+                () => ReusableDropDownMenusWithSearch(
+                  list:
+                      cont.combosMultiPartList, // Assuming multiList is List<List<String>>
+                  text: ''.tr,
+                  hint: 'combo'.tr,
+                  controller: comboCodeController,
+                  onSelected: (String? value) async {
+                    comboCodeController.text = value!;
+                    setState(() {
+                      var ind = cont.combosCodesList.indexOf(
+                        value.split(" | ")[0],
+                      );
+                      selectedComboId = cont.combosIdsList[ind];
+                      descriptionVar = cont.combosDescriptionList[ind];
+                      mainCode = cont.combosCodesList[ind];
+                      comboName = cont.combosNamesList[ind];
+                      descriptionController.text =
+                          cont.combosDescriptionList[ind];
 
-                        if (cont.combosPricesCurrencies[selectedComboId] ==
-                            cont.selectedCurrencyName) {
-                          cont.combosPriceControllers[widget.index]!.text =
-                              cont.combosPricesList[ind].toString();
-                        } else if (cont.selectedCurrencyName == 'USD' &&
-                            cont.combosPricesCurrencies[selectedComboId] !=
-                                cont.selectedCurrencyName) {
-                          var matchedItems = exchangeRatesController
-                              .exchangeRatesList
-                              .where(
-                                (item) =>
-                                    item["currency"] ==
-                                    cont.combosPricesCurrencies[selectedComboId],
-                              );
+                      if (cont.combosPricesCurrencies[selectedComboId] ==
+                          cont.selectedCurrencyName) {
+                        cont.combosPriceControllers[widget.index]!.text =
+                            cont.combosPricesList[ind].toString();
+                      } else if (cont.selectedCurrencyName == 'USD' &&
+                          cont.combosPricesCurrencies[selectedComboId] !=
+                              cont.selectedCurrencyName) {
+                        var matchedItems = exchangeRatesController
+                            .exchangeRatesList
+                            .where(
+                              (item) =>
+                                  item["currency"] ==
+                                  cont.combosPricesCurrencies[selectedComboId],
+                            );
 
-                          var result =
-                              matchedItems.isNotEmpty
-                                  ? matchedItems.reduce(
-                                    (a, b) =>
-                                        DateTime.parse(a["start_date"]).isAfter(
-                                              DateTime.parse(b["start_date"]),
-                                            )
-                                            ? a
-                                            : b,
-                                  )
-                                  : null;
+                        var result =
+                            matchedItems.isNotEmpty
+                                ? matchedItems.reduce(
+                                  (a, b) =>
+                                      DateTime.parse(a["start_date"]).isAfter(
+                                            DateTime.parse(b["start_date"]),
+                                          )
+                                          ? a
+                                          : b,
+                                )
+                                : null;
 
-                          var divider = '1';
-                          if (result != null) {
-                            divider = result["exchange_rate"].toString();
-                          }
-                          cont.combosPriceControllers[widget.index]!.text =
-                              '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                        } else if (cont.selectedCurrencyName != 'USD' &&
-                            cont.combosPricesCurrencies[selectedComboId] ==
-                                'USD') {
-                          cont.combosPriceControllers[widget.index]!.text =
-                              '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                        } else {
-                          var matchedItems = exchangeRatesController
-                              .exchangeRatesList
-                              .where(
-                                (item) =>
-                                    item["currency"] ==
-                                    cont.combosPricesCurrencies[selectedComboId],
-                              );
-
-                          var result =
-                              matchedItems.isNotEmpty
-                                  ? matchedItems.reduce(
-                                    (a, b) =>
-                                        DateTime.parse(a["start_date"]).isAfter(
-                                              DateTime.parse(b["start_date"]),
-                                            )
-                                            ? a
-                                            : b,
-                                  )
-                                  : null;
-                          var divider = '1';
-                          if (result != null) {
-                            divider = result["exchange_rate"].toString();
-                          }
-                          var usdPrice =
-                              '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                          cont.combosPriceControllers[widget.index]!.text =
-                              '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                        var divider = '1';
+                        if (result != null) {
+                          divider = result["exchange_rate"].toString();
                         }
                         cont.combosPriceControllers[widget.index]!.text =
-                            '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
-                        qtyController.text = '1';
-                        quantity = '1';
-                        discountController.text = '0';
-                        discount = '0';
-                        cont
-                            .combosPriceControllers[widget.index]!
-                            .text = double.parse(
-                          cont.combosPriceControllers[widget.index]!.text,
-                        ).toStringAsFixed(2);
-                        totalLine =
-                            '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                        cont.setEnteredQtyInQuotation(widget.index, quantity);
-                        cont.setMainTotalInQuotation(widget.index, totalLine);
-                        // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
-                        cont.getTotalItems();
-                      });
-                      cont.setEnteredUnitPriceInQuotation(
-                        widget.index,
-                        cont.combosPriceControllers[widget.index]!.text,
-                      );
-                      cont.setComboInQuotation(widget.index, selectedComboId);
-                      cont.setItemNameInQuotation(
-                        widget.index,
-                        comboName,
-                        // value.split(" | ")[0],
-                      ); // set only first element as name
-                      cont.setMainCodeInQuotation(widget.index, mainCode);
-                      cont.setTypeInQuotation(widget.index, '3');
-                      cont.setMainDescriptionInQuotation(
-                        widget.index,
-                        descriptionVar,
-                      );
-                    },
-                    validationFunc: (value) {
-                      // if (value == null || value.isEmpty) {
-                      //   return 'select_option'.tr;
-                      // }
-                      // return null;
-                    },
-                    rowWidth:
-                        homeController.isOpened.value
-                            ? MediaQuery.of(context).size.width * 0.13
-                            : MediaQuery.of(context).size.width * 0.16,
-                    textFieldWidth:
-                        homeController.isOpened.value
-                            ? MediaQuery.of(context).size.width * 0.13
-                            : MediaQuery.of(context).size.width * 0.16,
-                    clickableOptionText: 'create_virtual_combo'.tr,
-                    isThereClickableOption: true,
-                    onTappedClickableOption: () {
-                      showDialog<String>(
-                        context: context,
-                        builder:
-                            (BuildContext context) => const AlertDialog(
-                              backgroundColor: Colors.white,
-                              contentPadding: EdgeInsets.all(0),
-                              titlePadding: EdgeInsets.all(0),
-                              actionsPadding: EdgeInsets.all(0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(9),
-                                ),
-                              ),
-                              elevation: 0,
-                              content: Combo(),
-                            ),
-                      );
-                    },
-                    columnWidths: [
-                      100.0,
-                      200.0,
-                      550.0,
-                      100.0,
-                    ], // Set column widths
-                    focusNode: dropFocus,
-                    nextFocusNode: quantityFocus,
-                  ),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.27,
-                  child: TextFormField(
-                    style: GoogleFonts.openSans(fontSize: 12),
-                    onFieldSubmitted: (value) {
-                      FocusScope.of(context).requestFocus(focus);
-                    },
-                    controller: descriptionController,
-                    cursorColor: Colors.black,
-                    decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                          width: 1,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                          width: 1,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
-                        ),
-                      ),
-                      errorStyle: const TextStyle(fontSize: 10.0),
-                      focusedErrorBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(6)),
-                        borderSide: BorderSide(width: 1, color: Colors.red),
-                      ),
-                    ),
-                    validator: (String? value) {
-                      return null;
-                    },
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: false,
-                      signed: true,
-                    ),
-                    onChanged: (val) {
-                      setState(() {
-                        descriptionVar = val;
-                      });
-                      _formKey.currentState!.validate();
-                      cont.setMainDescriptionInQuotation(
-                        widget.index,
-                        descriptionVar,
-                      );
-                    },
-                  ),
-                ),
-                //quantity
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.05,
-                  child: TextFormField(
-                    style: GoogleFonts.openSans(
-                      fontSize: 12,
-                      // fontWeight: FontWeight.w500,
-                    ),
-                    focusNode: quantityFocus,
-                    onFieldSubmitted: (value) {
-                      FocusScope.of(context).requestFocus(focus);
-                    },
-                    textAlign: TextAlign.center,
-                    controller: qtyController,
-                    cursorColor: Colors.black,
-                    decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                          width: 1,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                          width: 1,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6),
-                        ),
-                      ),
-                      errorStyle: const TextStyle(fontSize: 10.0),
-                      focusedErrorBorder: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(6)),
-                        borderSide: BorderSide(width: 1, color: Colors.red),
-                      ),
-                    ),
-                    validator: (String? value) {
-                      if (value!.isEmpty || double.parse(value) <= 0) {
-                        return 'must be >0';
+                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                      } else if (cont.selectedCurrencyName != 'USD' &&
+                          cont.combosPricesCurrencies[selectedComboId] ==
+                              'USD') {
+                        cont.combosPriceControllers[widget.index]!.text =
+                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                      } else {
+                        var matchedItems = exchangeRatesController
+                            .exchangeRatesList
+                            .where(
+                              (item) =>
+                                  item["currency"] ==
+                                  cont.combosPricesCurrencies[selectedComboId],
+                            );
+
+                        var result =
+                            matchedItems.isNotEmpty
+                                ? matchedItems.reduce(
+                                  (a, b) =>
+                                      DateTime.parse(a["start_date"]).isAfter(
+                                            DateTime.parse(b["start_date"]),
+                                          )
+                                          ? a
+                                          : b,
+                                )
+                                : null;
+                        var divider = '1';
+                        if (result != null) {
+                          divider = result["exchange_rate"].toString();
+                        }
+                        var usdPrice =
+                            '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                        cont.combosPriceControllers[widget.index]!.text =
+                            '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       }
-                      return null;
-                    },
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: false,
-                      signed: true,
-                    ),
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
-                      // WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (val) {
-                      setState(() {
-                        quantity = val;
-                        totalLine =
-                            '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                        // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
-                      });
-
-                      _formKey.currentState!.validate();
-                      // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-
-                      cont.setEnteredQtyInQuotation(widget.index, val);
+                      cont.combosPriceControllers[widget.index]!.text =
+                          '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
+                      qtyController.text = '1';
+                      quantity = '1';
+                      discountController.text = '0';
+                      discount = '0';
+                      cont
+                          .combosPriceControllers[widget.index]!
+                          .text = double.parse(
+                        cont.combosPriceControllers[widget.index]!.text,
+                      ).toStringAsFixed(2);
+                      totalLine =
+                          '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                      cont.setEnteredQtyInQuotation(widget.index, quantity);
                       cont.setMainTotalInQuotation(widget.index, totalLine);
                       // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
                       cont.getTotalItems();
-                    },
-                  ),
+                    });
+                    cont.setEnteredUnitPriceInQuotation(
+                      widget.index,
+                      cont.combosPriceControllers[widget.index]!.text,
+                    );
+                    cont.setComboInQuotation(widget.index, selectedComboId);
+                    cont.setItemNameInQuotation(
+                      widget.index,
+                      comboName,
+                      // value.split(" | ")[0],
+                    ); // set only first element as name
+                    cont.setMainCodeInQuotation(widget.index, mainCode);
+                    cont.setTypeInQuotation(widget.index, '3');
+                    cont.setMainDescriptionInQuotation(
+                      widget.index,
+                      descriptionVar,
+                    );
+                  },
+                  validationFunc: (value) {
+                    // if (value == null || value.isEmpty) {
+                    //   return 'select_option'.tr;
+                    // }
+                    // return null;
+                  },
+                  rowWidth:
+                      homeController.isOpened.value
+                          ? MediaQuery.of(context).size.width * 0.13
+                          : MediaQuery.of(context).size.width * 0.16,
+                  textFieldWidth:
+                      homeController.isOpened.value
+                          ? MediaQuery.of(context).size.width * 0.13
+                          : MediaQuery.of(context).size.width * 0.16,
+                  clickableOptionText: 'create_virtual_combo'.tr,
+                  isThereClickableOption: true,
+                  onTappedClickableOption: () {
+                    showDialog<String>(
+                      context: context,
+                      builder:
+                          (BuildContext context) => const AlertDialog(
+                            backgroundColor: Colors.white,
+                            contentPadding: EdgeInsets.all(0),
+                            titlePadding: EdgeInsets.all(0),
+                            actionsPadding: EdgeInsets.all(0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(9),
+                              ),
+                            ),
+                            elevation: 0,
+                            content: Combo(),
+                          ),
+                    );
+                  },
+                  columnWidths: [
+                    100.0,
+                    200.0,
+                    550.0,
+                    100.0,
+                  ], // Set column widths
+                  focusNode: dropFocus,
+                  nextFocusNode: quantityFocus,
                 ),
-                // unitPrice
-                Obx(
-                  () => SizedBox(
-                    width:
-                        homeController.isOpened.value
-                            ? MediaQuery.of(context).size.width * 0.05
-                            : MediaQuery.of(context).size.width * 0.1,
-                    child: TextFormField(
-                      style: GoogleFonts.openSans(
-                        fontSize: 12,
-                        // fontWeight: FontWeight.w500,
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.27,
+                child: TextFormField(
+                  style: GoogleFonts.openSans(fontSize: 12),
+                  onFieldSubmitted: (value) {
+                    FocusScope.of(context).requestFocus(focus);
+                  },
+                  controller: descriptionController,
+                  cursorColor: Colors.black,
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
                       ),
-                      focusNode: focus,
-                      onFieldSubmitted: (value) {
-                        FocusScope.of(context).requestFocus(focus1);
-                      },
-                      textAlign: TextAlign.center,
-                      controller: cont.combosPriceControllers[widget.index],
-                      cursorColor: Colors.black,
-                      decoration: InputDecoration(
-                        hintText: "".tr,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                            width: 1,
-                          ),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(6),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black.withAlpha((0.1 * 255).toInt()),
-                            width: 1,
-                          ),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(6),
-                          ),
-                        ),
-                        errorStyle: const TextStyle(fontSize: 10.0),
-                        focusedErrorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(6)),
-                          borderSide: BorderSide(width: 1, color: Colors.red),
-                        ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
                       ),
-                      validator: (String? value) {
-                        return null;
-                      },
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: false,
-                        signed: true,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
                       ),
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
-                        // WhitelistingTextInputFormatter.digitsOnly
-                      ],
-                      onChanged: (val) {
-                        setState(() {
-                          if (val == '') {
-                            cont.combosPriceControllers[widget.index]!.text =
-                                '0';
-                          } else {
-                            // cont.unitPriceControllers[widget.index]!.text = val;
-                          }
-                          // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
-                          totalLine =
-                              '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
-                        });
-                        _formKey.currentState!.validate();
-                        // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                        cont.setEnteredUnitPriceInQuotation(widget.index, val);
-                        cont.setMainTotalInQuotation(widget.index, totalLine);
-                        cont.getTotalItems();
-                      },
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
+                      ),
+                    ),
+                    errorStyle: const TextStyle(fontSize: 10.0),
+                    focusedErrorBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                      borderSide: BorderSide(width: 1, color: Colors.red),
                     ),
                   ),
+                  validator: (String? value) {
+                    return null;
+                  },
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: false,
+                    signed: true,
+                  ),
+                  onChanged: (val) {
+                    setState(() {
+                      descriptionVar = val;
+                    });
+                    // _formKey.currentState!.validate();
+                    cont.setMainDescriptionInQuotation(
+                      widget.index,
+                      descriptionVar,
+                    );
+                  },
                 ),
-                //discount
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.05,
+              ),
+              //quantity
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.05,
+                child: TextFormField(
+                  style: GoogleFonts.openSans(
+                    fontSize: 12,
+                    // fontWeight: FontWeight.w500,
+                  ),
+                  focusNode: quantityFocus,
+                  onFieldSubmitted: (value) {
+                    FocusScope.of(context).requestFocus(focus);
+                  },
+                  textAlign: TextAlign.center,
+                  controller: qtyController,
+                  cursorColor: Colors.black,
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
+                      ),
+                    ),
+                    errorStyle: const TextStyle(fontSize: 10.0),
+                    focusedErrorBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                      borderSide: BorderSide(width: 1, color: Colors.red),
+                    ),
+                  ),
+                  validator: (String? value) {
+                    if (value!.isEmpty || double.parse(value) <= 0) {
+                      return 'must be >0';
+                    }
+                    return null;
+                  },
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: false,
+                    signed: true,
+                  ),
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                    // WhitelistingTextInputFormatter.digitsOnly
+                  ],
+                  onChanged: (val) {
+                    setState(() {
+                      quantity = val;
+                      totalLine =
+                          '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                      // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
+                    });
+
+                    // _formKey.currentState!.validate();
+                    // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
+
+                    cont.setEnteredQtyInQuotation(widget.index, val);
+                    cont.setMainTotalInQuotation(widget.index, totalLine);
+                    // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+                    cont.getTotalItems();
+                  },
+                ),
+              ),
+              // unitPrice
+              Obx(
+                () => SizedBox(
+                  width:
+                      homeController.isOpened.value
+                          ? MediaQuery.of(context).size.width * 0.05
+                          : MediaQuery.of(context).size.width * 0.1,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
                       fontSize: 12,
                       // fontWeight: FontWeight.w500,
                     ),
-                    focusNode: focus1,
+                    focusNode: focus,
                     onFieldSubmitted: (value) {
-                      setState(() {
-                        quotationController.quotationCounter += 1;
-                      });
-                      quotationController.incrementListViewLengthInQuotation(
-                        quotationController.increment,
-                      );
-                      quotationController.addToRowsInListViewInQuotation(
-                        quotationController.quotationCounter,
-                        {
-                          'line_type_id': '3',
-                          'item_id': '',
-                          'itemName': '',
-                          'item_main_code': '',
-                          'item_discount': '0',
-                          'item_description': '',
-                          'item_quantity': '0',
-                          'item_unit_price': '0',
-                          'item_total': '0',
-                          'title': '',
-                          'note': '',
-                          'combo': '',
-                        },
-                      );
-                      quotationController.addToCombosPricesControllers(
-                        quotationController.quotationCounter,
-                      );
-                      // Widget p = ReusableComboRow(
-                      //   index: quotationController.quotationCounter,
-                      // );
-                      // quotationController.addToOrderLinesInQuotationList(
-                      //   '${quotationController.quotationCounter}',
-                      //   p,
-                      // );
-                      // cont.setEnteredQtyInQuotation(
-                      //   quotationController.quotationCounter,
-                      //   quantity,
-                      // );
-                      // cont.setMainTotalInQuotation(
-                      //   quotationController.quotationCounter,
-                      //   totalLine,
-                      // );
-                      // cont.getTotalItems();
+                      FocusScope.of(context).requestFocus(focus1);
                     },
-                    controller: discountController,
-                    cursorColor: Colors.black,
                     textAlign: TextAlign.center,
+                    controller: cont.combosPriceControllers[widget.index],
+                    cursorColor: Colors.black,
                     decoration: InputDecoration(
                       hintText: "".tr,
                       enabledBorder: OutlineInputBorder(
@@ -6236,101 +7589,214 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
                       // WhitelistingTextInputFormatter.digitsOnly
                     ],
-                    onChanged: (val) async {
+                    onChanged: (val) {
                       setState(() {
                         if (val == '') {
-                          discountController.text = '0';
-                          discount = '0';
+                          cont.combosPriceControllers[widget.index]!.text =
+                              '0';
                         } else {
-                          discount = val;
+                          // cont.unitPriceControllers[widget.index]!.text = val;
                         }
-
                         // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
-
                         totalLine =
                             '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                       });
-                      _formKey.currentState!.validate();
-
+                      // _formKey.currentState!.validate();
                       // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
-                      cont.setEnteredDiscInQuotation(widget.index, val);
+                      cont.setEnteredUnitPriceInQuotation(widget.index, val);
                       cont.setMainTotalInQuotation(widget.index, totalLine);
-                      await cont.getTotalItems();
+                      cont.getTotalItems();
                     },
                   ),
                 ),
-
-                //total
-                Obx(
-                  () => ReusableShowInfoCard(
-                    text: formatDoubleWithCommas(
-                      double.parse(
-                        cont.rowsInListViewInQuotation[widget
-                            .index]['item_total'],
+              ),
+              //discount
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.05,
+                child: TextFormField(
+                  style: GoogleFonts.openSans(
+                    fontSize: 12,
+                    // fontWeight: FontWeight.w500,
+                  ),
+                  focusNode: focus1,
+                  onFieldSubmitted: (value) {
+                    setState(() {
+                      quotationController.quotationCounter += 1;
+                    });
+                    quotationController.incrementListViewLengthInQuotation(
+                      quotationController.increment,
+                    );
+                    quotationController.addToRowsInListViewInQuotation(
+                      quotationController.quotationCounter,
+                      {
+                        'line_type_id': '3',
+                        'item_id': '',
+                        'itemName': '',
+                        'item_main_code': '',
+                        'item_discount': '0',
+                        'item_description': '',
+                        'item_quantity': '0',
+                        'item_unit_price': '0',
+                        'item_total': '0',
+                        'title': '',
+                        'note': '',
+                        'combo': '',
+                      },
+                    );
+                    quotationController.addToCombosPricesControllers(
+                      quotationController.quotationCounter,
+                    );
+                    // Widget p = ReusableComboRow(
+                    //   index: quotationController.quotationCounter,
+                    // );
+                    // quotationController.addToOrderLinesInQuotationList(
+                    //   '${quotationController.quotationCounter}',
+                    //   p,
+                    // );
+                    // cont.setEnteredQtyInQuotation(
+                    //   quotationController.quotationCounter,
+                    //   quantity,
+                    // );
+                    // cont.setMainTotalInQuotation(
+                    //   quotationController.quotationCounter,
+                    //   totalLine,
+                    // );
+                    // cont.getTotalItems();
+                  },
+                  controller: discountController,
+                  cursorColor: Colors.black,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    hintText: "".tr,
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
+                      ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
                       ),
                     ),
-                    width:
-                        homeController.isOpened.value
-                            ? MediaQuery.of(context).size.width * 0.07
-                            : MediaQuery.of(context).size.width * 0.1,
-                  ),
-                ),
-
-                //more
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.07,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.02,
-                        child: ReusableMore(itemsList: []),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.black.withAlpha((0.1 * 255).toInt()),
+                        width: 1,
                       ),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(6),
+                      ),
+                    ),
+                    errorStyle: const TextStyle(fontSize: 10.0),
+                    focusedErrorBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                      borderSide: BorderSide(width: 1, color: Colors.red),
+                    ),
+                  ),
+                  validator: (String? value) {
+                    return null;
+                  },
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: false,
+                    signed: true,
+                  ),
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                    // WhitelistingTextInputFormatter.digitsOnly
+                  ],
+                  onChanged: (val) async {
+                    setState(() {
+                      if (val == '') {
+                        discountController.text = '0';
+                        discount = '0';
+                      } else {
+                        discount = val;
+                      }
 
-                      //delete
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.03,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              quotationController
-                                  .decrementListViewLengthInQuotation(
-                                    quotationController.increment,
-                                  );
-                              quotationController
-                                  .removeFromRowsInListViewInQuotation(
-                                    widget.index,
-                                  );
-                              // quotationController
-                              //     .removeFromOrderLinesInQuotationList(
-                              //       widget.index.toString(),
-                              //     );
-                            });
-                            setState(() {
-                              cont.totalItems = 0.0;
-                              cont.globalDisc = "0.0";
-                              cont.globalDiscountPercentageValue = "0.0";
-                              cont.specialDisc = "0.0";
-                              cont.specialDiscountPercentageValue = "0.0";
-                              cont.vat11 = "0.0";
-                              cont.vatInPrimaryCurrency = "0.0";
-                              cont.totalQuotation = "0.0";
-                            });
-                            if (cont.rowsInListViewInQuotation != {}) {
-                              cont.getTotalItems();
-                            }
-                          },
-                          child: Icon(
-                            Icons.delete_outline,
-                            color: Primary.primary,
-                          ),
+                      // totalLine= '${ quantity * unitPrice *(1 - discount / 100 ) }';
+
+                      totalLine =
+                          '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
+                    });
+                    // _formKey.currentState!.validate();
+
+                    // cont.calculateTotal(int.parse(quantity) , double.parse(unitPrice), double.parse(discount));
+                    cont.setEnteredDiscInQuotation(widget.index, val);
+                    cont.setMainTotalInQuotation(widget.index, totalLine);
+                    await cont.getTotalItems();
+                  },
+                ),
+              ),
+
+              //total
+              Obx(
+                () => ReusableShowInfoCard(
+                  text: formatDoubleWithCommas(
+                    double.parse(
+                      cont.rowsInListViewInQuotation[widget
+                          .index]['item_total'],
+                    ),
+                  ),
+                  width:
+                      homeController.isOpened.value
+                          ? MediaQuery.of(context).size.width * 0.07
+                          : MediaQuery.of(context).size.width * 0.1,
+                ),
+              ),
+
+              //more
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.07,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.02,
+                      child: ReusableMore(itemsList: []),
+                    ),
+
+                    //delete
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.03,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            quotationController
+                                .decrementListViewLengthInQuotation(
+                                  quotationController.increment,
+                                );
+                            quotationController
+                                .removeFromRowsInListViewInQuotation(
+                                  widget.index,
+                                );
+                            // quotationController
+                            //     .removeFromOrderLinesInQuotationList(
+                            //       widget.index.toString(),
+                            //     );
+                          });
+                          setState(() {
+                            cont.totalItems = 0.0;
+                            cont.globalDisc = "0.0";
+                            cont.globalDiscountPercentageValue = "0.0";
+                            cont.specialDisc = "0.0";
+                            cont.specialDiscountPercentageValue = "0.0";
+                            cont.vat11 = "0.0";
+                            cont.vatInPrimaryCurrency = "0.0";
+                            cont.totalQuotation = "0.0";
+                          });
+                          if (cont.rowsInListViewInQuotation != {}) {
+                            cont.getTotalItems();
+                          }
+                        },
+                        child: Icon(
+                          Icons.delete_outline,
+                          color: Primary.primary,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },

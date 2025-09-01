@@ -1,4 +1,3 @@
-
 // ignore_for_file: unused_local_variable
 
 import 'package:flutter/gestures.dart';
@@ -14,17 +13,15 @@ import 'Screens/Authorization/sign_up_screen.dart';
 import 'Screens/welcome_screen.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
-var id='';
-getInfoFromPref() async{
-  id=await getIdFromPref();
+var id = '';
+getInfoFromPref() async {
+  id = await getIdFromPref();
 }
-
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await getInfoFromPref();
-  runApp( const MyApp());
+  runApp(const MyApp());
   // runApp(
   //     DevicePreview(
   //       enabled: !kReleaseMode,
@@ -40,59 +37,60 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  HomeController homeController=Get.put(HomeController());
-
+  HomeController homeController = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
-    HomeController homeController=Get.put(HomeController());
+    HomeController homeController = Get.put(HomeController());
     return ScreenUtilInit(
-      designSize: const Size(1300, 729),
-      child: GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        initialBinding: MyBinding(),
-        scrollBehavior: MyCustomScrollBehavior(),
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-          useMaterial3: true,
-          textTheme: GoogleFonts.openSansTextTheme(
-            Theme.of(context).textTheme.copyWith(
-              bodyLarge: TextStyle(fontSize: 12),
-              bodyMedium: TextStyle(fontSize: 12),
-              bodySmall: TextStyle(fontSize: 12),
-              displayLarge: TextStyle(fontSize: 12),
-              displayMedium: TextStyle(fontSize: 12),
-              displaySmall: TextStyle(fontSize: 12),
-              headlineLarge: TextStyle(fontSize: 12),
-              headlineMedium: TextStyle(fontSize: 12),
-              headlineSmall: TextStyle(fontSize: 12),
-              titleLarge: TextStyle(fontSize: 12),
-              titleMedium: TextStyle(fontSize: 12),
-              titleSmall: TextStyle(fontSize: 12),
-              labelLarge: TextStyle(fontSize: 12),
-              labelMedium: TextStyle(fontSize: 12),
-              labelSmall: TextStyle(fontSize: 12),
-            ),//// Apply Open Sans to all text
-          )
-        ),
-        localizationsDelegates: const [
-          quill.FlutterQuillLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en'), // English
-          Locale('ar'), // Arabic
-        ],
-        translations: AppLocalization(),
-        locale: const Locale('en'),
-        fallbackLocale: const Locale('en'),
-        useInheritedMediaQuery: true,
-        home:id!=''?const WelcomeScreen(): const SignUpScreen(),
-      ),
+      designSize: const Size(1600, 729),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (_, child) {
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          initialBinding: MyBinding(),
+          scrollBehavior: MyCustomScrollBehavior(),
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+            useMaterial3: true,
+            textTheme: GoogleFonts.openSansTextTheme(
+              Theme.of(context).textTheme.copyWith(
+                bodyLarge: TextStyle(fontSize: 12.sp),
+                bodyMedium: TextStyle(fontSize: 12.sp),
+                bodySmall: TextStyle(fontSize: 12.sp),
+                displayLarge: TextStyle(fontSize: 12.sp),
+                displayMedium: TextStyle(fontSize: 12.sp),
+                displaySmall: TextStyle(fontSize: 12.sp),
+                headlineLarge: TextStyle(fontSize: 12.sp),
+                headlineMedium: TextStyle(fontSize: 12.sp),
+                headlineSmall: TextStyle(fontSize: 12.sp),
+                titleLarge: TextStyle(fontSize: 12.sp),
+                titleMedium: TextStyle(fontSize: 12.sp),
+                titleSmall: TextStyle(fontSize: 12.sp),
+                labelLarge: TextStyle(fontSize: 12.sp),
+                labelMedium: TextStyle(fontSize: 12.sp),
+                labelSmall: TextStyle(fontSize: 12.sp),
+              ), //// Apply Open Sans to all text
+            ),
+          ),
+          localizationsDelegates: const [
+            quill.FlutterQuillLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'), // English
+            Locale('ar'), // Arabic
+          ],
+          translations: AppLocalization(),
+          locale: const Locale('en'),
+          fallbackLocale: const Locale('en'),
+          useInheritedMediaQuery: true,
+          home: id != '' ? const WelcomeScreen() : const SignUpScreen(),
+        );
+      },
     );
   }
 }
-
-
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
@@ -102,5 +100,3 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
     PointerDeviceKind.mouse,
   };
 }
-
-

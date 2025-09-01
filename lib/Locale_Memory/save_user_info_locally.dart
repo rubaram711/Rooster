@@ -7,6 +7,7 @@ saveUserInfoLocally(
   String name,
   String companyId,
   String companyName,
+  String isItGarage,
 ) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('accessToken', accessToken);
@@ -15,6 +16,7 @@ saveUserInfoLocally(
   prefs.setString('name', name);
   prefs.setString('companyId', companyId);
   prefs.setString('companyName', companyName);
+  prefs.setString('isItGarage', isItGarage);
 }
 
 Future<Map> getUserInfoFromPref() async {
@@ -25,6 +27,7 @@ Future<Map> getUserInfoFromPref() async {
   String name = prefs.getString('name') ?? '';
   String companyId = prefs.getString('companyId') ?? '';
   String companyName = prefs.getString('companyName') ?? '';
+  String isItGarage = prefs.getString('isItGarage') ?? '0';
   return {
     'accessToken': accessToken,
     'identifier1': userId,
@@ -32,6 +35,7 @@ Future<Map> getUserInfoFromPref() async {
     'name': name,
     'companyId': companyId,
     'companyName': companyName,
+    'isItGarage': isItGarage,
   };
 }
 
@@ -87,6 +91,12 @@ Future<String> getShowLogoOnPosFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String showLogoOnPos = prefs.getString('showLogoOnPos') ?? '';
   return showLogoOnPos;
+}
+
+Future<String> getIsItGarageFromPref() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String isItGarage = prefs.getString('isItGarage') ?? '0';
+  return isItGarage;
 }
 
 saveCompanySettingsLocally(
