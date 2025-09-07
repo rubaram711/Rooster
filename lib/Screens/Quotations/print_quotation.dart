@@ -280,6 +280,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
               height: Sizes.deviceHeight * 0.80,
               child: PdfPreview(
                 build: (format) => _generatePdf(format, context),
+                pdfFileName: '${widget.clientName} [${widget.quotationNumber}]',
               ),
             ),
           ],
@@ -409,7 +410,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(
             color: PdfColors.black,
-            fontSize: 9.sp,
+            fontSize: 12,
             fontWeight: pw.FontWeight.normal,
             decoration: pw.TextDecoration.underline,
           ),
@@ -745,13 +746,29 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
     }
 
     reusableText(String text) {
-      return pw.Text(text, style: pw.TextStyle(fontSize: 9.sp));
+      return pw.Text(
+        text,
+        style: pw.TextStyle(
+          fontSize: 9.sp,
+          fontWeight: pw.FontWeight.normal,
+          color: PdfColors.black,
+        ),
+      );
     }
 
     reusableNumber(String text) {
       return pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.end,
-        children: [pw.Text(text, style: pw.TextStyle(fontSize: 9.sp))],
+        children: [
+          pw.Text(
+            text,
+            style: pw.TextStyle(
+              fontSize: 9.sp,
+              fontWeight: pw.FontWeight.normal,
+              color: PdfColors.black,
+            ),
+          ),
+        ],
       );
     }
 
@@ -817,7 +834,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                   padding: pw.EdgeInsets.fromLTRB(0, 10, 0, 0),
                   child: pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
-                    mainAxisAlignment: pw.MainAxisAlignment.start,
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
                       pw.SizedBox(
                         width: 240.w,
@@ -869,7 +886,7 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                       ),
 
                       pw.SizedBox(
-                        width: 150.w,
+                        width: 160.w,
                         // width: width * 0.1,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
@@ -1077,7 +1094,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                         children: [
                           tableTitleForSequence(
                             text: 'Quotation',
-                            width: width * 0.05,
+                            // text: 'Quotation',
+                            width: width * 0.2,
                           ),
                         ],
                       ),
@@ -1175,8 +1193,14 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                     horizontal: width * 0.01,
                     vertical: 25,
                   ),
-                  width: width * 0.385,
-                  height: 300,
+                  width:
+                      width < 833
+                          ? 2000.w
+                          : width < 875
+                          ? 1500.w
+                          : 1000.w,
+                  // width: width * 0.385,
+                  height: 300.h,
                   decoration: const pw.BoxDecoration(
                     color: PdfColors.white,
                     borderRadius: pw.BorderRadius.all(pw.Radius.circular(9)),
@@ -1189,12 +1213,14 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                         // endIndent: 250
                       ),
                       pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Column(
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.255,
+                                width: 355.w,
+                                // width: width * 0.255,
                                 child: reusableText('total_price'.tr),
                               ),
                             ],
@@ -1204,7 +1230,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.055,
+                                width: 135.w,
+                                // width: width * 0.055,
                                 child: reusableNumber(widget.quotationCurrency),
                               ),
                             ],
@@ -1213,7 +1240,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.045,
+                                width: 80.w,
+                                // width: width * 0.045,
                                 child: reusableNumber(
                                   numberWithComma(
                                     double.parse(
@@ -1237,12 +1265,15 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               widget.globalDiscount == ''
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
+                                    // width: width * 0.255,
                                     child: reusableText('dis_count'.tr),
                                   ),
                                 ],
@@ -1252,7 +1283,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     child: reusableNumber(
                                       '${widget.globalDiscount == '0.00' || widget.globalDiscount == '0' ? 0 : widget.globalDiscount}%',
                                     ),
@@ -1264,7 +1296,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: reusableNumber(
                                       widget.discountOnAllItem == '0' ||
                                               widget.discountOnAllItem == '0.00'
@@ -1291,12 +1324,15 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               widget.globalDiscount == ''
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
+                                    // width: width * 0.255,
                                     child: reusableText(
                                       'total_price_after_discount'.tr,
                                     ),
@@ -1308,7 +1344,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     child: reusableNumber(
                                       widget.quotationCurrency,
                                     ),
@@ -1320,7 +1357,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: reusableNumber(
                                       numberWithComma(
                                         double.parse(
@@ -1347,12 +1385,15 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               widget.specialDiscount == ''
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
+                                    // width: width * 0.255,
                                     child: reusableText(
                                       'additional_special_discount'.tr,
                                     ),
@@ -1364,7 +1405,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     child: reusableNumber(
                                       '${widget.specialDiscount == '0.00' || widget.specialDiscount == '0' ? 0 : widget.specialDiscount}%',
                                     ),
@@ -1375,7 +1417,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: reusableNumber(
                                       widget.additionalSpecialDiscount,
                                     ),
@@ -1395,12 +1438,14 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                       // TOTAL PRICE AFTER SPECIAL DISCOUNT
                       if (primaryCurrency != widget.quotationCurrency)
                         pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                           children: [
                             pw.Column(
                               mainAxisAlignment: pw.MainAxisAlignment.start,
                               children: [
                                 pw.SizedBox(
-                                  width: width * 0.255,
+                                  width: 355.w,
+                                  // width: width * 0.255,
                                   child: reusableText(
                                     'total_price_after_special_discount'.tr,
                                   ),
@@ -1412,7 +1457,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               mainAxisAlignment: pw.MainAxisAlignment.start,
                               children: [
                                 pw.SizedBox(
-                                  width: width * 0.055,
+                                  width: 135.w,
+                                  // width: width * 0.055,
                                   child: reusableNumber(
                                     widget.quotationCurrency,
                                   ),
@@ -1424,7 +1470,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               mainAxisAlignment: pw.MainAxisAlignment.start,
                               children: [
                                 pw.SizedBox(
-                                  width: width * 0.045,
+                                  width: 80.w,
+                                  // width: width * 0.045,
                                   child: reusableNumber(
                                     numberWithComma(
                                       double.parse(
@@ -1453,12 +1500,15 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               widget.vat == '0'
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
+                                    // width: width * 0.255,
                                     child: reusableText(
                                       widget.isVatNoPrinted
                                           ? ' '
@@ -1475,7 +1525,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     child:
                                         companyVat.isNotEmpty ||
                                                 !widget.isPrintedAs0
@@ -1497,7 +1548,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: reusableNumber(
                                       widget.isVatNoPrinted ||
                                               widget.isPrintedAsVatExempt
@@ -1526,13 +1578,16 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               widget.vat == '0'
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
 
+                                    // width: width * 0.255,
                                     child: pw.Text(
                                       'final_price_incl_vat'.tr,
                                       style: pw.TextStyle(
@@ -1549,7 +1604,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     child: pw.Row(
                                       mainAxisAlignment:
                                           pw.MainAxisAlignment.end,
@@ -1571,7 +1627,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: pw.Row(
                                       mainAxisAlignment:
                                           pw.MainAxisAlignment.end,
@@ -1608,13 +1665,16 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                               widget.vat == '0'
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
 
+                                    // width: width * 0.255,
                                     child: pw.Text(
                                       'final_price_incl_vat'.tr,
                                       style: pw.TextStyle(
@@ -1631,7 +1691,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     child: reusableNumber(primaryCurrency),
                                   ),
                                 ],
@@ -1640,7 +1701,8 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: reusableNumber(
                                       widget.finalPriceByQuotationCurrency ==
                                               '0'
@@ -2084,6 +2146,13 @@ class _PrintQuotationDataState extends State<PrintQuotationData> {
     );
 
     return pdf.save();
+  }
+
+  void _sharePdf(BuildContext context, PdfPageFormat format) async {
+    final pdfBytes = await _generatePdf(format, context);
+    final fileName =
+        '${widget.clientName} Quotation ${widget.quotationNumber}.pdf';
+    await Printing.sharePdf(bytes: pdfBytes, filename: fileName);
   }
 }
 

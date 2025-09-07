@@ -166,6 +166,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
               height: Sizes.deviceHeight * 0.80,
               child: PdfPreview(
                 build: (format) => _generatePdf(format, context),
+                pdfFileName: '${widget.clientName} [${widget.deliveryNumber}]',
               ),
             ),
           ],
@@ -282,7 +283,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(
             color: PdfColors.black,
-            fontSize: 11,
+            fontSize: 9.sp,
             fontWeight: pw.FontWeight.normal,
           ),
         ),
@@ -521,7 +522,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                       child: pw.Text(
                         'Note : ${quotationItemInfo['note'] ?? ''}',
                         style: pw.TextStyle(
-                          fontSize: 11,
+                          fontSize: 9.sp,
                           font: italicRobotoFont,
                         ),
                       ),
@@ -571,7 +572,14 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
     }
 
     reusableText(String text) {
-      return pw.Text(text, style: pw.TextStyle(fontSize: 11));
+      return pw.Text(
+        text,
+        style: pw.TextStyle(
+          fontSize: 9.sp,
+          fontWeight: pw.FontWeight.normal,
+          color: PdfColors.black,
+        ),
+      );
     }
 
     buildDividersRow(double width) {
@@ -606,7 +614,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                   padding: pw.EdgeInsets.fromLTRB(0, 10, 0, 0),
                   child: pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
-                    mainAxisAlignment: pw.MainAxisAlignment.start,
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
                       pw.SizedBox(
                         width: 240.w,
@@ -644,7 +652,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   fullCompanyName,
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -659,7 +667,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                       ),
 
                       pw.SizedBox(
-                        width: 150.w,
+                        width: 160.w,
                         // width: width * 0.1,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
@@ -768,7 +776,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'to'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -777,7 +785,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'telephone'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -786,7 +794,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'address'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -824,7 +832,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'offer_no'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -833,7 +841,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'sales_person'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -842,7 +850,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 pw.Text(
                                   '${'date'.tr}:',
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     fontWeight: pw.FontWeight.normal,
                                     color: PdfColors.black,
                                   ),
@@ -854,7 +862,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 //     ? pw.Text(
                                 //       '${'$primaryCurrency/${widget.deliveryCurrency} rate'.tr}:',
                                 //       style: pw.TextStyle(
-                                //         fontSize: 11,
+                                //         fontSize: 9.sp,
                                 //         fontWeight: pw.FontWeight.normal,
                                 //         color: PdfColors.black,
                                 //       ),
@@ -973,7 +981,13 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                     horizontal: width * 0.01,
                     vertical: 25,
                   ),
-                  width: width * 0.365,
+                  width:
+                      width < 833
+                          ? 2000.w
+                          : width < 875
+                          ? 1500.w
+                          : 1000.w,
+                  // width: width * 0.365,
                   height: 300,
                   decoration: const pw.BoxDecoration(
                     color: PdfColors.white,
@@ -987,12 +1001,14 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                         // endIndent: 250
                       ),
                       pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Column(
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.255,
+                                width: 355.w,
+                                // width: width * 0.255,
                                 child: reusableText('total_price'.tr),
                               ),
                             ],
@@ -1002,7 +1018,8 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.075,
+                                width: 135.w,
+                                // width: width * 0.075,
                                 child: pw.Text(''),
                                 // child: reusableText(primaryCurrency),
                               ),
@@ -1012,12 +1029,13 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.055,
+                                width: 80.w,
+                                // width: width * 0.055,
                                 child: pw.Text(
                                   widget.total,
 
                                   style: pw.TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 9.sp,
                                     color: PdfColors.black,
                                   ),
                                 ),

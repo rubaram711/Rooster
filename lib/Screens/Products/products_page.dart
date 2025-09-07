@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Screens/Products/barcode_scanner.dart';
@@ -20,7 +21,6 @@ import '../../const/Sizes.dart';
 import '../../const/functions.dart';
 import 'CreateProductDialog/create_product_dialog.dart';
 import 'edit_price_dialog.dart';
-
 
 TextEditingController searchControllerInProductsPage = TextEditingController();
 
@@ -78,19 +78,19 @@ class _ProductsPageState extends State<ProductsPage> {
   // }
   // Function to scan barcode
 
-  final ScrollController scrollController=ScrollController();
-
-
+  final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     productController.productsList.value = [].obs;
-    productController.currentPage.value=1;
+    productController.currentPage.value = 1;
     scrollController.addListener(() {
-      if(scrollController.position.pixels>=scrollController.position.maxScrollExtent && !productController.isLoading.value){
+      if (scrollController.position.pixels >=
+              scrollController.position.maxScrollExtent &&
+          !productController.isLoading.value) {
         productController.getAllProductsFromBack();
       }
-    },);
+    });
     getCategoriesFromBack();
     productController.productsList.value = [].obs;
     productController.getAllProductsFromBack();
@@ -105,340 +105,357 @@ class _ProductsPageState extends State<ProductsPage> {
           horizontal: MediaQuery.of(context).size.width * 0.02,
         ),
         // child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  PageTitle(text: 'products'.tr),
-                  ReusableButtonWithColor(
-                    width: MediaQuery.of(context).size.width * 0.15,
-                    height: 45,
-                    onTapFunction: () {
-                      productController.clearData();
-                      productController.getFieldsForCreateProductFromBack();
-                      productController.setIsItUpdateProduct(false);
-                      showDialog<String>(
-                        context: context,
-                        builder:
-                            (BuildContext context) => const AlertDialog(
-                              backgroundColor: Colors.white,
-                              contentPadding: EdgeInsets.all(0),
-                              titlePadding: EdgeInsets.all(0),
-                              actionsPadding: EdgeInsets.all(0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(9),
-                                ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                PageTitle(text: 'products'.tr),
+                ReusableButtonWithColor(
+                  width: MediaQuery.of(context).size.width * 0.15,
+                  height: 45,
+                  onTapFunction: () {
+                    productController.clearData();
+                    productController.getFieldsForCreateProductFromBack();
+                    productController.setIsItUpdateProduct(false);
+                    showDialog<String>(
+                      context: context,
+                      builder:
+                          (BuildContext context) => const AlertDialog(
+                            backgroundColor: Colors.white,
+                            contentPadding: EdgeInsets.all(0),
+                            titlePadding: EdgeInsets.all(0),
+                            actionsPadding: EdgeInsets.all(0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(9),
                               ),
-                              elevation: 0,
-                              content: CreateProductDialogContent(isFromProductsPage: true,),
                             ),
-                      );
-                    },
-                    btnText: 'create_new_product'.tr,
-                  ),
-                ],
-              ),
-              gapH16,
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    // width: MediaQuery.of(context).size.width * 0.55,
-                    child: ReusableSearchTextField(
-                      hint: '${"search".tr}...',
-                      textEditingController: searchControllerInProductsPage,
-                      onChangedFunc: (val) {},
-                      validationFunc: (val) {},
-                    ),
-                  ),
-                  gapW6,
-                  // DropdownMenu<FilterItems>(
-                  //   width: MediaQuery.of(context).size.width * 0.08,
-                  //   // initialSelection: configItems.green,
-                  //   requestFocusOnTap: false,
-                  //   inputDecorationTheme: InputDecorationTheme(
-                  //     // filled: true,
-                  //     contentPadding: const EdgeInsets.fromLTRB(10, 0, 0, 3),
-                  //     // outlineBorder: BorderSide(color: Colors.black,),
-                  //     enabledBorder: OutlineInputBorder(
-                  //       borderSide:
-                  //           BorderSide(color: Primary.primary, width: 1),
-                  //       borderRadius:
-                  //           const BorderRadius.all(Radius.circular(9)),
-                  //     ),
-                  //   ),
-                  //   controller: filterController,
-                  //   label: Text(
-                  //     'filter_by'.tr,
-                  //     style: TextStyle(
-                  //         fontSize: 12,
-                  //         fontWeight: FontWeight.bold,
-                  //         color: Primary.primary),
-                  //   ),
-                  //   // menuStyle: ,
-                  //   dropdownMenuEntries: FilterItems.values
-                  //       .map<DropdownMenuEntry<FilterItems>>(
-                  //           (FilterItems filter) {
-                  //     return DropdownMenuEntry<FilterItems>(
-                  //       value: filter,
-                  //       label: filter.label,
-                  //       enabled: filter.label != 'Grey',
-                  //       // style: MenuItemButton.styleFrom(
-                  //       // foregroundColor: color.color,
-                  //       // ),
-                  //     );
-                  //   }).toList(),
-                  //   onSelected: (FilterItems? val) {
-                  //     setState(() {
-                  //       selectedFilterItem = val;
-                  //     });
-                  //   },
-                  // ),
-                  // InkWell(
-                  //   key: accKey,
-                  //   onTap: () {
-                  //     // if (val == true) {
-                  //     final RenderBox renderBox = accKey.currentContext
-                  //         ?.findRenderObject() as RenderBox;
-                  //     final Size size = renderBox.size;
-                  //     final Offset offset =
-                  //         renderBox.localToGlobal(Offset.zero);
-                  //     showMenu(
-                  //       context: context,
-                  //       color: Colors.white, //TypographyColor.menuBg,
-                  //       surfaceTintColor: Colors.white,
-                  //       position: RelativeRect.fromLTRB(
-                  //           offset.dx,
-                  //           offset.dy + size.height + 15,
-                  //           offset.dx + size.width,
-                  //           offset.dy + size.height),
-                  //       items: [
-                  //         PopupMenuItem<String>(
-                  //             value: '1', child: Text('duplicate'.tr)),
-                  //         PopupMenuItem<String>(
-                  //             value: '2', child: Text('delete'.tr)),
-                  //         PopupMenuItem<String>(
-                  //             value: '3', child: Text('edit'.tr)),
-                  //       ],
-                  //     );
-                  //   },
-                  //   child: Icon(
-                  //     Icons.settings_rounded,
-                  //     color: TypographyColor.textTable,
-                  //   ),
-                  // ),
-                  DropdownMenu<String>(
-                    width: MediaQuery.of(context).size.width * 0.12,
-                    requestFocusOnTap: false,
-                    hintText: 'all_categories'.tr,
-                    inputDecorationTheme: InputDecorationTheme(
-                      // filled: true,
-                      contentPadding: const EdgeInsets.fromLTRB(20, 0, 25, 5),
-                      // outlineBorder: BorderSide(color: Colors.black,),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Primary.primary.withAlpha((0.2 * 255).toInt()),
-                          width: 1,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(9),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Primary.primary.withAlpha((0.4 * 255).toInt()),
-                          width: 2,
-                        ),
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(9),
-                        ),
-                      ),
-                    ),
-                    dropdownMenuEntries:
-                        categoriesNameList.map<DropdownMenuEntry<String>>((
-                          String option,
-                        ) {
-                          return DropdownMenuEntry<String>(
-                            value: option,
-                            label: option,
-                          );
-                        }).toList(),
-                    onSelected: (String? val) {
-                      setState(() {
-                        selectedItem = val!;
-                        var index = categoriesNameList.indexOf(val);
-                        productController
-                            .selectedCategoryIdInProductPage
-                            .value = categoriesIds[index];
-                      });
-                    },
-                  ),
-                  Tooltip(
-                    message: 'Click to search',
-                    child: InkWell(
-                      onTap: () async {
-                        productController.productsList.value = [].obs;
-                        await productController.getAllProductsFromBackWithSearch();
-                      },
-                      child: Icon(Icons.search, color: Primary.primary),
-                    ),
-                  ),
-                  Tooltip(
-                    message: 'Grid View',
-                    child: InkWell(
-                      onTap: () {
-                        productController.isGrid.value =
-                            !productController.isGrid.value;
-                      },
-                      child: Icon(
-                        Icons.grid_view_outlined,
-                        color:
-                            productController.isGrid.value
-                                ? Primary.primary
-                                : TypographyColor.textTable,
-                      ),
-                    ),
-                  ),
-                  Tooltip(
-                    message: 'List View',
-                    // decoration: BoxDecoration(
-                    //   color: Colors.black,
-                    //   borderRadius: BorderRadius.circular(8),
-                    // ),
-                    // textStyle: TextStyle(color: Colors.white),
-                    // waitDuration: Duration(milliseconds: 500),
-                    // showDuration: Duration(seconds: 2),
-                    child: InkWell(
-                      onTap: () {
-                        productController.isGrid.value =
-                            !productController.isGrid.value;
-                      },
-                      child: Icon(
-                        Icons.format_list_bulleted,
-                        color:
-                            productController.isGrid.value
-                                ? TypographyColor.textTable
-                                : Primary.primary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              gapH32,
-              productController.isGrid.value
-                  ? SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    child:
-                        // productController.isProductsFetched.value ?
-                        GridView.count(
-                          controller: scrollController,
-                              crossAxisCount: 3,
-                              childAspectRatio: Sizes.deviceWidth / 720,
-                              children: List.generate(
-                                productController.productsList.length,
-                                (index) {
-                                  return _productsCard(
-                                    productController.productsList[index],
-                                    index,
-                                  );
-                                },
-                              ),
-                            )
-                            // : const Center(child: CircularProgressIndicator()),
-                  ):
-                  // : productController.isProductsFetched.value ?
-              Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width * 0.01,
-                          vertical: 15,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Primary.primary,
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(6),
+                            elevation: 0,
+                            content: CreateProductDialogContent(
+                              isFromProductsPage: true,
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              width:  MediaQuery.of(context).size.width * 0.09,
-                              child: Text('code'.tr,
-                                  style: const TextStyle(
-                                      color: Colors.white, fontWeight: FontWeight.bold)),
-                            ),SizedBox(
-                              width:  MediaQuery.of(context).size.width * 0.09,
-                              child: Text('name'.tr,
-                                  style: const TextStyle(
-                                      color: Colors.white, fontWeight: FontWeight.bold)),
-                            ),SizedBox(
-                              width:  MediaQuery.of(context).size.width * 0.24,
-                              child: Text('description'.tr,
-                                  style: const TextStyle(
-                                      color: Colors.white, fontWeight: FontWeight.bold)),
-                            ),
-                            // TableTitle(
-                            //   text: 'name'.tr,
-                            //   width: MediaQuery.of(context).size.width * 0.09,
-                            // ),
-                            // TableTitle(
-                            //   text: 'description'.tr,
-                            //   width: MediaQuery.of(context).size.width * 0.24,
-                            // ),
-                            // TableTitle(
-                            //   text: 'qty_on_hand'.tr,
-                            //   width:
-                            //       MediaQuery.of(context).size.width * 0.07,
-                            // ),
-                            TableTitle(
-                              text: 'price'.tr,
-                              width: MediaQuery.of(context).size.width * 0.09,
-                            ),
-                            TableTitle(
-                              text: 'currency'.tr,
-                              width: MediaQuery.of(context).size.width * 0.09,
-                            ),
-                            TableTitle(
-                              text: 'on_hand'.tr,
-                              width: MediaQuery.of(context).size.width * 0.09,
-                            ),
-                            // TableTitle(
-                            //   text: 'qty_shipped'.tr,
-                            //   width:
-                            //       MediaQuery.of(context).size.width * 0.07,
-                            // ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.03,
-                            ),
-                          ],
-                        ),
+                    );
+                  },
+                  btnText: 'create_new_product'.tr,
+                ),
+              ],
+            ),
+            gapH16,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  // width: MediaQuery.of(context).size.width * 0.55,
+                  child: ReusableSearchTextField(
+                    hint: '${"search".tr}...',
+                    textEditingController: searchControllerInProductsPage,
+                    onChangedFunc: (val) {},
+                    validationFunc: (val) {},
+                  ),
+                ),
+                gapW6,
+                // DropdownMenu<FilterItems>(
+                //   width: MediaQuery.of(context).size.width * 0.08,
+                //   // initialSelection: configItems.green,
+                //   requestFocusOnTap: false,
+                //   inputDecorationTheme: InputDecorationTheme(
+                //     // filled: true,
+                //     contentPadding: const EdgeInsets.fromLTRB(10, 0, 0, 3),
+                //     // outlineBorder: BorderSide(color: Colors.black,),
+                //     enabledBorder: OutlineInputBorder(
+                //       borderSide:
+                //           BorderSide(color: Primary.primary, width: 1),
+                //       borderRadius:
+                //           const BorderRadius.all(Radius.circular(9)),
+                //     ),
+                //   ),
+                //   controller: filterController,
+                //   label: Text(
+                //     'filter_by'.tr,
+                //     style: TextStyle(
+                //         fontSize: 12,
+                //         fontWeight: FontWeight.bold,
+                //         color: Primary.primary),
+                //   ),
+                //   // menuStyle: ,
+                //   dropdownMenuEntries: FilterItems.values
+                //       .map<DropdownMenuEntry<FilterItems>>(
+                //           (FilterItems filter) {
+                //     return DropdownMenuEntry<FilterItems>(
+                //       value: filter,
+                //       label: filter.label,
+                //       enabled: filter.label != 'Grey',
+                //       // style: MenuItemButton.styleFrom(
+                //       // foregroundColor: color.color,
+                //       // ),
+                //     );
+                //   }).toList(),
+                //   onSelected: (FilterItems? val) {
+                //     setState(() {
+                //       selectedFilterItem = val;
+                //     });
+                //   },
+                // ),
+                // InkWell(
+                //   key: accKey,
+                //   onTap: () {
+                //     // if (val == true) {
+                //     final RenderBox renderBox = accKey.currentContext
+                //         ?.findRenderObject() as RenderBox;
+                //     final Size size = renderBox.size;
+                //     final Offset offset =
+                //         renderBox.localToGlobal(Offset.zero);
+                //     showMenu(
+                //       context: context,
+                //       color: Colors.white, //TypographyColor.menuBg,
+                //       surfaceTintColor: Colors.white,
+                //       position: RelativeRect.fromLTRB(
+                //           offset.dx,
+                //           offset.dy + size.height + 15,
+                //           offset.dx + size.width,
+                //           offset.dy + size.height),
+                //       items: [
+                //         PopupMenuItem<String>(
+                //             value: '1', child: Text('duplicate'.tr)),
+                //         PopupMenuItem<String>(
+                //             value: '2', child: Text('delete'.tr)),
+                //         PopupMenuItem<String>(
+                //             value: '3', child: Text('edit'.tr)),
+                //       ],
+                //     );
+                //   },
+                //   child: Icon(
+                //     Icons.settings_rounded,
+                //     color: TypographyColor.textTable,
+                //   ),
+                // ),
+                DropdownMenu<String>(
+                  width: MediaQuery.of(context).size.width * 0.12,
+                  requestFocusOnTap: false,
+                  hintText: 'all_categories'.tr,
+                  inputDecorationTheme: InputDecorationTheme(
+                    // filled: true,
+                    contentPadding: const EdgeInsets.fromLTRB(20, 0, 25, 5),
+                    // outlineBorder: BorderSide(color: Colors.black,),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Primary.primary.withAlpha((0.2 * 255).toInt()),
+                        width: 1,
                       ),
-                      Container(
-                        color: Colors.white,
-                        height: MediaQuery.of(context).size.height * 0.5,
-                        child: ListView.builder(
-                          controller: scrollController,
-                          itemCount:
-                              productController
-                                  .productsList
-                                  .length, //products is data from back res
-                          itemBuilder:
-                              (context, index) => _productsAsRowInTable(
-                                productController.productsList[index],
-                                index,
-                              ),
-                        ),
+                      borderRadius: const BorderRadius.all(Radius.circular(9)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Primary.primary.withAlpha((0.4 * 255).toInt()),
+                        width: 2,
                       ),
-                    ],
+                      borderRadius: const BorderRadius.all(Radius.circular(9)),
+                    ),
+                  ),
+                  dropdownMenuEntries:
+                      categoriesNameList.map<DropdownMenuEntry<String>>((
+                        String option,
+                      ) {
+                        return DropdownMenuEntry<String>(
+                          value: option,
+                          label: option,
+                        );
+                      }).toList(),
+                  onSelected: (String? val) {
+                    setState(() {
+                      selectedItem = val!;
+                      var index = categoriesNameList.indexOf(val);
+                      productController.selectedCategoryIdInProductPage.value =
+                          categoriesIds[index];
+                    });
+                  },
+                ),
+                Tooltip(
+                  message: 'Click to search',
+                  child: InkWell(
+                    onTap: () async {
+                      productController.productsList.value = [].obs;
+                      await productController
+                          .getAllProductsFromBackWithSearch();
+                    },
+                    child: Icon(Icons.search, color: Primary.primary),
+                  ),
+                ),
+                Tooltip(
+                  message: 'Grid View',
+                  child: InkWell(
+                    onTap: () {
+                      productController.isGrid.value =
+                          !productController.isGrid.value;
+                    },
+                    child: Icon(
+                      Icons.grid_view_outlined,
+                      color:
+                          productController.isGrid.value
+                              ? Primary.primary
+                              : TypographyColor.textTable,
+                    ),
+                  ),
+                ),
+                Tooltip(
+                  message: 'List View',
+                  // decoration: BoxDecoration(
+                  //   color: Colors.black,
+                  //   borderRadius: BorderRadius.circular(8),
+                  // ),
+                  // textStyle: TextStyle(color: Colors.white),
+                  // waitDuration: Duration(milliseconds: 500),
+                  // showDuration: Duration(seconds: 2),
+                  child: InkWell(
+                    onTap: () {
+                      productController.isGrid.value =
+                          !productController.isGrid.value;
+                    },
+                    child: Icon(
+                      Icons.format_list_bulleted,
+                      color:
+                          productController.isGrid.value
+                              ? TypographyColor.textTable
+                              : Primary.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            gapH32,
+            productController.isGrid.value
+                ? SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child:
+                  // productController.isProductsFetched.value ?
+                  GridView.count(
+                    controller: scrollController,
+                    crossAxisCount: 3,
+                    childAspectRatio: Sizes.deviceWidth / 720,
+                    children: List.generate(
+                      productController.productsList.length,
+                      (index) {
+                        return _productsCard(
+                          productController.productsList[index],
+                          index,
+                        );
+                      },
+                    ),
                   ),
                   // : const Center(child: CircularProgressIndicator()),
-              if(productController.isLoading.value)Padding(padding: EdgeInsets.all(16),child: CircularProgressIndicator(),)
-            ],
-          ),
+                )
+                :
+                // : productController.isProductsFetched.value ?
+                Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: MediaQuery.of(context).size.width * 0.01,
+                        vertical: 15,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Primary.primary,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.09,
+                            child: Text(
+                              'code'.tr,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.09,
+                            child: Text(
+                              'name'.tr,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.24,
+                            child: Text(
+                              'description'.tr,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          // TableTitle(
+                          //   text: 'name'.tr,
+                          //   width: MediaQuery.of(context).size.width * 0.09,
+                          // ),
+                          // TableTitle(
+                          //   text: 'description'.tr,
+                          //   width: MediaQuery.of(context).size.width * 0.24,
+                          // ),
+                          // TableTitle(
+                          //   text: 'qty_on_hand'.tr,
+                          //   width:
+                          //       MediaQuery.of(context).size.width * 0.07,
+                          // ),
+                          TableTitle(
+                            text: 'price'.tr,
+                            width: MediaQuery.of(context).size.width * 0.09,
+                          ),
+                          TableTitle(
+                            text: 'currency'.tr,
+                            width: MediaQuery.of(context).size.width * 0.09,
+                          ),
+                          TableTitle(
+                            text: 'on_hand'.tr,
+                            width: MediaQuery.of(context).size.width * 0.09,
+                          ),
+                          // TableTitle(
+                          //   text: 'qty_shipped'.tr,
+                          //   width:
+                          //       MediaQuery.of(context).size.width * 0.07,
+                          // ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.03,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      color: Colors.white,
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount:
+                            productController
+                                .productsList
+                                .length, //products is data from back res
+                        itemBuilder:
+                            (context, index) => _productsAsRowInTable(
+                              productController.productsList[index],
+                              index,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+            // : const Center(child: CircularProgressIndicator()),
+            if (productController.isLoading.value)
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: CircularProgressIndicator(),
+              ),
+          ],
+        ),
         // ),
       ),
     );
@@ -501,7 +518,10 @@ class _ProductsPageState extends State<ProductsPage> {
             //   width: MediaQuery.of(context).size.width * 0.07,
             // ),
             TableItem(
-              text: product['unitPrice']!=null?numberWithComma('${product['unitPrice']}'): '',
+              text:
+                  product['unitPrice'] != null
+                      ? numberWithComma('${product['unitPrice']}')
+                      : '',
               width: MediaQuery.of(context).size.width * 0.09,
             ),
             TableItem(
@@ -513,7 +533,7 @@ class _ProductsPageState extends State<ProductsPage> {
             ),
             TableItem(
               text:
-                  '${product['current_quantity']!=null?numberWithComma('${product['current_quantity']}'): ''} ${product['packageSetName'] ?? ''}',
+                  '${product['current_quantity'] != null ? numberWithComma('${product['current_quantity']}') : ''} ${product['packageSetName'] ?? ''}',
               width: MediaQuery.of(context).size.width * 0.09,
             ),
             // TableItem(
@@ -622,7 +642,7 @@ class _ProductsPageState extends State<ProductsPage> {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10.h),
         child: ClipPath(
           clipper: const ShapeBorderClipper(
             shape: RoundedRectangleBorder(
@@ -643,7 +663,7 @@ class _ProductsPageState extends State<ProductsPage> {
               ],
             ),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -656,7 +676,7 @@ class _ProductsPageState extends State<ProductsPage> {
                           '${product['item_name'] ?? ''}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                            fontSize: 15.sp,
                             color: Primary.primary,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -738,11 +758,11 @@ class _ProductsPageState extends State<ProductsPage> {
                           Text('[${product['mainCode'] ?? ''}]'),
                           SizedBox(height: Sizes.deviceHeight * 0.01),
                           Text(
-                            '${'price'.tr}: ${product['unitPrice']!=null?numberWithComma('${product['unitPrice']}'): ''} ${product['priceCurrency'] != null ? '${product['priceCurrency']['symbol'] ?? ''}' : ''}',
+                            '${'price'.tr}: ${product['unitPrice'] != null ? numberWithComma('${product['unitPrice']}') : ''} ${product['priceCurrency'] != null ? '${product['priceCurrency']['symbol'] ?? ''}' : ''}',
                           ),
                           SizedBox(height: Sizes.deviceHeight * 0.01),
                           Text(
-                            '${'on_hand'.tr}: ${product['current_quantity']!=null?numberWithComma('${product['current_quantity']}'): ''} ${product['packageUnitName'] ?? ''}',
+                            '${'on_hand'.tr}: ${product['current_quantity'] != null ? numberWithComma('${product['current_quantity']}') : ''} ${product['packageUnitName'] ?? ''}',
                           ),
                         ],
                       ),
@@ -752,10 +772,12 @@ class _ProductsPageState extends State<ProductsPage> {
                         ),
                         child: Image.network(
                           '${product['images']}' == '[]'
-                              ?'https://theravenstyle.com/rooster-backend/public/storage/WhatsApp%20Image%202024-03-03%20at%2011.41.15%20AM.jpeg'
-                              :'${product['images'][0]}',
-                          height: Sizes.deviceHeight * 0.12,
-                          width: Sizes.deviceWidth * 0.07,
+                              ? 'https://theravenstyle.com/rooster-backend/public/storage/WhatsApp%20Image%202024-03-03%20at%2011.41.15%20AM.jpeg'
+                              : '${product['images'][0]}',
+                          height: 85.h,
+                          // height: Sizes.deviceHeight * 0.12,
+                          width: 85.w,
+                          // width: Sizes.deviceWidth * 0.07.w,
                           fit: BoxFit.cover,
                           errorBuilder:
                               (context, error, stackTrace) => loading(),
@@ -947,7 +969,7 @@ class MobileProductsPage extends StatefulWidget {
 
 class _MobileProductsPageState extends State<MobileProductsPage> {
   final TextEditingController filterController = TextEditingController();
-  final ScrollController scrollController=ScrollController();
+  final ScrollController scrollController = ScrollController();
 
   FilterItems? selectedFilterItem;
   ProductController productController = Get.find();
@@ -967,16 +989,17 @@ class _MobileProductsPageState extends State<MobileProductsPage> {
     });
   }
 
-
   @override
   void initState() {
     productController.productsList.value = [].obs;
-    productController.currentPage.value=1;
+    productController.currentPage.value = 1;
     scrollController.addListener(() {
-      if(scrollController.position.pixels>=scrollController.position.maxScrollExtent && !productController.isLoading.value){
+      if (scrollController.position.pixels >=
+              scrollController.position.maxScrollExtent &&
+          !productController.isLoading.value) {
         productController.getAllProductsFromBack();
       }
-    },);
+    });
     getCategoriesFromBack();
     productController.getAllProductsFromBack();
     super.initState();
@@ -1034,13 +1057,21 @@ class _MobileProductsPageState extends State<MobileProductsPage> {
                   ),
                   gapW6,
                   InkWell(
-                    onTap:(){
-                      Navigator.push(context, MaterialPageRoute(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
                           builder: (BuildContext context) {
                             return BarcodeScannerPage();
-                          }));
+                          },
+                        ),
+                      );
                     },
-                    child: Icon(Icons.barcode_reader,size: 30, color: Primary.primary),
+                    child: Icon(
+                      Icons.barcode_reader,
+                      size: 30,
+                      color: Primary.primary,
+                    ),
                   ),
                 ],
               ),
@@ -1103,8 +1134,9 @@ class _MobileProductsPageState extends State<MobileProductsPage> {
                     children: [
                       InkWell(
                         onTap: () async {
-                            productController.productsList.value = [].obs;
-                          await productController.getAllProductsFromBackWithSearch();
+                          productController.productsList.value = [].obs;
+                          await productController
+                              .getAllProductsFromBackWithSearch();
                         },
                         child: Icon(Icons.search, color: Primary.primary),
                       ),
@@ -1155,123 +1187,122 @@ class _MobileProductsPageState extends State<MobileProductsPage> {
                   ? SizedBox(
                     height: MediaQuery.of(context).size.height * 0.5,
                     child:
-                        // productController.isProductsFetched.value
-                        //     ?
-                        GridView.count(
-                          controller: scrollController,
-                              crossAxisCount:
-                                  1, //MediaQuery.of(context).size.width<460?1:2,
-                              childAspectRatio: Sizes.deviceHeight / 450,
-                              // MediaQuery.of(context).size.width<460
-                              //     ? Sizes.deviceHeight / 500
-                              // : Sizes.deviceHeight / 600
-                              children: List.generate(
-                                productController.productsList.length,
-                                (index) {
-                                  return _productsCard(
-                                    productController.productsList[index],
-                                    index,
-                                  );
-                                },
-                              ),
-                            )
-                            // : const Center(child: CircularProgressIndicator()),
+                    // productController.isProductsFetched.value
+                    //     ?
+                    GridView.count(
+                      controller: scrollController,
+                      crossAxisCount:
+                          1, //MediaQuery.of(context).size.width<460?1:2,
+                      childAspectRatio: Sizes.deviceHeight / 450,
+                      // MediaQuery.of(context).size.width<460
+                      //     ? Sizes.deviceHeight / 500
+                      // : Sizes.deviceHeight / 600
+                      children: List.generate(
+                        productController.productsList.length,
+                        (index) {
+                          return _productsCard(
+                            productController.productsList[index],
+                            index,
+                          );
+                        },
+                      ),
+                    ),
+                    // : const Center(child: CircularProgressIndicator()),
                   )
                   : SizedBox(
                     // height: MediaQuery.of(context).size.height * 0.4,
                     child:
-                        // productController.isProductsFetched.value
-                        //     ?
-                        SingleChildScrollView(
-                          controller: scrollController,
-                              child: Row(
+                    // productController.isProductsFetched.value
+                    //     ?
+                    SingleChildScrollView(
+                      controller: scrollController,
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Column(
                                 children: [
-                                  Flexible(
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 15,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Primary.primary,
-                                              borderRadius:
-                                                  const BorderRadius.all(
-                                                    Radius.circular(6),
-                                                  ),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                TableTitle(
-                                                  text: 'code'.tr,
-                                                  width:
-                                                      150, // MediaQuery.of(context).size.width * 0.15,
-                                                ),
-                                                TableTitle(
-                                                  text: 'name'.tr,
-                                                  width:
-                                                      150, // MediaQuery.of(context).size.width * 0.15,
-                                                ),
-                                                TableTitle(
-                                                  text: 'description'.tr,
-                                                  width:
-                                                      350, //MediaQuery.of(context).size.width * 0.5,
-                                                ),
-                                                // TableTitle(
-                                                //   text: 'qty_on_hand'.tr,
-                                                //   width: 150//MediaQuery.of(context).size.width * 0.2,
-                                                // ),
-                                                TableTitle(
-                                                  text: 'price'.tr,
-                                                  width: 150,
-                                                ),
-                                                TableTitle(
-                                                  text: 'currency'.tr,
-                                                  width: 150,
-                                                ),
-                                                TableTitle(
-                                                  text: 'on_hand'.tr,
-                                                  width: 150,
-                                                ),
-                                                // TableTitle(
-                                                //   text: 'qty_shipped'.tr,
-                                                //   width: 150
-                                                // ),
-                                                const SizedBox(width: 100),
-                                              ],
-                                            ),
-                                          ),
-                                          Container(
-                                            color: Colors.white,
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: List.generate(
-                                                productController
-                                                    .productsList
-                                                    .length,
-                                                (index) =>
-                                                    _productsAsRowInTable(
-                                                      productController
-                                                          .productsList[index],
-                                                      index,
-                                                    ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 15,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Primary.primary,
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(6),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        TableTitle(
+                                          text: 'code'.tr,
+                                          width:
+                                              150, // MediaQuery.of(context).size.width * 0.15,
+                                        ),
+                                        TableTitle(
+                                          text: 'name'.tr,
+                                          width:
+                                              150, // MediaQuery.of(context).size.width * 0.15,
+                                        ),
+                                        TableTitle(
+                                          text: 'description'.tr,
+                                          width:
+                                              350, //MediaQuery.of(context).size.width * 0.5,
+                                        ),
+                                        // TableTitle(
+                                        //   text: 'qty_on_hand'.tr,
+                                        //   width: 150//MediaQuery.of(context).size.width * 0.2,
+                                        // ),
+                                        TableTitle(
+                                          text: 'price'.tr,
+                                          width: 150,
+                                        ),
+                                        TableTitle(
+                                          text: 'currency'.tr,
+                                          width: 150,
+                                        ),
+                                        TableTitle(
+                                          text: 'on_hand'.tr,
+                                          width: 150,
+                                        ),
+                                        // TableTitle(
+                                        //   text: 'qty_shipped'.tr,
+                                        //   width: 150
+                                        // ),
+                                        const SizedBox(width: 100),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    color: Colors.white,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: List.generate(
+                                        productController.productsList.length,
+                                        (index) => _productsAsRowInTable(
+                                          productController.productsList[index],
+                                          index,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                            )
-                            // : const Center(child: CircularProgressIndicator()),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // : const Center(child: CircularProgressIndicator()),
                   ),
-              if(productController.isLoading.value)Padding(padding: EdgeInsets.all(16),child: Center(child: CircularProgressIndicator()),)
+              if (productController.isLoading.value)
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
             ],
           ),
         ),
@@ -1578,18 +1609,24 @@ class _MobileProductsPageState extends State<MobileProductsPage> {
                         borderRadius: const BorderRadius.all(
                           Radius.circular(12),
                         ),
-                        child: '${product['images']}' == '[]'? Image.network(
-                          '${product['images']}' == '[]'
-                              ? 'https://theravenstyle.com/rooster-backend/public/storage/WhatsApp%20Image%202024-03-03%20at%2011.41.15%20AM.jpeg'
-                              : '${product['images'][0]}',
-                          height: Sizes.deviceHeight * 0.12,
-                          width: Sizes.deviceWidth * 0.2,
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (context, error, stackTrace) => loading(),
-                          // loadingBuilder: (context, child, loadingProgress) => loading('laod'),
-                        ):Icon(Icons.broken_image,
-                            size: 50, color: Colors.grey),
+                        child:
+                            '${product['images']}' == '[]'
+                                ? Image.network(
+                                  '${product['images']}' == '[]'
+                                      ? 'https://theravenstyle.com/rooster-backend/public/storage/WhatsApp%20Image%202024-03-03%20at%2011.41.15%20AM.jpeg'
+                                      : '${product['images'][0]}',
+                                  height: Sizes.deviceHeight * 0.12,
+                                  width: Sizes.deviceWidth * 0.2,
+                                  fit: BoxFit.cover,
+                                  errorBuilder:
+                                      (context, error, stackTrace) => loading(),
+                                  // loadingBuilder: (context, child, loadingProgress) => loading('laod'),
+                                )
+                                : Icon(
+                                  Icons.broken_image,
+                                  size: 50,
+                                  color: Colors.grey,
+                                ),
                       ),
                     ],
                   ),

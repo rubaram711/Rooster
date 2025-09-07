@@ -5,8 +5,6 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
 import 'package:rooster_app/const/colors.dart';
 import '../../../Backend/RolesAndPermissionsBackend/delete_role.dart';
-import '../../../Controllers/roles_and_permissions_controller.dart';
-import '../../../Models/RolesAndPermissions/roles_and_permissions_model.dart';
 import '../../../Widgets/custom_snak_bar.dart';
 import '../../../Widgets/page_title.dart';
 import '../../../Widgets/reusable_btn.dart';
@@ -14,17 +12,19 @@ import '../../../Widgets/reusable_text_field.dart';
 import '../../../Widgets/table_item.dart';
 import '../../../Widgets/table_title.dart';
 import '../../../const/Sizes.dart';
-import 'add_update_role_dialog.dart';
+import '../../Controllers/garage_controller.dart';
+import 'add_attribute.dart';
 
-class RolesPage extends StatefulWidget {
-  const RolesPage({super.key});
+
+class AttributeTablePage extends StatefulWidget {
+  const AttributeTablePage({super.key});
 
   @override
-  State<RolesPage> createState() => _RolesPageState();
+  State<AttributeTablePage> createState() => _AttributeTablePageState();
 }
 
-class _RolesPageState extends State<RolesPage> {
-  RolesAndPermissionsController rolesController = Get.find();
+class _AttributeTablePageState extends State<AttributeTablePage> {
+  GarageController garageController = Get.find();
   HomeController homeController = Get.find();
   String searchValue = '';
   Timer? searchOnStoppedTyping;
@@ -40,11 +40,11 @@ class _RolesPageState extends State<RolesPage> {
   }
 
   search(value) async {
-    rolesController.getAllRolesFromBack();
+    garageController.getAllAttributesFromBack();
   }
   @override
   void initState() {
-    rolesController.getAllRolesFromBack();
+    garageController.getAllAttributesFromBack();
     super.initState();
   }
 
@@ -53,7 +53,7 @@ class _RolesPageState extends State<RolesPage> {
     return Container(
       padding: EdgeInsets.symmetric(
           horizontal: homeController.isMobile.value ?MediaQuery.of(context).size.width * 0.05:MediaQuery.of(context).size.width * 0.02),
-      child: GetBuilder<RolesAndPermissionsController>(
+      child: GetBuilder<GarageController>(
           builder: (cont) {
             return SingleChildScrollView(
               child: Column(
@@ -62,28 +62,32 @@ class _RolesPageState extends State<RolesPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      PageTitle(text: 'roles'.tr),
+                      PageTitle(text: cont.selectedAttributeText.tr),
                       ReusableButtonWithColor(
                         width:homeController.isMobile.value ?MediaQuery.of(context).size.width * 0.3: MediaQuery.of(context).size.width * 0.15,
                         height: 45,
                         onTapFunction: () {
-                          cont.setIsItUpdateRoles(false);
+                          cont.setIsItUpdateAttribute(false);
                           showDialog<String>(
                               context: context,
-                              builder: (BuildContext context) => const AlertDialog(
+                              builder: (BuildContext context) => AlertDialog(
                                 backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius:
                                   BorderRadius.all(Radius.circular(9)),
                                 ),
                                 elevation: 0,
-                                content: AddNewRoleDialog(
-                                  id: '',
-                                  name: '',
-                                ),
+                                content:AddGarageAttributeDialog(text: cont.selectedAttributeText,),
+                                // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
                               ));
                         },
-                        btnText: 'add_new_role'.tr,
+                        btnText:   cont.selectedAttributeText == 'color'
+                            ? 'add_new_color'.tr
+                            : cont.selectedAttributeText == 'model'
+                            ? 'add_new_model'.tr
+                            : cont.selectedAttributeText == 'technician'
+                            ? 'add_new_technician'.tr
+                            : 'add_new_brand'.tr,
                       ),
                     ],
                   ),
@@ -96,7 +100,7 @@ class _RolesPageState extends State<RolesPage> {
                         // width:homeController.isMobile.value ?MediaQuery.of(context).size.width * 0.9: MediaQuery.of(context).size.width * 0.7,
                         child: ReusableSearchTextField(
                           hint: '${"search".tr}...',
-                          textEditingController: cont.searchOnRoleController,
+                          textEditingController: cont.searchOnAttributeValueController,
                           onChangedFunc: (val) {
                             _onChangeHandler(val);
                           },
@@ -106,7 +110,7 @@ class _RolesPageState extends State<RolesPage> {
                     ],
                   ),
                   gapH32,
-                  cont.isRolesFetched
+                  cont.isAttributesFetched
                       ?
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,11 +150,11 @@ class _RolesPageState extends State<RolesPage> {
                         height:homeController.isMobile.value ? MediaQuery.of(context).size.height * 0.57:MediaQuery.of(context).size.height * 0.5,
                         width:homeController.isMobile.value ?MediaQuery.of(context).size.width : MediaQuery.of(context).size.width * 0.32,
                         child: ListView.builder(
-                          itemCount: cont.rolesList.length,
+                          itemCount: cont.attributeValuesList.length,
                           itemBuilder: (context, index) =>
-                              _roleAsRowInTable(
-                                  cont.rolesList[index] ,
-                                  index,
+                              _attributeAsRowInTable(
+                                cont.attributeValuesList[index] ,
+                                index,
                               ),
                         ),
                       ),
@@ -165,7 +169,7 @@ class _RolesPageState extends State<RolesPage> {
     );
   }
 
-  _roleAsRowInTable(Roles role, int index) {
+  _attributeAsRowInTable(Map role, int index) {
     return Container(
       padding: EdgeInsets.symmetric(
           horizontal: MediaQuery.of(context).size.width * 0.01, vertical: 10),
@@ -176,7 +180,7 @@ class _RolesPageState extends State<RolesPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           TableItem(
-            text: role.name ?? '',
+            text: role['name'] ?? '',
             width: homeController.isMobile.value ?MediaQuery.of(context).size.width * 0.5:MediaQuery.of(context).size.width * 0.2,
           ),
           Row(
@@ -185,20 +189,18 @@ class _RolesPageState extends State<RolesPage> {
                 width:homeController.isMobile.value ?MediaQuery.of(context).size.width * 0.1: MediaQuery.of(context).size.width * 0.05,
                 child: InkWell(
                   onTap: () async {
-                    rolesController.setIsItUpdateRoles(true);
+                    garageController.setIsItUpdateAttribute(true);
                     showDialog<String>(
                         context: context,
                         builder: (BuildContext context) => AlertDialog(
                           backgroundColor: Colors.white,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(9)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(9)),
                           ),
                           elevation: 0,
-                          content: AddNewRoleDialog(
-                              id:
-                              '${role.id ?? 0}',
-                              name: role.name ??
-                                  ''),
+                          content:AddGarageAttributeDialog(text: garageController.selectedAttributeText,),
+                          // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
                         ));
                   },
                   child: Icon(
@@ -212,9 +214,9 @@ class _RolesPageState extends State<RolesPage> {
                 child: InkWell(
                   onTap: () async {
                     var res = await deleteRole(
-                        '${role.id}');
+                        '${role['id']}');
                     if ('${res['success']}' == 'true') {
-                      rolesController.getAllRolesFromBack();
+                      garageController.getAllAttributesFromBack();
                       CommonWidgets.snackBar('Success',
                           res['message']);
                     } else {

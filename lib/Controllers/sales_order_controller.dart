@@ -701,8 +701,6 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   @override
   resetItemsAfterChangePriceList() async {
     itemsCode = [];
-    cashingMethodsNamesList = [];
-    cashingMethodsIdsList = [];
     itemsIds = [];
     itemsInfo = [];
     itemsMultiPartList = [];

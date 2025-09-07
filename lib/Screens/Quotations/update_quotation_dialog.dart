@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
@@ -239,11 +240,13 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
           '${widget.info['cashingMethod']['id']}';
     }
 
-    quotationController.selectedHeaderIndex=0;
-    if(widget.info['companyHeader']!=null){
-      if('${widget.info['companyHeader']['id']}' != '${quotationController.headersList[0]['id']}'){
-        quotationController.selectedHeaderIndex=1;
-    }}
+    quotationController.selectedHeaderIndex = 0;
+    if (widget.info['companyHeader'] != null) {
+      if ('${widget.info['companyHeader']['id']}' !=
+          '${quotationController.headersList[0]['id']}') {
+        quotationController.selectedHeaderIndex = 1;
+      }
+    }
 
     if (widget.info['pricelist'] != null) {
       priceListController.text = '${widget.info['pricelist']['code'] ?? ''}';
@@ -351,11 +354,11 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
           3) {
         quotationController.combosPriceControllers[i + 1] =
             TextEditingController();
-      }else if (quotationController
+      } else if (quotationController
               .selectedQuotationData['orderLines'][i]['line_type_id'] ==
           5) {
         quotationController.rowsInListViewInQuotation[i + 1]['image'] =
-        quotationController.selectedQuotationData['orderLines'][i]['image'];
+            quotationController.selectedQuotationData['orderLines'][i]['image'];
       }
     }
     //
@@ -408,6 +411,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GetBuilder<QuotationController>(
       builder: (quotationCont) {
         return Container(
@@ -446,6 +450,10 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
+                        mainAxisAlignment:
+                            screenWidth > 615
+                                ? MainAxisAlignment.start
+                                : MainAxisAlignment.spaceBetween,
                         children: [
                           UnderTitleBtn(
                             text: 'send_by_email'.tr,
@@ -683,8 +691,13 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     deliveryTermsController.text,
                                     chanceController.text,
                                     homeController.companyName == 'CASALAGO' ||
-                                        homeController.companyName == 'AMAZON'
-                                        ?quotationCont.headersList[quotationCont.selectedHeaderIndex]['id'].toString():'',
+                                            homeController.companyName ==
+                                                'AMAZON'
+                                        ? quotationCont
+                                            .headersList[quotationCont
+                                                .selectedHeaderIndex]['id']
+                                            .toString()
+                                        : '',
                                   );
                                   if (res['success'] == true) {
                                     setState(() {
@@ -872,9 +885,16 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                 cancelledReason,
                                                 deliveryTermsController.text,
                                                 chanceController.text,
-                                                homeController.companyName == 'CASALAGO' ||
-                                                    homeController.companyName == 'AMAZON'
-                                                    ?quotationCont.headersList[quotationCont.selectedHeaderIndex]['id'].toString():'',
+                                                homeController.companyName ==
+                                                            'CASALAGO' ||
+                                                        homeController
+                                                                .companyName ==
+                                                            'AMAZON'
+                                                    ? quotationCont
+                                                        .headersList[quotationCont
+                                                            .selectedHeaderIndex]['id']
+                                                        .toString()
+                                                    : '',
                                               );
                                               if (res['success'] == true) {
                                                 Get.back();
@@ -906,37 +926,78 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                           ),
                         ],
                       ),
-                      Row(
-                        children: [
-                          ReusableTimeLineTile(
-                            id: 0,
-                            progressVar: progressVar,
-                            isFirst: true,
-                            isLast: false,
-                            isPast: true,
-                            text: 'processing'.tr,
-                          ),
-                          ReusableTimeLineTile(
-                            id: 1,
-                            progressVar: progressVar,
-                            isFirst: false,
-                            isLast: false,
-                            isPast: false,
-                            text: 'quotation_sent'.tr,
-                          ),
-                          ReusableTimeLineTile(
-                            id: 2,
-                            progressVar: progressVar,
-                            isFirst: false,
-                            isLast: true,
-                            isPast: false,
-                            text: 'confirmed'.tr,
-                          ),
-                        ],
-                      ),
+                      if (screenWidth >= 615)
+                        Row(
+                          children: [
+                            ReusableTimeLineTile(
+                              id: 0,
+                              progressVar: progressVar,
+                              isFirst: true,
+                              isLast: false,
+                              isPast: true,
+                              text: 'processing'.tr,
+                            ),
+                            ReusableTimeLineTile(
+                              id: 1,
+                              progressVar: progressVar,
+                              isFirst: false,
+                              isLast: false,
+                              isPast: false,
+                              text: 'quotation_sent'.tr,
+                            ),
+                            ReusableTimeLineTile(
+                              id: 2,
+                              progressVar: progressVar,
+                              isFirst: false,
+                              isLast: true,
+                              isPast: false,
+                              text: 'confirmed'.tr,
+                            ),
+                          ],
+                        ),
                     ],
                   ),
+                  if (screenWidth < 615) gapH16,
+                  if (screenWidth < 615)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisAlignment:
+                              screenWidth > 615
+                                  ? MainAxisAlignment.start
+                                  : MainAxisAlignment.spaceBetween,
+                          children: [
+                            ReusableTimeLineTile(
+                              id: 0,
+                              progressVar: progressVar,
+                              isFirst: true,
+                              isLast: false,
+                              isPast: true,
+                              text: 'processing'.tr,
+                            ),
+                            ReusableTimeLineTile(
+                              id: 1,
+                              progressVar: progressVar,
+                              isFirst: false,
+                              isLast: false,
+                              isPast: false,
+                              text: 'quotation_sent'.tr,
+                            ),
+                            ReusableTimeLineTile(
+                              id: 2,
+                              progressVar: progressVar,
+                              isFirst: false,
+                              isLast: true,
+                              isPast: false,
+                              text: 'confirmed'.tr,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   gapH16,
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
@@ -956,8 +1017,8 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               children: [
                                 Text(
                                   '${widget.info['quotationNumber'] ?? ''}',
-                                  style: const TextStyle(
-                                    fontSize: 20,
+                                  style: TextStyle(
+                                    fontSize: 20.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -968,13 +1029,31 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               text: '${'ref'.tr}:',
                               hint: 'manual_reference'.tr,
                               rowWidth:
-                                  MediaQuery.of(context).size.width * 0.18,
+                                  screenWidth > 800
+                                      ? 250.w
+                                      : screenWidth > 560
+                                      ? 300.w
+                                      : 250.w,
+                              // MediaQuery.of(context).size.width * 0.18,
                               textFieldWidth:
-                                  MediaQuery.of(context).size.width * 0.15,
+                                  screenWidth > 800
+                                      ? 220.w
+                                      : screenWidth > 560
+                                      ? 270.w
+                                      : 220.w,
+                              // MediaQuery.of(context).size.width * 0.15,
                               validationFunc: (val) {},
                             ),
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.11,
+                              width:
+                                  screenWidth > 1230
+                                      ? 180.w
+                                      : screenWidth > 800
+                                      ? 250.w
+                                      : screenWidth > 560
+                                      ? 310.w
+                                      : 250.w,
+
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -984,9 +1063,15 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     builder: (cont) {
                                       return DropdownMenu<String>(
                                         width:
-                                            MediaQuery.of(context).size.width *
-                                            0.07,
-                                        // requestFocusOnTap: false,
+                                            screenWidth > 1230
+                                                ? 120.w
+                                                : screenWidth > 800
+                                                ? 190.w
+                                                : screenWidth > 560
+                                                ? 240.w
+                                                : 190.w,
+
+                                        requestFocusOnTap: false,
                                         enableSearch: true,
                                         controller: currencyController,
                                         hintText: '',
@@ -1194,258 +1279,767 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 ],
                               ),
                             ),
+                            if (screenWidth > 800)
+                              SizedBox(
+                                width:
+                                    screenWidth > 1230
+                                        ? 220.w
+                                        // ? MediaQuery.of(context).size.width * 0.14
+                                        : 300.w,
+                                // : MediaQuery.of(context).size.width *
+                                // 0.20,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('validity'.tr),
+                                    DialogDateTextField(
+                                      textEditingController: validityController,
+                                      text: '',
+                                      textFieldWidth:
+                                          screenWidth > 1230
+                                              ? 170.w
+                                              // ?MediaQuery.of(
+                                              //       context,
+                                              //     ).size.width *
+                                              //     0.10
+                                              : 240.w,
+                                      // MediaQuery.of(
+                                      //       context,
+                                      //     ).size.width *
+                                      //     0.15,
+                                      // MediaQuery.of(context).size.width * 0.25,
+                                      validationFunc: (val) {},
+                                      onChangedFunc: (val) {
+                                        validityController.text = val;
+                                      },
+                                      onDateSelected: (value) {
+                                        validityController.text = value;
+                                        setState(() {
+                                          // LocalDate a=LocalDate.today();
+                                          // LocalDate b = LocalDate.dateTime(value);
+                                          // Period diff = b.periodSince(a);
+                                          // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (screenWidth > 1230)
+                              SizedBox(
+                                width:
+                                    homeController.isOpened.value
+                                        ? 180.w
+                                        //  MediaQuery.of(context).size.width *
+                                        //     0.10
+                                        : 210.w,
 
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.14,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('validity'.tr),
-                                  DialogDateTextField(
-                                    textEditingController: validityController,
-                                    text: '',
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.10,
-                                    // MediaQuery.of(context).size.width * 0.25,
-                                    validationFunc: (val) {},
-                                    onChangedFunc: (val) {
-                                      validityController.text = val;
-                                    },
-                                    onDateSelected: (value) {
-                                      validityController.text = value;
-                                      setState(() {
-                                        // LocalDate a=LocalDate.today();
-                                        // LocalDate b = LocalDate.dateTime(value);
-                                        // Period diff = b.periodSince(a);
-                                        // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              width:
-                                  homeController.isOpened.value
-                                      ? MediaQuery.of(context).size.width * 0.10
-                                      : MediaQuery.of(context).size.width *
-                                          0.14,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('chance'.tr),
-                                  DropdownMenu<String>(
-                                    width:
-                                        homeController.isOpened.value
-                                            ? MediaQuery.of(
-                                                  context,
-                                                ).size.width *
-                                                0.07
-                                            : MediaQuery.of(
-                                                  context,
-                                                ).size.width *
-                                                0.1,
-                                    // requestFocusOnTap: false,
-                                    enableSearch: true,
-                                    controller: chanceController,
-                                    hintText: '',
-                                    inputDecorationTheme: InputDecorationTheme(
-                                      // filled: true,
-                                      hintStyle: const TextStyle(
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                      contentPadding: const EdgeInsets.fromLTRB(
-                                        20,
-                                        0,
-                                        25,
-                                        5,
-                                      ),
-                                      // outlineBorder: BorderSide(color: Colors.black,),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Primary.primary.withAlpha(
-                                            (0.2 * 255).toInt(),
+                                // MediaQuery.of(context).size.width *
+                                //     0.14,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('chance'.tr),
+                                    DropdownMenu<String>(
+                                      width:
+                                          homeController.isOpened.value
+                                              ? 130.w
+                                              //  MediaQuery.of(
+                                              //       context,
+                                              //     ).size.width *
+                                              //     0.07
+                                              : 150.w,
+                                      //  MediaQuery.of(
+                                      //       context,
+                                      //     ).size.width *
+                                      //     0.1,
+                                      // requestFocusOnTap: false,
+                                      enableSearch: true,
+                                      controller: chanceController,
+                                      hintText: '',
+                                      inputDecorationTheme: InputDecorationTheme(
+                                        // filled: true,
+                                        hintStyle: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                              20,
+                                              0,
+                                              25,
+                                              5,
+                                            ),
+                                        // outlineBorder: BorderSide(color: Colors.black,),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.2 * 255).toInt(),
+                                            ),
+                                            width: 1,
                                           ),
-                                          width: 1,
-                                        ),
-                                        borderRadius: const BorderRadius.all(
-                                          Radius.circular(9),
-                                        ),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Primary.primary.withAlpha(
-                                            (0.4 * 255).toInt(),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
                                           ),
-                                          width: 2,
                                         ),
-                                        borderRadius: const BorderRadius.all(
-                                          Radius.circular(9),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.4 * 255).toInt(),
+                                            ),
+                                            width: 2,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
                                         ),
                                       ),
+                                      // menuStyle: ,
+                                      menuHeight: 250,
+                                      dropdownMenuEntries:
+                                          chanceLevels.map<
+                                            DropdownMenuEntry<String>
+                                          >((String option) {
+                                            return DropdownMenuEntry<String>(
+                                              value: option,
+                                              label: option,
+                                            );
+                                          }).toList(),
+                                      enableFilter: true,
+                                      onSelected: (String? val) {
+                                        //   var index = quotationCont
+                                        //       .priceListsCodes
+                                        //       .indexOf(val!);
+                                        //   quotationCont.setSelectedPriceListId(
+                                        //     quotationCont.priceListsIds[index],
+                                        //   );
+                                        //   setState(() {
+                                        //     quotationCont
+                                        //         .resetItemsAfterChangePriceList();
+                                        //   });
+                                      },
                                     ),
-                                    // menuStyle: ,
-                                    menuHeight: 250,
-                                    dropdownMenuEntries:
-                                        chanceLevels
-                                            .map<DropdownMenuEntry<String>>((
-                                              String option,
-                                            ) {
-                                              return DropdownMenuEntry<String>(
-                                                value: option,
-                                                label: option,
-                                              );
-                                            })
-                                            .toList(),
-                                    enableFilter: true,
-                                    onSelected: (String? val) {
-                                      //   var index = quotationCont
-                                      //       .priceListsCodes
-                                      //       .indexOf(val!);
-                                      //   quotationCont.setSelectedPriceListId(
-                                      //     quotationCont.priceListsIds[index],
-                                      //   );
-                                      //   setState(() {
-                                      //     quotationCont
-                                      //         .resetItemsAfterChangePriceList();
-                                      //   });
-                                    },
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.15,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Pricelist'.tr),
-                                  DropdownMenu<String>(
-                                    width:
-                                        MediaQuery.of(context).size.width *
-                                        0.10,
-                                    // requestFocusOnTap: false,
-                                    enableSearch: true,
-                                    controller: priceListController,
-                                    hintText: '',
-                                    inputDecorationTheme: InputDecorationTheme(
-                                      // filled: true,
-                                      hintStyle: const TextStyle(
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                      contentPadding: const EdgeInsets.fromLTRB(
-                                        20,
-                                        0,
-                                        25,
-                                        5,
-                                      ),
-                                      // outlineBorder: BorderSide(color: Colors.black,),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Primary.primary.withAlpha(
-                                            (0.2 * 255).toInt(),
+                            if (screenWidth > 1230)
+                              SizedBox(
+                                width: 250.w,
+                                // width: MediaQuery.of(context).size.width * 0.15,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Pricelist'.tr),
+                                    DropdownMenu<String>(
+                                      width: 200.w,
+                                      // MediaQuery.of(context).size.width *
+                                      // 0.10,
+                                      // requestFocusOnTap: false,
+                                      enableSearch: true,
+                                      controller: priceListController,
+                                      hintText: '',
+                                      inputDecorationTheme: InputDecorationTheme(
+                                        // filled: true,
+                                        hintStyle: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                              20,
+                                              0,
+                                              25,
+                                              5,
+                                            ),
+                                        // outlineBorder: BorderSide(color: Colors.black,),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.2 * 255).toInt(),
+                                            ),
+                                            width: 1,
                                           ),
-                                          width: 1,
-                                        ),
-                                        borderRadius: const BorderRadius.all(
-                                          Radius.circular(9),
-                                        ),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Primary.primary.withAlpha(
-                                            (0.4 * 255).toInt(),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
                                           ),
-                                          width: 2,
                                         ),
-                                        borderRadius: const BorderRadius.all(
-                                          Radius.circular(9),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.4 * 255).toInt(),
+                                            ),
+                                            width: 2,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
                                         ),
                                       ),
+                                      // menuStyle: ,
+                                      menuHeight: 250,
+                                      dropdownMenuEntries:
+                                          quotationCont.priceListsCodes.map<
+                                            DropdownMenuEntry<String>
+                                          >((String option) {
+                                            return DropdownMenuEntry<String>(
+                                              value: option,
+                                              label: option,
+                                            );
+                                          }).toList(),
+                                      enableFilter: true,
+                                      onSelected: (String? val) {
+                                        var index = quotationCont
+                                            .priceListsCodes
+                                            .indexOf(val!);
+                                        quotationCont.setSelectedPriceListId(
+                                          quotationCont.priceListsIds[index],
+                                        );
+                                        setState(() {
+                                          quotationCont
+                                              .resetItemsAfterChangePriceList();
+                                        });
+                                      },
                                     ),
-                                    // menuStyle: ,
-                                    menuHeight: 250,
-                                    dropdownMenuEntries:
-                                        quotationCont.priceListsCodes
-                                            .map<DropdownMenuEntry<String>>((
-                                              String option,
-                                            ) {
-                                              return DropdownMenuEntry<String>(
-                                                value: option,
-                                                label: option,
-                                              );
-                                            })
-                                            .toList(),
-                                    enableFilter: true,
-                                    onSelected: (String? val) {
-                                      var index = quotationCont.priceListsCodes
-                                          .indexOf(val!);
-                                      quotationCont.setSelectedPriceListId(
-                                        quotationCont.priceListsIds[index],
-                                      );
-                                      setState(() {
-                                        quotationCont
-                                            .resetItemsAfterChangePriceList();
-                                      });
-                                    },
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
                           ],
                         ),
                         gapH10,
+                        if (screenWidth < 800)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: screenWidth > 560 ? 400.w : 300.w,
+
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('validity'.tr),
+                                    DialogDateTextField(
+                                      textEditingController: validityController,
+                                      text: '',
+                                      textFieldWidth:
+                                          screenWidth > 560 ? 340.w : 240.w,
+
+                                      validationFunc: (val) {},
+                                      onChangedFunc: (val) {
+                                        validityController.text = val;
+                                      },
+                                      onDateSelected: (value) {
+                                        validityController.text = value;
+                                        setState(() {
+                                          // LocalDate a=LocalDate.today();
+                                          // LocalDate b = LocalDate.dateTime(value);
+                                          // Period diff = b.periodSince(a);
+                                          // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                width: screenWidth > 560 ? 400.w : 300.w,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('chance'.tr),
+                                    DropdownMenu<String>(
+                                      width: screenWidth > 560 ? 340.w : 240.w,
+                                      // requestFocusOnTap: false,
+                                      enableSearch: true,
+                                      controller: chanceController,
+                                      hintText: '',
+                                      inputDecorationTheme: InputDecorationTheme(
+                                        // filled: true,
+                                        hintStyle: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                              20,
+                                              0,
+                                              25,
+                                              5,
+                                            ),
+                                        // outlineBorder: BorderSide(color: Colors.black,),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.2 * 255).toInt(),
+                                            ),
+                                            width: 1,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.4 * 255).toInt(),
+                                            ),
+                                            width: 2,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                      ),
+                                      // menuStyle: ,
+                                      menuHeight: 250,
+                                      dropdownMenuEntries:
+                                          chanceLevels.map<
+                                            DropdownMenuEntry<String>
+                                          >((String option) {
+                                            return DropdownMenuEntry<String>(
+                                              value: option,
+                                              label: option,
+                                            );
+                                          }).toList(),
+                                      enableFilter: true,
+                                      onSelected: (String? val) {
+                                        //   var index = quotationCont
+                                        //       .priceListsCodes
+                                        //       .indexOf(val!);
+                                        //   quotationCont.setSelectedPriceListId(
+                                        //     quotationCont.priceListsIds[index],
+                                        //   );
+                                        //   setState(() {
+                                        //     quotationCont
+                                        //         .resetItemsAfterChangePriceList();
+                                        //   });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        gapH10,
+                        if (screenWidth < 1230 && screenWidth > 800)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width:
+                                    homeController.isOpened.value
+                                        ? screenWidth > 1230
+                                            ? MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.10
+                                            : MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.20
+                                        : MediaQuery.of(context).size.width *
+                                            0.14,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('chance'.tr),
+                                    DropdownMenu<String>(
+                                      width:
+                                          homeController.isOpened.value
+                                              ? screenWidth > 1230
+                                                  ? MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.07
+                                                  : MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
+                                                      0.15
+                                              : MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.1,
+                                      // requestFocusOnTap: false,
+                                      enableSearch: true,
+                                      controller: chanceController,
+                                      hintText: '',
+                                      inputDecorationTheme: InputDecorationTheme(
+                                        // filled: true,
+                                        hintStyle: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                              20,
+                                              0,
+                                              25,
+                                              5,
+                                            ),
+                                        // outlineBorder: BorderSide(color: Colors.black,),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.2 * 255).toInt(),
+                                            ),
+                                            width: 1,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.4 * 255).toInt(),
+                                            ),
+                                            width: 2,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                      ),
+                                      // menuStyle: ,
+                                      menuHeight: 250,
+                                      dropdownMenuEntries:
+                                          chanceLevels.map<
+                                            DropdownMenuEntry<String>
+                                          >((String option) {
+                                            return DropdownMenuEntry<String>(
+                                              value: option,
+                                              label: option,
+                                            );
+                                          }).toList(),
+                                      enableFilter: true,
+                                      onSelected: (String? val) {
+                                        //   var index = quotationCont
+                                        //       .priceListsCodes
+                                        //       .indexOf(val!);
+                                        //   quotationCont.setSelectedPriceListId(
+                                        //     quotationCont.priceListsIds[index],
+                                        //   );
+                                        //   setState(() {
+                                        //     quotationCont
+                                        //         .resetItemsAfterChangePriceList();
+                                        //   });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              SizedBox(
+                                width:
+                                    screenWidth > 1230
+                                        ? MediaQuery.of(context).size.width *
+                                            0.15
+                                        : MediaQuery.of(context).size.width *
+                                            0.20,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Pricelist'.tr),
+                                    DropdownMenu<String>(
+                                      width:
+                                          screenWidth > 1230
+                                              ? MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.10
+                                              : MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.15,
+                                      // requestFocusOnTap: false,
+                                      enableSearch: true,
+                                      controller: priceListController,
+                                      hintText: '',
+                                      inputDecorationTheme: InputDecorationTheme(
+                                        // filled: true,
+                                        hintStyle: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                              20,
+                                              0,
+                                              25,
+                                              5,
+                                            ),
+                                        // outlineBorder: BorderSide(color: Colors.black,),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.2 * 255).toInt(),
+                                            ),
+                                            width: 1,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.4 * 255).toInt(),
+                                            ),
+                                            width: 2,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                      ),
+                                      // menuStyle: ,
+                                      menuHeight: 250,
+                                      dropdownMenuEntries:
+                                          quotationCont.priceListsCodes.map<
+                                            DropdownMenuEntry<String>
+                                          >((String option) {
+                                            return DropdownMenuEntry<String>(
+                                              value: option,
+                                              label: option,
+                                            );
+                                          }).toList(),
+                                      enableFilter: true,
+                                      onSelected: (String? val) {
+                                        var index = quotationCont
+                                            .priceListsCodes
+                                            .indexOf(val!);
+                                        quotationCont.setSelectedPriceListId(
+                                          quotationCont.priceListsIds[index],
+                                        );
+                                        setState(() {
+                                          quotationCont
+                                              .resetItemsAfterChangePriceList();
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                width:
+                                    screenWidth > 1230
+                                        ? MediaQuery.of(context).size.width *
+                                            0.15
+                                        : MediaQuery.of(context).size.width *
+                                            0.20,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('input_date'.tr),
+                                    DialogDateTextField(
+                                      textEditingController:
+                                          inputDateController,
+                                      text: '',
+                                      textFieldWidth:
+                                          screenWidth > 1230
+                                              ? MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.09
+                                              : MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.15,
+                                      // MediaQuery.of(context).size.width * 0.25,
+                                      validationFunc: (val) {},
+                                      onChangedFunc: (val) {
+                                        inputDateController.text = val;
+                                      },
+                                      onDateSelected: (value) {
+                                        inputDateController.text = value;
+                                        setState(() {
+                                          // LocalDate a=LocalDate.today();
+                                          // LocalDate b = LocalDate.dateTime(value);
+                                          // Period diff = b.periodSince(a);
+                                          // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        gapH10,
+                        if (screenWidth < 800)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: screenWidth > 560 ? 400.w : 300.w,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Pricelist'.tr),
+                                    DropdownMenu<String>(
+                                      width: screenWidth > 560 ? 340.w : 240.w,
+                                      // requestFocusOnTap: false,
+                                      enableSearch: true,
+                                      controller: priceListController,
+                                      hintText: '',
+                                      inputDecorationTheme: InputDecorationTheme(
+                                        // filled: true,
+                                        hintStyle: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                              20,
+                                              0,
+                                              25,
+                                              5,
+                                            ),
+                                        // outlineBorder: BorderSide(color: Colors.black,),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.2 * 255).toInt(),
+                                            ),
+                                            width: 1,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.4 * 255).toInt(),
+                                            ),
+                                            width: 2,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                      ),
+                                      // menuStyle: ,
+                                      menuHeight: 250,
+                                      dropdownMenuEntries:
+                                          quotationCont.priceListsCodes.map<
+                                            DropdownMenuEntry<String>
+                                          >((String option) {
+                                            return DropdownMenuEntry<String>(
+                                              value: option,
+                                              label: option,
+                                            );
+                                          }).toList(),
+                                      enableFilter: true,
+                                      onSelected: (String? val) {
+                                        var index = quotationCont
+                                            .priceListsCodes
+                                            .indexOf(val!);
+                                        quotationCont.setSelectedPriceListId(
+                                          quotationCont.priceListsIds[index],
+                                        );
+                                        setState(() {
+                                          quotationCont
+                                              .resetItemsAfterChangePriceList();
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                width: screenWidth > 560 ? 420.w : 320.w,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('input_date'.tr),
+                                    DialogDateTextField(
+                                      textEditingController:
+                                          inputDateController,
+                                      text: '',
+                                      textFieldWidth:
+                                          screenWidth > 560 ? 340.w : 240.w,
+                                      // MediaQuery.of(context).size.width * 0.25,
+                                      validationFunc: (val) {},
+                                      onChangedFunc: (val) {
+                                        inputDateController.text = val;
+                                      },
+                                      onDateSelected: (value) {
+                                        inputDateController.text = value;
+                                        setState(() {
+                                          // LocalDate a=LocalDate.today();
+                                          // LocalDate b = LocalDate.dateTime(value);
+                                          // Period diff = b.periodSince(a);
+                                          // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        if (screenWidth < 1230) gapH10,
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.15,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('input_date'.tr),
-                                  DialogDateTextField(
-                                    textEditingController: inputDateController,
-                                    text: '',
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.09,
-                                    // MediaQuery.of(context).size.width * 0.25,
-                                    validationFunc: (val) {},
-                                    onChangedFunc: (val) {
-                                      inputDateController.text = val;
-                                    },
-                                    onDateSelected: (value) {
-                                      inputDateController.text = value;
-                                      setState(() {
-                                        // LocalDate a=LocalDate.today();
-                                        // LocalDate b = LocalDate.dateTime(value);
-                                        // Period diff = b.periodSince(a);
-                                        // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
-                                      });
-                                    },
-                                  ),
-                                ],
+                            if (screenWidth > 1230)
+                              SizedBox(
+                                width: 240.w,
+                                // width: MediaQuery.of(context).size.width * 0.15,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('input_date'.tr),
+                                    DialogDateTextField(
+                                      textEditingController:
+                                          inputDateController,
+                                      text: '',
+                                      textFieldWidth: 170.w,
+                                      // MediaQuery.of(context).size.width *
+                                      // 0.09,
+                                      // MediaQuery.of(context).size.width * 0.25,
+                                      validationFunc: (val) {},
+                                      onChangedFunc: (val) {
+                                        inputDateController.text = val;
+                                      },
+                                      onDateSelected: (value) {
+                                        inputDateController.text = value;
+                                        setState(() {
+                                          // LocalDate a=LocalDate.today();
+                                          // LocalDate b = LocalDate.dateTime(value);
+                                          // Period diff = b.periodSince(a);
+                                          // print("years: ${diff.years}; months: ${diff.months}; days: ${diff.days}");
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
                             //code
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.37,
+                              width:
+                                  screenWidth > 1230
+                                      ? 600.w
+                                      : screenWidth > 560
+                                      ? 800.w
+                                      : 700.w,
+
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text('code'.tr),
+                                  gapW6,
+
                                   DropdownMenu<String>(
-                                    width:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
+                                    width: 200.w,
+
                                     // requestFocusOnTap: false,
                                     enableSearch: true,
                                     controller: codeController,
@@ -1617,11 +2211,19 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     },
                                     validationFunc: (value) {},
                                     rowWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.18,
+                                        screenWidth > 1230
+                                            ? 350.w
+                                            : screenWidth > 560
+                                            ? 550.w
+                                            : 400.w,
+
                                     textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.17,
+                                        screenWidth > 1230
+                                            ? 340.w
+                                            : screenWidth > 560
+                                            ? 540.w
+                                            : 380.w,
+
                                     clickableOptionText: 'create_new_client'.tr,
                                     isThereClickableOption: true,
                                     onTappedClickableOption: () {
@@ -1646,16 +2248,18 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 ],
                               ),
                             ),
-                            DialogTextField(
-                              textEditingController: paymentTermsController,
-                              text: 'payment_terms'.tr,
-                              hint: '',
-                              rowWidth:
-                                  MediaQuery.of(context).size.width * 0.24,
-                              textFieldWidth:
-                                  MediaQuery.of(context).size.width * 0.15,
-                              validationFunc: (val) {},
-                            ),
+                            if (screenWidth > 1100)
+                              DialogTextField(
+                                textEditingController: paymentTermsController,
+                                text: 'payment_terms'.tr,
+                                hint: '',
+                                rowWidth: screenWidth > 1220 ? 270.w : 350.w,
+                                // MediaQuery.of(context).size.width * 0.24,
+                                textFieldWidth:
+                                    screenWidth > 1220 ? 170.w : 240.w,
+                                // MediaQuery.of(context).size.width * 0.15,
+                                validationFunc: (val) {},
+                              ),
                             // SizedBox(
                             //   width: MediaQuery.of(context).size.width * 0.24,
                             //   child: Row(
@@ -1745,118 +2349,263 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.3,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  //address
-                                  Row(
-                                    children: [
-                                      Text(
-                                        '${'Street_building_floor'.tr} ',
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      gapW10,
-                                      Text(
-                                        " ${quotationCont.street[selectedCustomerIds] ?? ''} ",
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      Text(
-                                        quotationCont.floorAndBuilding[selectedCustomerIds] ==
-                                                    '' ||
-                                                quotationCont
-                                                        .floorAndBuilding[selectedCustomerIds] ==
-                                                    null
-                                            ? ''
-                                            : ',',
-                                      ),
-                                      Text(
-                                        " ${quotationCont.floorAndBuilding[selectedCustomerIds] ?? ''}",
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                  gapH6,
-                                  //tel
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'phone_number'.tr,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      gapW10,
-                                      Text(
-                                        "${quotationCont.phoneNumber[selectedCustomerIds] ?? ''}",
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                            if (screenWidth > 1100)
+                              SizedBox(
+                                width: 500.w,
+                                // width: MediaQuery.of(context).size.width * 0.5,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    //address
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${'Street_building_floor'.tr} ',
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                        gapW10,
+                                        Text(
+                                          " ${quotationCont.street[selectedCustomerIds] ?? ''} ",
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                        Text(
+                                          quotationCont.floorAndBuilding[selectedCustomerIds] ==
+                                                      '' ||
+                                                  quotationCont
+                                                          .floorAndBuilding[selectedCustomerIds] ==
+                                                      null
+                                              ? ''
+                                              : ',',
+                                        ),
+                                        Text(
+                                          " ${quotationCont.floorAndBuilding[selectedCustomerIds] ?? ''}",
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                    gapH6,
+                                    //tel
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'phone_number'.tr,
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                        gapW10,
+                                        Text(
+                                          "${quotationCont.phoneNumber[selectedCustomerIds] ?? ''}",
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            gapW16,
+                            if (screenWidth < 1100)
+                              DialogTextField(
+                                textEditingController: paymentTermsController,
+                                text: 'payment_terms'.tr,
+                                hint: '',
+                                rowWidth: screenWidth > 1100 ? 270.w : 400.w,
+                                textFieldWidth:
+                                    screenWidth > 1100 ? 170.w : 280.w,
+                                validationFunc: (val) {},
+                              ),
+
+                            // gapW16,
                             DialogTextField(
                               textEditingController: deliveryTermsController,
                               text: '${'delivery_terms'.tr}:',
                               hint: '',
                               rowWidth:
-                                  MediaQuery.of(context).size.width * 0.24,
+                                  screenWidth > 1220
+                                      ? 270.w
+                                      : screenWidth > 1100
+                                      ? 350.w
+                                      : screenWidth > 800
+                                      ? 400.w
+                                      : screenWidth > 610
+                                      ? 480.w
+                                      : screenWidth > 560
+                                      ? 370.w
+                                      : 300.w,
+
                               textFieldWidth:
-                                  MediaQuery.of(context).size.width * 0.15,
+                                  screenWidth > 1220
+                                      ? 170.w
+                                      : screenWidth > 1100
+                                      ? 240.w
+                                      : screenWidth > 800
+                                      ? 280.w
+                                      : screenWidth > 610
+                                      ? 350.w
+                                      : screenWidth > 560
+                                      ? 270.w
+                                      : 200.w,
+
                               validationFunc: (val) {},
                             ),
                           ],
                         ),
                         gapH10,
+                        if (screenWidth < 1100)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: 400.w,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    //address
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${'Street_building_floor'.tr} ',
+                                          style: TextStyle(fontSize: 12.sp),
+                                        ),
+                                        gapW10,
+                                        Text(
+                                          " ${quotationCont.street[selectedCustomerIds] ?? ''} ",
+                                          style: TextStyle(fontSize: 12.sp),
+                                        ),
+                                        Text(
+                                          quotationCont.floorAndBuilding[selectedCustomerIds] ==
+                                                      '' ||
+                                                  quotationCont
+                                                          .floorAndBuilding[selectedCustomerIds] ==
+                                                      null
+                                              ? ''
+                                              : ',',
+                                        ),
+                                        Text(
+                                          " ${quotationCont.floorAndBuilding[selectedCustomerIds] ?? ''}",
+                                          style: TextStyle(fontSize: 12.sp),
+                                        ),
+                                      ],
+                                    ),
+                                    gapH6,
+                                    //tel
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'phone_number'.tr,
+                                          style: TextStyle(fontSize: 12.sp),
+                                        ),
+                                        gapW10,
+                                        Text(
+                                          "${quotationCont.phoneNumber[selectedCustomerIds] ?? ''}",
+                                          style: TextStyle(fontSize: 12.sp),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              SizedBox(
+                                width: screenWidth > 676 ? 400.w : 300.w,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'email'.tr,
+                                          style: TextStyle(fontSize: 12.sp),
+                                        ),
+                                        gapW10,
+                                        GetBuilder<QuotationController>(
+                                          builder: (cont) {
+                                            return Text(
+                                              "${cont.email[selectedCustomerIds] ?? ''}",
+                                              style: TextStyle(fontSize: 12.sp),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    gapH6,
+                                    quotationCont
+                                            .isVatExemptCheckBoxShouldAppear
+                                        ? Row(
+                                          children: [
+                                            Text(
+                                              'vat'.tr,
+                                              style: TextStyle(fontSize: 12.sp),
+                                            ),
+                                            gapW10,
+                                          ],
+                                        )
+                                        : SizedBox(),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        gapH10,
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.15,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'email'.tr,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      gapW10,
-                                      GetBuilder<QuotationController>(
-                                        builder: (cont) {
-                                          return Text(
-                                            "${cont.email[selectedCustomerIds] ?? ''}",
-                                            style: const TextStyle(
-                                              fontSize: 12,
+                            if (screenWidth > 1100)
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.20,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'email'.tr,
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                        gapW10,
+                                        GetBuilder<QuotationController>(
+                                          builder: (cont) {
+                                            return Text(
+                                              "${cont.email[selectedCustomerIds] ?? ''}",
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    gapH6,
+                                    quotationCont
+                                            .isVatExemptCheckBoxShouldAppear
+                                        ? Row(
+                                          children: [
+                                            Text(
+                                              'vat'.tr,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                              ),
                                             ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  gapH6,
-                                  quotationCont.isVatExemptCheckBoxShouldAppear
-                                      ? Row(
-                                        children: [
-                                          Text(
-                                            'vat'.tr,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          gapW10,
-                                        ],
-                                      )
-                                      : SizedBox(),
-                                ],
+                                            gapW10,
+                                          ],
+                                        )
+                                        : SizedBox(),
+                                  ],
+                                ),
                               ),
-                            ),
+
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.24,
+                              width:
+                                  screenWidth > 1100
+                                      ? MediaQuery.of(context).size.width * 0.20
+                                      : screenWidth > 900
+                                      ? MediaQuery.of(context).size.width * 0.34
+                                      : screenWidth > 676
+                                      ? MediaQuery.of(context).size.width * 0.25
+                                      : screenWidth > 560
+                                      ? 800.w
+                                      : 690.w,
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -1874,8 +2623,24 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                         enabled:
                                             !quotationCont.isVatExemptChecked,
                                         width:
-                                            MediaQuery.of(context).size.width *
-                                            0.15,
+                                            screenWidth > 1100
+                                                ? MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.15
+                                                : screenWidth > 900
+                                                ? MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.24
+                                                : screenWidth > 676
+                                                ? MediaQuery.of(
+                                                      context,
+                                                    ).size.width *
+                                                    0.20
+                                                : screenWidth > 560
+                                                ? 700.w
+                                                : 650.w,
                                         // requestFocusOnTap: false,
                                         enableSearch: true,
                                         controller: priceConditionController,
@@ -2090,280 +2855,537 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 ],
                               ),
                             ),
-                            gapW16,
+                            //     gapW10,
                             //vat exempt
-                            quotationCont.isVatExemptCheckBoxShouldAppear
-                                ? SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.28,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: ListTile(
-                                          title: Text(
-                                            'vat_exempt'.tr,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          leading: Checkbox(
-                                            value:
-                                                quotationCont
-                                                    .isVatExemptChecked,
-                                            onChanged: (bool? value) {
-                                              quotationCont
-                                                  .setIsVatExemptChecked(
-                                                    value!,
-                                                  );
-                                              if (value) {
-                                                priceConditionController.text =
-                                                    'Prices are before vat';
-                                                quotationCont
-                                                    .setIsBeforeVatPrices(true);
-                                                vatExemptController.text =
-                                                    vatExemptList[0];
-                                                quotationCont.setIsVatExempted(
-                                                  true,
-                                                  false,
-                                                  false,
-                                                );
-                                              } else {
-                                                vatExemptController.clear();
-                                                quotationCont.setIsVatExempted(
-                                                  false,
-                                                  false,
-                                                  false,
-                                                );
-                                              }
-                                              // setState(() {
-                                              //   isVatExemptChecked = value!;
-                                              // });
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                      quotationCont.isVatExemptChecked == false
-                                          ? DropdownMenu<String>(
-                                            width:
-                                                MediaQuery.of(
+                            if (screenWidth >= 676)
+                              quotationCont.isVatExemptCheckBoxShouldAppear
+                                  ? SizedBox(
+                                    width:
+                                        screenWidth > 1100
+                                            ? MediaQuery.of(
                                                   context,
                                                 ).size.width *
-                                                0.15,
-                                            enableSearch: true,
-                                            controller: vatExemptController,
-                                            hintText: '',
-
-                                            textStyle: const TextStyle(
-                                              fontSize: 12,
-                                            ),
-                                            inputDecorationTheme:
-                                                InputDecorationTheme(
-                                                  hintStyle: const TextStyle(
-                                                    fontStyle: FontStyle.italic,
-                                                  ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                          color: Primary.primary
-                                                              .withAlpha(
-                                                                (0.2 * 255)
-                                                                    .toInt(),
-                                                              ),
-                                                          width: 1,
-                                                        ),
-                                                        borderRadius:
-                                                            const BorderRadius.all(
-                                                              Radius.circular(
-                                                                9,
-                                                              ),
-                                                            ),
-                                                      ),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                          color: Primary.primary
-                                                              .withAlpha(
-                                                                (0.4 * 255)
-                                                                    .toInt(),
-                                                              ),
-                                                          width: 2,
-                                                        ),
-                                                        borderRadius:
-                                                            const BorderRadius.all(
-                                                              Radius.circular(
-                                                                9,
-                                                              ),
-                                                            ),
-                                                      ),
-                                                ),
-                                            // menuStyle: ,
-                                            menuHeight: 250,
-                                            dropdownMenuEntries:
-                                                termsList.map<
-                                                  DropdownMenuEntry<String>
-                                                >((String option) {
-                                                  return DropdownMenuEntry<
-                                                    String
-                                                  >(
-                                                    value: option,
-                                                    label: option,
-                                                  );
-                                                }).toList(),
-                                            enableFilter: true,
-                                            onSelected: (String? val) {},
-                                          )
-                                          : DropdownMenu<String>(
-                                            width:
-                                                MediaQuery.of(
+                                                0.28
+                                            : MediaQuery.of(
                                                   context,
                                                 ).size.width *
-                                                0.15,
-                                            // requestFocusOnTap: false,
-                                            enableSearch: true,
-                                            controller: vatExemptController,
-                                            hintText: '',
-
-                                            textStyle: const TextStyle(
-                                              fontSize: 12,
+                                                0.34,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: ListTile(
+                                            title: Text(
+                                              'vat_exempt'.tr,
+                                              style: TextStyle(fontSize: 12.sp),
                                             ),
-                                            inputDecorationTheme:
-                                                InputDecorationTheme(
-                                                  // filled: true,
-                                                  hintStyle: const TextStyle(
-                                                    fontStyle: FontStyle.italic,
-                                                  ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                          color: Primary.primary
-                                                              .withAlpha(
-                                                                (0.2 * 255)
-                                                                    .toInt(),
-                                                              ),
-                                                          width: 1,
-                                                        ),
-                                                        borderRadius:
-                                                            const BorderRadius.all(
-                                                              Radius.circular(
-                                                                9,
-                                                              ),
-                                                            ),
-                                                      ),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                        borderSide: BorderSide(
-                                                          color: Primary.primary
-                                                              .withAlpha(
-                                                                (0.4 * 255)
-                                                                    .toInt(),
-                                                              ),
-                                                          width: 2,
-                                                        ),
-                                                        borderRadius:
-                                                            const BorderRadius.all(
-                                                              Radius.circular(
-                                                                9,
-                                                              ),
-                                                            ),
-                                                      ),
-                                                ),
-                                            // menuStyle: ,
-                                            menuHeight: 250,
-                                            dropdownMenuEntries:
-                                                vatExemptList.map<
-                                                  DropdownMenuEntry<String>
-                                                >((String option) {
-                                                  return DropdownMenuEntry<
-                                                    String
-                                                  >(
-                                                    value: option,
-                                                    label: option,
-                                                  );
-                                                }).toList(),
-                                            enableFilter: true,
-                                            onSelected: (String? val) {
-                                              setState(() {
-                                                if (val ==
-                                                    'Printed as "vat exempted"') {
+                                            leading: Checkbox(
+                                              value:
                                                   quotationCont
-                                                      .setIsVatExempted(
+                                                      .isVatExemptChecked,
+                                              onChanged: (bool? value) {
+                                                quotationCont
+                                                    .setIsVatExemptChecked(
+                                                      value!,
+                                                    );
+                                                if (value) {
+                                                  priceConditionController
+                                                          .text =
+                                                      'Prices are before vat';
+                                                  quotationCont
+                                                      .setIsBeforeVatPrices(
                                                         true,
-                                                        false,
-                                                        false,
                                                       );
-                                                } else if (val ==
-                                                    'Printed as "vat 0 % = 0"') {
+                                                  vatExemptController.text =
+                                                      vatExemptList[0];
                                                   quotationCont
                                                       .setIsVatExempted(
-                                                        false,
                                                         true,
+                                                        false,
                                                         false,
                                                       );
                                                 } else {
+                                                  vatExemptController.clear();
                                                   quotationCont
                                                       .setIsVatExempted(
                                                         false,
                                                         false,
-                                                        true,
+                                                        false,
                                                       );
                                                 }
-                                              });
-                                            },
+                                                // setState(() {
+                                                //   isVatExemptChecked = value!;
+                                                // });
+                                              },
+                                            ),
                                           ),
-                                    ],
-                                  ),
-                                )
-                                : SizedBox(),
+                                        ),
+                                        quotationCont.isVatExemptChecked ==
+                                                false
+                                            ? DropdownMenu<String>(
+                                              width:
+                                                  screenWidth > 1100
+                                                      ? MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.15
+                                                      : MediaQuery.of(
+                                                            context,
+                                                          ).size.width *
+                                                          0.20,
+                                              enableSearch: true,
+                                              controller: vatExemptController,
+                                              hintText: '',
+
+                                              textStyle: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                              inputDecorationTheme: InputDecorationTheme(
+                                                hintStyle: const TextStyle(
+                                                  fontStyle: FontStyle.italic,
+                                                ),
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Primary.primary
+                                                            .withAlpha(
+                                                              (0.2 * 255)
+                                                                  .toInt(),
+                                                            ),
+                                                        width: 1,
+                                                      ),
+                                                      borderRadius:
+                                                          const BorderRadius.all(
+                                                            Radius.circular(9),
+                                                          ),
+                                                    ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Primary.primary
+                                                            .withAlpha(
+                                                              (0.4 * 255)
+                                                                  .toInt(),
+                                                            ),
+                                                        width: 2,
+                                                      ),
+                                                      borderRadius:
+                                                          const BorderRadius.all(
+                                                            Radius.circular(9),
+                                                          ),
+                                                    ),
+                                              ),
+                                              // menuStyle: ,
+                                              menuHeight: 250,
+                                              dropdownMenuEntries:
+                                                  termsList.map<
+                                                    DropdownMenuEntry<String>
+                                                  >((String option) {
+                                                    return DropdownMenuEntry<
+                                                      String
+                                                    >(
+                                                      value: option,
+                                                      label: option,
+                                                    );
+                                                  }).toList(),
+                                              enableFilter: true,
+                                              onSelected: (String? val) {},
+                                            )
+                                            : DropdownMenu<String>(
+                                              width:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.15,
+                                              // requestFocusOnTap: false,
+                                              enableSearch: true,
+                                              controller: vatExemptController,
+                                              hintText: '',
+
+                                              textStyle: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                              inputDecorationTheme: InputDecorationTheme(
+                                                // filled: true,
+                                                hintStyle: const TextStyle(
+                                                  fontStyle: FontStyle.italic,
+                                                ),
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Primary.primary
+                                                            .withAlpha(
+                                                              (0.2 * 255)
+                                                                  .toInt(),
+                                                            ),
+                                                        width: 1,
+                                                      ),
+                                                      borderRadius:
+                                                          const BorderRadius.all(
+                                                            Radius.circular(9),
+                                                          ),
+                                                    ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Primary.primary
+                                                            .withAlpha(
+                                                              (0.4 * 255)
+                                                                  .toInt(),
+                                                            ),
+                                                        width: 2,
+                                                      ),
+                                                      borderRadius:
+                                                          const BorderRadius.all(
+                                                            Radius.circular(9),
+                                                          ),
+                                                    ),
+                                              ),
+                                              // menuStyle: ,
+                                              menuHeight: 250,
+                                              dropdownMenuEntries:
+                                                  vatExemptList.map<
+                                                    DropdownMenuEntry<String>
+                                                  >((String option) {
+                                                    return DropdownMenuEntry<
+                                                      String
+                                                    >(
+                                                      value: option,
+                                                      label: option,
+                                                    );
+                                                  }).toList(),
+                                              enableFilter: true,
+                                              onSelected: (String? val) {
+                                                setState(() {
+                                                  if (val ==
+                                                      'Printed as "vat exempted"') {
+                                                    quotationCont
+                                                        .setIsVatExempted(
+                                                          true,
+                                                          false,
+                                                          false,
+                                                        );
+                                                  } else if (val ==
+                                                      'Printed as "vat 0 % = 0"') {
+                                                    quotationCont
+                                                        .setIsVatExempted(
+                                                          false,
+                                                          true,
+                                                          false,
+                                                        );
+                                                  } else {
+                                                    quotationCont
+                                                        .setIsVatExempted(
+                                                          false,
+                                                          false,
+                                                          true,
+                                                        );
+                                                  }
+                                                });
+                                              },
+                                            ),
+                                      ],
+                                    ),
+                                  )
+                                  : SizedBox(),
                           ],
                         ),
+                        gapH10,
+                        if (screenWidth < 676)
+                          Row(
+                            children: [
+                              quotationCont.isVatExemptCheckBoxShouldAppear
+                                  ? SizedBox(
+                                    width: screenWidth > 560 ? 800.w : 690.w,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: ListTile(
+                                            title: Text(
+                                              'vat_exempt'.tr,
+                                              style: TextStyle(fontSize: 12.sp),
+                                            ),
+                                            leading: Checkbox(
+                                              value:
+                                                  quotationCont
+                                                      .isVatExemptChecked,
+                                              onChanged: (bool? value) {
+                                                quotationCont
+                                                    .setIsVatExemptChecked(
+                                                      value!,
+                                                    );
+                                                if (value) {
+                                                  priceConditionController
+                                                          .text =
+                                                      'Prices are before vat';
+                                                  quotationCont
+                                                      .setIsBeforeVatPrices(
+                                                        true,
+                                                      );
+                                                  vatExemptController.text =
+                                                      vatExemptList[0];
+                                                  quotationCont
+                                                      .setIsVatExempted(
+                                                        true,
+                                                        false,
+                                                        false,
+                                                      );
+                                                } else {
+                                                  vatExemptController.clear();
+                                                  quotationCont
+                                                      .setIsVatExempted(
+                                                        false,
+                                                        false,
+                                                        false,
+                                                      );
+                                                }
+                                                // setState(() {
+                                                //   isVatExemptChecked = value!;
+                                                // });
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        quotationCont.isVatExemptChecked ==
+                                                false
+                                            ? DropdownMenu<String>(
+                                              width:
+                                                  screenWidth > 560
+                                                      ? 500.w
+                                                      : 350.w,
+                                              enableSearch: true,
+                                              controller: vatExemptController,
+                                              hintText: '',
+
+                                              textStyle: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                              inputDecorationTheme: InputDecorationTheme(
+                                                hintStyle: const TextStyle(
+                                                  fontStyle: FontStyle.italic,
+                                                ),
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Primary.primary
+                                                            .withAlpha(
+                                                              (0.2 * 255)
+                                                                  .toInt(),
+                                                            ),
+                                                        width: 1,
+                                                      ),
+                                                      borderRadius:
+                                                          const BorderRadius.all(
+                                                            Radius.circular(9),
+                                                          ),
+                                                    ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Primary.primary
+                                                            .withAlpha(
+                                                              (0.4 * 255)
+                                                                  .toInt(),
+                                                            ),
+                                                        width: 2,
+                                                      ),
+                                                      borderRadius:
+                                                          const BorderRadius.all(
+                                                            Radius.circular(9),
+                                                          ),
+                                                    ),
+                                              ),
+                                              // menuStyle: ,
+                                              menuHeight: 250,
+                                              dropdownMenuEntries:
+                                                  termsList.map<
+                                                    DropdownMenuEntry<String>
+                                                  >((String option) {
+                                                    return DropdownMenuEntry<
+                                                      String
+                                                    >(
+                                                      value: option,
+                                                      label: option,
+                                                    );
+                                                  }).toList(),
+                                              enableFilter: true,
+                                              onSelected: (String? val) {},
+                                            )
+                                            : DropdownMenu<String>(
+                                              width:
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.15,
+                                              // requestFocusOnTap: false,
+                                              enableSearch: true,
+                                              controller: vatExemptController,
+                                              hintText: '',
+
+                                              textStyle: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                              inputDecorationTheme: InputDecorationTheme(
+                                                // filled: true,
+                                                hintStyle: const TextStyle(
+                                                  fontStyle: FontStyle.italic,
+                                                ),
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Primary.primary
+                                                            .withAlpha(
+                                                              (0.2 * 255)
+                                                                  .toInt(),
+                                                            ),
+                                                        width: 1,
+                                                      ),
+                                                      borderRadius:
+                                                          const BorderRadius.all(
+                                                            Radius.circular(9),
+                                                          ),
+                                                    ),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Primary.primary
+                                                            .withAlpha(
+                                                              (0.4 * 255)
+                                                                  .toInt(),
+                                                            ),
+                                                        width: 2,
+                                                      ),
+                                                      borderRadius:
+                                                          const BorderRadius.all(
+                                                            Radius.circular(9),
+                                                          ),
+                                                    ),
+                                              ),
+                                              // menuStyle: ,
+                                              menuHeight: 250,
+                                              dropdownMenuEntries:
+                                                  vatExemptList.map<
+                                                    DropdownMenuEntry<String>
+                                                  >((String option) {
+                                                    return DropdownMenuEntry<
+                                                      String
+                                                    >(
+                                                      value: option,
+                                                      label: option,
+                                                    );
+                                                  }).toList(),
+                                              enableFilter: true,
+                                              onSelected: (String? val) {
+                                                setState(() {
+                                                  if (val ==
+                                                      'Printed as "vat exempted"') {
+                                                    quotationCont
+                                                        .setIsVatExempted(
+                                                          true,
+                                                          false,
+                                                          false,
+                                                        );
+                                                  } else if (val ==
+                                                      'Printed as "vat 0 % = 0"') {
+                                                    quotationCont
+                                                        .setIsVatExempted(
+                                                          false,
+                                                          true,
+                                                          false,
+                                                        );
+                                                  } else {
+                                                    quotationCont
+                                                        .setIsVatExempted(
+                                                          false,
+                                                          false,
+                                                          true,
+                                                        );
+                                                  }
+                                                });
+                                              },
+                                            ),
+                                      ],
+                                    ),
+                                  )
+                                  : SizedBox(),
+                            ],
+                          ),
                         homeController.companyName == 'CASALAGO' ||
-                            homeController.companyName == 'AMAZON'?Column(
-                          children: [
-                            gapH16,
-                            Row(
+                                homeController.companyName == 'AMAZON'
+                            ? Column(
                               children: [
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.15,
-                                  child: ListTile(
-                                    title: Text(
-                                      quotationCont.headersList[0]['header_name'],
-                                      style: const TextStyle(fontSize: 12),
+                                gapH16,
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                      width:
+                                          screenWidth >= 676
+                                              ? MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.15
+                                              : MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.20,
+                                      child: ListTile(
+                                        title: Text(
+                                          quotationCont
+                                              .headersList[0]['header_name'],
+                                          style: TextStyle(fontSize: 9.sp),
+                                        ),
+                                        leading: Radio(
+                                          value: 0,
+                                          groupValue:
+                                              quotationCont.selectedHeaderIndex,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              quotationCont
+                                                  .selectedHeaderIndex = value!;
+                                            });
+                                          },
+                                        ),
+                                      ),
                                     ),
-                                    leading: Radio(
-                                      value: 0,
-                                      groupValue: quotationCont.selectedHeaderIndex,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          quotationCont.selectedHeaderIndex = value!;
-                                        });
-                                      },
+                                    if (screenWidth <= 676) gapW10,
+                                    SizedBox(
+                                      width:
+                                          screenWidth >= 676
+                                              ? MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.15
+                                              : MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.20,
+                                      child: ListTile(
+                                        title: Text(
+                                          quotationCont
+                                              .headersList[1]['header_name'],
+                                          style: TextStyle(fontSize: 9.sp),
+                                        ),
+                                        leading: Radio(
+                                          value: 1,
+                                          groupValue:
+                                              quotationCont.selectedHeaderIndex,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              quotationCont
+                                                  .selectedHeaderIndex = value!;
+                                            });
+                                          },
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.15,
-                                  child: ListTile(
-                                    title: Text(
-                                      quotationCont.headersList[1]['header_name'],
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    leading: Radio(
-                                      value: 1,
-                                      groupValue: quotationCont.selectedHeaderIndex,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          quotationCont.selectedHeaderIndex = value!;
-                                        });
-                                      },
-                                    ),
-                                  ),
+                                  ],
                                 ),
                               ],
-                            ),
-                          ],
-                        ):SizedBox.shrink(),
+                            )
+                            : SizedBox.shrink(),
                         gapH10,
                       ],
                     ),
@@ -2408,44 +3430,56 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.02,
-                                ),
                                 TableTitle(
                                   text: 'item_code'.tr,
                                   width:
-                                      MediaQuery.of(context).size.width * 0.15,
+                                      screenWidth > 1440
+                                          ? 250.w
+                                          : screenWidth > 1035
+                                          ? 200.w
+                                          : screenWidth > 700
+                                          ? 150.w
+                                          : 100.w,
+                                  // MediaQuery.of(context).size.width * 0.15,
                                 ),
                                 TableTitle(
                                   text: 'description'.tr,
                                   width:
-                                      MediaQuery.of(context).size.width * 0.3,
+                                      screenWidth > 1200
+                                          ? 450.w
+                                          : screenWidth > 1035
+                                          ? 350.w
+                                          : screenWidth > 700
+                                          ? 300.w
+                                          : screenWidth > 515
+                                          ? 280.w
+                                          : 250.w,
+                                  // MediaQuery.of(context).size.width * 0.3,
                                 ),
                                 TableTitle(
                                   text: 'quantity'.tr,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.04,
+                                  width: 100.w,
+                                  // MediaQuery.of(context).size.width * 0.04,
                                 ),
                                 TableTitle(
                                   text: 'unit_price'.tr,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.07,
+                                  width: 120.w,
+                                  // MediaQuery.of(context).size.width * 0.07,
                                 ),
                                 TableTitle(
                                   text: '${'disc'.tr}. %',
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.05,
+                                  width: 100.w,
+                                  // MediaQuery.of(context).size.width * 0.05,
                                 ),
                                 TableTitle(
                                   text: 'total'.tr,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.05,
+                                  width: screenWidth > 510 ? 120.w : 100.w,
+                                  // MediaQuery.of(context).size.width * 0.05,
                                 ),
                                 TableTitle(
                                   text: 'more_options'.tr,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.07,
+                                  width: screenWidth > 570 ? 150.w : 75.w,
+                                  // MediaQuery.of(context).size.width * 0.07,
                                 ),
                               ],
                             ),
@@ -2659,121 +3693,135 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                           gapH24,
                         ],
                       )
-                      : Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width * 0.04,
-                          vertical: 15,
-                        ),
-                        decoration: const BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(6),
-                            bottomRight: Radius.circular(6),
-                          ),
-                          color: Colors.white,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.35,
-                              child: Column(
-                                children: [
-                                  DialogDropMenu(
-                                    controller: salesPersonController,
-                                    optionsList:
-                                        quotationController
-                                            .salesPersonListNames,
-                                    text: 'sales_person'.tr,
-                                    hint: 'search'.tr,
-                                    rowWidth:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    onSelected: (String? val) {
-                                      setState(() {
-                                        selectedSalesPerson = val!;
-                                        var index = quotationController
-                                            .salesPersonListNames
-                                            .indexOf(val);
-                                        selectedSalesPersonId =
+                      : Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal:
+                                  MediaQuery.of(context).size.width * 0.04,
+                              vertical: 15,
+                            ),
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(6),
+                                bottomRight: Radius.circular(6),
+                              ),
+                              color: Colors.white,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.35,
+                                  child: Column(
+                                    children: [
+                                      DialogDropMenu(
+                                        controller: salesPersonController,
+                                        optionsList:
                                             quotationController
-                                                .salesPersonListId[index];
-                                      });
-                                    },
+                                                .salesPersonListNames,
+                                        text: 'sales_person'.tr,
+                                        hint: 'search'.tr,
+                                        rowWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        textFieldWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.15,
+                                        onSelected: (String? val) {
+                                          setState(() {
+                                            selectedSalesPerson = val!;
+                                            var index = quotationController
+                                                .salesPersonListNames
+                                                .indexOf(val);
+                                            selectedSalesPersonId =
+                                                quotationController
+                                                    .salesPersonListId[index];
+                                          });
+                                        },
+                                      ),
+                                      gapH16,
+                                      DialogDropMenu(
+                                        optionsList: const [''],
+                                        text: 'commission_method'.tr,
+                                        hint: '',
+                                        rowWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        textFieldWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.15,
+                                        onSelected: () {},
+                                      ),
+                                      gapH16,
+                                      DialogDropMenu(
+                                        controller: cashingMethodsController,
+                                        optionsList:
+                                            quotationCont
+                                                .cashingMethodsNamesList,
+                                        text: 'cashing_method'.tr,
+                                        hint: '',
+                                        rowWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        textFieldWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.15,
+                                        onSelected: (value) {
+                                          var index = quotationCont
+                                              .cashingMethodsNamesList
+                                              .indexOf(value);
+                                          quotationCont
+                                              .setSelectedCashingMethodId(
+                                                quotationCont
+                                                    .cashingMethodsIdsList[index],
+                                              );
+                                        },
+                                      ),
+                                    ],
                                   ),
-                                  gapH16,
-                                  DialogDropMenu(
-                                    optionsList: const [''],
-                                    text: 'commission_method'.tr,
-                                    hint: '',
-                                    rowWidth:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    onSelected: () {},
+                                ),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      DialogTextField(
+                                        textEditingController:
+                                            commissionController,
+                                        text: 'commission'.tr,
+                                        rowWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        textFieldWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.15,
+                                        validationFunc: (val) {},
+                                      ),
+                                      gapH16,
+                                      DialogTextField(
+                                        textEditingController:
+                                            totalCommissionController,
+                                        text: 'total_commission'.tr,
+                                        rowWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        textFieldWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.15,
+                                        validationFunc: (val) {},
+                                      ),
+                                    ],
                                   ),
-                                  gapH16,
-                                  DialogDropMenu(
-                                    controller: cashingMethodsController,
-                                    optionsList:
-                                        quotationCont.cashingMethodsNamesList,
-                                    text: 'cashing_method'.tr,
-                                    hint: '',
-                                    rowWidth:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    onSelected: (value) {
-                                      var index = quotationCont
-                                          .cashingMethodsNamesList
-                                          .indexOf(value);
-                                      quotationCont.setSelectedCashingMethodId(
-                                        quotationCont
-                                            .cashingMethodsIdsList[index],
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.3,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  DialogTextField(
-                                    textEditingController: commissionController,
-                                    text: 'commission'.tr,
-                                    rowWidth:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    validationFunc: (val) {},
-                                  ),
-                                  gapH16,
-                                  DialogTextField(
-                                    textEditingController:
-                                        totalCommissionController,
-                                    text: 'total_commission'.tr,
-                                    rowWidth:
-                                        MediaQuery.of(context).size.width * 0.3,
-                                    textFieldWidth:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    validationFunc: (val) {},
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-
                   gapH10,
 
                   Container(
@@ -2864,9 +3912,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                   GetBuilder<QuotationController>(
                     builder: (cont) {
                       return Container(
-                        padding: const EdgeInsets.symmetric(
+                        padding: EdgeInsets.symmetric(
                           vertical: 20,
-                          horizontal: 40,
+                          horizontal: 40.w,
                         ),
                         decoration: BoxDecoration(
                           color: Primary.p20,
@@ -3044,7 +4092,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                       Text(
                                         'total_amount'.tr,
                                         style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 16.sp,
                                           color: Primary.primary,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -3053,7 +4101,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                         // '${'usd'.tr} 0.00',
                                         '${quotationCont.selectedCurrencyName} ${formatDoubleWithCommas(double.parse(quotationCont.totalQuotation))}',
                                         style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 16.sp,
                                           color: Primary.primary,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -3305,8 +4353,12 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 deliveryTermsController.text,
                                 chanceController.text,
                                 homeController.companyName == 'CASALAGO' ||
-                                    homeController.companyName == 'AMAZON'
-                                    ?quotationCont.headersList[quotationCont.selectedHeaderIndex]['id'].toString():'',
+                                        homeController.companyName == 'AMAZON'
+                                    ? quotationCont
+                                        .headersList[quotationCont
+                                            .selectedHeaderIndex]['id']
+                                        .toString()
+                                    : '',
                               );
                               if (res['success'] == true) {
                                 Get.back();
@@ -3381,7 +4433,11 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
           ),
         ),
         child: Container(
-          width: name.length * 10, // MediaQuery.of(context).size.width * 0.09,
+          width:
+              MediaQuery.of(context).size.width > 515
+                  ? name.length * 10
+                  : name.length *
+                      7, // MediaQuery.of(context).size.width * 0.09,
           height: MediaQuery.of(context).size.height * 0.07,
           decoration: BoxDecoration(
             color: selectedTabIndex == index ? Primary.p20 : Colors.white,
@@ -3710,6 +4766,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GetBuilder<QuotationController>(
       builder: (cont) {
         return Container(
@@ -3827,8 +4884,24 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     // }
                     // return null;
                   },
-                  rowWidth: MediaQuery.of(context).size.width * 0.15,
-                  textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                  rowWidth:
+                      screenWidth > 1440
+                          ? 250.w
+                          : screenWidth > 1035
+                          ? 200.w
+                          : screenWidth > 700
+                          ? 150.w
+                          : 100.w,
+                  // rowWidth: MediaQuery.of(context).size.width * 0.15,
+                  textFieldWidth:
+                      screenWidth > 1440
+                          ? 250.w
+                          : screenWidth > 1035
+                          ? 200.w
+                          : screenWidth > 700
+                          ? 150.w
+                          : 100.w,
+                  // textFieldWidth: MediaQuery.of(context).size.width * 0.15,
                   clickableOptionText: 'create_virtual_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
@@ -3863,10 +4936,24 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   nextFocusNode: quantityFocus, // Set column widths
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.3,
+                  width:
+                      screenWidth > 1200
+                          ? 400.w
+                          : screenWidth > 1035
+                          ? 350.w
+                          : screenWidth > 800
+                          ? 300.w
+                          : screenWidth > 700
+                          ? 280.w
+                          : screenWidth > 525
+                          ? 230.w
+                          : screenWidth > 510
+                          ? 210.w
+                          : 200.w,
+                  // width: MediaQuery.of(context).size.width * 0.3,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       // fontWeight: FontWeight.w500,
                     ),
                     onFieldSubmitted: (value) {
@@ -3924,10 +5011,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
                 //quantity
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.06,
+                  width: screenWidth > 700 ? 120.w : 100.w,
+                  // width: MediaQuery.of(context).size.width * 0.06,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: quantityFocus,
@@ -3995,10 +5083,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                 ),
                 // unitPrice
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.07,
+                  width: screenWidth > 700 ? 120.w : 100.w,
+                  // width: MediaQuery.of(context).size.width * 0.07,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus,
@@ -4073,10 +5162,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
                 //discount
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.05,
+                  width: screenWidth > 700 ? 120.w : 100.w,
+                  // width: MediaQuery.of(context).size.width * 0.05,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus1,
@@ -4192,77 +5282,95 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           .index]['item_total'],
                     ),
                   ),
-                  width: MediaQuery.of(context).size.width * 0.07,
+                  width: screenWidth > 700 ? 120.w : 100.w,
+                  // width: MediaQuery.of(context).size.width * 0.07,
                 ),
 
                 //more
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.02,
-                  child: ReusableMore(
-                    itemsList:
-                        selectedItemId.isEmpty
-                            ? []
-                            : [
-                              PopupMenuItem<String>(
-                                value: '1',
-                                onTap: () async {
-                                  showDialog<String>(
-                                    context: context,
-                                    builder:
-                                        (BuildContext context) => AlertDialog(
-                                          backgroundColor: Colors.white,
-                                          shape: const RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(9),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    if (screenWidth > 775) SizedBox(width: 50.w),
+                    SizedBox(
+                      width: 50.w,
+                      child: ReusableMore(
+                        itemsList:
+                            selectedItemId.isEmpty
+                                ? []
+                                : [
+                                  PopupMenuItem<String>(
+                                    value: '1',
+                                    onTap: () async {
+                                      showDialog<String>(
+                                        context: context,
+                                        builder:
+                                            (
+                                              BuildContext context,
+                                            ) => AlertDialog(
+                                              backgroundColor: Colors.white,
+                                              shape:
+                                                  const RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                          Radius.circular(9),
+                                                        ),
+                                                  ),
+                                              elevation: 0,
+                                              content: ShowItemQuantitiesDialog(
+                                                selectedItemId: selectedItemId,
+                                              ),
                                             ),
-                                          ),
-                                          elevation: 0,
-                                          content: ShowItemQuantitiesDialog(
-                                            selectedItemId: selectedItemId,
-                                          ),
-                                        ),
-                                  );
-                                },
-                                child: Text('Show Quantity'),
-                              ),
-                            ],
-                  ),
-                ),
+                                      );
+                                    },
+                                    child: Text('Show Quantity'),
+                                  ),
+                                ],
+                      ),
+                    ),
 
-                //delete
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.03,
-                  child: InkWell(
-                    onTap: () {
-                      quotationController.decrementListViewLengthInQuotation(
-                        quotationController.increment,
-                      );
-                      quotationController.removeFromRowsInListViewInQuotation(
-                        widget.index,
-                      );
+                    //delete
+                    SizedBox(
+                      width: 50.w,
+                      // width: MediaQuery.of(context).size.width * 0.03,
+                      child: InkWell(
+                        onTap: () {
+                          quotationController
+                              .decrementListViewLengthInQuotation(
+                                quotationController.increment,
+                              );
+                          quotationController
+                              .removeFromRowsInListViewInQuotation(
+                                widget.index,
+                              );
 
-                      // quotationController.removeFromOrderLinesInQuotationList(
-                      //   (widget.index).toString(),
-                      // );
+                          // quotationController.removeFromOrderLinesInQuotationList(
+                          //   (widget.index).toString(),
+                          // );
 
-                      setState(() {
-                        cont.totalItems = 0.0;
-                        cont.globalDisc = "0.0";
-                        cont.globalDiscountPercentageValue = "0.0";
-                        cont.specialDisc = "0.0";
-                        cont.specialDiscountPercentageValue = "0.0";
-                        cont.vat11 = "0.0";
-                        cont.vatInPrimaryCurrency = "0.0";
-                        cont.totalQuotation = "0.0";
+                          setState(() {
+                            cont.totalItems = 0.0;
+                            cont.globalDisc = "0.0";
+                            cont.globalDiscountPercentageValue = "0.0";
+                            cont.specialDisc = "0.0";
+                            cont.specialDiscountPercentageValue = "0.0";
+                            cont.vat11 = "0.0";
+                            cont.vatInPrimaryCurrency = "0.0";
+                            cont.totalQuotation = "0.0";
 
-                        cont.getTotalItems();
-                      });
-                      if (cont.rowsInListViewInQuotation != {}) {
-                        cont.getTotalItems();
-                      }
-                    },
-                    child: Icon(Icons.delete_outline, color: Primary.primary),
-                  ),
+                            cont.getTotalItems();
+                          });
+                          if (cont.rowsInListViewInQuotation != {}) {
+                            cont.getTotalItems();
+                          }
+                        },
+                        child: Icon(
+                          Icons.delete_outline,
+                          color: Primary.primary,
+                          size: 25.sp,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -4299,6 +5407,7 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GetBuilder<QuotationController>(
       builder: (cont) {
         return Container(
@@ -4310,7 +5419,35 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.73,
+                  width:
+                      screenWidth > 1400
+                          ? 1140.w
+                          : screenWidth > 1300
+                          ? 1100.w
+                          : screenWidth > 1210
+                          ? 1100.w
+                          : screenWidth > 1085
+                          ? 1050.w
+                          : screenWidth > 955
+                          ? 1000.w
+                          : screenWidth > 935
+                          ? 970.w
+                          : screenWidth > 818
+                          ? 950.w
+                          : screenWidth > 730
+                          ? 940.w
+                          : screenWidth > 690
+                          ? 900.w
+                          : screenWidth > 636
+                          ? 850.w
+                          : screenWidth > 585
+                          ? 800.w
+                          : screenWidth > 572
+                          ? 780.w
+                          : screenWidth > 535
+                          ? 750.w
+                          : 700.w,
+                  // width: MediaQuery.of(context).size.width * 0.73,
                   child: ReusableTextField(
                     textEditingController: titleController,
                     isPasswordField: false,
@@ -4326,36 +5463,52 @@ class _ReusableTitleRowState extends State<ReusableTitleRow> {
                   ),
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.02,
-                  child: ReusableMore(
-                    itemsList: [
-                      // PopupMenuItem<String>(
-                      //   value: '1',
-                      //   onTap: () async {},
-                      //   child: Row(
-                      //     children: [
-                      //       Text(''),
-                      //     ],
-                      //   ),
-                      // ),
+                  width: 100.w,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SizedBox(
+                        width: 45.w,
+                        // width: MediaQuery.of(context).size.width * 0.02,
+                        child: ReusableMore(
+                          itemsList: [
+                            // PopupMenuItem<String>(
+                            //   value: '1',
+                            //   onTap: () async {},
+                            //   child: Row(
+                            //     children: [
+                            //       Text(''),
+                            //     ],
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        width: 45.w,
+                        // width: MediaQuery.of(context).size.width * 0.03,
+                        child: InkWell(
+                          onTap: () {
+                            quotationController
+                                .decrementListViewLengthInQuotation(
+                                  quotationController.increment,
+                                );
+                            quotationController
+                                .removeFromRowsInListViewInQuotation(
+                                  widget.index,
+                                );
+                            // quotationController.removeFromOrderLinesInQuotationList(
+                            //   (widget.index).toString(),
+                            // );
+                          },
+                          child: Icon(
+                            Icons.delete_outline,
+                            color: Primary.primary,
+                            size: 25.sp,
+                          ),
+                        ),
+                      ),
                     ],
-                  ),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.03,
-                  child: InkWell(
-                    onTap: () {
-                      quotationController.decrementListViewLengthInQuotation(
-                        quotationController.increment,
-                      );
-                      quotationController.removeFromRowsInListViewInQuotation(
-                        widget.index,
-                      );
-                      // quotationController.removeFromOrderLinesInQuotationList(
-                      //   (widget.index).toString(),
-                      // );
-                    },
-                    child: Icon(Icons.delete_outline, color: Primary.primary),
                   ),
                 ),
               ],
@@ -4390,6 +5543,7 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Container(
       height: 60,
       margin: const EdgeInsets.symmetric(vertical: 5),
@@ -4400,7 +5554,8 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
           // mainAxisAlignment: MainAxisAlignment.start,
           children: [
             SizedBox(
-              width: MediaQuery.of(context).size.width * 0.73,
+              width: 1140.w,
+              // width: MediaQuery.of(context).size.width * 0.73,
               child: ReusableTextField(
                 textEditingController: noteController,
                 isPasswordField: false,
@@ -4415,54 +5570,92 @@ class _ReusableNoteRowState extends State<ReusableNoteRow> {
                 validationFunc: (val) {},
               ),
             ),
-
-            //more
             SizedBox(
-              width: MediaQuery.of(context).size.width * 0.02,
-              child: ReusableMore(
-                itemsList: [
-                  // PopupMenuItem<String>(
-                  //   value: '1',
-                  //   onTap: () async {
-                  //     showDialog<String>(
-                  //         context: context,
-                  //         builder: (BuildContext context) => AlertDialog(
-                  //           backgroundColor: Colors.white,
-                  //           shape: const RoundedRectangleBorder(
-                  //             borderRadius:
-                  //             BorderRadius.all(Radius.circular(9)),
-                  //           ),
-                  //           elevation: 0,
-                  //           content: Column(
-                  //             mainAxisAlignment: MainAxisAlignment.center,
-                  //             children: [
-                  //
-                  //             ],
-                  //           ),
-                  //         ));
-                  //   },
-                  //   child: const Text('Show Quantity'),
-                  // ),
+              width:
+                  screenWidth > 1400
+                      ? 1140.w
+                      : screenWidth > 1300
+                      ? 1100.w
+                      : screenWidth > 1210
+                      ? 1100.w
+                      : screenWidth > 1085
+                      ? 1050.w
+                      : screenWidth > 955
+                      ? 1000.w
+                      : screenWidth > 935
+                      ? 970.w
+                      : screenWidth > 818
+                      ? 950.w
+                      : screenWidth > 730
+                      ? 940.w
+                      : screenWidth > 690
+                      ? 900.w
+                      : screenWidth > 636
+                      ? 850.w
+                      : screenWidth > 585
+                      ? 800.w
+                      : screenWidth > 572
+                      ? 780.w
+                      : screenWidth > 535
+                      ? 750.w
+                      : 700.w,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  //more
+                  SizedBox(
+                    width: 45.w,
+                    // width: MediaQuery.of(context).size.width * 0.02,
+                    child: ReusableMore(
+                      itemsList: [
+                        // PopupMenuItem<String>(
+                        //   value: '1',
+                        //   onTap: () async {
+                        //     showDialog<String>(
+                        //         context: context,
+                        //         builder: (BuildContext context) => AlertDialog(
+                        //           backgroundColor: Colors.white,
+                        //           shape: const RoundedRectangleBorder(
+                        //             borderRadius:
+                        //             BorderRadius.all(Radius.circular(9)),
+                        //           ),
+                        //           elevation: 0,
+                        //           content: Column(
+                        //             mainAxisAlignment: MainAxisAlignment.center,
+                        //             children: [
+                        //
+                        //             ],
+                        //           ),
+                        //         ));
+                        //   },
+                        //   child: const Text('Show Quantity'),
+                        // ),
+                      ],
+                    ),
+                  ), //delete
+                  SizedBox(
+                    width: 45.w,
+                    // width: MediaQuery.of(context).size.width * 0.03,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          quotationController
+                              .decrementListViewLengthInQuotation(
+                                quotationController.increment,
+                              );
+                          quotationController
+                              .removeFromRowsInListViewInQuotation(
+                                widget.index,
+                              );
+                          // quotationController.removeFromOrderLinesInQuotationList(
+                          //   widget.index.toString(),
+                          // );
+                        });
+                      },
+                      child: Icon(Icons.delete_outline, color: Primary.primary),
+                    ),
+                  ),
                 ],
-              ),
-            ), //delete
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.03,
-              child: InkWell(
-                onTap: () {
-                  setState(() {
-                    quotationController.decrementListViewLengthInQuotation(
-                      quotationController.increment,
-                    );
-                    quotationController.removeFromRowsInListViewInQuotation(
-                      widget.index,
-                    );
-                    // quotationController.removeFromOrderLinesInQuotationList(
-                    //   widget.index.toString(),
-                    // );
-                  });
-                },
-                child: Icon(Icons.delete_outline, color: Primary.primary),
               ),
             ),
           ],
@@ -4501,7 +5694,7 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
       // isLoading = true;
       isImageFetched = false;
     });
-// print('dfdf ${widget.info['image']}');
+    // print('dfdf ${widget.info['image']}');
     if (widget.info['image'] != null && widget.info['image'].isNotEmpty) {
       try {
         final response = await http.get(
@@ -4521,7 +5714,8 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
     } else {
       imageFile = Uint8List(0); // Set to empty if no image URL
     }
-    quotationController.rowsInListViewInQuotation[widget.index]['image'] = imageFile;
+    quotationController.rowsInListViewInQuotation[widget.index]['image'] =
+        imageFile;
     setState(() {
       // isLoading = false;
       isImageFetched = true;
@@ -4530,132 +5724,179 @@ class _ReusableImageRowState extends State<ReusableImageRow> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GetBuilder<QuotationController>(
       builder: (cont) {
         return Container(
           height: 100,
           margin: const EdgeInsets.symmetric(vertical: 2),
-          child: isImageFetched?Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              InkWell(
-                onTap: () async {
-                  final image = await ImagePickerHelper.pickImage();
-                  setState(() {
-                    imageFile = image!;
-                    cont.changeBoolVar(true);
-                    cont.increaseImageSpace(30);
-                  });
-                  cont.setTypeInQuotation(widget.index, '4');
-                  cont.setImageInQuotation(widget.index, imageFile);
-                },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 5,
-                    horizontal: 5,
-                  ),
-                  child: DottedBorder(
-                    dashPattern: const [10, 10],
-                    color: Others.borderColor,
-                    radius: const Radius.circular(9),
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.72,
-                      height: cont.imageSpaceHeight,
-                      child:
-                      imageFile.isNotEmpty
-                          ? Row(
-                        mainAxisAlignment:
-                        MainAxisAlignment.start,
-                        children: [
-                          Image.memory(
-                            imageFile,
-                            height: cont.imageSpaceHeight,
+          child:
+              isImageFetched
+                  ? Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      InkWell(
+                        onTap: () async {
+                          final image = await ImagePickerHelper.pickImage();
+                          setState(() {
+                            imageFile = image!;
+                            cont.changeBoolVar(true);
+                            cont.increaseImageSpace(30);
+                          });
+                          cont.setTypeInQuotation(widget.index, '4');
+                          cont.setImageInQuotation(widget.index, imageFile);
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 5,
+                            horizontal: 5,
                           ),
-                        ],
-                      )
-                          : Row(
-                        mainAxisAlignment:
-                        MainAxisAlignment.start,
-                        crossAxisAlignment:
-                        CrossAxisAlignment.center,
-                        children: [
-                          gapW20,
-                          Icon(
-                            Icons.cloud_upload_outlined,
-                            color: Others.iconColor,
-                            size: 32,
-                          ),
-                          gapW20,
-                          Text(
-                            'drag_drop_image'.tr,
-                            style: TextStyle(
-                              color: TypographyColor.textTable,
+                          child: DottedBorder(
+                            dashPattern: const [10, 10],
+                            color: Others.borderColor,
+                            radius: const Radius.circular(9),
+                            child: SizedBox(
+                              width:
+                                  screenWidth > 1400
+                                      ? 1130.w
+                                      : screenWidth > 1300
+                                      ? 1090.w
+                                      : screenWidth > 1210
+                                      ? 1090.w
+                                      : screenWidth > 1085
+                                      ? 1040.w
+                                      : screenWidth > 955
+                                      ? 990.w
+                                      : screenWidth > 935
+                                      ? 960.w
+                                      : screenWidth > 818
+                                      ? 940.w
+                                      : screenWidth > 730
+                                      ? 940.w
+                                      : screenWidth > 690
+                                      ? 890.w
+                                      : screenWidth > 636
+                                      ? 840.w
+                                      : screenWidth > 585
+                                      ? 790.w
+                                      : screenWidth > 572
+                                      ? 770.w
+                                      : screenWidth > 535
+                                      ? 740.w
+                                      : 690.w,
+                              // width: MediaQuery.of(context).size.width * 0.72,
+                              height: cont.imageSpaceHeight,
+                              child:
+                                  imageFile.isNotEmpty
+                                      ? Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Image.memory(
+                                            imageFile,
+                                            height: cont.imageSpaceHeight,
+                                          ),
+                                        ],
+                                      )
+                                      : Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          gapW20,
+                                          Icon(
+                                            Icons.cloud_upload_outlined,
+                                            color: Others.iconColor,
+                                            size: 32,
+                                          ),
+                                          gapW20,
+                                          Text(
+                                            'drag_drop_image'.tr,
+                                            style: TextStyle(
+                                              color: TypographyColor.textTable,
+                                            ),
+                                          ),
+                                          Text(
+                                            'browse'.tr,
+                                            style: TextStyle(
+                                              color: Primary.primary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                             ),
                           ),
-                          Text(
-                            'browse'.tr,
-                            style: TextStyle(
-                              color: Primary.primary,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-              ),
-              //more
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.02,
-                child: ReusableMore(
-                  itemsList: [
-                    // PopupMenuItem<String>(
-                    //   value: '1',
-                    //   onTap: () async {
-                    //     showDialog<String>(
-                    //         context: context,
-                    //         builder: (BuildContext context) => AlertDialog(
-                    //           backgroundColor: Colors.white,
-                    //           shape: const RoundedRectangleBorder(
-                    //             borderRadius:
-                    //             BorderRadius.all(Radius.circular(9)),
-                    //           ),
-                    //           elevation: 0,
-                    //           content: Column(
-                    //             mainAxisAlignment: MainAxisAlignment.center,
-                    //             children: [
-                    //
-                    //             ],
-                    //           ),
-                    //         ));
-                    //   },
-                    //   child: const Text('Show Quantity'),
-                    // ),
-                  ],
-                ),
-              ),
-              //delete
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.03,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      quotationController.decrementListViewLengthInQuotation(
-                        quotationController.increment + 50,
-                      );
-                      quotationController.removeFromRowsInListViewInQuotation(
-                        widget.index,
-                      );
-                      // quotationController.removeFromOrderLinesInQuotationList(
-                      //   widget.index.toString(),
-                      // );
-                    });
-                  },
-                  child: Icon(Icons.delete_outline, color: Primary.primary),
-                ),
-              ),
-            ],
-          ):loading(),
+                      SizedBox(
+                        width: 100.w,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            //more
+                            SizedBox(
+                              width: 45.w,
+                              // width: MediaQuery.of(context).size.width * 0.02,
+                              child: ReusableMore(
+                                itemsList: [
+                                  // PopupMenuItem<String>(
+                                  //   value: '1',
+                                  //   onTap: () async {
+                                  //     showDialog<String>(
+                                  //         context: context,
+                                  //         builder: (BuildContext context) => AlertDialog(
+                                  //           backgroundColor: Colors.white,
+                                  //           shape: const RoundedRectangleBorder(
+                                  //             borderRadius:
+                                  //             BorderRadius.all(Radius.circular(9)),
+                                  //           ),
+                                  //           elevation: 0,
+                                  //           content: Column(
+                                  //             mainAxisAlignment: MainAxisAlignment.center,
+                                  //             children: [
+                                  //
+                                  //             ],
+                                  //           ),
+                                  //         ));
+                                  //   },
+                                  //   child: const Text('Show Quantity'),
+                                  // ),
+                                ],
+                              ),
+                            ),
+                            //delete
+                            SizedBox(
+                              width: 45.w,
+                              // width: MediaQuery.of(context).size.width * 0.03,
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    quotationController
+                                        .decrementListViewLengthInQuotation(
+                                          quotationController.increment + 50,
+                                        );
+                                    quotationController
+                                        .removeFromRowsInListViewInQuotation(
+                                          widget.index,
+                                        );
+                                    // quotationController.removeFromOrderLinesInQuotationList(
+                                    //   widget.index.toString(),
+                                    // );
+                                  });
+                                },
+                                child: Icon(
+                                  Icons.delete_outline,
+                                  color: Primary.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                  : loading(),
         );
       },
     );
@@ -4861,6 +6102,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return GetBuilder<QuotationController>(
       builder: (cont) {
         return Container(
@@ -4968,8 +6210,24 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                     // }
                     return null;
                   },
-                  rowWidth: MediaQuery.of(context).size.width * 0.15,
-                  textFieldWidth: MediaQuery.of(context).size.width * 0.15,
+                  rowWidth:
+                      screenWidth > 1440
+                          ? 250.w
+                          : screenWidth > 1035
+                          ? 200.w
+                          : screenWidth > 700
+                          ? 150.w
+                          : 100.w,
+                  textFieldWidth:
+                      screenWidth > 1440
+                          ? 250.w
+                          : screenWidth > 1035
+                          ? 200.w
+                          : screenWidth > 700
+                          ? 150.w
+                          : 100.w,
+                  // rowWidth: MediaQuery.of(context).size.width * 0.15,
+                  // textFieldWidth: MediaQuery.of(context).size.width * 0.15,
                   clickableOptionText: 'create_virtual_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
@@ -5001,10 +6259,24 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   nextFocusNode: quantityFocus, // Set column widths
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.3,
+                  width:
+                      screenWidth > 1200
+                          ? 400.w
+                          : screenWidth > 1035
+                          ? 350.w
+                          : screenWidth > 800
+                          ? 300.w
+                          : screenWidth > 700
+                          ? 280.w
+                          : screenWidth > 525
+                          ? 230.w
+                          : screenWidth > 510
+                          ? 210.w
+                          : 200.w,
+                  // width: MediaQuery.of(context).size.width * 0.3,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       // fontWeight: FontWeight.w500,
                     ),
                     onFieldSubmitted: (value) {
@@ -5062,10 +6334,11 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
                 //quantity
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.06,
+                  width: screenWidth > 700 ? 120.w : 100.w,
+                  // width: MediaQuery.of(context).size.width * 0.06,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: quantityFocus,
@@ -5133,10 +6406,12 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                 ),
                 // unitPrice
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.07,
+                  width: screenWidth > 700 ? 120.w : 100.w,
+
+                  // width: MediaQuery.of(context).size.width * 0.07,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus,
@@ -5211,10 +6486,11 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
                 //discount
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.05,
+                  width: screenWidth > 700 ? 120.w : 100.w,
+                  // width: MediaQuery.of(context).size.width * 0.05,
                   child: TextFormField(
                     style: GoogleFonts.openSans(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       // fontWeight: FontWeight.w500,
                     ),
                     focusNode: focus1,
@@ -5331,77 +6607,91 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                           .index]['item_total'],
                     ),
                   ),
-                  width: MediaQuery.of(context).size.width * 0.07,
+                  width: screenWidth > 700 ? 120.w : 100.w,
+                  // width: MediaQuery.of(context).size.width * 0.07,
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    if (screenWidth > 775) SizedBox(width: 50.w),
+                    //more
+                    SizedBox(
+                      width: 50.w,
+                      // width: MediaQuery.of(context).size.width * 0.02,
+                      child: ReusableMore(
+                        itemsList:
+                            selectedComboId.isEmpty
+                                ? []
+                                : [
+                                  // PopupMenuItem<String>(
+                                  //   value: '1',
+                                  //   onTap: () async {
+                                  //     showDialog<String>(
+                                  //       context: context,
+                                  //       builder:
+                                  //           (BuildContext context) => AlertDialog(
+                                  //         backgroundColor: Colors.white,
+                                  //         shape: const RoundedRectangleBorder(
+                                  //           borderRadius: BorderRadius.all(
+                                  //             Radius.circular(9),
+                                  //           ),
+                                  //         ),
+                                  //         elevation: 0,
+                                  //         content: ShowItemQuantitiesDialog(
+                                  //           selectedItemId: selectedComboId,
+                                  //         ),
+                                  //       ),
+                                  //     );
+                                  //   },
+                                  //   child: Text('Show Quantity'),
+                                  // ),
+                                ],
+                      ),
+                    ),
 
-                //more
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.02,
-                  child: ReusableMore(
-                    itemsList:
-                        selectedComboId.isEmpty
-                            ? []
-                            : [
-                              // PopupMenuItem<String>(
-                              //   value: '1',
-                              //   onTap: () async {
-                              //     showDialog<String>(
-                              //       context: context,
-                              //       builder:
-                              //           (BuildContext context) => AlertDialog(
-                              //         backgroundColor: Colors.white,
-                              //         shape: const RoundedRectangleBorder(
-                              //           borderRadius: BorderRadius.all(
-                              //             Radius.circular(9),
-                              //           ),
-                              //         ),
-                              //         elevation: 0,
-                              //         content: ShowItemQuantitiesDialog(
-                              //           selectedItemId: selectedComboId,
-                              //         ),
-                              //       ),
-                              //     );
-                              //   },
-                              //   child: Text('Show Quantity'),
-                              // ),
-                            ],
-                  ),
-                ),
+                    //delete
+                    SizedBox(
+                      width: 50.w,
+                      // width: MediaQuery.of(context).size.width * 0.03,
+                      child: InkWell(
+                        onTap: () {
+                          quotationController
+                              .decrementListViewLengthInQuotation(
+                                quotationController.increment,
+                              );
+                          quotationController
+                              .removeFromRowsInListViewInQuotation(
+                                widget.index,
+                              );
 
-                //delete
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.03,
-                  child: InkWell(
-                    onTap: () {
-                      quotationController.decrementListViewLengthInQuotation(
-                        quotationController.increment,
-                      );
-                      quotationController.removeFromRowsInListViewInQuotation(
-                        widget.index,
-                      );
+                          // quotationController.removeFromOrderLinesInQuotationList(
+                          //   (widget.index).toString(),
+                          // );
 
-                      // quotationController.removeFromOrderLinesInQuotationList(
-                      //   (widget.index).toString(),
-                      // );
+                          setState(() {
+                            cont.totalItems = 0.0;
+                            cont.globalDisc = "0.0";
+                            cont.globalDiscountPercentageValue = "0.0";
+                            cont.specialDisc = "0.0";
+                            cont.specialDiscountPercentageValue = "0.0";
+                            cont.vat11 = "0.0";
+                            cont.vatInPrimaryCurrency = "0.0";
+                            cont.totalQuotation = "0.0";
 
-                      setState(() {
-                        cont.totalItems = 0.0;
-                        cont.globalDisc = "0.0";
-                        cont.globalDiscountPercentageValue = "0.0";
-                        cont.specialDisc = "0.0";
-                        cont.specialDiscountPercentageValue = "0.0";
-                        cont.vat11 = "0.0";
-                        cont.vatInPrimaryCurrency = "0.0";
-                        cont.totalQuotation = "0.0";
-
-                        cont.getTotalItems();
-                      });
-                      if (cont.rowsInListViewInQuotation != {}) {
-                        cont.getTotalItems();
-                      }
-                    },
-                    child: Icon(Icons.delete_outline, color: Primary.primary),
-                  ),
+                            cont.getTotalItems();
+                          });
+                          if (cont.rowsInListViewInQuotation != {}) {
+                            cont.getTotalItems();
+                          }
+                        },
+                        child: Icon(
+                          Icons.delete_outline,
+                          color: Primary.primary,
+                          size: 25.sp,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/cash_trays_controller.dart';
 import 'package:rooster_app/Controllers/company_settings_controller.dart';
 import 'package:rooster_app/Controllers/discounts_controller.dart';
+import 'package:rooster_app/Controllers/garage_controller.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
 import 'package:rooster_app/Controllers/users_controller.dart';
@@ -70,6 +71,7 @@ class MyBinding extends Bindings {
     Get.lazyPut<SalesInvoiceController>(() => SalesInvoiceController());
     Get.lazyPut<DeliveryController>(() => DeliveryController());
     Get.lazyPut<DeliveryController>(() => DeliveryController());
+    Get.lazyPut<GarageController>(() => GarageController());
     // LanguagesController languagesController=Get.put(LanguagesController());
     // ProductController productController=Get.put(ProductController());
     // CategoriesController categoriesController=Get.put(CategoriesController());

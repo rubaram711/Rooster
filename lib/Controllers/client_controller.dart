@@ -194,12 +194,16 @@ class ClientController extends GetxController {
 //       'rating': '',
 //       'comment': '',
 //       'car_fax': '',
+//   'technician':''
   ];
   addToCarsList(Map newMap){
     carsList.add(newMap);
     update();
   }
 
+  updateCarTechnician(int index,String newVal){
+    carsList[index]['technician']=newVal;
+  }
   updateCarOdometer(int index,String newVal){
     carsList[index]['odometer']=newVal;
   }

@@ -684,8 +684,6 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   @override
   resetItemsAfterChangePriceList() async {
     itemsCode = [];
-    cashingMethodsNamesList = [];
-    cashingMethodsIdsList = [];
     itemsIds = [];
     itemsInfo = [];
     itemsMultiPartList = [];

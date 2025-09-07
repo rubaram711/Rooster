@@ -158,8 +158,8 @@ class QuotationController extends GetxController {
 
   // Map<String, Widget> orderLinesQuotationList = {};
   resetQuotation() {
-    // cashingMethodsNamesList = [];
-    // cashingMethodsIdsList = [];
+    cashingMethodsNamesList = [];
+    cashingMethodsIdsList = [];
     // orderLinesQuotationList = {};
     rowsInListViewInQuotation = {};
     // itemsList = [];
@@ -368,9 +368,9 @@ class QuotationController extends GetxController {
         selectedPriceListId = '${priceList['id']}';
       }
     }
-    for (var priceList in p['cashingMethods']) {
-      cashingMethodsNamesList.add(priceList['title']);
-      cashingMethodsIdsList.add('${priceList['id']}');
+    for (var cashingMethod in p['cashingMethods']) {
+      cashingMethodsNamesList.add(cashingMethod['title']);
+      cashingMethodsIdsList.add('${cashingMethod['id']}');
     }
     // print('cashing $cashingMethodsNamesList');
 
@@ -406,8 +406,6 @@ class QuotationController extends GetxController {
   ExchangeRatesController exchangeRatesController = Get.find();
   resetItemsAfterChangePriceList() async {
     itemsCode = [];
-    cashingMethodsNamesList = [];
-    cashingMethodsIdsList = [];
     itemsIds = [];
     itemsInfo = [];
     itemsMultiPartList = [];

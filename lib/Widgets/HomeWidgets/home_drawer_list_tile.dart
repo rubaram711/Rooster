@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rooster_app/Controllers/garage_controller.dart';
 import 'package:rooster_app/const/sizes.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Controllers/products_controller.dart';
+import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Screens/Combo/combo.dart';
 import '../../Screens/Products/CreateProductDialog/create_product_dialog.dart';
+import '../../Screens/garage/add_attribute.dart';
 import '../../const/colors.dart';
 // import 'dart:html' as html;
 
@@ -88,7 +91,7 @@ class Entry {
 }
 
 // Data to display.
-const List<Entry> data = <Entry>[
+ List<Entry> data = <Entry>[
   Entry('sales_and_clients', "assets/images/clientsIcon.png", <Entry>[
     Entry(
       'clients',
@@ -406,6 +409,7 @@ class EntryItem extends StatefulWidget {
 class _EntryItemState extends State<EntryItem> {
   Widget _buildTiles(Entry root) {
     final HomeController homeController = Get.find();
+    final GarageController garageController = Get.find();
     final ProductController productController = Get.find();
     if (root.title == 'dashboard_summary') {
       return ListTile(
@@ -473,22 +477,22 @@ class _EntryItemState extends State<EntryItem> {
                   ),
             );
           }
-          // else if(root.title=='create_category'){
-          //     showDialog<String>(
-          //         context: context,
-          //         builder: (BuildContext context) => const AlertDialog(
-          //           backgroundColor: Colors.white,
-          //           contentPadding: EdgeInsets.all(0),
-          //           titlePadding: EdgeInsets.all(0),
-          //           actionsPadding: EdgeInsets.all(0),
-          //           shape:RoundedRectangleBorder(
-          //             borderRadius: BorderRadius.all(Radius.circular(9)),) ,
-          //           elevation: 0,
-          //           content:CreateCategoryDialogContent(),
-          //           // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
-          //         ));
-          //
-          // }
+          else if(['technician','brand','model','color'].contains(root.title)){
+            garageController.setSelectedAttributeText(root.title);
+            homeController.selectedTab.value='attribute_table';
+              // showDialog<String>(
+              //     context: context,
+              //     builder: (BuildContext context) => AlertDialog(
+              //       backgroundColor: Colors.white,
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius:
+              //         BorderRadius.all(Radius.circular(9)),
+              //       ),
+              //       elevation: 0,
+              //       content:AddGarageAttributeDialog(text: root.title,),
+              //       // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
+              //     ));
+          }
           else {
             homeController.selectedTab.value = root.title;
           }
@@ -1057,8 +1061,29 @@ class _SideBarBasicState extends State<SideBarBasic>
     super.dispose();
   }
 
+  addGarage() async {
+    var isItGarage = await getIsItGarageFromPref();
+    if (isItGarage == '1') {
+      setState(() {
+        data.add(
+          Entry('garage', "assets/images/garageIcon.png", <Entry>[
+            Entry('brand', ""),
+            Entry('model', ""),
+            Entry('color', ""),
+            Entry('technician', ""),
+          ]),
+        );
+      });
+    }else{
+      if(data.last.title=='garage'){
+        data.removeLast();
+      }
+    }
+  }
+
   @override
   void initState() {
+    addGarage();
     // homeController.animationController = AnimationController(
     //     vsync: this, duration: const Duration(milliseconds: 40));
     // homeController.widthAnimation = Tween<double>(begin: widget.maxWidth, end: widget.minWidth)
@@ -1209,7 +1234,9 @@ class _SideBarBasicState extends State<SideBarBasic>
                     isCollapsed = !isCollapsed;
                     homeController.isOpened.value =
                         !homeController.isOpened.value;
-                    homeController.setIsMenuOpened(homeController.isOpened.value);
+                    homeController.setIsMenuOpened(
+                      homeController.isOpened.value,
+                    );
                     // isCollapsed
                     //     ?  homeController.forwardController()
                     //     :  homeController.reverseController();

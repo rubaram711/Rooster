@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
@@ -110,7 +111,9 @@ class _ComboSummaryState extends State<ComboSummary> {
                                   ),
                                 ),
                                 elevation: 0,
-                                content: const Combo(isCombosPageIsLastPage: true,),
+                                content: const Combo(
+                                  isCombosPageIsLastPage: true,
+                                ),
                               ),
                         );
                       },
@@ -613,7 +616,7 @@ class _ComboAsRowInTableState extends State<ComboAsRowInTable> {
                                   ),
                                   elevation: 0,
                                   content: ShowItemsComboDialog(
-                                    info:deepCloneMap(widget.info),
+                                    info: deepCloneMap(widget.info),
                                   ),
                                 ),
                           );
@@ -635,7 +638,11 @@ class _ComboAsRowInTableState extends State<ComboAsRowInTable> {
                     '${comboController.combosList[widget.index]['id']}',
                   );
                 },
-                child: Icon(Icons.delete_outline, color: Primary.primary),
+                child: Icon(
+                  Icons.delete_outline,
+                  color: Primary.primary,
+                  size: 21.sp,
+                ),
               ),
             ),
             // **************

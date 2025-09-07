@@ -21,6 +21,7 @@ import '../../Widgets/reusable_text_field.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
 import '../../const/functions.dart';
+import '../garage/add_attribute.dart';
 
 List<String> titles = ['Doctor', 'Miss', 'Mister', 'Maitre', 'Professor'];
 
@@ -1478,6 +1479,7 @@ class _CarsSectionState
       'rating': '',
       'comment': '',
       'car_fax': '',
+      'technician':''
     };
     clientController.addToCarsList(car);
   }
@@ -1521,11 +1523,12 @@ class ReusableCarSection extends StatefulWidget {
 
 class _ReusableCarSectionState extends State<ReusableCarSection> {
   ClientController clientController = Get.find();
-  String selectedYear = '', selectedModel = '', selectedColor = '',selectedBrand = '', selectedRating = '';
+  String selectedYear = '', selectedModel = '', selectedColor = '',selectedBrand = '', selectedRating = '', selectedTechnician = '';
   List<String> years = [];
   TextEditingController faxController = TextEditingController();
   TextEditingController odometerController = TextEditingController();
   TextEditingController colorController = TextEditingController();
+  TextEditingController technicianController = TextEditingController();
   TextEditingController chassisNoController = TextEditingController();
   TextEditingController registrationController = TextEditingController();
   TextEditingController brandController = TextEditingController();
@@ -1536,6 +1539,8 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
   @override
   void initState() {
     years = generateYears();
+    technicianController.text =
+        clientController.carsList[widget.index]['technician'];
     odometerController.text =
         clientController.carsList[widget.index]['odometer'];
     colorController.text =
@@ -1649,23 +1654,18 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                             'create_new_brand'.tr,
                             isThereClickableOption: true,
                             onTappedClickableOption: () {
-                              // showDialog<String>(
-                              //   context: context,
-                              //   builder:
-                              //       (
-                              //       BuildContext context,
-                              //       ) => const AlertDialog(
-                              //     backgroundColor: Colors.white,
-                              //     shape: RoundedRectangleBorder(
-                              //       borderRadius:
-                              //       BorderRadius.all(
-                              //         Radius.circular(9),
-                              //       ),
-                              //     ),
-                              //     elevation: 0,
-                              //     content: CreateBrandDialog(),
-                              //   ),
-                              // );
+                              showDialog<String>(
+                                  context: context,
+                                  builder: (BuildContext context) => AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(9)),
+                                    ),
+                                    elevation: 0,
+                                    content:AddGarageAttributeDialog(text: 'brand',),
+                                    // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
+                                  ));
                             },
                           ),
                           ReusableDropDownMenuWithSearch(
@@ -1691,23 +1691,18 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                             'create_new_model'.tr,
                             isThereClickableOption: true,
                             onTappedClickableOption: () {
-                              // showDialog<String>(
-                              //   context: context,
-                              //   builder:
-                              //       (
-                              //       BuildContext context,
-                              //       ) => const AlertDialog(
-                              //     backgroundColor: Colors.white,
-                              //     shape: RoundedRectangleBorder(
-                              //       borderRadius:
-                              //       BorderRadius.all(
-                              //         Radius.circular(9),
-                              //       ),
-                              //     ),
-                              //     elevation: 0,
-                              //     content: CreateModelDialog(),
-                              //   ),
-                              // );
+                              showDialog<String>(
+                                  context: context,
+                                  builder: (BuildContext context) => AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(9)),
+                                    ),
+                                    elevation: 0,
+                                    content:AddGarageAttributeDialog(text: 'model',),
+                                    // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
+                                  ));
                             },
                           ),
                           SizedBox(
@@ -1805,23 +1800,18 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                             'create_new_color'.tr,
                             isThereClickableOption: true,
                             onTappedClickableOption: () {
-                              // showDialog<String>(
-                              //   context: context,
-                              //   builder:
-                              //       (
-                              //       BuildContext context,
-                              //       ) => const AlertDialog(
-                              //     backgroundColor: Colors.white,
-                              //     shape: RoundedRectangleBorder(
-                              //       borderRadius:
-                              //       BorderRadius.all(
-                              //         Radius.circular(9),
-                              //       ),
-                              //     ),
-                              //     elevation: 0,
-                              //     content: CreateColorDialog(),
-                              //   ),
-                              // );
+                              showDialog<String>(
+                                  context: context,
+                                  builder: (BuildContext context) => AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(9)),
+                                    ),
+                                    elevation: 0,
+                                    content:AddGarageAttributeDialog(text: 'color',),
+                                    // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
+                                  ));
                             },
                           ),
                           SizedBox(
@@ -1900,7 +1890,55 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                               cont.updateCarOdometer(widget.index, val);
                             },
                           ),
-
+                        ],
+                      ),
+                      gapH10,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ReusableDropDownMenuWithSearch(
+                            list: carTechnician,
+                            text: 'technician'.tr,
+                            hint: '${'search'.tr}...',
+                            controller: technicianController,
+                            onSelected: (String? val) {
+                              setState(() {
+                                selectedTechnician=val!;
+                              });
+                              cont.updateCarTechnician(widget.index, val!);
+                            },
+                            validationFunc: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'select_option'.tr;
+                              }
+                              return null;
+                            },
+                            rowWidth: smallRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
+                            clickableOptionText:
+                            'add_new_technician'.tr,
+                            isThereClickableOption: true,
+                            onTappedClickableOption: () {
+                              showDialog<String>(
+                                  context: context,
+                                  builder: (BuildContext context) => AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(9)),
+                                    ),
+                                    elevation: 0,
+                                    content:AddGarageAttributeDialog(text: 'technician',),
+                                    // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
+                                  ));
+                            },
+                          ),
+                          SizedBox(
+                            width: smallRowWidth,
+                          ),
+                          SizedBox(
+                            width: smallRowWidth,
+                          ),
                         ],
                       ),
                       gapH10,

@@ -58,6 +58,7 @@ import 'AccountSettings/Users/users.dart';
 import 'Warehouses/create_warehouse.dart';
 import 'client_order/sales_order_summury.dart';
 import 'client_order/create_new_sales_order.dart';
+import 'garage/attribute_table.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -157,6 +158,7 @@ class _HomeBodyState extends State<HomeBody> {
     'sales_and_clients': const AccountsPage(),
     'purchases_and_suppliers': const Suppliers(),
     'inventory_management': const PhysicalInventory(),
+    'attribute_table':const AttributeTablePage(),
   };
 
   final HomeController homeController = Get.find();

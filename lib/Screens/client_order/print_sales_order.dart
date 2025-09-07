@@ -234,6 +234,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
               height: Sizes.deviceHeight * 0.80,
               child: PdfPreview(
                 build: (format) => _generatePdf(format, context),
+                pdfFileName:
+                    '${widget.clientName} [${widget.salesOrderNumber}]',
               ),
             ),
           ],
@@ -336,7 +338,7 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(
             color: PdfColors.black,
-            fontSize: 9.sp,
+            fontSize: 12,
             fontWeight: pw.FontWeight.normal,
             decoration: pw.TextDecoration.underline,
           ),
@@ -686,13 +688,29 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
     }
 
     reusableText(String text) {
-      return pw.Text(text, style: pw.TextStyle(fontSize: 11));
+      return pw.Text(
+        text,
+        style: pw.TextStyle(
+          fontSize: 9.sp,
+          fontWeight: pw.FontWeight.normal,
+          color: PdfColors.black,
+        ),
+      );
     }
 
     reusableNumber(String text) {
       return pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.end,
-        children: [pw.Text(text, style: pw.TextStyle(fontSize: 11))],
+        children: [
+          pw.Text(
+            text,
+            style: pw.TextStyle(
+              fontSize: 9.sp,
+              fontWeight: pw.FontWeight.normal,
+              color: PdfColors.black,
+            ),
+          ),
+        ],
       );
     }
 
@@ -810,7 +828,7 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                       ),
 
                       pw.SizedBox(
-                        width: 150.w,
+                        width: 160.w,
                         // width: width * 0.1,
                         child: pw.Row(
                           mainAxisAlignment: pw.MainAxisAlignment.start,
@@ -1095,7 +1113,13 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                     horizontal: width * 0.01,
                     vertical: 25,
                   ),
-                  width: width * 0.385,
+                  width:
+                      width < 833
+                          ? 2000.w
+                          : width < 875
+                          ? 1500.w
+                          : 1000.w,
+                  // width: width * 0.385,
                   height: 300,
                   decoration: const pw.BoxDecoration(
                     color: PdfColors.white,
@@ -1109,12 +1133,14 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                         // endIndent: 250
                       ),
                       pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Column(
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.255,
+                                width: 355.w,
+                                // width: width * 0.255,
                                 child: reusableText('total_price'.tr),
                               ),
                             ],
@@ -1124,7 +1150,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                             mainAxisAlignment: pw.MainAxisAlignment.start,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.055,
+                                width: 135.w,
+                                // width: width * 0.055,
                                 child: reusableNumber(
                                   widget.salesOrderCurrency,
                                 ),
@@ -1136,7 +1163,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                             mainAxisAlignment: pw.MainAxisAlignment.end,
                             children: [
                               pw.SizedBox(
-                                width: width * 0.045,
+                                width: 80.w,
+                                // width: width * 0.045,
                                 child: reusableNumber(
                                   numberWithComma(
                                     double.parse(
@@ -1163,12 +1191,15 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
+                                    // width: width * 0.255,
                                     child: reusableText('dis_count'.tr),
                                   ),
                                 ],
@@ -1178,7 +1209,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     // widget.discountOnAllItem == '0'
                                     //     ? width * 0.08
                                     //     : width * 0.068,
@@ -1193,7 +1225,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.end,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     // child: reusableText('$discountOnAllItem'),
                                     child: reusableNumber(
                                       widget.discountOnAllItem == '0' ||
@@ -1219,12 +1252,15 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               widget.globalDiscount == '0'
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
+                                    // width: width * 0.255,
                                     child: reusableText(
                                       'total_price_after_discount'.tr,
                                     ),
@@ -1236,7 +1272,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     child: reusableNumber(
                                       widget.salesOrderCurrency,
                                     ),
@@ -1248,7 +1285,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.end,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: reusableNumber(
                                       numberWithComma(
                                         double.parse(
@@ -1274,12 +1312,15 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               widget.specialDiscount == '0'
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
+                                    // width: width * 0.255,
                                     child: reusableText(
                                       'additional_special_discount'.tr,
                                     ),
@@ -1291,7 +1332,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     // width:
                                     //     widget.additionalSpecialDiscount == '0'
                                     //         ? width * 0.08
@@ -1306,7 +1348,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.end,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: reusableNumber(
                                       widget.additionalSpecialDiscount,
                                     ),
@@ -1326,12 +1369,14 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                       // TOTAL PRICE AFTER SPECIAL DISCOUNT
                       if (primaryCurrency != widget.salesOrderCurrency)
                         pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                           children: [
                             pw.Column(
                               mainAxisAlignment: pw.MainAxisAlignment.start,
                               children: [
                                 pw.SizedBox(
-                                  width: width * 0.255,
+                                  width: 355.w,
+                                  // width: width * 0.255,
                                   child: reusableText(
                                     'total_price_after_special_discount'.tr,
                                   ),
@@ -1343,8 +1388,9 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               mainAxisAlignment: pw.MainAxisAlignment.start,
                               children: [
                                 pw.SizedBox(
-                                  width: width * 0.055,
+                                  width: 135.w,
 
+                                  // width: width * 0.055,
                                   child: reusableNumber(
                                     widget.salesOrderCurrency,
                                   ),
@@ -1356,7 +1402,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               mainAxisAlignment: pw.MainAxisAlignment.end,
                               children: [
                                 pw.SizedBox(
-                                  width: width * 0.045,
+                                  width: 80.w,
+                                  // width: width * 0.045,
                                   child: reusableNumber(
                                     // '${widget.specialDiscountAmount}',
                                     // widget.totalPriceAfterSpecialDiscount,
@@ -1383,12 +1430,16 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               widget.vat == '0'
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
+
+                                    // width: width * 0.255,
                                     child: reusableText(
                                       widget.isVatNoPrinted
                                           ? ' '
@@ -1405,7 +1456,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     child:
                                         companyVat.isNotEmpty &&
                                                 !widget.isPrintedAs0
@@ -1427,7 +1479,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.end,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: pw.Row(
                                       mainAxisAlignment:
                                           pw.MainAxisAlignment.end,
@@ -1465,12 +1518,15 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               widget.vat == '0'
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
+                                    // width: width * 0.255,
                                     child: pw.Text(
                                       'final_price_incl_vat'.tr,
                                       style: pw.TextStyle(
@@ -1487,7 +1543,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     child: pw.Row(
                                       mainAxisAlignment:
                                           pw.MainAxisAlignment.end,
@@ -1509,7 +1566,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.end,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: pw.Row(
                                       mainAxisAlignment:
                                           pw.MainAxisAlignment.end,
@@ -1545,13 +1603,16 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                               widget.vat == '0'
                           ? pw.Text("")
                           : pw.Row(
+                            mainAxisAlignment:
+                                pw.MainAxisAlignment.spaceBetween,
                             children: [
                               pw.Column(
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.255,
+                                    width: 355.w,
 
+                                    // width: width * 0.255,
                                     child: pw.Text(
                                       'final_price_incl_vat'.tr,
                                       style: pw.TextStyle(
@@ -1568,7 +1629,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.start,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.055,
+                                    width: 135.w,
+                                    // width: width * 0.055,
                                     child: reusableNumber(primaryCurrency),
                                   ),
                                 ],
@@ -1577,7 +1639,8 @@ class _PrintSalesOrderState extends State<PrintSalesOrder> {
                                 mainAxisAlignment: pw.MainAxisAlignment.end,
                                 children: [
                                   pw.SizedBox(
-                                    width: width * 0.045,
+                                    width: 80.w,
+                                    // width: width * 0.045,
                                     child: reusableNumber(
                                       widget.finalPriceBySalesOrderCurrency ==
                                               '0'

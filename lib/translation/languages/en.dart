@@ -621,5 +621,10 @@ Map<String, String> en = {
   'create_new_color': 'Create new color',
   'create_new_model': 'Create new model', //number
   'create_new_brand': 'Create new brand',
-
+'garage':'Garage',
+  'add_new_color':'Add New Color',
+  'add_new_model':'Add New Model',
+  'add_new_brand':'Add New Brand',
+  'add_new_technician':'Add New Technician',
+  'technician':'Technician',
 };
