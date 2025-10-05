@@ -115,13 +115,16 @@ class CompanySettingsController extends GetxController {
 
 
 
-  getCashTraysFromBack(bool isItHaveHeader2) async {
+  getHeadersFromBack(bool isItHaveHeader2) async {
     headersList = [];
     isHeadersFetched = false;
     var p = await getAllHeaders();
-    if (p['success']==true) {
-      for (var header in p['data']) {
-        headersList.add(header);
+    if (p['success']==true && '${p['data']}'!='[]') {
+
+      for (  int i=0;i<2 ;i++) {
+        //var header in p['data']
+        headersList.add(p['data'][i]);
+
       }
       // cashTraysList=cashTraysList.reversed.toList();
 
@@ -142,6 +145,10 @@ class CompanySettingsController extends GetxController {
             'localPayments': '',
             'companySubjectToVat': '',
             'headerName': 'Header 1',
+            'defaultQuotationCurrency': {
+              'id':'',
+              'name':'',
+            },
           } ,
           { 'id': '',
             'logo':'',
@@ -157,7 +164,12 @@ class CompanySettingsController extends GetxController {
             'address': '',
             'localPayments': '',
             'companySubjectToVat': '',
-            'headerName': 'Header 2',}
+            'headerName': 'Header 2',
+            'defaultQuotationCurrency': {
+              'id':'',
+              'name':'',
+            },
+          }
         ];
       }
       else if(headersList.length==1 && isItHaveHeader2){
@@ -176,7 +188,12 @@ class CompanySettingsController extends GetxController {
           'address': '',
           'localPayments': '',
           'companySubjectToVat': '',
-          'headerName': 'Header 2',});
+          'headerName': 'Header 2',
+          'defaultQuotationCurrency': {
+            'id':'',
+            'name':'',
+          },
+        });
       }
       else if (headersList.isEmpty && !isItHaveHeader2){
         headersList=[
@@ -195,9 +212,56 @@ class CompanySettingsController extends GetxController {
             'localPayments': '',
             'companySubjectToVat': '',
             'headerName': 'Header 1',
+            'defaultQuotationCurrency': {
+            'id':'',
+            'name':'',
+            },
           } ,
         ];
       }
+    }else{
+      headersList=[
+        { 'id': '',
+          'logo':'',
+          'fullCompanyName': '',
+          'email': '',
+          'vat': '',
+          'trn': '',
+          'bankInfo': '',
+          'phoneCode': '+961',
+          'phoneNumber': '',
+          'mobileCode': '+961',
+          'mobileNumber': '',
+          'address': '',
+          'localPayments': '',
+          'companySubjectToVat': '',
+          'headerName': 'Header 1',
+          'defaultQuotationCurrency': {
+            'id':'',
+            'name':'',
+          },
+        } ,
+        { 'id': '',
+          'logo':'',
+          'fullCompanyName': '',
+          'email': '',
+          'vat': '',
+          'trn': '',
+          'bankInfo': '',
+          'phoneCode': '+961',
+          'phoneNumber': '',
+          'mobileCode': '+961',
+          'mobileNumber': '',
+          'address': '',
+          'localPayments': '',
+          'companySubjectToVat': '',
+          'headerName': 'Header 2',
+          'defaultQuotationCurrency': {
+            'id':'',
+            'name':'',
+          },
+        }
+      ];
     }
     isHeadersFetched = true;
     update();
@@ -260,5 +324,19 @@ class CompanySettingsController extends GetxController {
   }
   updateCompanySubjectToVat(int index,String newVal){
     headersList[index]['companySubjectToVat']=newVal;
+  }
+  updateQuotationCurrency(int index,String idVal,String nameVal){
+    if(!headersList[index].containsKey('defaultQuotationCurrency')){
+      headersList[index].addAll({'defaultQuotationCurrency': {
+        'id': '',
+        'name': '',
+      },});
+    }
+    else if(headersList[index]['defaultQuotationCurrency']==null){
+      headersList[index]['defaultQuotationCurrency']={'id': '',
+        'name': '',};
+    }
+    headersList[index]['defaultQuotationCurrency']['id']=idVal;
+    headersList[index]['defaultQuotationCurrency']['name']=nameVal;
   }
 }

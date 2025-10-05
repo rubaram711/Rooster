@@ -17,6 +17,7 @@ import '../../Widgets/dialog_title.dart';
 import '../../Widgets/loading.dart';
 import '../../Widgets/loading_dialog.dart';
 import '../../Widgets/reusable_add_card.dart';
+import '../../Widgets/reusable_radio_btns.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../Widgets/table_item.dart';
 import '../../Widgets/table_title.dart';
@@ -952,43 +953,17 @@ class _PropertiesTabInPriceListsState extends State<PropertiesTabInPriceLists> {
                       ),
                     ),
                     gapH6,
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: ListTile(
-                              title: Text(
-                                'net_prices'.tr,
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                              leading: Radio(
-                                value: 1,
-                                groupValue: cont.selectedDisplayModeRadio,
-                                onChanged: (value) {
-                                  cont.setSelectedRadio(value!);
-                                },
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: ListTile(
-                              title: Text(
-                                'prices_with_visible_discount'.tr,
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                              leading: Radio(
-                                value: 2,
-                                groupValue: cont.selectedDisplayModeRadio,
-                                onChanged: (value) {
-                                  cont.setSelectedRadio(value!);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
+                   ReusableRadioBtns(
+                     isRow: true,
+                        groupVal:  cont.selectedDisplayModeRadio,
+                        title1: 'net_prices'.tr,
+                        title2: 'prices_with_visible_discount'.tr,
+                        func: (value) {
+                           cont.setSelectedRadio(value!);
+                        },
+                        width1: MediaQuery.of(context).size.width * 0.25,
+                        width2: MediaQuery.of(context).size.width * 0.25,
                       ),
-                    ),
                     gapH6,
                   ],
                 )

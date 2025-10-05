@@ -1080,7 +1080,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                           ),
                         ),
                       ),
-                      Tooltip(
+                      widget.info['status'] == "pending"?Tooltip(
                         message: 'modify'.tr,
                         child: InkWell(
                           onTap: () async {
@@ -1105,7 +1105,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                           },
                           child: Icon(Icons.edit, color: Primary.primary),
                         ),
-                      ),
+                      ):SizedBox.shrink(),
 
                       // Tooltip(
                       //   message: 'send'.tr,
@@ -1357,7 +1357,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                       //         '${widget.info['validity'] ?? ''}',
                       //         '${widget.info['inputDate'] ?? ''}',
 
-                      //         '', //todo paymentTermsController.text,
+                      //          widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',,
                       //         pricelistId,
                       //         currencyId,
                       //         '${widget.info['termsAndConditions']}',

@@ -9,6 +9,7 @@ import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/loading.dart';
 import '../../Widgets/page_title.dart';
 import '../../Widgets/reusable_btn.dart';
+import '../../Widgets/reusable_radio_btns.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
@@ -259,38 +260,16 @@ class _FormPageOptionsState extends State<FormPageOptions> {
               // width: MediaQuery.of(context).size.width * 0.25,
               padding:
                   const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-              // decoration: BoxDecoration(
-              //   border: Border.all(color: Colors.black26, width: 1),
-              //   borderRadius: BorderRadius.circular(10),
-              // ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Radio<int>(
-                        value: 1,
-                        groupValue: cont.selectedValueForPackaging,
-                        onChanged: (value) {
-                            cont.setSelectedValue(value!);
-                        },
-                      ),
-                      const  Text('Print Item Packaging'),
-                    ],
-                  ),
-                  gapH10,
-                  Row(
-                    children: [
-                      Radio<int>(
-                        value: 2,
-                        groupValue: cont.selectedValueForPackaging,
-                        onChanged: (value) {
-                          cont.setSelectedValue(value!);
-                        },
-                      ),
-                      const Text('Print item unit name'),
-                    ],
-                  ),
-                ],
+              child:   ReusableRadioBtns(
+                isRow: false,
+                groupVal: cont.selectedValueForPackaging,
+                title1: 'Print Item Packaging',
+                title2: 'Print item unit name',
+                func: (value) {
+                  cont.setSelectedValue(value!);
+                },
+                width1: MediaQuery.of(context).size.width ,
+                width2: MediaQuery.of(context).size.width ,
               ),
             ),
 

@@ -17,6 +17,8 @@ saveHeader2Locally(
     String companySubjectToVat,
     String headerName,
     String headerId,
+    String quotationCurrencyId,
+    String quotationCurrencyName,
     ) async
 {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -35,6 +37,8 @@ saveHeader2Locally(
   prefs.setString('companySubjectToVat2', companySubjectToVat);
   prefs.setString('headerName2', headerName);
   prefs.setString('headerId2', headerId);
+  prefs.setString('quotationCurrencyId2', quotationCurrencyId);
+  prefs.setString('quotationCurrencyName2', quotationCurrencyName);
 }
 
 
@@ -128,4 +132,16 @@ Future<String> getCompanyLocalPayments2FromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String localPayments = prefs.getString('localPayments2') ?? '';
   return localPayments;
+}
+
+Future<String> getQuotationCurrencyName2FromPref() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String headerName = prefs.getString('quotationCurrencyName2') ?? '';
+  return headerName;
+}
+
+Future<String> getQuotationCurrencyId2FromPref() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String headerName = prefs.getString('quotationCurrencyId2') ?? '';
+  return headerName;
 }

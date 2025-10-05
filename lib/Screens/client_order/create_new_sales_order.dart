@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:rooster_app/Backend/Quotations/TermsAndConditions/get_terms_and_conditions.dart';
 import 'package:rooster_app/Backend/SalesOrderBackend/store_sales_order.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
 import 'package:rooster_app/Controllers/sales_order_controller.dart';
@@ -32,10 +31,13 @@ import '../../../Widgets/reusable_btn.dart';
 import '../../../Widgets/reusable_text_field.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
-import '../../Backend/Quotations/TermsAndConditions/save_terms_and_conditions.dart';
+import '../../Backend/TermsAndConditions/get_terms_and_conditions.dart';
+import '../../Controllers/payment_terms_controller.dart';
+import '../../Widgets/HomeWidgets/home_app_bar.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/dialog_drop_menu.dart';
+import '../../Widgets/reusable_reference_text_field.dart';
 import '../../Widgets/reusable_add_card.dart';
 import '../../Widgets/reusable_more.dart';
 import '../../Widgets/table_title.dart';
@@ -107,6 +109,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
   final SalesOrderController salesOrderController = Get.find();
   final HomeController homeController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
+  final PaymentTermsController paymentController = Get.find();
 
   int progressVar = 0;
   String selectedCustomerIds = '';
@@ -186,23 +189,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
     termsAndConditionsController.text = jsonString;
   }
 
-  void _saveTermsAndConditions() async {
-    final deltaJson = _controller.document.toDelta().toJson();
-    final jsonString = jsonEncode(deltaJson);
 
-    setState(() {
-      _savedContent = jsonString;
-    });
-    termsAndConditionsController.text = jsonString;
-
-    // print('_savedContent $_savedContent');
-    var p = await storeTermsAndConditions(_savedContent!);
-    if (p['success'] == true) {
-      CommonWidgets.snackBar('Success', p['message']);
-    } else {
-      CommonWidgets.snackBar('error', p['message']);
-    }
-  }
 
   List termsAndConditionsList = [];
   int currentIndex = 0;
@@ -272,6 +259,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
     inputDateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     priceListController.text = 'STANDARD';
     getAllTermsAndConditions();
+    paymentController.getPaymentTermsFromBack();
     super.initState();
   }
 
@@ -317,7 +305,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                         homeCont.isMenuOpened
                             ? MediaQuery.of(context).size.width * 0.15
                             : MediaQuery.of(context).size.width * 0.24;
-                    double PriceListFieldWidth =
+                    double priceListFieldWidth =
                         homeCont.isMenuOpened
                             ? MediaQuery.of(context).size.width * 0.10
                             : MediaQuery.of(context).size.width * 0.15;
@@ -790,7 +778,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                         selectedCustomerIds,
                                         validityController.text,
                                         inputDateController.text,
-                                        '', //todo paymentTermsController.text,
+                                        salesOrderCont.selectedPaymentTermId,
                                         salesOrderCont.salesOrderNumber,
                                         salesOrderCont.selectedPriceListId,
                                         salesOrderCont
@@ -1251,20 +1239,26 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       color: TypographyColor.titleTable,
                                     ),
                                   ),
-                                  DialogTextField(
+                                  ReusableReferenceTextField(
+                                    type: 'salesOrders',
                                     textEditingController: refController,
-                                    text: '${'ref'.tr}:',
-                                    hint: 'manual_reference'.tr,
                                     rowWidth: referenceRow,
-                                    // rowWidth:
-                                    //     MediaQuery.of(context).size.width *
-                                    //     0.18,
                                     textFieldWidth: referenceFieldWidth,
-                                    // textFieldWidth:
-                                    //     MediaQuery.of(context).size.width *
-                                    //     0.15,
-                                    validationFunc: (val) {},
                                   ),
+                                  // DialogTextField(
+                                  //   textEditingController: refController,
+                                  //   text: '${'ref'.tr}:',
+                                  //   hint: 'manual_reference'.tr,
+                                  //   rowWidth: referenceRow,
+                                  //   // rowWidth:
+                                  //   //     MediaQuery.of(context).size.width *
+                                  //   //     0.18,
+                                  //   textFieldWidth: referenceFieldWidth,
+                                  //   // textFieldWidth:
+                                  //   //     MediaQuery.of(context).size.width *
+                                  //   //     0.15,
+                                  //   validationFunc: (val) {},
+                                  // ),
                                   SizedBox(
                                     width: currencyRow,
                                     // width:
@@ -1694,7 +1688,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       children: [
                                         Text('pricelist'.tr),
                                         DropdownMenu<String>(
-                                          width: PriceListFieldWidth,
+                                          width: priceListFieldWidth,
                                           // width:
                                           //     MediaQuery.of(
                                           //       context,
@@ -2056,20 +2050,64 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       ],
                                     ),
                                   ),
-                                  DialogTextField(
-                                    textEditingController:
-                                        paymentTermsController,
-                                    text: 'payment_terms'.tr,
-                                    hint: '',
-                                    rowWidth: paymentTermsRow,
-                                    // rowWidth:
-                                    //     MediaQuery.of(context).size.width *
-                                    //     0.24,
-                                    textFieldWidth: paymentTermsFieldWidth,
-                                    // textFieldWidth:
-                                    //     MediaQuery.of(context).size.width *
-                                    //     0.15,
-                                    validationFunc: (val) {},
+                                  // DialogTextField(
+                                  //   textEditingController:
+                                  //       paymentTermsController,
+                                  //   text: 'payment_terms'.tr,
+                                  //   hint: '',
+                                  //   rowWidth: paymentTermsRow,
+                                  //   // rowWidth:
+                                  //   //     MediaQuery.of(context).size.width *
+                                  //   //     0.24,
+                                  //   textFieldWidth: paymentTermsFieldWidth,
+                                  //   // textFieldWidth:
+                                  //   //     MediaQuery.of(context).size.width *
+                                  //   //     0.15,
+                                  //   validationFunc: (val) {},
+                                  // ),
+                                  GetBuilder<PaymentTermsController>(
+                                    builder: (cont) {
+                                      return ReusableDropDownMenuWithSearch(
+                                        list: cont.paymentTermsNamesList,
+                                        text: 'payment_terms'.tr,
+                                        hint: '${'search'.tr}...',
+                                        controller: paymentTermsController,
+                                        onSelected: (String? val) {
+                                          int index=cont.paymentTermsNamesList.indexOf(val!);
+                                          salesOrderCont.setSelectedPaymentTermId(cont.paymentTermsIdsList[index]);
+                                        },
+                                        validationFunc: (value) {
+                                          // if (value == null || value.isEmpty) {
+                                          //   return 'select_option'.tr;
+                                          // }
+                                          // return null;
+                                        },
+                                        rowWidth: paymentTermsRow,
+                                        // rowWidth:
+                                        //     MediaQuery.of(context).size.width *
+                                        //     0.24,
+                                        textFieldWidth: paymentTermsFieldWidth,
+                                        clickableOptionText:
+                                        'or_create_new_payment_term'.tr,
+                                        isThereClickableOption: true,
+                                        onTappedClickableOption: () {
+                                          showDialog<String>(
+                                              context: context,
+                                              builder: (BuildContext context) => AlertDialog(
+                                                backgroundColor: Colors.white,
+                                                contentPadding: const EdgeInsets.all(0),
+                                                titlePadding: const EdgeInsets.all(0),
+                                                actionsPadding: const EdgeInsets.all(0),
+                                                shape: const RoundedRectangleBorder(
+                                                  borderRadius:
+                                                  BorderRadius.all(Radius.circular(9)),
+                                                ),
+                                                elevation: 0,
+                                                content: configDialogs['payment_terms'],
+                                              ));
+                                        },
+                                      );
+                                    },
                                   ),
                                   // ReusableDropDownMenuWithSearch(
                                   //   list: termsList,
@@ -3145,31 +3183,14 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            'terms_conditions'.tr,
+                                            'note'.tr,
                                             style: TextStyle(
                                               fontSize: 15,
                                               color: TypographyColor.titleTable,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          Row(
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.save_alt,
-                                                ),
-                                                onPressed: () async {
-                                                  _saveTermsAndConditions();
-                                                },
-                                              ),
-                                              gapW6,
-                                              IconButton(
-                                                icon: const Icon(Icons.restore),
-                                                onPressed:
-                                                    showLastTermsAndConditionsList,
-                                              ),
-                                            ],
-                                          ),
+
                                         ],
                                       ),
                                       gapH16,
@@ -3186,7 +3207,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                       //   },
                                       // ),
                                       SizedBox(
-                                        height: 300,
+                                        height: 200,
                                         child: Column(
                                           children: [
                                             QuillSimpleToolbar(
@@ -3581,7 +3602,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             selectedCustomerIds,
                                             validityController.text,
                                             inputDateController.text,
-                                            '', //todo paymentTermsController.text,
+                                            salesOrderCont.selectedPaymentTermId,
                                             salesOrderCont.salesOrderNumber,
                                             salesOrderCont.selectedPriceListId,
                                             salesOrderCont
@@ -4256,7 +4277,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         homeController.isOpened.value
                             ? MediaQuery.of(context).size.width * 0.10
                             : MediaQuery.of(context).size.width * 0.13,
-                    clickableOptionText: 'create_virtual_item'.tr,
+                    clickableOptionText: 'create_item'.tr,
                     isThereClickableOption: true,
                     onTappedClickableOption: () {
                       productController.clearData();

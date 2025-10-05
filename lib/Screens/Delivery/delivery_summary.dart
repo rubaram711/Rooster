@@ -1013,7 +1013,10 @@ class _DeliveryAsRowInTableState extends State<DeliveryAsRowInTable> {
                                     isInDelivery: true,
                                     deliveryNumber:
                                         widget.info['deliveryNumber'] ?? '',
-
+                                    salesPerson:
+                                        widget.info['salesperson'] != null
+                                            ? widget.info['salesperson']['name']
+                                            : '---',
                                     creationDate: widget.info['date'] ?? '',
                                     expectedDate:
                                         widget.info['expectedDelivery'] ?? '',
@@ -2234,7 +2237,11 @@ class _UpdateDeliveryDialogState extends State<UpdateDeliveryDialog> {
                                     return PrintDeliveryData(
                                       deliveryNumber:
                                           widget.info['deliveryNumber'] ?? '',
-
+                                      salesPerson:
+                                          widget.info['salesperson'] != null
+                                              ? widget
+                                                  .info['salesperson']['name']
+                                              : '---',
                                       creationDate: widget.info['date'] ?? '',
                                       expectedDate:
                                           widget.info['expectedDelivery'] ?? '',
@@ -3855,7 +3862,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   },
                   rowWidth: MediaQuery.of(context).size.width * 0.12,
                   textFieldWidth: MediaQuery.of(context).size.width * 0.12,
-                  clickableOptionText: 'create_virtual_item'.tr,
+                  clickableOptionText: 'create_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
                     productController.clearData();
@@ -4800,7 +4807,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   },
                   rowWidth: MediaQuery.of(context).size.width * 0.12,
                   textFieldWidth: MediaQuery.of(context).size.width * 0.12,
-                  clickableOptionText: 'create_virtual_item'.tr,
+                  clickableOptionText: 'create_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
                     showDialog<String>(

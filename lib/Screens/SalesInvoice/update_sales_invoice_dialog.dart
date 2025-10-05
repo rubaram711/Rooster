@@ -23,11 +23,14 @@ import 'package:rooster_app/Widgets/loading.dart';
 import 'package:rooster_app/Widgets/reusable_add_card.dart';
 import 'package:rooster_app/utils/image_picker_helper.dart';
 import '../../Controllers/home_controller.dart';
+import '../../Controllers/payment_terms_controller.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
+import '../../Widgets/HomeWidgets/home_app_bar.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/page_title.dart';
+import '../../Widgets/reusable_reference_text_field.dart';
 import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_drop_down_menu.dart';
 import '../../Widgets/reusable_more.dart';
@@ -117,6 +120,8 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
   final SalesInvoiceController salesInvoiceController = Get.find();
   final PendingDocsReviewController pendingDocsController = Get.find();
   final WarehouseController wareHouseController = Get.find();
+  final PaymentTermsController paymentController = Get.find();
+
 
   String cashMethodId = '';
   String clientId = '';
@@ -261,6 +266,8 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     salesInvoiceController.rowsInListViewInSalesInvoice = {};
     salesInvoiceController.salesInvoiceCounter = 0;
     setProgressVar();
+    paymentTermsController.text = widget.info['paymentTerm']!=null ?widget.info['paymentTerm']['title'] : '';
+    salesInvoiceController.selectedPaymentTermId = widget.info['paymentTerm']!=null ?'${widget.info['paymentTerm']['id']}' : '';
     if (widget.info['deliveredFromWarehouse'] != null) {
       warehouseName = '${widget.info['deliveredFromWarehouse']['name'] ?? ''}';
       selectedWarehouseId =
@@ -425,7 +432,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
         salesInvoiceController.rowsInListViewInSalesInvoice.length;
     salesInvoiceController.listViewLengthInSalesInvoice =
         salesInvoiceController.rowsInListViewInSalesInvoice.length * 60;
-
+paymentController.getPaymentTermsFromBack();
     super.initState();
   }
 
@@ -903,7 +910,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     selectedCustomerIds,
                                     validityController.text,
                                     selectedWarehouseId,
-                                    '', //todo paymentTermsController.text,
+                                    salesInvoiceCont.selectedPaymentTermId,
                                     salesInvoiceCont.selectedPriceListId,
                                     salesInvoiceCont
                                         .selectedCurrencyId, //selectedCurrency
@@ -1061,7 +1068,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     selectedCustomerIds,
                                     validityController.text,
                                     selectedWarehouseId,
-                                    '', //todo paymentTermsController.text,
+                                    salesInvoiceCont.selectedPaymentTermId,
                                     salesInvoiceCont.selectedPriceListId,
                                     salesInvoiceCont
                                         .selectedCurrencyId, //selectedCurrency
@@ -1219,7 +1226,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                     selectedCustomerIds,
                                     validityController.text,
                                     selectedWarehouseId,
-                                    '', //todo paymentTermsController.text,
+                                    salesInvoiceCont.selectedPaymentTermId,
                                     salesInvoiceCont.selectedPriceListId,
                                     salesInvoiceCont
                                         .selectedCurrencyId, //selectedCurrency
@@ -1355,16 +1362,24 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                 ),
                               ],
                             ),
-                            DialogTextField(
-                              textEditingController: refController,
-                              text: '${'ref'.tr}:',
-                              hint: 'manual_reference'.tr,
-                              rowWidth:
-                                  MediaQuery.of(context).size.width * 0.18,
-                              textFieldWidth:
-                                  MediaQuery.of(context).size.width * 0.15,
-                              validationFunc: (val) {},
-                            ),
+                            ReusableReferenceTextField(
+                              type: 'salesInvoices',
+                                textEditingController: refController,
+                                rowWidth:
+                                    MediaQuery.of(context).size.width * 0.18,
+                                textFieldWidth:
+                                    MediaQuery.of(context).size.width * 0.15,
+                              ),
+                            // DialogTextField(
+                            //   textEditingController: refController,
+                            //   text: '${'ref'.tr}:',
+                            //   hint: 'manual_reference'.tr,
+                            //   rowWidth:
+                            //       MediaQuery.of(context).size.width * 0.18,
+                            //   textFieldWidth:
+                            //       MediaQuery.of(context).size.width * 0.15,
+                            //   validationFunc: (val) {},
+                            // ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width * 0.15,
                               child: Row(
@@ -1958,15 +1973,58 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                 ],
                               ),
                             ),
-                            DialogTextField(
-                              textEditingController: paymentTermsController,
-                              text: 'payment_terms'.tr,
-                              hint: '',
-                              rowWidth:
+                            // DialogTextField(
+                            //   textEditingController: paymentTermsController,
+                            //   text: 'payment_terms'.tr,
+                            //   hint: '',
+                            //   rowWidth:
+                            //       MediaQuery.of(context).size.width * 0.24,
+                            //   textFieldWidth:
+                            //       MediaQuery.of(context).size.width * 0.15,
+                            //   validationFunc: (val) {},
+                            // ),
+                            GetBuilder<PaymentTermsController>(
+                              builder: (cont) {
+                                return ReusableDropDownMenuWithSearch(
+                                  list: cont.paymentTermsNamesList,
+                                  text: 'payment_terms'.tr,
+                                  hint: '${'search'.tr}...',
+                                  controller: paymentTermsController,
+                                  onSelected: (String? val) {
+                                    int index=cont.paymentTermsNamesList.indexOf(val!);
+                                    salesInvoiceCont.setSelectedPaymentTermId(cont.paymentTermsIdsList[index]);
+                                  },
+                                  validationFunc: (value) {
+                                    // if (value == null || value.isEmpty) {
+                                    //   return 'select_option'.tr;
+                                    // }
+                                    // return null;
+                                  },
+                                  rowWidth:
                                   MediaQuery.of(context).size.width * 0.24,
-                              textFieldWidth:
+                                  textFieldWidth:
                                   MediaQuery.of(context).size.width * 0.15,
-                              validationFunc: (val) {},
+                                  clickableOptionText:
+                                  'or_create_new_payment_term'.tr,
+                                  isThereClickableOption: true,
+                                  onTappedClickableOption: () {
+                                    showDialog<String>(
+                                        context: context,
+                                        builder: (BuildContext context) => AlertDialog(
+                                          backgroundColor: Colors.white,
+                                          contentPadding: const EdgeInsets.all(0),
+                                          titlePadding: const EdgeInsets.all(0),
+                                          actionsPadding: const EdgeInsets.all(0),
+                                          shape: const RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.all(Radius.circular(9)),
+                                          ),
+                                          elevation: 0,
+                                          content: configDialogs['payment_terms'],
+                                        ));
+                                  },
+                                );
+                              },
                             ),
                             // SizedBox(
                             //   width: MediaQuery.of(context).size.width * 0.24,
@@ -2135,7 +2193,6 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                         enableSearch: true,
                                         controller: priceConditionController,
                                         hintText: '',
-
                                         textStyle: const TextStyle(
                                           fontSize: 12.0,
                                         ),
@@ -3197,7 +3254,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                         ),
                         gapH16,
                         SizedBox(
-                          height: 300.0,
+                          height: 200,
                           child: Column(
                             children: [
                               QuillSimpleToolbar(
@@ -3559,7 +3616,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                 selectedCustomerIds,
                                 validityController.text,
                                 salesInvoiceController.selectedWarehouseId,
-                                '', //todo paymentTermsController.text,
+                                salesInvoiceCont.selectedPaymentTermId,
                                 salesInvoiceCont.selectedPriceListId,
                                 salesInvoiceController
                                     .selectedCurrencyId, //selectedCurrency
@@ -4087,7 +4144,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   },
                   rowWidth: MediaQuery.of(context).size.width * 0.15,
                   textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                  clickableOptionText: 'create_virtual_item'.tr,
+                  clickableOptionText: 'create_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
                     productController.clearData();
@@ -5200,7 +5257,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                   },
                   rowWidth: MediaQuery.of(context).size.width * 0.15,
                   textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                  clickableOptionText: 'create_virtual_item'.tr,
+                  clickableOptionText: 'create_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
                     showDialog<String>(

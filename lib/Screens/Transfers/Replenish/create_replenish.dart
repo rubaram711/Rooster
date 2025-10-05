@@ -109,6 +109,8 @@ getCurrencies() async {
   }
 }
 
+  final ScrollController scrollController = ScrollController();
+
   @override
   void initState() {
     getCategoriesFromBack();
@@ -123,6 +125,18 @@ getCurrencies() async {
     warehouseController.getWarehousesFromBack();
     // transferController.getAllProductsFromBack('');
     transferController.resetReplenish();
+
+    transferController.currentPage = 1;
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent &&
+          !transferController.isLoading) {
+        transferController.getAllProductsFromBack( '',
+          searchController.text,
+          transferController
+              .selectedCategoryId,);
+      }
+    });
     super.initState();
   }
 
@@ -695,7 +709,7 @@ getCurrencies() async {
                           onTap: () async {
                             if (cont.transferToIdInReplenish != '') {
                               transferController.clearReplenishOrderLines();
-                              transferController.getAllProductsFromBack(
+                              transferController.getAllProductsFromBackWithSearch(
                                 '',
                                 searchController.text,
                                 cont.selectedCategoryId,
@@ -829,34 +843,54 @@ getCurrencies() async {
                                   SizedBox(
                                     height:
                                         cont.transferToIdInReplenish != ''
-                                            ? cont.productsList.length *
+                                            ? cont.productsList.length >8 ?500
+                                        :cont.productsList.length *
                                                 increment
                                             : 50,
                                     child:
                                         // cont.transferToIdInReplenish != '' && !cont.isProductsFetched?
                                         cont.isProductsFetched
-                                            ? Column(
-                                              children: List.generate(
-                                                cont
-                                                    .productsList
-                                                    .length, // products is data from back-end response
-                                                (index) {
-                                                  // print('focusNodes.length');
-                                                  // print(focusNodes.length);
-                                                  focusNodes=[];
-                                                  for (int i = 0; i < cont.productsList.length; i++) {
-                                                    focusNodes.add(FocusNode());
-                                                  }
-                                                  return ReusableItemRow(
-                                                    index: index,
-                                                    focusNode: focusNodes[index],
-                                                    nextFocusNode: index < focusNodes.length - 1
-                                                        ? focusNodes[index + 1]
-                                                        : null,
-                                                  );
-                                                },
-                                              ),
-                                            )
+                                            ?ListView.builder(
+                                          controller: scrollController,
+                                          itemCount: cont
+                                              .productsList
+                                              .length,
+                                          itemBuilder: (context, index) {
+                                            focusNodes=[];
+                                            for (int i = 0; i < cont.productsList.length; i++) {
+                                              focusNodes.add(FocusNode());
+                                            }
+                                            return ReusableItemRow(
+                                              index: index,
+                                              focusNode: focusNodes[index],
+                                              nextFocusNode: index < focusNodes.length - 1
+                                                  ? focusNodes[index + 1]
+                                                  : null,
+                                            );
+                                          } ,)
+                                      //
+                                      // :  Column(
+                                      //         children: List.generate(
+                                      //           cont
+                                      //               .productsList
+                                      //               .length, // products is data from back-end response
+                                      //           (index) {
+                                      //             // print('focusNodes.length');
+                                      //             // print(focusNodes.length);
+                                      //             focusNodes=[];
+                                      //             for (int i = 0; i < cont.productsList.length; i++) {
+                                      //               focusNodes.add(FocusNode());
+                                      //             }
+                                      //             return ReusableItemRow(
+                                      //               index: index,
+                                      //               focusNode: focusNodes[index],
+                                      //               nextFocusNode: index < focusNodes.length - 1
+                                      //                   ? focusNodes[index + 1]
+                                      //                   : null,
+                                      //             );
+                                      //           },
+                                      //         ),
+                                      //       )
                                             : Row(
                                               children: [
                                                 isLoading
@@ -2021,6 +2055,16 @@ class _MobileReplenishState extends State<MobileReplenish> {
                                           });
                                           transferController
                                               .isProductsFetched = false;
+                                          transferController
+                                              .productsList= [];
+                                          transferController
+                                              .productsNames = [];
+                                          transferController
+                                              .productsCodes = [];
+                                          transferController
+                                              . productsIds = [];
+                                          transferController
+                                              .itemsListInReplenish = {};
                                           transferController
                                               .getAllProductsFromBack(
                                                 '',

@@ -374,7 +374,7 @@ class _SignFormState extends State<SignForm> {
                           res['data']['user']['name'],
                           '${res['data']['user']['company']['id']}',
                           '${res['data']['user']['company']['name']}',
-                          '0'//
+                          res['data']['user']['company']['has_garage']==true?'1':'0',
                         );
                         if (res['data']['companySettings'].isNotEmpty) {
                           await saveCompanySettingsLocally(
@@ -445,6 +445,8 @@ class _SignFormState extends State<SignForm> {
                                 '${header['companySubjectToVat']??'1'}',
                                 header['headerName']??'',
                                 '${header['id']??''}',
+                                header['quotationCurrency']!=null? '${header['quotationCurrency']['id']}':'',
+                                header['quotationCurrency']!=null? header['quotationCurrency']['name']:''
                               );
                             }
                             else if(i==1){
@@ -464,6 +466,8 @@ class _SignFormState extends State<SignForm> {
                                 '${header['companySubjectToVat']??'1'}',
                                 header['headerName']??'',
                                 '${header['id']??''}',
+                                  header['quotationCurrency']!=null? '${header['quotationCurrency']['id']}':'',
+                                  header['quotationCurrency']!=null? header['quotationCurrency']['name']:''
                               );}
                             i++;
                           }
@@ -564,7 +568,7 @@ class _SignFormState extends State<SignForm> {
                         res['data']['user']['name'],
                         '${res['data']['user']['company']['id']}',
                         '${res['data']['user']['company']['name']}',
-                          '0'//
+                        res['data']['user']['company']['has_garage']==true?'1':'0',
                       );
                       if (res['data']['companySettings'].isNotEmpty) {
                         // print('object');print(res['data']['companySettings']);
@@ -633,6 +637,8 @@ class _SignFormState extends State<SignForm> {
                               '${header['companySubjectToVat']??'1'}',
                               header['headerName']??'',
                               '${header['id']??''}',
+                              header['defaultQuotationCurrency']!=null?'${header['defaultQuotationCurrency']['id']}':'',
+                              header['defaultQuotationCurrency']!=null?'${header['defaultQuotationCurrency']['name']}':'',
                             );
                           }
                           else if(i==1){
@@ -652,6 +658,8 @@ class _SignFormState extends State<SignForm> {
                               '${header['companySubjectToVat']??'1'}',
                               header['headerName']??'',
                               '${header['id']??''}',
+                              header['defaultQuotationCurrency']!=null?'${header['defaultQuotationCurrency']['id']}':'',
+                              header['defaultQuotationCurrency']!=null?'${header['defaultQuotationCurrency']['name']}':'',
                             );}
                           i++;
                         }

@@ -4,8 +4,8 @@ import '../../../Locale_Memory/save_user_info_locally.dart';
 import '../../../const/urls.dart';
 
 
-Future storeTermsAndConditions(String termsAndConditions) async {
-  final uri = Uri.parse(kAddTermsAndConditionsUrl);
+Future editTechnician(String id,String name) async {
+  final uri = Uri.parse('$kUpdateCarTechniciansUrl/$id');
   String token = await getAccessTokenFromPref();
   var response = await http.post(
       uri,
@@ -14,7 +14,7 @@ Future storeTermsAndConditions(String termsAndConditions) async {
         "Authorization": "Bearer $token"
       },
       body: {
-        "termsAndConditions":termsAndConditions,
+        "name":name,
       }
   );
 

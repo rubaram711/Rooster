@@ -75,6 +75,12 @@ abstract class SalesOrderControllerAbstract extends GetxController {
 }
 
 class SalesOrderController extends SalesOrderControllerAbstract {
+  String selectedPaymentTermId='';
+  setSelectedPaymentTermId(String val) {
+    selectedPaymentTermId = val;
+    update();
+  }
+
   int salesOrderCounter = 0;
   setSalesOrderCounter(int val){
     salesOrderCounter=val;
@@ -931,7 +937,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
       for (int i = 0; i < salesOrdersList.length; i++) {
         var cc = salesOrdersList[i];
 
-        if (cc['status'] == 'confirmed' || cc['status'] == 'cancelled') {
+        if (cc['status'] == 'confirmed' || cc['status'] == 'pending' || cc['status'] == 'cancelled') {
           // Check if this item already exists in SalesOrdersListPending
           bool existsCC = salesOrderListCC.any(
             (element) => element['id'] == cc['id'],

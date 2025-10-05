@@ -24,9 +24,10 @@ import '../../Widgets/reusable_btn.dart';
 import 'package:rooster_app/utils/image_picker_helper.dart';
 
 import '../../Widgets/reusable_photo_card_in_update_product.dart';
+import '../../Widgets/reusable_radio_btns.dart';
 import '../../Widgets/reusable_text_field.dart';
 
-List costOptionsList = [
+List<String> costOptionsList = [
   'Weighted Average Cost (WAC)',
   'First-In, First-Out (FIFO)',
   'Last-In, First-Out (LIFO)',
@@ -72,6 +73,8 @@ class _SettingsContentState extends State<SettingsContent> {
   ExchangeRatesController exchangeRatesController = Get.find();
   QuotationController quotationController = Get.find();
   getInfoFromPref() async {
+    print('ok1');
+
     var selectedCost = await getCostCalculationTypeFromPref();
     var showQuantitiesOnPos = await getShowQuantitiesOnPosFromPref();
     var showLogoOnPos = await getShowLogoOnPosFromPref();
@@ -150,7 +153,7 @@ class _SettingsContentState extends State<SettingsContent> {
     exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
     companySettingsController.headersList=[];
     companySettingsController.isHeadersFetched=false;
-    companySettingsController.getCashTraysFromBack(homeController.companyName == 'CASALAGO' ||
+    companySettingsController.getHeadersFromBack(homeController.companyName == 'CASALAGO' ||
         homeController.companyName == 'AMAZON');
     super.initState();
   }
@@ -378,7 +381,8 @@ class _SettingsContentState extends State<SettingsContent> {
                             vat: header['vat']??'',
                             companySubjectToVat: header['companySubjectToVat']??'1',
                             headerName: header['headerName']??'',
-                            imageFile: '${header['logo']??''}'.startsWith('https://') || header['logo']==''?null:header['logo']//todo something
+                            imageFile: '${header['logo']??''}'.startsWith('https://') || header['logo']==''?null:header['logo'],
+                            quotationCurrency:header['defaultQuotationCurrency']!=null?'${header['defaultQuotationCurrency']['id']}':''
                         );
                       }else{
                          headersResponse = await updateHeader(
@@ -396,7 +400,8 @@ class _SettingsContentState extends State<SettingsContent> {
                             vat: header['vat']??'',
                             companySubjectToVat: '${header['companySubjectToVat']??'1'}',
                             headerName: header['headerName']??'',
-                            imageFile: '${header['logo']}'.startsWith('https://')|| header['logo']==''?null:header['logo']//todo something
+                            imageFile: '${header['logo']}'.startsWith('https://')|| header['logo']==''?null:header['logo'],
+                             quotationCurrency:header['defaultQuotationCurrency']!=null?'${header['defaultQuotationCurrency']['id']}':''
                         );
                       }
                         if (headersResponse['success'] == true) {
@@ -419,6 +424,8 @@ class _SettingsContentState extends State<SettingsContent> {
                               '${header['companySubjectToVat']??''}',
                               header['headerName']??'',
                               '${headersResponse['data']['id']??''}',
+                              header['defaultQuotationCurrency']!=null?'${header['defaultQuotationCurrency']['id']}':'',
+                              header['defaultQuotationCurrency']!=null?'${header['defaultQuotationCurrency']['name']}':'',
                             );
                             quotationController
                                 .setIsVatExemptCheckBoxShouldAppear(
@@ -456,6 +463,8 @@ class _SettingsContentState extends State<SettingsContent> {
                               '${header['companySubjectToVat']??''}',
                               header['headerName']??'',
                               '${headersResponse['data']['id']??''}',
+                              header['defaultQuotationCurrency']!=null?'${header['defaultQuotationCurrency']['id']}':'',
+                              header['defaultQuotationCurrency']!=null?'${header['defaultQuotationCurrency']['name']}':'',
                             );}
                         } else {
                           CommonWidgets.snackBar(
@@ -508,30 +517,21 @@ class _CostOptionsTabState extends State<CostOptionsTab> {
       width: MediaQuery.of(context).size.width * 0.8,
       height: MediaQuery.of(context).size.height * 0.65,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           gapH32,
           GetBuilder<CompanySettingsController>(
             builder: (cont) {
-              return Expanded(
-                child: ListView.builder(
-                  itemCount: costOptionsList.length,
-                  itemBuilder:
-                      (context, index) => ListTile(
-                        title: Text(
-                          costOptionsList[index],
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        leading: Radio(
-                          value: index + 1,
-                          groupValue: cont.selectedCostOption,
-                          onChanged: (value) {
-                            cont.setSelectedCostOption(value!);
-                          },
-                        ),
-                      ),
-                ),
+              return ReusableFlexibleRadioBtns(
+                isRow: false,
+                groupVal: cont.selectedCostOption ,
+                titles:costOptionsList ,
+                func: (value) {
+                  cont.setSelectedCostOption(value!);
+                },
+                length: costOptionsList.length,
+                widths: List.filled(5, MediaQuery.of(context).size.width),
               );
             },
           ),
@@ -1439,6 +1439,7 @@ class _ReusableHeaderSectionState
   TextEditingController bankInformation = TextEditingController();
   TextEditingController localPayments = TextEditingController();
   TextEditingController vat = TextEditingController();
+  TextEditingController quotationCurrency = TextEditingController();
   bool isCompanySubjectToVat = true;
   @override
   void initState() {
@@ -1456,6 +1457,8 @@ class _ReusableHeaderSectionState
     selectedPhoneCode=companySettingsController.headersList[widget.index]['phoneCode'] ?? '';
     selectedMobileCode=companySettingsController.headersList[widget.index]['mobileCode'] ?? '';
     logo=companySettingsController.headersList[widget.index]['logo'] ?? '';
+    quotationCurrency.text=companySettingsController.headersList[widget.index]['defaultQuotationCurrency']!=null?
+    companySettingsController.headersList[widget.index]['defaultQuotationCurrency']['name'] : '';
     super.initState();
   }
 
@@ -1706,21 +1709,109 @@ class _ReusableHeaderSectionState
               ),
               gapH10,
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Checkbox(
-                    value: isCompanySubjectToVat,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        isCompanySubjectToVat=value!;
-                      });
-                      cont.updateCompanySubjectToVat(
-                        widget.index,
-                        value == true ? '1' : '0',
-                      );
-                    },
+                  Row(
+                    children: [
+                      SizedBox(
+                        width:
+                        homeController.isMobile.value
+                            ? MediaQuery.of(context).size.width * 0.22
+                            : MediaQuery.of(context).size.width * 0.1,
+                        child: Text('quotation_currency'.tr),
+                      ),
+                      GetBuilder<ExchangeRatesController>(
+                        builder: (exchangeRatesCont) {
+                          return DropdownMenu<String>(
+                            width:
+                            homeController.isMobile.value
+                                ? MediaQuery.of(context).size.width * 0.4
+                                : MediaQuery.of(context).size.width * 0.25,
+                            enableSearch: true,
+                            controller: quotationCurrency,
+                            hintText: '',
+                            inputDecorationTheme: InputDecorationTheme(
+                              hintStyle: const TextStyle(
+                                fontStyle: FontStyle.italic,
+                              ),
+                              contentPadding: const EdgeInsets.fromLTRB(
+                                20,
+                                0,
+                                25,
+                                5,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Primary.primary.withAlpha(
+                                    (0.2 * 255).toInt(),
+                                  ),
+                                  width: 1,
+                                ),
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(9),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Primary.primary.withAlpha(
+                                    (0.4 * 255).toInt(),
+                                  ),
+                                  width: 2,
+                                ),
+                                borderRadius: const BorderRadius.all(
+                                  Radius.circular(9),
+                                ),
+                              ),
+                            ),
+                            menuHeight: 250,
+                            dropdownMenuEntries:
+                            exchangeRatesCont.currenciesNamesList
+                                .map<DropdownMenuEntry<String>>((
+                                String option,
+                                ) {
+                              return DropdownMenuEntry<String>(
+                                value: option,
+                                label: option,
+                              );
+                            })
+                                .toList(),
+                            enableFilter: true,
+                            onSelected: (val) {
+                              var index = exchangeRatesCont.currenciesNamesList
+                                  .indexOf(val!);
+                              cont.updateQuotationCurrency(
+                                widget.index,
+                                '${exchangeRatesCont.currenciesIdsList[index]}',
+                                val,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                  gapW8,
-                  Text('company_subject_to_vat'.tr),
+                  SizedBox(
+                    width:  MediaQuery.of(context).size.width * 0.35,
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: isCompanySubjectToVat,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              isCompanySubjectToVat=value!;
+                            });
+                            cont.updateCompanySubjectToVat(
+                              widget.index,
+                              value == true ? '1' : '0',
+                            );
+                          },
+                        ),
+                        gapW8,
+                        Text('company_subject_to_vat'.tr),
+                      ],
+                    ),
+                  ),
+
                 ],
               ),
             ],

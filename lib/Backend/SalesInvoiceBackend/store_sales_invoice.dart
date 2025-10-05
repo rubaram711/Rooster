@@ -9,7 +9,7 @@ Future storeSalesInvoice(
   String invoiceDeliveryDate,
   String deliveredFromWarehouseId,
 
-  // String paymentTerm,
+  String paymentTerm,
   String salesInvoiceNumber,
   String priceList,
   String currency,
@@ -45,7 +45,7 @@ Future storeSalesInvoice(
     "clientId": clientId, //ok
     "valueDate": validity, //ok
     "inputDate": invoiceDeliveryDate, //ok
-    "paymentTermId": null, //ok
+    "paymentTerm": paymentTerm, //ok
     "salesInvoiceNumber": salesInvoiceNumber, //?????
     "priceList": priceList, //ok
     "currencyId": currency, //ok

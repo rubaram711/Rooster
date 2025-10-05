@@ -7,27 +7,61 @@ import 'package:rooster_app/Backend/Quotations/get_quotations.dart';
 import 'package:rooster_app/Backend/get_currencies.dart';
 
 import '../Backend/PriceListBackend/get_prices_list_items.dart';
+
 import '../Backend/UsersBackend/get_user.dart';
 import '../const/functions.dart';
 import 'exchange_rates_controller.dart';
 
 class QuotationController extends GetxController {
-  int selectedHeaderIndex = 0;
-  Map selectedHeader={};
-  setSelectedHeaderIndex(int val){
-    selectedHeaderIndex=val;
-    update;
+  String selectedTermAndConditionId = '';
+  setSelectedTermAndConditionId(String val) {
+    selectedTermAndConditionId = val;
+    update();
   }
-  setSelectedHeader(Map val){
-    selectedHeader=val;
-    update;
+
+  String selectedPaymentTermId = '';
+  setSelectedPaymentTermId(String val) {
+    selectedPaymentTermId = val;
+    update();
+  }
+
+  String selectedDeliveryTermId = '';
+  setSelectedDeliveryTermId(String val) {
+    selectedDeliveryTermId = val;
+    update();
+  }
+
+  int selectedHeaderIndex = 1;
+  Map selectedHeader = {};
+  setSelectedHeaderIndex(int val) {
+    selectedHeaderIndex = val;
+    update();
+  }
+
+  setSelectedHeader(Map val) {
+    selectedHeader = val;
+    update();
+  }
+
+  TextEditingController currencyController = TextEditingController();
+  setQuotationCurrency(Map header){
+    if( header['default_quotation_currency']!=null) {
+      exchangeRateForSelectedCurrency = header['default_quotation_currency']['latest_rate'];
+      selectedCurrencyId = '${header['default_quotation_currency']['id']}';
+      selectedCurrencySymbol = header['default_quotation_currency']['symbol'];
+      selectedCurrencyName = header['default_quotation_currency']['name'];
+      currencyController.text = header['default_quotation_currency']['name'];
+      setPriceAsCurrency(header['default_quotation_currency']['name']);
+      update();
+    }
   }
 
   int quotationCounter = 0;
-  setQuotationCounter(int val){
-    quotationCounter=val;
-    update;
+  setQuotationCounter(int val) {
+    quotationCounter = val;
+    update();
   }
+
   String status = '';
   setStatus(String val) {
     status = val;
@@ -198,7 +232,7 @@ class QuotationController extends GetxController {
     update();
   }
 
-  List<Map> headersList=[];
+  List<Map> headersList = [];
   List<String> cashingMethodsNamesList = [];
   List<String> cashingMethodsIdsList = [];
   List<String> itemsCode = [];
@@ -374,11 +408,12 @@ class QuotationController extends GetxController {
     }
     // print('cashing $cashingMethodsNamesList');
 
-
-    for (var header in p['companyHeaders']??[]) {
+    for (var header in p['companyHeaders'] ?? []) {
       headersList.add(header);
     }
-
+    if(headersList.isNotEmpty && headersList[0].isNotEmpty) {
+      setQuotationCurrency(headersList[0]);
+    }
 
     for (var combo in p['combos']) {
       combosMap["${combo['id']}"] = combo;
@@ -556,7 +591,7 @@ class QuotationController extends GetxController {
   };
   clearList() {
     rowsInListViewInQuotation = {};
-    orderedKeys=[];
+    orderedKeys = [];
     update();
   }
 
@@ -709,6 +744,7 @@ class QuotationController extends GetxController {
 
   setCompanyVat(double val) {
     vat = val;
+
     update();
   }
 
@@ -814,7 +850,9 @@ class QuotationController extends GetxController {
     quotationsList = [];
     isQuotationsFetched = false;
     update();
-    var p = await getAllQuotationsWithoutPending(searchInQuotationsController.text);
+    var p = await getAllQuotationsWithoutPending(
+      searchInQuotationsController.text,
+    );
     if ('$p' != '[]') {
       quotationsList = p;
       // print(quotationsList.length);
@@ -886,9 +924,7 @@ class QuotationController extends GetxController {
     quotationsList = [];
     isQuotationsFetched = false;
     update();
-    var p = await getAllQuotations(
-      searchInQuotationsController.text,
-    );
+    var p = await getAllQuotations(searchInQuotationsController.text);
     if ('$p' != '[]') {
       quotationsList = p;
       // print(quotationsList.length);
@@ -900,7 +936,7 @@ class QuotationController extends GetxController {
         if (item['status'] == 'pending' || item['status'] == 'sent') {
           // Check if this item already exists in quotations List pending
           bool exists = quotationsListPending.any(
-                (element) => element['id'] == item['id'],
+            (element) => element['id'] == item['id'],
           );
 
           if (!exists) {
@@ -915,7 +951,7 @@ class QuotationController extends GetxController {
         if (confirm['status'] == 'confirmed') {
           // Check if this item already exists in quotations List pending
           bool existsConfirm = quotationsListConfirmed.any(
-                (element) => element['id'] == confirm['id'],
+            (element) => element['id'] == confirm['id'],
           );
 
           if (!existsConfirm) {
@@ -927,10 +963,11 @@ class QuotationController extends GetxController {
         for (int i = 0; i < quotationsList.length; i++) {
           var ccItem = quotationsList[i];
           if (ccItem['status'] == 'confirmed' ||
+              ccItem['status'] == 'pending' ||
               ccItem['status'] == 'cancelled') {
             // Check if this item already exists in quotations List pending
             bool existsCC = quotationsListCC.any(
-                  (element) => element['id'] == ccItem['id'],
+              (element) => element['id'] == ccItem['id'],
             );
 
             if (!existsCC) {
@@ -944,6 +981,308 @@ class QuotationController extends GetxController {
 
       isQuotationsFetched = true;
       update();
+    }
+  }
+
+
+  setPriceAsCurrency(String val){
+
+    var keys =
+  unitPriceControllers
+        .keys
+        .toList();
+    for (
+    int i = 0;
+    i < unitPriceControllers
+            .length;
+    i++
+    ) {
+      var selectedItemId =
+          '${rowsInListViewInQuotation[keys[i]]['item_id']}';
+      if (selectedItemId !=
+          '') {
+        if (itemsPricesCurrencies[selectedItemId] ==
+            val) {
+         unitPriceControllers[keys[i]]!
+              .text =
+              itemUnitPrice[selectedItemId]
+                  .toString();
+        } else if (selectedCurrencyName ==
+            'USD' &&
+            itemsPricesCurrencies[selectedItemId] !=
+                val) {
+          var matchedItems = exchangeRatesController
+              .exchangeRatesList
+              .where(
+                (item) =>
+            item["currency"] ==
+                itemsPricesCurrencies[selectedItemId],
+          );
+          var result =
+          matchedItems
+              .isNotEmpty
+              ? matchedItems.reduce(
+                (
+                a,
+                b,
+                ) =>
+            DateTime.parse(
+              a["start_date"],
+            ).isAfter(
+              DateTime.parse(
+                b["start_date"],
+              ),
+            )
+                ? a
+                : b,
+          )
+              : null;
+          var divider =
+              '1';
+          if (result !=
+              null) {
+            divider =
+                result["exchange_rate"]
+                    .toString();
+          }
+         unitPriceControllers[keys[i]]!
+              .text =
+          '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+        } else if (selectedCurrencyName !=
+            'USD' &&
+            itemsPricesCurrencies[selectedItemId] ==
+                'USD') {
+         unitPriceControllers[keys[i]]!
+              .text =
+          '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
+        } else {
+          var matchedItems = exchangeRatesController
+              .exchangeRatesList
+              .where(
+                (item) =>
+            item["currency"] ==
+                itemsPricesCurrencies[selectedItemId],
+          );
+          var result =
+          matchedItems
+              .isNotEmpty
+              ? matchedItems.reduce(
+                (
+                a,
+                b,
+                ) =>
+            DateTime.parse(
+              a["start_date"],
+            ).isAfter(
+              DateTime.parse(
+                b["start_date"],
+              ),
+            )
+                ? a
+                : b,
+          )
+              : null;
+          var divider =
+              '1';
+          if (result !=
+              null) {
+            divider =
+                result["exchange_rate"]
+                    .toString();
+          }
+          var usdPrice =
+              '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+         unitPriceControllers[keys[i]]!
+              .text =
+          '${double.parse('${(double.parse(usdPrice) * double.parse(exchangeRateForSelectedCurrency))}')}';
+        }
+        if (!isBeforeVatPrices) {
+          var taxRate =
+              double.parse(
+                itemsVats[selectedItemId],
+              ) /
+                  100.0;
+          var taxValue =
+              taxRate *
+                  double.parse(
+                    unitPriceControllers[keys[i]]!
+                        .text,
+                  );
+
+         unitPriceControllers[keys[i]]!
+              .text =
+          '${double.parse(unitPriceControllers[keys[i]]!.text) + taxValue}';
+        }
+        unitPriceControllers[keys[i]]!
+            .text = double.parse(
+         unitPriceControllers[keys[i]]!
+              .text,
+        ).toStringAsFixed(
+          2,
+        );
+        var totalLine =
+            '${(double.parse(rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+
+        setEnteredUnitPriceInQuotation(
+          keys[i],
+         unitPriceControllers[keys[i]]!
+              .text,
+        );
+        setMainTotalInQuotation(
+          keys[i],
+          totalLine,
+        );
+        getTotalItems();
+      }
+    }
+    var comboKeys =
+    combosPriceControllers
+        .keys
+        .toList();
+    for (
+    int i = 0;
+    i <
+        combosPriceControllers
+            .length;
+    i++
+    ) {
+      var selectedComboId =
+          '${rowsInListViewInQuotation[comboKeys[i]]['combo']}';
+      if (selectedComboId !=
+          '') {
+        var ind = combosIdsList
+            .indexOf(
+          selectedComboId,
+        );
+        if (combosPricesCurrencies[selectedComboId] ==
+            selectedCurrencyName) {
+         combosPriceControllers[comboKeys[i]]!
+              .text =
+             combosPricesList[ind]
+                  .toString();
+        } else if (selectedCurrencyName ==
+            'USD' &&
+            combosPricesCurrencies[selectedComboId] != selectedCurrencyName) {
+          var matchedItems = exchangeRatesController
+              .exchangeRatesList
+              .where(
+                (item) =>
+            item["currency"] ==
+                combosPricesCurrencies[selectedComboId],
+          );
+
+          var result =
+          matchedItems
+              .isNotEmpty
+              ? matchedItems.reduce(
+                (
+                a,
+                b,
+                ) =>
+            DateTime.parse(
+              a["start_date"],
+            ).isAfter(
+              DateTime.parse(
+                b["start_date"],
+              ),
+            )
+                ? a
+                : b,
+          )
+              : null;
+          var divider =
+              '1';
+          if (result !=
+              null) {
+            divider =
+                result["exchange_rate"]
+                    .toString();
+          }
+         combosPriceControllers[comboKeys[i]]!
+              .text =
+          '${double.parse('${(double.parse(combosPricesList[ind].toString()) / double.parse(divider))}')}';
+        } else if (selectedCurrencyName !=
+            'USD' && combosPricesCurrencies[selectedComboId] ==
+                'USD') {
+         combosPriceControllers[comboKeys[i]]!
+              .text =
+          '${double.parse('${(double.parse(combosPricesList[ind].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
+        } else {
+          var matchedItems = exchangeRatesController
+              .exchangeRatesList
+              .where(
+                (item) =>
+            item["currency"] ==
+                combosPricesCurrencies[selectedComboId],
+          );
+
+          var result =
+          matchedItems
+              .isNotEmpty
+              ? matchedItems.reduce(
+                (
+                a,
+                b,
+                ) =>
+            DateTime.parse(
+              a["start_date"],
+            ).isAfter(
+              DateTime.parse(
+                b["start_date"],
+              ),
+            )
+                ? a
+                : b,
+          )
+              : null;
+          var divider =
+              '1';
+          if (result !=
+              null) {
+            divider =
+                result["exchange_rate"]
+                    .toString();
+          }
+          var usdPrice =
+              '${double.parse('${(double.parse(combosPricesList[ind].toString()) / double.parse(divider))}')}';
+         combosPriceControllers[comboKeys[i]]!
+              .text =
+          '${double.parse('${(double.parse(usdPrice) * double.parse(exchangeRateForSelectedCurrency))}')}';
+        }
+        combosPriceControllers[comboKeys[i]]!
+            .text =
+        '${double.parse(combosPriceControllers[comboKeys[i]]!.text)}';
+
+        combosPriceControllers[comboKeys[i]]!
+            .text = double.parse(combosPriceControllers[comboKeys[i]]!
+              .text,
+        ).toStringAsFixed(
+          2,
+        );
+        var totalLine =
+            '${(int.parse( rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+        setEnteredQtyInQuotation(
+          comboKeys[i],
+           rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
+        );
+          setMainTotalInQuotation(
+          comboKeys[i],
+          totalLine,
+        );
+        // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
+         getTotalItems();
+
+        setEnteredUnitPriceInQuotation(
+          comboKeys[i],
+           combosPriceControllers[comboKeys[i]]!
+              .text,
+        );
+         setMainTotalInQuotation(
+          comboKeys[i],
+          totalLine,
+        );
+         getTotalItems();
+      }
     }
   }
 }

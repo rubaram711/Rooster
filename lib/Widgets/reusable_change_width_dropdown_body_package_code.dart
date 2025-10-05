@@ -820,9 +820,9 @@ class _DropdownMenusCodeCodeState<T> extends State<DropdownMenusCodeCode<T>> {
     if (widget.menuHeight != null) {
       effectiveMenuStyle = effectiveMenuStyle.copyWith(maximumSize: WidgetStatePropertyAll<Size>(Size(double.infinity, widget.menuHeight!)));
     }
-    final InputDecorationTheme effectiveInputDecorationTheme = widget.inputDecorationTheme
+    final InputDecorationTheme effectiveInputDecorationTheme = (widget.inputDecorationTheme
         ?? theme.inputDecorationTheme
-        ?? defaults.inputDecorationTheme!;
+        ?? defaults.inputDecorationTheme!) as InputDecorationTheme;
 
     final MouseCursor? effectiveMouseCursor = switch (widget.enabled) {
       true => canRequestFocus() ? SystemMouseCursors.text : SystemMouseCursors.click,
@@ -1226,7 +1226,7 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
   }
 
   @override
-  InputDecorationTheme get inputDecorationTheme {
-    return const InputDecorationTheme(border: OutlineInputBorder());
+  InputDecorationThemeData? get inputDecorationTheme {
+    return const InputDecorationTheme(border: OutlineInputBorder()) as InputDecorationThemeData?;
   }
 }

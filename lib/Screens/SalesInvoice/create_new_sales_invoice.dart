@@ -9,8 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:rooster_app/Backend/Quotations/TermsAndConditions/get_terms_and_conditions.dart';
+import 'package:rooster_app/Backend/TermsAndConditions/get_terms_and_conditions.dart';
 import 'package:rooster_app/Backend/SalesInvoiceBackend/store_sales_invoice.dart';
+import 'package:rooster_app/Controllers/payment_terms_controller.dart';
 import 'package:rooster_app/Controllers/pending_docs_review_controller.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
@@ -35,10 +36,12 @@ import '../../../Widgets/reusable_btn.dart';
 import '../../../Widgets/reusable_text_field.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
-import '../../Backend/Quotations/TermsAndConditions/save_terms_and_conditions.dart';
+import '../../Widgets/HomeWidgets/home_app_bar.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/dialog_drop_menu.dart';
+import '../../Widgets/reusable_radio_btns.dart';
+import '../../Widgets/reusable_reference_text_field.dart';
 import '../../Widgets/reusable_add_card.dart';
 import '../../Widgets/reusable_more.dart';
 import '../../Widgets/table_title.dart';
@@ -120,7 +123,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
   int currentStep = 0;
   int selectedTabIndex = 0;
   List tabsList = ['order_lines', 'sales_commissions'];
-  List<String> termsList = [];
+
   String selectedTab = 'order_lines'.tr;
 
   double listViewLength = Sizes.deviceHeight * 0.08;
@@ -144,6 +147,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
   final HomeController homeController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
   WarehouseController warehouseController = Get.find();
+  PaymentTermsController paymentController = Get.find();
 
   int progressVar = 0;
   String selectedCustomerIds = '';
@@ -224,22 +228,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
     termsAndConditionsController.text = jsonString;
   }
 
-  void _saveTermsAndConditions() async {
-    final deltaJson = _controller.document.toDelta().toJson();
-    final jsonString = jsonEncode(deltaJson);
 
-    setState(() {
-      _savedContent = jsonString;
-    });
-    termsAndConditionsController.text = jsonString;
-
-    var p = await storeTermsAndConditions(_savedContent!);
-    if (p['success'] == true) {
-      CommonWidgets.snackBar('Success', p['message']);
-    } else {
-      CommonWidgets.snackBar('error', p['message']);
-    }
-  }
 
   List termsAndConditionsList = [];
   int currentIndex = 0;
@@ -315,6 +304,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
     priceListController.text = 'STANDARD';
     getAllTermsAndConditions();
     pendingDocsController.getAllPendingDocs();
+    paymentController.getPaymentTermsFromBack();
     super.initState();
   }
 
@@ -391,14 +381,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                         homeCont.isMenuOpened
                             ? MediaQuery.of(context).size.width * 0.14
                             : MediaQuery.of(context).size.width * 0.22;
-                    double paymentTermsRow =
-                        homeCont.isMenuOpened
-                            ? MediaQuery.of(context).size.width * 0.24
-                            : MediaQuery.of(context).size.width * 0.24;
-                    double paymentTermsFieldWidth =
-                        homeCont.isMenuOpened
-                            ? MediaQuery.of(context).size.width * 0.15
-                            : MediaQuery.of(context).size.width * 0.15;
+
                     return Column(
                       children: [
                         Row(
@@ -873,7 +856,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             inputDateController.text,
                                             salesInvoiceCont
                                                 .selectedWarehouseId,
-                                            // 'payment term', //todo paymentTermsController.text,
+                                            salesInvoiceCont.selectedPaymentTermId,
                                             salesInvoiceCont.salesInvoiceNumber,
                                             salesInvoiceCont
                                                 .selectedPriceListId,
@@ -1042,7 +1025,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             inputDateController.text,
                                             salesInvoiceCont
                                                 .selectedWarehouseId,
-                                            // 'payment term', //todo paymentTermsController.text,
+                                            salesInvoiceCont.selectedPaymentTermId,
                                             salesInvoiceCont.salesInvoiceNumber,
                                             salesInvoiceCont
                                                 .selectedPriceListId,
@@ -1211,7 +1194,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             inputDateController.text,
                                             salesInvoiceCont
                                                 .selectedWarehouseId,
-                                            // 'payment term', //todo paymentTermsController.text,
+                                            salesInvoiceCont.selectedPaymentTermId,
                                             salesInvoiceCont.salesInvoiceNumber,
                                             salesInvoiceCont
                                                 .selectedPriceListId,
@@ -1348,18 +1331,24 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                       color: TypographyColor.titleTable,
                                     ),
                                   ),
-                                  DialogTextField(
+                                  ReusableReferenceTextField(
+                                    type: 'salesInvoices',
                                     textEditingController: refController,
-                                    text: '${'ref'.tr}:',
-                                    hint: 'manual_reference'.tr,
                                     rowWidth: referenceRow,
                                     textFieldWidth: referenceFieldWidth,
-                                    // rowWidth:
-                                    //     MediaQuery.of(context).size.width * 0.18,
-                                    // textFieldWidth:
-                                    //     MediaQuery.of(context).size.width * 0.15,
-                                    validationFunc: (val) {},
                                   ),
+                                  // DialogTextField(
+                                  //   textEditingController: refController,
+                                  //   text: '${'ref'.tr}:',
+                                  //   hint: 'manual_reference'.tr,
+                                  //   rowWidth: referenceRow,
+                                  //   textFieldWidth: referenceFieldWidth,
+                                  //   // rowWidth:
+                                  //   //     MediaQuery.of(context).size.width * 0.18,
+                                  //   // textFieldWidth:
+                                  //   //     MediaQuery.of(context).size.width * 0.15,
+                                  //   validationFunc: (val) {},
+                                  // ),
                                   SizedBox(
                                     width: currencyRow,
                                     // width: MediaQuery.of(context).size.width * 0.11,
@@ -2130,52 +2119,58 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                       ],
                                     ),
                                   ),
-                                  DialogTextField(
-                                    textEditingController:
-                                        paymentTermsController,
-                                    text: 'payment_terms'.tr,
-                                    hint: '',
-                                    rowWidth: paymentTermsRow,
-                                    textFieldWidth: paymentTermsFieldWidth,
-                                    // rowWidth:
-                                    //     MediaQuery.of(context).size.width * 0.24,
-                                    // textFieldWidth:
-                                    //     MediaQuery.of(context).size.width * 0.15,
-                                    validationFunc: (val) {},
-                                  ),
-                                  // ReusableDropDownMenuWithSearch(
-                                  //   list: termsList,
+                                  // DialogTextField(
+                                  //   textEditingController:
+                                  //       paymentTermsController,
                                   //   text: 'payment_terms'.tr,
                                   //   hint: '',
-                                  //   onSelected: (value) {},
-                                  //   controller: controller,
-                                  //   validationFunc: (value) {},
-                                  //   rowWidth:
-                                  //       MediaQuery.of(context).size.width * 0.24,
-                                  //   textFieldWidth:
-                                  //       MediaQuery.of(context).size.width * 0.15,
-                                  //   clickableOptionText:
-                                  //       'create_new_payment_terms'.tr,
-                                  //   isThereClickableOption: true,
-                                  //   onTappedClickableOption: () {
-                                  //     // showDialog<String>(
-                                  //     //   context: context,
-                                  //     //   builder:
-                                  //     //       (
-                                  //     //       BuildContext context,
-                                  //     //       ) => const AlertDialog(
-                                  //     //     backgroundColor: Colors.white,
-                                  //     //     shape: RoundedRectangleBorder(
-                                  //     //       borderRadius:
-                                  //     //       BorderRadius.all(
-                                  //     //         Radius.circular(9),
-                                  //     //       ),
-                                  //     //     ),
-                                  //     //     elevation: 0,
-                                  //     //     content: CreateClientDialog(),
-                                  //     //   ),
-                                  //     // );
-                                  //   },
+                                  //   rowWidth: paymentTermsRow,
+                                  //   textFieldWidth: paymentTermsFieldWidth,
+                                  //   // rowWidth:
+                                  //   //     MediaQuery.of(context).size.width * 0.24,
+                                  //   // textFieldWidth:
+                                  //   //     MediaQuery.of(context).size.width * 0.15,
+                                  //   validationFunc: (val) {},
+                                  // ),
+                                  // GetBuilder<PaymentTermsController>(
+                                  //   builder: (cont) {
+                                  //     return ReusableDropDownMenuWithSearch(
+                                  //       list: cont.paymentTermsNamesList,
+                                  //       text: 'payment_terms'.tr,
+                                  //       hint: '',
+                                  //       onSelected: (value) {},
+                                  //       controller: controller,
+                                  //       validationFunc: (value) {},
+                                  //         rowWidth: paymentTermsRow,
+                                  //         textFieldWidth: paymentTermsFieldWidth,
+                                  //       // rowWidth:
+                                  //       //     MediaQuery.of(context).size.width * 0.24,
+                                  //       // textFieldWidth:
+                                  //       //     MediaQuery.of(context).size.width * 0.15,
+                                  //       clickableOptionText:
+                                  //           'create_new_payment_terms'.tr,
+                                  //       isThereClickableOption: true,
+                                  //       onTappedClickableOption: () {
+                                  //         // showDialog<String>(
+                                  //         //   context: context,
+                                  //         //   builder:
+                                  //         //       (
+                                  //         //       BuildContext context,
+                                  //         //       ) => const AlertDialog(
+                                  //         //     backgroundColor: Colors.white,
+                                  //         //     shape: RoundedRectangleBorder(
+                                  //         //       borderRadius:
+                                  //         //       BorderRadius.all(
+                                  //         //         Radius.circular(9),
+                                  //         //       ),
+                                  //         //     ),
+                                  //         //     elevation: 0,
+                                  //         //     content: CreateClientDialog(),
+                                  //         //   ),
+                                  //         // );
+                                  //       },
+                                  //     );
+                                  //   }
                                   // ),
                                   // SizedBox(
                                   //   width: MediaQuery.of(context).size.width * 0.24,
@@ -2185,7 +2180,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                   //     children: [
                                   //       Text('payment_terms'.tr),
                                   //
-                                  //       GetBuilder<ExchangeRatesController>(
+                                  //       GetBuilder<PaymentTermsController>(
                                   //         builder: (cont) {
                                   //           return DropdownMenu<String>(
                                   //             width:
@@ -2240,7 +2235,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                   //             // menuStyle: ,
                                   //             menuHeight: 250,
                                   //             dropdownMenuEntries:
-                                  //                 termsList.map<
+                                  //                 cont.paymentTermsNamesList.map<
                                   //                   DropdownMenuEntry<String>
                                   //                 >((String option) {
                                   //                   return DropdownMenuEntry<
@@ -2263,6 +2258,49 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                   //     ],
                                   //   ),
                                   // ),
+                                  GetBuilder<PaymentTermsController>(
+                                    builder: (cont) {
+                                      return ReusableDropDownMenuWithSearch(
+                                        list: cont.paymentTermsNamesList,
+                                        text: 'payment_terms'.tr,
+                                        hint: '${'search'.tr}...',
+                                        controller: paymentTermsController,
+                                        onSelected: (String? val) {
+                                          int index=cont.paymentTermsNamesList.indexOf(val!);
+                                          salesInvoiceCont.setSelectedPaymentTermId(cont.paymentTermsIdsList[index]);
+                                        },
+                                        validationFunc: (value) {
+                                          // if (value == null || value.isEmpty) {
+                                          //   return 'select_option'.tr;
+                                          // }
+                                          // return null;
+                                        },
+                                        rowWidth:
+                                        MediaQuery.of(context).size.width * 0.24,
+                                        textFieldWidth:
+                                        MediaQuery.of(context).size.width * 0.15,
+                                        clickableOptionText:
+                                        'or_create_new_payment_term'.tr,
+                                        isThereClickableOption: true,
+                                        onTappedClickableOption: () {
+                                          showDialog<String>(
+                                              context: context,
+                                              builder: (BuildContext context) => AlertDialog(
+                                                backgroundColor: Colors.white,
+                                                contentPadding: const EdgeInsets.all(0),
+                                                titlePadding: const EdgeInsets.all(0),
+                                                actionsPadding: const EdgeInsets.all(0),
+                                                shape: const RoundedRectangleBorder(
+                                                  borderRadius:
+                                                  BorderRadius.all(Radius.circular(9)),
+                                                ),
+                                                elevation: 0,
+                                                content: configDialogs['payment_terms'],
+                                              ));
+                                        },
+                                      );
+                                    },
+                                  ),
                                 ],
                               ),
 
@@ -2898,7 +2936,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                   ),
                                                   menuHeight: 250,
                                                   dropdownMenuEntries:
-                                                      termsList.map<
+                                                      vatExemptList.map<
                                                         DropdownMenuEntry<
                                                           String
                                                         >
@@ -3025,6 +3063,66 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                         ),
                                       )
                                       : SizedBox(),
+                                ],
+                              ),
+                              homeController.companyName == 'CASALAGO' ||
+                                  homeController.companyName == 'AMAZON'
+                                  ? Column(
+                                children: [
+                                  gapH16,
+                                  Row(
+                                    children: [
+                                      Text('header'.tr),
+                                      gapW64,
+                                      ReusableRadioBtns(
+                                        isRow: true,
+                                        groupVal: salesInvoiceCont
+                                            .selectedHeaderIndex,
+                                        title1: salesInvoiceCont
+                                            .headersList[0]['header_name'],
+                                        title2: salesInvoiceCont
+                                            .headersList[1]['header_name'],
+                                        func: (value) {
+                                          if(value==1){
+                                            salesInvoiceCont.setSelectedHeaderIndex(1);
+                                            salesInvoiceCont.setSelectedHeader( salesInvoiceCont
+                                                .headersList[0]);
+                                          }else{
+                                            salesInvoiceCont.setSelectedHeaderIndex(2);
+                                            salesInvoiceCont.setSelectedHeader( salesInvoiceCont
+                                                .headersList[1]);
+                                          }
+                                        },
+                                        width1: MediaQuery.of(context).size.width * 0.15,
+                                        width2: MediaQuery.of(context).size.width * 0.15,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              )
+                                  : SizedBox.shrink(),
+                              Row(
+                                children: [
+                                  Text('invoice'.tr),
+                                  gapW64,
+                                  ReusableRadioBtns(
+                                    isRow: true,
+                                    groupVal: salesInvoiceCont
+                                        .selectedTypeIndex,
+                                    title1: 'real'.tr,
+                                    title2: 'estimate'.tr,
+                                    func: (value) {
+                                    if(value==1){
+                                      salesInvoiceCont.setSelectedTypeIndex(1);
+                                      salesInvoiceCont.setSelectedType('real');
+                                    }else{
+                                      salesInvoiceCont.setSelectedTypeIndex(2);
+                                      salesInvoiceCont.setSelectedType('estimate');
+                                    }
+                                    },
+                                    width1: MediaQuery.of(context).size.width * 0.15,
+                                    width2: MediaQuery.of(context).size.width * 0.15,
+                                  ),
                                 ],
                               ),
                             ],
@@ -3361,30 +3459,12 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            'terms_conditions'.tr,
+                                            'note'.tr,
                                             style: TextStyle(
                                               fontSize: 15,
                                               color: TypographyColor.titleTable,
                                               fontWeight: FontWeight.bold,
                                             ),
-                                          ),
-                                          Row(
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.save_alt,
-                                                ),
-                                                onPressed: () async {
-                                                  _saveTermsAndConditions();
-                                                },
-                                              ),
-                                              gapW6,
-                                              IconButton(
-                                                icon: const Icon(Icons.restore),
-                                                onPressed:
-                                                    showLastTermsAndConditionsList,
-                                              ),
-                                            ],
                                           ),
                                         ],
                                       ),
@@ -3402,7 +3482,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                       //   },
                                       // ),
                                       SizedBox(
-                                        height: 300,
+                                        height: 200,
                                         child: Column(
                                           children: [
                                             QuillSimpleToolbar(
@@ -3798,7 +3878,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             inputDateController.text,
                                             salesInvoiceCont
                                                 .selectedWarehouseId,
-                                            // 'payment term', //todo paymentTermsController.text,
+                                            salesInvoiceCont.selectedPaymentTermId,
                                             salesInvoiceCont.salesInvoiceNumber,
                                             salesInvoiceCont
                                                 .selectedPriceListId,
@@ -4631,7 +4711,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         homeController.isOpened.value
                             ? MediaQuery.of(context).size.width * 0.13
                             : MediaQuery.of(context).size.width * 0.16,
-                    clickableOptionText: 'create_virtual_item'.tr,
+                    clickableOptionText: 'create_item'.tr,
                     isThereClickableOption: true,
                     onTappedClickableOption: () {
                       productController.clearData();

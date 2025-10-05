@@ -1,4 +1,4 @@
-import 'dart:convert';
+// import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -7,7 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:rooster_app/Backend/Quotations/delete_quotation.dart';
+// import 'package:rooster_app/Backend/Quotations/delete_quotation.dart';
 import 'package:rooster_app/Backend/Quotations/update_quotation.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
@@ -30,8 +30,6 @@ import 'package:rooster_app/const/functions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import 'package:rooster_app/const/urls.dart';
 
-import '../../Widgets/reusable_table_menu.dart';
-import '../../const/constants.dart';
 import '../Quotations/add_cancelled_reason_dialog.dart';
 
 class PendingQuotation extends StatefulWidget {
@@ -354,7 +352,7 @@ class _PendingQuotationState extends State<PendingQuotation> {
                                 },
                               ),
                               TableTitle(
-                                text: 'chance'.tr,
+                                text: 'potential'.tr,
                                 width: 90.w,
                                 // width: MediaQuery.of(context).size.width * 0.06,
                               ),
@@ -904,264 +902,266 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                       // ? MediaQuery.of(context).size.width * 0.06
                       : 150,
             ),
-            // TableItem(
-            //   text: widget.info['chance'] ?? '',
-            //   width:
-            //       widget.isDesktop
-            //           ? MediaQuery.of(context).size.width * 0.06
-            //           : 150,
-            // ),
-            ReusableStatusDropdown(
-              options: chanceLevels,
-              value: widget.info['chance'] ?? chanceLevels.first,
-              onSelected: (value) async {
-                //update from back
-
-                Map<int, Map<String, dynamic>> orderLines1 = {};
-                List<int> orderedKeys = [];
-                Map<int, dynamic> orderLinesMap = {
-                  for (int i = 0; i < widget.info['orderLines'].length; i++)
-                    (i + 1): widget.info['orderLines'][i],
-                };
-
-                for (int i = 0; i < orderLinesMap.length; i++) {
-                  orderedKeys.add(i + 1);
-                  Map<String, dynamic> selectedOrderLine = orderLinesMap[i + 1];
-                  orderLines1[i + 1] = {};
-                  if (selectedOrderLine['line_type_id'] == 1) {
-                    // Map the fields you want to copy from selectedOrderLine to orderLines1
-
-                    orderLines1[i + 1]!['line_type_id'] =
-                        selectedOrderLine['line_type_id']?.toString() ?? '';
-                    orderLines1[i + 1]!['item_id'] = '';
-
-                    orderLines1[i + 1]!['itemName'] = '';
-                    orderLines1[i + 1]!['item_main_code'] = '';
-                    orderLines1[i + 1]!['item_discount'] = '0';
-                    orderLines1[i + 1]!['item_description'] = '';
-                    orderLines1[i + 1]!['item_quantity'] = '0';
-
-                    orderLines1[i + 1]!['item_unit_price'] = '0';
-                    orderLines1[i + 1]!['item_total'] = '0';
-                    orderLines1[i + 1]!['title'] =
-                        selectedOrderLine['title'] ?? '';
-                    orderLines1[i + 1]!['note'] = '';
-                    orderLines1[i + 1]!['combo'] = '';
-                    // Add more fields as needed
-                  }
-                  if (selectedOrderLine['line_type_id'] == 2) {
-                    // Map the fields you want to copy from selectedOrderLine to orderLines1
-
-                    orderLines1[i + 1]!['line_type_id'] =
-                        selectedOrderLine['line_type_id']?.toString() ?? '';
-                    orderLines1[i + 1]!['item_id'] =
-                        selectedOrderLine['item_id']?.toString() ?? '';
-
-                    orderLines1[i + 1]!['itemName'] =
-                        selectedOrderLine['item_name'] ?? '';
-                    orderLines1[i + 1]!['item_main_code'] =
-                        selectedOrderLine['item_main_code'] ?? '';
-                    orderLines1[i + 1]!['item_discount'] =
-                        selectedOrderLine['item_discount']?.toString() ?? '';
-                    orderLines1[i + 1]!['item_description'] =
-                        selectedOrderLine['item_description'] ?? '';
-                    orderLines1[i + 1]!['item_quantity'] =
-                        selectedOrderLine['item_quantity']?.toString() ?? '';
-
-                    orderLines1[i + 1]!['item_unit_price'] =
-                        selectedOrderLine['item_unit_price']?.toString() ?? '';
-                    orderLines1[i + 1]!['item_total'] =
-                        selectedOrderLine['item_total']?.toString() ?? '';
-                    orderLines1[i + 1]!['title'] =
-                        selectedOrderLine['title'] ?? '';
-                    orderLines1[i + 1]!['note'] =
-                        selectedOrderLine['note'] ?? '';
-                    orderLines1[i + 1]!['combo'] = '';
-                    // Add more fields as needed
-                  }
-                  if (selectedOrderLine['line_type_id'] == 3) {
-                    // Map the fields you want to copy from selectedOrderLine to orderLines1
-                    orderLines1[i + 1]!['line_type_id'] =
-                        selectedOrderLine['line_type_id']?.toString() ?? '';
-                    orderLines1[i + 1]!['item_id'] = '';
-
-                    orderLines1[i + 1]!['itemName'] =
-                        selectedOrderLine['combo_name'] ?? '';
-                    orderLines1[i + 1]!['item_main_code'] =
-                        selectedOrderLine['combo_code'] ?? '';
-                    orderLines1[i + 1]!['item_discount'] =
-                        selectedOrderLine['combo_discount']?.toString() ?? '';
-                    orderLines1[i + 1]!['item_description'] =
-                        selectedOrderLine['combo_description'] ?? '';
-                    orderLines1[i + 1]!['item_quantity'] =
-                        selectedOrderLine['combo_quantity']?.toString() ?? '';
-
-                    orderLines1[i + 1]!['item_unit_price'] =
-                        selectedOrderLine['combo_unit_price']?.toString() ?? '';
-                    orderLines1[i + 1]!['item_total'] =
-                        selectedOrderLine['combo_total']?.toString() ?? '';
-                    orderLines1[i + 1]!['title'] =
-                        selectedOrderLine['title'] ?? '';
-                    orderLines1[i + 1]!['note'] =
-                        selectedOrderLine['note'] ?? '';
-                    orderLines1[i + 1]!['combo'] =
-                        selectedOrderLine['combo_id']?.toString() ?? '';
-                    // Add more fields as needed
-                  }
-                  if (selectedOrderLine['line_type_id'] == 4) {
-                    // Map the fields you want to copy from selectedOrderLine to orderLines1
-
-                    orderLines1[i + 1]!['line_type_id'] =
-                        selectedOrderLine['line_type_id']?.toString() ?? '';
-                    orderLines1[i + 1]!['item_id'] = '';
-
-                    orderLines1[i + 1]!['itemName'] = '';
-                    orderLines1[i + 1]!['item_main_code'] = '';
-                    orderLines1[i + 1]!['item_discount'] = '0';
-                    orderLines1[i + 1]!['item_description'] = '';
-                    orderLines1[i + 1]!['item_quantity'] = '0';
-
-                    orderLines1[i + 1]!['item_unit_price'] = '0';
-                    orderLines1[i + 1]!['item_total'] = '0';
-                    orderLines1[i + 1]!['title'] = '';
-                    orderLines1[i + 1]!['note'] = '';
-                    late Uint8List imageFile;
-                    if (selectedOrderLine['image'] != null &&
-                        selectedOrderLine['image'].isNotEmpty) {
-                      try {
-                        final response = await http.get(
-                          Uri.parse('$baseImage${selectedOrderLine['image']}'),
-                        );
-
-                        if (response.statusCode == 200) {
-                          imageFile = response.bodyBytes;
-                        } else {
-                          imageFile = Uint8List(
-                            0,
-                          ); // Set to empty if loading fails
-                        }
-                      } catch (e) {
-                        imageFile = Uint8List(
-                          0,
-                        ); // Set to empty if loading fails
-                      }
-                    } else {
-                      imageFile = Uint8List(0); // Set to empty if no image URL
-                    }
-                    orderLines1[i + 1]!['image'] = imageFile;
-                    // Add more fields as needed
-                  }
-                  if (selectedOrderLine['line_type_id'] == 5) {
-                    // Map the fields you want to copy from selectedOrderLine to orderLines1
-
-                    orderLines1[i + 1]!['line_type_id'] =
-                        selectedOrderLine['line_type_id']?.toString() ?? '';
-                    orderLines1[i + 1]!['item_id'] = '';
-
-                    orderLines1[i + 1]!['itemName'] = '';
-                    orderLines1[i + 1]!['item_main_code'] = '';
-                    orderLines1[i + 1]!['item_discount'] = '0';
-                    orderLines1[i + 1]!['item_description'] = '';
-                    orderLines1[i + 1]!['item_quantity'] = '0';
-
-                    orderLines1[i + 1]!['item_unit_price'] = '0';
-                    orderLines1[i + 1]!['item_total'] = '0';
-                    orderLines1[i + 1]!['title'] = '';
-                    orderLines1[i + 1]!['note'] =
-                        selectedOrderLine['note'] ?? '';
-                    orderLines1[i + 1]!['combo'] = '';
-                    // Add more fields as needed
-                  }
-                }
-
-                String cashMethodId = '';
-                String clientId = '';
-                String pricelistId = '';
-                String salespersonId = ' ';
-                String commissionMethodId = '';
-                String currencyId = ' ';
-
-                if (widget.info['cashingMethod'] != null) {
-                  cashMethodId = '${widget.info['cashingMethod']['id']}';
-                }
-                if (widget.info['commissionMethod'] != null) {
-                  commissionMethodId =
-                      '${widget.info['commissionMethod']['id']}';
-                }
-                if (widget.info['currency'] != null) {
-                  currencyId = '${widget.info['currency']['id']}';
-                }
-                if (widget.info['client'] != null) {
-                  clientId = widget.info['client']['id'].toString();
-                } else {}
-                if (widget.info['pricelist'] != null) {
-                  pricelistId = widget.info['pricelist']['id'].toString();
-                }
-                if (widget.info['salesperson'] != null) {
-                  salespersonId = widget.info['salesperson']['id'].toString();
-                }
-
-                var res = await updateQuotation(
-                  '${widget.info['id']}',
-                  // false,
-                  '${widget.info['reference'] ?? ''}',
-                  clientId,
-
-                  '${widget.info['validity'] ?? ''}',
-                  '${widget.info['inputDate'] ?? ''}',
-                  '', //todo paymentTermsController.text,
-                  pricelistId,
-                  currencyId,
-                  '${widget.info['termsAndConditions']}',
-                  salespersonId,
-                  commissionMethodId,
-                  cashMethodId,
-                  '${widget.info['commissionRate'] ?? ''}',
-                  '${widget.info['commissionTotal'] ?? ''}',
-                  '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
-                  '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
-                  '${widget.info['specialDiscount'] ?? '0'}', // calculated
-                  '${widget.info['globalDiscountAmount'] ?? ''}',
-                  '${widget.info['globalDiscount'] ?? ''}',
-                  '${widget.info['vat'] ?? ''}', //vat
-                  '${widget.info['vatLebanese'] ?? ''}',
-                  '${widget.info['total'] ?? ''}',
-                  '${widget.info['vatExempt'] ?? ''}',
-                  '${widget.info['notPrinted'] ?? ''}',
-                  '${widget.info['printedAsVatExempt'] ?? ''}',
-                  '${widget.info['printedAsPercentage'] ?? ''}',
-                  '${widget.info['vatInclusivePrices'] ?? ''}',
-                  '${widget.info['beforeVatPrices'] ?? ''}',
-
-                  '${widget.info['code'] ?? ''}',
-                  widget.info['status'],
-
-                  orderLines1,
-                  orderedKeys,
-                  '',
-                  widget.info['deliveryTerms'] ?? '',
-                  value,
-                  widget.info['companyHeader'] != null ||
-                          '${widget.info['companyHeader']}' != '[]'
-                      ? '${widget.info['companyHeader']['id']}'
-                      : '',
-                );
-                if (res['success'] == true) {
-                  quotationController.getAllQuotationsFromBack();
-                  homeController.selectedTab.value = "pending_quotation";
-                  CommonWidgets.snackBar('Success', res['message']);
-                } else {
-                  CommonWidgets.snackBar('error', res['message']);
-                }
-              },
+            // widget.info['status'] != "pending"?
+            TableItem(
+              text: widget.info['chance'] ?? '',
               width:
                   widget.isDesktop
-                      ? widget.info['status'] == "sent"
-                          ? 90.w
-                          : 110.w
-                      // ? MediaQuery.of(context).size.width * 0.06
+                      ? MediaQuery.of(context).size.width * 0.06
                       : 150,
             ),
+            //     :
+            // ReusableStatusDropdown(
+            //   options: chanceLevels,
+            //   value: widget.info['chance'] ?? chanceLevels.first,
+            //   onSelected: (value) async {
+            //     //update from back
+            //
+            //     Map<int, Map<String, dynamic>> orderLines1 = {};
+            //     List<int> orderedKeys = [];
+            //     Map<int, dynamic> orderLinesMap = {
+            //       for (int i = 0; i < widget.info['orderLines'].length; i++)
+            //         (i + 1): widget.info['orderLines'][i],
+            //     };
+            //
+            //     for (int i = 0; i < orderLinesMap.length; i++) {
+            //       orderedKeys.add(i + 1);
+            //       Map<String, dynamic> selectedOrderLine = orderLinesMap[i + 1];
+            //       orderLines1[i + 1] = {};
+            //       if (selectedOrderLine['line_type_id'] == 1) {
+            //         // Map the fields you want to copy from selectedOrderLine to orderLines1
+            //
+            //         orderLines1[i + 1]!['line_type_id'] =
+            //             selectedOrderLine['line_type_id']?.toString() ?? '';
+            //         orderLines1[i + 1]!['item_id'] = '';
+            //
+            //         orderLines1[i + 1]!['itemName'] = '';
+            //         orderLines1[i + 1]!['item_main_code'] = '';
+            //         orderLines1[i + 1]!['item_discount'] = '0';
+            //         orderLines1[i + 1]!['item_description'] = '';
+            //         orderLines1[i + 1]!['item_quantity'] = '0';
+            //
+            //         orderLines1[i + 1]!['item_unit_price'] = '0';
+            //         orderLines1[i + 1]!['item_total'] = '0';
+            //         orderLines1[i + 1]!['title'] =
+            //             selectedOrderLine['title'] ?? '';
+            //         orderLines1[i + 1]!['note'] = '';
+            //         orderLines1[i + 1]!['combo'] = '';
+            //         // Add more fields as needed
+            //       }
+            //       if (selectedOrderLine['line_type_id'] == 2) {
+            //         // Map the fields you want to copy from selectedOrderLine to orderLines1
+            //
+            //         orderLines1[i + 1]!['line_type_id'] =
+            //             selectedOrderLine['line_type_id']?.toString() ?? '';
+            //         orderLines1[i + 1]!['item_id'] =
+            //             selectedOrderLine['item_id']?.toString() ?? '';
+            //
+            //         orderLines1[i + 1]!['itemName'] =
+            //             selectedOrderLine['item_name'] ?? '';
+            //         orderLines1[i + 1]!['item_main_code'] =
+            //             selectedOrderLine['item_main_code'] ?? '';
+            //         orderLines1[i + 1]!['item_discount'] =
+            //             selectedOrderLine['item_discount']?.toString() ?? '';
+            //         orderLines1[i + 1]!['item_description'] =
+            //             selectedOrderLine['item_description'] ?? '';
+            //         orderLines1[i + 1]!['item_quantity'] =
+            //             selectedOrderLine['item_quantity']?.toString() ?? '';
+            //
+            //         orderLines1[i + 1]!['item_unit_price'] =
+            //             selectedOrderLine['item_unit_price']?.toString() ?? '';
+            //         orderLines1[i + 1]!['item_total'] =
+            //             selectedOrderLine['item_total']?.toString() ?? '';
+            //         orderLines1[i + 1]!['title'] =
+            //             selectedOrderLine['title'] ?? '';
+            //         orderLines1[i + 1]!['note'] =
+            //             selectedOrderLine['note'] ?? '';
+            //         orderLines1[i + 1]!['combo'] = '';
+            //         // Add more fields as needed
+            //       }
+            //       if (selectedOrderLine['line_type_id'] == 3) {
+            //         // Map the fields you want to copy from selectedOrderLine to orderLines1
+            //         orderLines1[i + 1]!['line_type_id'] =
+            //             selectedOrderLine['line_type_id']?.toString() ?? '';
+            //         orderLines1[i + 1]!['item_id'] = '';
+            //
+            //         orderLines1[i + 1]!['itemName'] =
+            //             selectedOrderLine['combo_name'] ?? '';
+            //         orderLines1[i + 1]!['item_main_code'] =
+            //             selectedOrderLine['combo_code'] ?? '';
+            //         orderLines1[i + 1]!['item_discount'] =
+            //             selectedOrderLine['combo_discount']?.toString() ?? '';
+            //         orderLines1[i + 1]!['item_description'] =
+            //             selectedOrderLine['combo_description'] ?? '';
+            //         orderLines1[i + 1]!['item_quantity'] =
+            //             selectedOrderLine['combo_quantity']?.toString() ?? '';
+            //
+            //         orderLines1[i + 1]!['item_unit_price'] =
+            //             selectedOrderLine['combo_unit_price']?.toString() ?? '';
+            //         orderLines1[i + 1]!['item_total'] =
+            //             selectedOrderLine['combo_total']?.toString() ?? '';
+            //         orderLines1[i + 1]!['title'] =
+            //             selectedOrderLine['title'] ?? '';
+            //         orderLines1[i + 1]!['note'] =
+            //             selectedOrderLine['note'] ?? '';
+            //         orderLines1[i + 1]!['combo'] =
+            //             selectedOrderLine['combo_id']?.toString() ?? '';
+            //         // Add more fields as needed
+            //       }
+            //       if (selectedOrderLine['line_type_id'] == 4) {
+            //         // Map the fields you want to copy from selectedOrderLine to orderLines1
+            //
+            //         orderLines1[i + 1]!['line_type_id'] =
+            //             selectedOrderLine['line_type_id']?.toString() ?? '';
+            //         orderLines1[i + 1]!['item_id'] = '';
+            //
+            //         orderLines1[i + 1]!['itemName'] = '';
+            //         orderLines1[i + 1]!['item_main_code'] = '';
+            //         orderLines1[i + 1]!['item_discount'] = '0';
+            //         orderLines1[i + 1]!['item_description'] = '';
+            //         orderLines1[i + 1]!['item_quantity'] = '0';
+            //
+            //         orderLines1[i + 1]!['item_unit_price'] = '0';
+            //         orderLines1[i + 1]!['item_total'] = '0';
+            //         orderLines1[i + 1]!['title'] = '';
+            //         orderLines1[i + 1]!['note'] = '';
+            //         late Uint8List imageFile;
+            //         if (selectedOrderLine['image'] != null &&
+            //             selectedOrderLine['image'].isNotEmpty) {
+            //           try {
+            //             final response = await http.get(
+            //               Uri.parse('$baseImage${selectedOrderLine['image']}'),
+            //             );
+            //
+            //             if (response.statusCode == 200) {
+            //               imageFile = response.bodyBytes;
+            //             } else {
+            //               imageFile = Uint8List(
+            //                 0,
+            //               ); // Set to empty if loading fails
+            //             }
+            //           } catch (e) {
+            //             imageFile = Uint8List(
+            //               0,
+            //             ); // Set to empty if loading fails
+            //           }
+            //         } else {
+            //           imageFile = Uint8List(0); // Set to empty if no image URL
+            //         }
+            //         orderLines1[i + 1]!['image'] = imageFile;
+            //         // Add more fields as needed
+            //       }
+            //       if (selectedOrderLine['line_type_id'] == 5) {
+            //         // Map the fields you want to copy from selectedOrderLine to orderLines1
+            //
+            //         orderLines1[i + 1]!['line_type_id'] =
+            //             selectedOrderLine['line_type_id']?.toString() ?? '';
+            //         orderLines1[i + 1]!['item_id'] = '';
+            //
+            //         orderLines1[i + 1]!['itemName'] = '';
+            //         orderLines1[i + 1]!['item_main_code'] = '';
+            //         orderLines1[i + 1]!['item_discount'] = '0';
+            //         orderLines1[i + 1]!['item_description'] = '';
+            //         orderLines1[i + 1]!['item_quantity'] = '0';
+            //
+            //         orderLines1[i + 1]!['item_unit_price'] = '0';
+            //         orderLines1[i + 1]!['item_total'] = '0';
+            //         orderLines1[i + 1]!['title'] = '';
+            //         orderLines1[i + 1]!['note'] =
+            //             selectedOrderLine['note'] ?? '';
+            //         orderLines1[i + 1]!['combo'] = '';
+            //         // Add more fields as needed
+            //       }
+            //     }
+            //
+            //     String cashMethodId = '';
+            //     String clientId = '';
+            //     String pricelistId = '';
+            //     String salespersonId = ' ';
+            //     String commissionMethodId = '';
+            //     String currencyId = ' ';
+            //
+            //     if (widget.info['cashingMethod'] != null) {
+            //       cashMethodId = '${widget.info['cashingMethod']['id']}';
+            //     }
+            //     if (widget.info['commissionMethod'] != null) {
+            //       commissionMethodId =
+            //           '${widget.info['commissionMethod']['id']}';
+            //     }
+            //     if (widget.info['currency'] != null) {
+            //       currencyId = '${widget.info['currency']['id']}';
+            //     }
+            //     if (widget.info['client'] != null) {
+            //       clientId = widget.info['client']['id'].toString();
+            //     } else {}
+            //     if (widget.info['pricelist'] != null) {
+            //       pricelistId = widget.info['pricelist']['id'].toString();
+            //     }
+            //     if (widget.info['salesperson'] != null) {
+            //       salespersonId = widget.info['salesperson']['id'].toString();
+            //     }
+            //
+            //     var res = await updateQuotation(
+            //       '${widget.info['id']}',
+            //       // false,
+            //       '${widget.info['reference'] ?? ''}',
+            //       clientId,
+            //
+            //       '${widget.info['validity'] ?? ''}',
+            //       '${widget.info['inputDate'] ?? ''}',
+            //        widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',,
+            //       pricelistId,
+            //       currencyId,
+            //       '${widget.info['termsAndConditions']}',
+            //       salespersonId,
+            //       commissionMethodId,
+            //       cashMethodId,
+            //       '${widget.info['commissionRate'] ?? ''}',
+            //       '${widget.info['commissionTotal'] ?? ''}',
+            //       '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+            //       '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+            //       '${widget.info['specialDiscount'] ?? '0'}', // calculated
+            //       '${widget.info['globalDiscountAmount'] ?? ''}',
+            //       '${widget.info['globalDiscount'] ?? ''}',
+            //       '${widget.info['vat'] ?? ''}', //vat
+            //       '${widget.info['vatLebanese'] ?? ''}',
+            //       '${widget.info['total'] ?? ''}',
+            //       '${widget.info['vatExempt'] ?? ''}',
+            //       '${widget.info['notPrinted'] ?? ''}',
+            //       '${widget.info['printedAsVatExempt'] ?? ''}',
+            //       '${widget.info['printedAsPercentage'] ?? ''}',
+            //       '${widget.info['vatInclusivePrices'] ?? ''}',
+            //       '${widget.info['beforeVatPrices'] ?? ''}',
+            //
+            //       '${widget.info['code'] ?? ''}',
+            //       widget.info['status'],
+            //
+            //       orderLines1,
+            //       orderedKeys,
+            //       '',
+            //       widget.info['deliveryTerms'] ?? '',
+            //       value,
+            //       widget.info['companyHeader'] != null ||
+            //               '${widget.info['companyHeader']}' != '[]'
+            //           ? '${widget.info['companyHeader']['id']}'
+            //           : '',
+            //     );
+            //     if (res['success'] == true) {
+            //       quotationController.getAllQuotationsFromBack();
+            //       homeController.selectedTab.value = "pending_quotation";
+            //       CommonWidgets.snackBar('Success', res['message']);
+            //     } else {
+            //       CommonWidgets.snackBar('error', res['message']);
+            //     }
+            //   },
+            //   width:
+            //       widget.isDesktop
+            //           ? widget.info['status'] == "sent"
+            //               ? 90.w
+            //               : 110.w
+            //           // ? MediaQuery.of(context).size.width * 0.06
+            //           : 150,
+            // ),
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
@@ -1245,7 +1245,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                   ),
                   child: Center(
                     child: Text(
-                      '${widget.info['status'] ?? ''}',
+                      widget.info['status'] == 'cancelled'?'lost'.tr:'${widget.info['status'] ?? ''}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -1488,6 +1488,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
                                       return PrintQuotationData(
+                                        termsAndConditions:   widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['terms_and_conditions']}' : '',
                                         header: widget.info['companyHeader'],
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
@@ -1589,7 +1590,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                                 : "---",
                                         clientName:
                                             widget.info['client']['name'] ?? '',
-                                        termsAndConditions:
+                                        termsAndConditionsNote:
                                             widget.info['termsAndConditions'] ??
                                             '',
                                         itemsInfoPrint: itemsInfoPrint,
@@ -1606,6 +1607,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                             ),
                           ),
 
+                          widget.info['status'] == "pending"?
                           Tooltip(
                             message: 'modify'.tr,
                             child: InkWell(
@@ -1635,7 +1637,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                 size: 21.sp,
                               ),
                             ),
-                          ),
+                          ):SizedBox.shrink(),
 
                           Tooltip(
                             message: 'confirm'.tr,
@@ -1853,8 +1855,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
 
                                   '${widget.info['validity'] ?? ''}',
                                   '${widget.info['inputDate'] ?? ''}',
-
-                                  '', //todo paymentTermsController.text,
+                                    widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                                   pricelistId,
                                   currencyId,
                                   '${widget.info['termsAndConditions']}',
@@ -1884,13 +1885,14 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   orderLines1,
                                   orderedKeys,
                                   '',
-                                  widget.info['deliveryTerms'] ?? '',
+                                    widget.info['deliveryTerm']!=null ?'${widget.info['deliveryTerm']['id']}' : '',
                                   widget.info['chance'] ?? '',
                                   widget.info['companyHeader'] != null ||
                                           '${widget.info['companyHeader']}' !=
                                               '[]'
                                       ? '${widget.info['companyHeader']['id']}'
                                       : '',
+                                    widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['id']}' : ''
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -1917,7 +1919,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                             ),
                           ),
                           Tooltip(
-                            message: 'cancel'.tr,
+                            message: 'lost'.tr,
                             child: InkWell(
                               onTap: () async {
                                 //cancel from back
@@ -2169,7 +2171,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                                           '${widget.info['validity'] ?? ''}',
                                                           '${widget.info['inputDate'] ?? ''}',
 
-                                                          '', //todo paymentTermsController.text,
+                                                            widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                                                           pricelistId,
                                                           currencyId,
                                                           '${widget.info['termsAndConditions']}',
@@ -2199,8 +2201,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                                           orderLines1,
                                                           orderedKeys,
                                                           cancelledReason,
-                                                          widget.info['deliveryTerms'] ??
-                                                              '',
+                                                            widget.info['deliveryTerm']!=null ?'${widget.info['deliveryTerm']['id']}' : '',
                                                           widget.info['chance'] ??
                                                               '',
                                                           widget.info['companyHeader'] !=
@@ -2209,6 +2210,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                                                       '[]'
                                                               ? '${widget.info['companyHeader']['id']}'
                                                               : '',
+                                                            widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['id']}' : ''
                                                         );
                                                         if (res['success'] ==
                                                             true) {
@@ -2266,7 +2268,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                           //           '${widget.info['validity'] ?? ''}',
                           //           '${widget.info['inputDate'] ?? ''}',
                           //
-                          //           '', //todo paymentTermsController.text,
+                          //            widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',,
                           //           pricelistId,
                           //           currencyId,
                           //           '${widget.info['termsAndConditions']}',
@@ -2320,7 +2322,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                           //           '${widget.info['validity'] ?? ''}',
                           //           '${widget.info['inputDate'] ?? ''}',
                           //
-                          //           '', //todo paymentTermsController.text,
+                          //            widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',,
                           //           pricelistId,
                           //           currencyId,
                           //           '${widget.info['termsAndConditions']}',
@@ -2621,6 +2623,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
                                       return PrintQuotationData(
+                                        termsAndConditions:   widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['terms_and_conditions']}' : '',
                                         header: widget.info['companyHeader'],
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
@@ -2722,7 +2725,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                                 : "---",
                                         clientName:
                                             widget.info['client']['name'] ?? '',
-                                        termsAndConditions:
+                                        termsAndConditionsNote:
                                             widget.info['termsAndConditions'] ??
                                             '',
                                         itemsInfoPrint: itemsInfoPrint,
@@ -2738,7 +2741,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                               ),
                             ),
                           ),
-
+                          widget.info['status'] == "pending"?
                           Tooltip(
                             message: 'modify'.tr,
                             child: InkWell(
@@ -2772,7 +2775,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                 size: 21.sp,
                               ),
                             ),
-                          ),
+                          ):SizedBox.shrink(),
 
                           Tooltip(
                             message: 'confirm'.tr,
@@ -2992,7 +2995,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   '${widget.info['validity'] ?? ''}',
                                   '${widget.info['inputDate'] ?? ''}',
 
-                                  '', //todo paymentTermsController.text,
+                                    widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                                   pricelistId,
                                   currencyId,
                                   '${widget.info['termsAndConditions']}',
@@ -3022,13 +3025,14 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   orderLines1,
                                   orderedKeys,
                                   '',
-                                  widget.info['deliveryTerms'] ?? '',
+                                    widget.info['deliveryTerm']!=null ?'${widget.info['deliveryTerm']['id']}' : '',
                                   widget.info['chance'] ?? '',
                                   widget.info['companyHeader'] != null ||
                                           '${widget.info['companyHeader']}' !=
                                               '[]'
                                       ? '${widget.info['companyHeader']['id']}'
                                       : '',
+                                    widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['id']}' : ''
                                 );
                                 if (res['success'] == true) {
                                   // homeController.selectedTab.value =
@@ -3274,8 +3278,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
 
                                   '${widget.info['validity'] ?? ''}',
                                   '${widget.info['inputDate'] ?? ''}',
-
-                                  '', //todo paymentTermsController.text,
+                                    widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                                   pricelistId,
                                   currencyId,
                                   '${widget.info['termsAndConditions']}',
@@ -3305,13 +3308,14 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   orderLines1,
                                   orderedKeys,
                                   '',
-                                  widget.info['deliveryTerms'] ?? '',
+                                    widget.info['deliveryTerm']!=null ?'${widget.info['deliveryTerm']['id']}' : '',
                                   widget.info['chance'] ?? '',
                                   widget.info['companyHeader'] != null ||
                                           '${widget.info['companyHeader']}' !=
                                               '[]'
                                       ? '${widget.info['companyHeader']['id']}'
                                       : '',
+                                    widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['id']}' : ''
                                 );
                                 if (res['success'] == true) {
                                   // homeController.selectedTab.value =
@@ -3340,7 +3344,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                           ),
 
                           Tooltip(
-                            message: 'cancel'.tr,
+                            message: 'lost'.tr,
                             child: InkWell(
                               onTap: () async {
                                 //cancel from back
@@ -3569,8 +3573,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
 
                                               '${widget.info['validity'] ?? ''}',
                                               '${widget.info['inputDate'] ?? ''}',
-
-                                              '', //todo paymentTermsController.text,
+                                              widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                                               pricelistId,
                                               currencyId,
                                               '${widget.info['termsAndConditions']}',
@@ -3599,8 +3602,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                               orderLines1,
                                               orderedKeys,
                                               cancelledReason,
-                                              widget.info['deliveryTerms'] ??
-                                                  '',
+                                              widget.info['deliveryTerm']!=null ?'${widget.info['deliveryTerm']['id']}' : '',
                                               widget.info['chance'] ?? '',
                                               widget.info['companyHeader'] !=
                                                           null ||
@@ -3608,6 +3610,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                                           '[]'
                                                   ? '${widget.info['companyHeader']['id']}'
                                                   : '',
+                                                widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['id']}' : ''
                                             );
                                             if (res['success'] == true) {
                                               Get.back();
@@ -3655,7 +3658,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                           //           '${widget.info['validity'] ?? ''}',
                           //           '${widget.info['inputDate'] ?? ''}',
                           //
-                          //           '', //todo paymentTermsController.text,
+                          //            widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',,
                           //           pricelistId,
                           //           currencyId,
                           //           '${widget.info['termsAndConditions']}',
@@ -3709,7 +3712,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                           //           '${widget.info['validity'] ?? ''}',
                           //           '${widget.info['inputDate'] ?? ''}',
                           //
-                          //           '', //todo paymentTermsController.text,
+                          //            widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',,
                           //           pricelistId,
                           //           currencyId,
                           //           '${widget.info['termsAndConditions']}',
@@ -3783,23 +3786,23 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
             SizedBox(
               width: 30.w,
               // width: MediaQuery.of(context).size.width * 0.03,
-              child: InkWell(
-                onTap: () async {
-                  var res = await deleteQuotation('${(widget.info['id'])}');
-                  var p = json.decode(res.body);
-                  if (res.statusCode == 200) {
-                    CommonWidgets.snackBar('Success', p['message']);
-                    pendingDocsController.getAllPendingDocs();
-                  } else {
-                    CommonWidgets.snackBar('error', p['message']);
-                  }
-                },
-                child: Icon(
-                  Icons.delete_outline,
-                  color: Primary.primary,
-                  size: 21.sp,
-                ),
-              ),
+              // child: InkWell(
+              //   onTap: () async {
+              //     var res = await deleteQuotation('${(widget.info['id'])}');
+              //     var p = json.decode(res.body);
+              //     if (res.statusCode == 200) {
+              //       CommonWidgets.snackBar('Success', p['message']);
+              //       pendingDocsController.getAllPendingDocs();
+              //     } else {
+              //       CommonWidgets.snackBar('error', p['message']);
+              //     }
+              //   },
+              //   child: Icon(
+              //     Icons.delete_outline,
+              //     color: Primary.primary,
+              //     size: 21.sp,
+              //   ),
+              // ),
             ),
           ],
         ),

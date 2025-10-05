@@ -5,6 +5,7 @@ import 'package:rooster_app/Controllers/discounts_controller.dart';
 import 'package:rooster_app/Controllers/garage_controller.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
+import 'package:rooster_app/Controllers/terms_and_conditions_controller.dart';
 import 'package:rooster_app/Controllers/users_controller.dart';
 import 'package:rooster_app/Controllers/warehouse_controller.dart';
 import 'package:rooster_app/Controllers/cashing_methods_controller.dart';
@@ -26,6 +27,7 @@ import 'package:rooster_app/Controllers/languages_controller.dart';
 
 import '../Controllers/combo_controller.dart';
 import '../Controllers/delivery_controller.dart';
+import '../Controllers/delivery_terms_controller.dart';
 import '../Controllers/payment_terms_controller.dart';
 import '../Controllers/pending_docs_review_controller.dart';
 import '../Controllers/sales_invoice_controller.dart';
@@ -72,6 +74,8 @@ class MyBinding extends Bindings {
     Get.lazyPut<DeliveryController>(() => DeliveryController());
     Get.lazyPut<DeliveryController>(() => DeliveryController());
     Get.lazyPut<GarageController>(() => GarageController());
+    Get.lazyPut<DeliveryTermsController>(() => DeliveryTermsController());
+    Get.lazyPut<TermsAndConditionsController>(() => TermsAndConditionsController());
     // LanguagesController languagesController=Get.put(LanguagesController());
     // ProductController productController=Get.put(ProductController());
     // CategoriesController categoriesController=Get.put(CategoriesController());

@@ -47,7 +47,7 @@ class _ReusableDropDownMenuWithoutSearchState
             width: widget.textFieldWidth,
             child: DropdownButtonFormField<String>(
               // autovalidateMode: AutovalidateMode.always,
-              value: dropDownValue,
+              initialValue: dropDownValue,
               decoration: InputDecoration(
                 hintText: widget.hint,
                 hintStyle:
@@ -135,12 +135,6 @@ class _ReusableDropDownMenuWithSearchState
     extends State<ReusableDropDownMenuWithSearch> {
   List<String> _filteredOptions = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _filteredOptions = widget.list;
-    widget.controller.addListener(_handleSearch);
-  }
 
   @override
   void dispose() {
@@ -148,22 +142,6 @@ class _ReusableDropDownMenuWithSearchState
     super.dispose();
   }
 
-  // void _handleSearch() {
-  //   final filter = widget.controller.text.toLowerCase();
-  //   setState(() {
-  //     // Filter the list based on the user's input
-  //     _filteredOptions = widget.list
-  //         .where((option) => option.toLowerCase().contains(filter))
-  //         .toList();
-  //
-  //     // If no options match or always add the clickable option at the end
-  //     if (widget.isThereClickableOption) {
-  //       if (_filteredOptions.isEmpty || !_filteredOptions.contains(widget.clickableOptionText)) {
-  //         _filteredOptions.add(widget.clickableOptionText);
-  //       }
-  //     }
-  //   });
-  // }
   void _handleSearch() {
     final filter = widget.controller.text.toLowerCase();
 
@@ -173,13 +151,21 @@ class _ReusableDropDownMenuWithSearchState
         option != widget.clickableOptionText)
         .toList();
 
-    if (widget.isThereClickableOption) {
-      filtered.add(widget.clickableOptionText);
-    }
-
     setState(() {
-      _filteredOptions = filtered;
+      _filteredOptions = [
+        if (widget.isThereClickableOption) widget.clickableOptionText,
+        ...filtered
+      ];
     });
+  }
+  @override
+  void initState() {
+    super.initState();
+    _filteredOptions = [
+      if (widget.isThereClickableOption) widget.clickableOptionText,
+      ...widget.list
+    ];
+    widget.controller.addListener(_handleSearch);
   }
 
 
@@ -526,9 +512,13 @@ class _ReusableDropDownMenusWithSearchState
   @override
   void initState() {
     super.initState();
-    _filteredOptions = widget.list;
+    _filteredOptions = [
+      if (widget.isThereClickableOption) [widget.clickableOptionText],
+      ...widget.list
+    ];
     widget.controller.addListener(_handleSearch);
   }
+
 
   @override
   void dispose() {
@@ -541,22 +531,20 @@ class _ReusableDropDownMenusWithSearchState
   void _handleSearch() {
     final filter = widget.controller.text.toLowerCase();
 
-
     final List<List<String>> filtered = widget.list
         .where((option) =>
     option.any((element) => element.toLowerCase().contains(filter)) &&
         option[0] != widget.clickableOptionText)
         .toList();
 
-
-    if (widget.isThereClickableOption) {
-      filtered.add([widget.clickableOptionText]);
-    }
-
     setState(() {
-      _filteredOptions = filtered;
+      _filteredOptions = [
+        if (widget.isThereClickableOption) [widget.clickableOptionText],
+        ...filtered
+      ];
     });
   }
+
 
 
   @override
@@ -714,9 +702,13 @@ class _ReusableDropDownMenusWithSearchCodeState
   @override
   void initState() {
     super.initState();
-    _filteredOptions = widget.list;
+    _filteredOptions = [
+      if (widget.isThereClickableOption) [widget.clickableOptionText],
+      ...widget.list
+    ];
     widget.controller.addListener(_handleSearch);
   }
+
 
   @override
   void dispose() {
@@ -724,42 +716,23 @@ class _ReusableDropDownMenusWithSearchCodeState
     super.dispose();
   }
 
-  // void _handleSearch() {
-  //   final filter = widget.controller.text.toLowerCase();
-  //   setState(() {
-  //     _filteredOptions = widget.list.where((option) {
-  //       // Search in all elements of the option list
-  //       return option.any((element) => element.toLowerCase().contains(filter));
-  //     }).toList();
-  //
-  //     if (widget.isThereClickableOption) {
-  //       if (_filteredOptions.isEmpty ||
-  //           !_filteredOptions.any(
-  //                   (option) => option[0] == widget.clickableOptionText)) {
-  //         _filteredOptions.add([widget.clickableOptionText]);
-  //       }
-  //     }
-  //   });
-  // }
   void _handleSearch() {
     final filter = widget.controller.text.toLowerCase();
 
-    final List<List<String>> filtered = widget.list.where((option) {
-      return option.any((element) => element.toLowerCase().contains(filter));
-    }).toList();
-
-    if (widget.isThereClickableOption) {
-      final clickable = [widget.clickableOptionText];
-      final alreadyExists = filtered.any((option) => option[0] == widget.clickableOptionText);
-      if (!alreadyExists) {
-        filtered.add(clickable);
-      }
-    }
+    final List<List<String>> filtered = widget.list
+        .where((option) =>
+    option.any((element) => element.toLowerCase().contains(filter)) &&
+        option[0] != widget.clickableOptionText)
+        .toList();
 
     setState(() {
-      _filteredOptions = filtered;
+      _filteredOptions = [
+        if (widget.isThereClickableOption) [widget.clickableOptionText],
+        ...filtered
+      ];
     });
   }
+
 
   @override
   Widget build(BuildContext context) {

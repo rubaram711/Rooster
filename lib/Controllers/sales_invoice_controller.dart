@@ -75,6 +75,35 @@ abstract class SalesInvoiceControllerAbstract extends GetxController {
 }
 
 class SalesInvoiceController extends SalesInvoiceControllerAbstract {
+  String selectedPaymentTermId='';
+  setSelectedPaymentTermId(String val) {
+    selectedPaymentTermId = val;
+    update();
+  }
+
+  List<Map> headersList=[];
+  int selectedHeaderIndex = 1;
+  Map selectedHeader={};
+  setSelectedHeaderIndex(int val){
+    selectedHeaderIndex=val;
+    update();
+  }
+  setSelectedHeader(Map val){
+    selectedHeader=val;
+    update();
+  }
+
+  int selectedTypeIndex = 1;
+  String selectedType='';
+  setSelectedTypeIndex(int val){
+    selectedTypeIndex=val;
+    update();
+  }
+  setSelectedType(String val){
+    selectedType=val;
+    update();
+  }
+
   int salesInvoiceCounter = 0;
   setSalesInvoiceCounter(int val){
     salesInvoiceCounter=val;
@@ -543,6 +572,10 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   Map combosMap = {};
   @override
   getFieldsForCreateSalesInvoiceFromBack() async {
+    headersList = [
+      {'header_name':'h1'},
+      {'header_name':'h2'},
+    ];
     combosPricesCurrencies = {};
     combosPricesList = [];
     combosNamesList = [];
@@ -654,6 +687,12 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
         selectedPriceListId = '${priceList['id']}';
       }
     }
+//todo ooooooo
+
+    // for (var header in p['companyHeaders']??[]) {
+    //   headersList.add(header);
+    // }
+
     for (var priceList in p['cashingMethods']) {
       cashingMethodsNamesList.add(priceList['title']);
       cashingMethodsIdsList.add('${priceList['id']}');
@@ -900,7 +939,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
       for (int i = 0; i < salesInvoicesList2.length; i++) {
         var cc = salesInvoicesList2[i];
 
-        if (cc['status'] == 'confirmed' || cc['status'] == 'cancelled') {
+        if (cc['status'] == 'confirmed' || cc['status'] == 'cancelled'  || cc['status'] == 'pending' ) {
           // Check if this item already exists in SalesOrders List pending
           bool existsCC = salesInvoicesListCC.any(
             (element) => element['id'] == cc['id'],

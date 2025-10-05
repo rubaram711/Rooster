@@ -52,6 +52,7 @@ Future storeClient(
     String internalNote,
     String clientCompany,
     List contacts,
+    List cars,
     ) async
 {
   // print('object111');
@@ -120,6 +121,22 @@ Future storeClient(
       MapEntry("addresses[$i][email]", '${contacts[i]['email']}',),
       MapEntry("addresses[$i][note]", '${contacts[i]['note']}',),
       MapEntry("addresses[$i][internalNote]", '${contacts[i]['internalNote']}',),
+    ]);
+  }
+
+  for (int i = 0; i < cars.length; i++) {
+    formData.fields.addAll([
+      MapEntry("cars[$i][carBrandId]", '${cars[i]['brand'].isNotEmpty?cars[i]['brand']['id']:''}'),
+      MapEntry("cars[$i][carModelId]", '${cars[i]['model'].isNotEmpty?cars[i]['model']['id']:''}',),
+      MapEntry("cars[$i][carColorId]", '${cars[i]['color'].isNotEmpty?cars[i]['color']['id']:''}',),
+      MapEntry("cars[$i][carTechnicianId]", '${cars[i]['technician'].isNotEmpty?cars[i]['technician']['id']:''}',),
+      MapEntry("cars[$i][plateNumber]", '${cars[i]['registration']}',),
+      MapEntry("cars[$i][chassisNumber]", '${cars[i]['chassis_no']}',),
+      MapEntry("cars[$i][carFax]", '${cars[i]['car_fax']}',),
+      MapEntry("cars[$i][year]", '${cars[i]['year']}',),
+      MapEntry("cars[$i][rating]", '${cars[i]['rating']}',),
+      MapEntry("cars[$i][odometer]", '${cars[i]['odometer']}',),
+      MapEntry("cars[$i][comment]", '${cars[i]['comment']}',),
     ]);
   }
 

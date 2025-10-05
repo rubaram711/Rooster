@@ -10,6 +10,7 @@ import 'package:rooster_app/Widgets/loading.dart';
 import 'package:rooster_app/Widgets/reusable_add_card.dart';
 import 'package:rooster_app/const/cars_constants.dart';
 import '../../Backend/ClientsBackend/store_client.dart';
+import '../../Controllers/garage_controller.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Widgets/custom_snak_bar.dart';
@@ -17,6 +18,7 @@ import '../../Widgets/dialog_drop_menu.dart';
 import '../../Widgets/page_title.dart';
 import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_drop_down_menu.dart';
+import '../../Widgets/reusable_radio_btns.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
@@ -69,12 +71,13 @@ class _AddNewClientState extends State<AddNewClient> {
     'accounting',
     // 'cars',
   ];
-  setTabsList()async{
-    var isItGarage= await getIsItGarageFromPref();
-    if(isItGarage=='1'){
+  setTabsList() async {
+    var isItGarage = await getIsItGarageFromPref();
+    if (isItGarage == '1') {
       tabsList.add('cars');
     }
   }
+
   Map data = {};
   List<String> pricesListsNames = [];
   List<String> pricesListsCodes = [];
@@ -170,45 +173,18 @@ class _AddNewClientState extends State<AddNewClient> {
                   // gapH32,
                   // const AddPhotoCircle(),
                   gapH32,
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.15,
-                        child: ListTile(
-                          title: Text(
-                            'individual'.tr,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            value: 1,
-                            groupValue: selectedClientType,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedClientType = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.15,
-                        child: ListTile(
-                          title: Text(
-                            'company'.tr,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            value: 2,
-                            groupValue: selectedClientType,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedClientType = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
+                  ReusableRadioBtns(
+                    isRow: true,
+                    groupVal: selectedClientType,
+                    title1: 'individual'.tr,
+                    title2: 'company'.tr,
+                    func: (value) {
+                      setState(() {
+                        selectedClientType = value!;
+                      });
+                    },
+                    width1: MediaQuery.of(context).size.width * 0.15,
+                    width2: MediaQuery.of(context).size.width * 0.15,
                   ),
                   gapH16,
                   // Text(
@@ -217,457 +193,454 @@ class _AddNewClientState extends State<AddNewClient> {
                   //       fontSize: 36, fontWeight: FontWeight.bold),
                   // ),
                   GetBuilder<HomeController>(
-                    builder:
-                        (homeCont) {
-                      double bigRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.5:MediaQuery.of(context).size.width * 0.7;
-                      double bigTextFieldWidth=homeCont.isMenuOpened?
-                          MediaQuery.of(context).size.width * 0.4
+                    builder: (homeCont) {
+                      double bigRowWidth =
+                          homeCont.isMenuOpened
+                              ? MediaQuery.of(context).size.width * 0.5
+                              : MediaQuery.of(context).size.width * 0.7;
+                      double bigTextFieldWidth =
+                          homeCont.isMenuOpened
+                              ? MediaQuery.of(context).size.width * 0.4
                               : MediaQuery.of(context).size.width * 0.6;
-                      double smallRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.22:MediaQuery.of(context).size.width * 0.27;
-                      double smallTextFieldWidth=homeCont.isMenuOpened?
-                          MediaQuery.of(context).size.width * 0.15
+                      double smallRowWidth =
+                          homeCont.isMenuOpened
+                              ? MediaQuery.of(context).size.width * 0.22
+                              : MediaQuery.of(context).size.width * 0.27;
+                      double smallTextFieldWidth =
+                          homeCont.isMenuOpened
+                              ? MediaQuery.of(context).size.width * 0.15
                               : MediaQuery.of(context).size.width * 0.19;
-                      double middleRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.25:MediaQuery.of(context).size.width * 0.29;
-                      double middleTextFieldWidth=homeCont.isMenuOpened?
-                          MediaQuery.of(context).size.width * 0.2
+                      double middleRowWidth =
+                          homeCont.isMenuOpened
+                              ? MediaQuery.of(context).size.width * 0.25
+                              : MediaQuery.of(context).size.width * 0.29;
+                      double middleTextFieldWidth =
+                          homeCont.isMenuOpened
+                              ? MediaQuery.of(context).size.width * 0.2
                               : MediaQuery.of(context).size.width * 0.25;
-                          return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            DialogTextField(
-                              textEditingController: clientNumberController,
-                              text: '${'client_code'.tr}*',
-                              rowWidth: bigRowWidth,
-                              textFieldWidth: bigTextFieldWidth,
-                              validationFunc: (value) {
-                                if (value.isEmpty) {
-                                  return 'required_field'.tr;
-                                }
-                                return null;
-                              },
-                            ),
-                            gapH16,
-                            DialogTextField(
-                              textEditingController: clientNameController,
-                              text: '${'client_name'.tr}*',
-                              rowWidth: bigRowWidth,
-                              textFieldWidth: bigTextFieldWidth,
-                                  // MediaQuery.of(context).size.width * 0.4,
-                              validationFunc: (value) {
-                                if (value.isEmpty) {
-                                  return 'required_field'.tr;
-                                }
-                                return null;
-                              },
-                            ),
-                            gapH10,
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                DialogTextField(
-                                  textEditingController: referenceController,
-                                  text: 'reference'.tr,
-                                  rowWidth:smallRowWidth,
-                                  textFieldWidth:smallTextFieldWidth,
-                                  validationFunc: (val) {},
-                                ),
-                                PhoneTextField(
-                                  textEditingController: phoneController,
-                                  text: 'phone'.tr,
-                                  rowWidth:middleRowWidth,
-                                  textFieldWidth:middleTextFieldWidth,
-                                  validationFunc: (String val) {
-                                    if (val.isNotEmpty && val.length < 7) {
-                                      return '7_digits'.tr;
-                                    }
-                                    return null;
-                                  },
-                                  onCodeSelected: (value) {
-                                    setState(() {
-                                      selectedPhoneCode = value;
-                                    });
-                                  },
-                                  onChangedFunc: (value) {
-                                    setState(() {
-                                      // mainDescriptionController.text=value;
-                                    });
-                                  },
-                                ),
-                                DialogTextField(
-                                  textEditingController: floorBldgController,
-                                  text: 'floor_bldg'.tr,
-                                  rowWidth:smallRowWidth,
-                                  textFieldWidth:smallTextFieldWidth,
-                                  validationFunc: (val) {},
-                                ),
-                              ],
-                            ),
-                            gapH10,
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  width:smallRowWidth,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text('title'.tr),
-                                      DropdownMenu<String>(
-                                        width:smallTextFieldWidth,
-                                        // requestFocusOnTap: false,
-                                        enableSearch: true,
-                                        controller: titleController,
-                                        hintText: 'Doctor, Miss, Mister',
-                                        inputDecorationTheme: InputDecorationTheme(
-                                          // filled: true,
-                                          hintStyle: const TextStyle(
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                          contentPadding:
-                                              const EdgeInsets.fromLTRB(
-                                                20,
-                                                0,
-                                                25,
-                                                5,
-                                              ),
-                                          // outlineBorder: BorderSide(color: Colors.black,),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Primary.primary.withAlpha(
-                                                (0.2 * 255).toInt(),
-                                              ),
-                                              width: 1,
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          DialogTextField(
+                            textEditingController: clientNumberController,
+                            text: '${'client_code'.tr}*',
+                            rowWidth: bigRowWidth,
+                            textFieldWidth: bigTextFieldWidth,
+                            validationFunc: (value) {
+                              if (value.isEmpty) {
+                                return 'required_field'.tr;
+                              }
+                              return null;
+                            },
+                          ),
+                          gapH16,
+                          DialogTextField(
+                            textEditingController: clientNameController,
+                            text: '${'client_name'.tr}*',
+                            rowWidth: bigRowWidth,
+                            textFieldWidth: bigTextFieldWidth,
+                            // MediaQuery.of(context).size.width * 0.4,
+                            validationFunc: (value) {
+                              if (value.isEmpty) {
+                                return 'required_field'.tr;
+                              }
+                              return null;
+                            },
+                          ),
+                          gapH10,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              DialogTextField(
+                                textEditingController: referenceController,
+                                text: 'reference'.tr,
+                                rowWidth: smallRowWidth,
+                                textFieldWidth: smallTextFieldWidth,
+                                validationFunc: (val) {},
+                              ),
+                              PhoneTextField(
+                                textEditingController: phoneController,
+                                text: 'phone'.tr,
+                                rowWidth: middleRowWidth,
+                                textFieldWidth: middleTextFieldWidth,
+                                validationFunc: (String val) {
+                                  if (val.isNotEmpty && val.length < 7) {
+                                    return '7_digits'.tr;
+                                  }
+                                  return null;
+                                },
+                                onCodeSelected: (value) {
+                                  setState(() {
+                                    selectedPhoneCode = value;
+                                  });
+                                },
+                                onChangedFunc: (value) {
+                                  setState(() {
+                                    // mainDescriptionController.text=value;
+                                  });
+                                },
+                              ),
+                              DialogTextField(
+                                textEditingController: floorBldgController,
+                                text: 'floor_bldg'.tr,
+                                rowWidth: smallRowWidth,
+                                textFieldWidth: smallTextFieldWidth,
+                                validationFunc: (val) {},
+                              ),
+                            ],
+                          ),
+                          gapH10,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: smallRowWidth,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('title'.tr),
+                                    DropdownMenu<String>(
+                                      width: smallTextFieldWidth,
+                                      // requestFocusOnTap: false,
+                                      enableSearch: true,
+                                      controller: titleController,
+                                      hintText: 'Doctor, Miss, Mister',
+                                      inputDecorationTheme: InputDecorationTheme(
+                                        // filled: true,
+                                        hintStyle: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                              20,
+                                              0,
+                                              25,
+                                              5,
                                             ),
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
-                                                ),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                              color: Primary.primary.withAlpha(
-                                                (0.4 * 255).toInt(),
-                                              ),
-                                              width: 2,
+                                        // outlineBorder: BorderSide(color: Colors.black,),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.2 * 255).toInt(),
                                             ),
-                                            borderRadius:
-                                                const BorderRadius.all(
-                                                  Radius.circular(9),
-                                                ),
+                                            width: 1,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
                                           ),
                                         ),
-                                        // menuStyle: ,
-                                        menuHeight: 250,
-                                        dropdownMenuEntries:
-                                            titles.map<
-                                              DropdownMenuEntry<String>
-                                            >((String option) {
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Primary.primary.withAlpha(
+                                              (0.4 * 255).toInt(),
+                                            ),
+                                            width: 2,
+                                          ),
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                      ),
+                                      // menuStyle: ,
+                                      menuHeight: 250,
+                                      dropdownMenuEntries:
+                                          titles.map<DropdownMenuEntry<String>>(
+                                            (String option) {
                                               return DropdownMenuEntry<String>(
                                                 value: option,
                                                 label: option,
                                               );
-                                            }).toList(),
-                                        enableFilter: true,
-                                        onSelected: (String? val) {
-                                          setState(() {
-                                            selectedTitle = val!;
-                                          });
-                                        },
-                                      ),
-                                    ],
+                                            },
+                                          ).toList(),
+                                      enableFilter: true,
+                                      onSelected: (String? val) {
+                                        setState(() {
+                                          selectedTitle = val!;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              PhoneTextField(
+                                textEditingController: mobileController,
+                                text: 'mobile'.tr,
+                                rowWidth: middleRowWidth,
+                                textFieldWidth: middleTextFieldWidth,
+                                validationFunc: (val) {
+                                  if (val.isNotEmpty && val.length < 9) {
+                                    return '7_digits'.tr;
+                                  }
+                                  return null;
+                                },
+                                onCodeSelected: (value) {
+                                  setState(() {
+                                    selectedMobileCode = value;
+                                  });
+                                },
+                                onChangedFunc: (value) {
+                                  setState(() {
+                                    // mainDescriptionController.text=value;
+                                  });
+                                },
+                              ),
+                              DialogTextField(
+                                textEditingController: streetController,
+                                text: 'street'.tr,
+                                rowWidth: smallRowWidth,
+                                textFieldWidth: smallTextFieldWidth,
+                                validationFunc: (val) {},
+                                // onChangedFunc: (value){
+                                //   setState(() {
+                                //     // mainDescriptionController.text=value;
+                                //   });
+                                // },
+                              ),
+                            ],
+                          ),
+                          gapH10,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              DialogTextField(
+                                textEditingController: jobPositionController,
+                                text: 'job_position'.tr,
+                                hint: 'Sales Director,Sales...',
+                                rowWidth: smallRowWidth,
+                                textFieldWidth: smallTextFieldWidth,
+                                validationFunc: (val) {},
+                              ),
+                              DialogTextField(
+                                textEditingController: emailController,
+                                text: 'email'.tr,
+                                hint: 'example@gmail.com',
+                                rowWidth: middleRowWidth,
+                                textFieldWidth: middleTextFieldWidth,
+                                validationFunc: (String value) {
+                                  if (value.isNotEmpty &&
+                                      !RegExp(
+                                        r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                      ).hasMatch(value)) {
+                                    return 'check_format'.tr;
+                                  }
+                                },
+                              ),
+                              isCountriesFetched
+                                  ? SizedBox(
+                                    width: smallRowWidth,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('country'.tr),
+                                        DropdownMenu<String>(
+                                          width: smallTextFieldWidth,
+                                          // requestFocusOnTap: false,
+                                          enableSearch: true,
+                                          controller: countryController,
+                                          hintText: '',
+                                          inputDecorationTheme: InputDecorationTheme(
+                                            // filled: true,
+                                            hintStyle: const TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                            contentPadding:
+                                                const EdgeInsets.fromLTRB(
+                                                  20,
+                                                  0,
+                                                  25,
+                                                  5,
+                                                ),
+                                            // outlineBorder: BorderSide(color: Colors.black,),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Primary.primary
+                                                    .withAlpha(
+                                                      (0.2 * 255).toInt(),
+                                                    ),
+                                                width: 1,
+                                              ),
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                    Radius.circular(9),
+                                                  ),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Primary.primary
+                                                    .withAlpha(
+                                                      (0.4 * 255).toInt(),
+                                                    ),
+                                                width: 2,
+                                              ),
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                    Radius.circular(9),
+                                                  ),
+                                            ),
+                                          ),
+                                          // menuStyle: ,
+                                          menuHeight: 250,
+                                          dropdownMenuEntries:
+                                              countriesNamesList.map<
+                                                DropdownMenuEntry<String>
+                                              >((String option) {
+                                                return DropdownMenuEntry<
+                                                  String
+                                                >(value: option, label: option);
+                                              }).toList(),
+                                          enableFilter: true,
+                                          onSelected: (String? val) {
+                                            setState(() {
+                                              selectedCountry = val!;
+                                              getCitiesFromBack(val);
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                  : SizedBox(
+                                    width: smallRowWidth,
+                                    child: loading(),
                                   ),
-                                ),
-                                PhoneTextField(
-                                  textEditingController: mobileController,
-                                  text: 'mobile'.tr,
-                                  rowWidth:middleRowWidth,
-                                  textFieldWidth:middleTextFieldWidth,
-                                  validationFunc: (val) {
-                                    if (val.isNotEmpty && val.length < 9) {
-                                      return '7_digits'.tr;
-                                    }
-                                    return null;
-                                  },
-                                  onCodeSelected: (value) {
-                                    setState(() {
-                                      selectedMobileCode = value;
-                                    });
-                                  },
-                                  onChangedFunc: (value) {
-                                    setState(() {
-                                      // mainDescriptionController.text=value;
-                                    });
-                                  },
-                                ),
-                                DialogTextField(
-                                  textEditingController: streetController,
-                                  text: 'street'.tr,
-                                  rowWidth:smallRowWidth,
-                                  textFieldWidth:smallTextFieldWidth,
-                                  validationFunc: (val) {},
-                                  // onChangedFunc: (value){
-                                  //   setState(() {
-                                  //     // mainDescriptionController.text=value;
-                                  //   });
-                                  // },
-                                ),
-                              ],
-                            ),
-                            gapH10,
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                DialogTextField(
-                                  textEditingController: jobPositionController,
-                                  text: 'job_position'.tr,
-                                  hint: 'Sales Director,Sales...',
-                                  rowWidth:smallRowWidth,
-                                  textFieldWidth:smallTextFieldWidth,
-                                  validationFunc: (val) {},
-                                ),
-                                DialogTextField(
-                                  textEditingController: emailController,
-                                  text: 'email'.tr,
-                                  hint: 'example@gmail.com',
-                                  rowWidth:middleRowWidth,
-                                  textFieldWidth:middleTextFieldWidth,
-                                  validationFunc: (String value) {
-                                    if (value.isNotEmpty &&
-                                        !RegExp(
-                                          r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
-                                        ).hasMatch(value)) {
-                                      return 'check_format'.tr;
-                                    }
-                                  },
-                                ),
-                                isCountriesFetched
-                                    ? SizedBox(
-                                      width:smallRowWidth,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text('country'.tr),
-                                          DropdownMenu<String>(
-                                            width:
-                                               smallTextFieldWidth,
-                                            // requestFocusOnTap: false,
-                                            enableSearch: true,
-                                            controller: countryController,
-                                            hintText: '',
-                                            inputDecorationTheme: InputDecorationTheme(
-                                              // filled: true,
-                                              hintStyle: const TextStyle(
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                              contentPadding:
-                                                  const EdgeInsets.fromLTRB(
-                                                    20,
-                                                    0,
-                                                    25,
-                                                    5,
-                                                  ),
-                                              // outlineBorder: BorderSide(color: Colors.black,),
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Primary.primary
-                                                      .withAlpha(
-                                                        (0.2 * 255).toInt(),
-                                                      ),
-                                                  width: 1,
-                                                ),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                      Radius.circular(9),
-                                                    ),
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Primary.primary
-                                                      .withAlpha(
-                                                        (0.4 * 255).toInt(),
-                                                      ),
-                                                  width: 2,
-                                                ),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                      Radius.circular(9),
-                                                    ),
-                                              ),
-                                            ),
-                                            // menuStyle: ,
-                                            menuHeight: 250,
-                                            dropdownMenuEntries:
-                                                countriesNamesList.map<
-                                                  DropdownMenuEntry<String>
-                                                >((String option) {
-                                                  return DropdownMenuEntry<
-                                                    String
-                                                  >(
-                                                    value: option,
-                                                    label: option,
-                                                  );
-                                                }).toList(),
-                                            enableFilter: true,
-                                            onSelected: (String? val) {
-                                              setState(() {
-                                                selectedCountry = val!;
-                                                getCitiesFromBack(val);
-                                              });
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                    : SizedBox(
-                                      width:
-                                          smallRowWidth,
-                                      child: loading(),
-                                    ),
-                              ],
-                            ),
-                            gapH10,
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                DialogTextField(
-                                  textEditingController: taxNumberController,
-                                  text: 'tax_number'.tr,
-                                  rowWidth:smallRowWidth,
-                                  textFieldWidth:smallTextFieldWidth,
-                                  validationFunc: (String val) {
-                                    if (selectedClientType == 2 &&
-                                        val.isEmpty) {
-                                      return 'required_field'.tr;
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                DialogTextField(
-                                  textEditingController: websiteController,
-                                  text: 'website'.tr,
-                                  hint: 'www.example.com',
-                                  rowWidth:middleRowWidth,
-                                  textFieldWidth:middleTextFieldWidth,
-                                  validationFunc: (String value) {
-                                    // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                    //     .hasMatch(value)) {
-                                    //   return 'check_format'.tr ;
-                                    // }return null;
-                                  },
-                                ),
+                            ],
+                          ),
+                          gapH10,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              DialogTextField(
+                                textEditingController: taxNumberController,
+                                text: 'tax_number'.tr,
+                                rowWidth: smallRowWidth,
+                                textFieldWidth: smallTextFieldWidth,
+                                validationFunc: (String val) {
+                                  if (selectedClientType == 2 && val.isEmpty) {
+                                    return 'required_field'.tr;
+                                  }
+                                  return null;
+                                },
+                              ),
+                              DialogTextField(
+                                textEditingController: websiteController,
+                                text: 'website'.tr,
+                                hint: 'www.example.com',
+                                rowWidth: middleRowWidth,
+                                textFieldWidth: middleTextFieldWidth,
+                                validationFunc: (String value) {
+                                  // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                  //     .hasMatch(value)) {
+                                  //   return 'check_format'.tr ;
+                                  // }return null;
+                                },
+                              ),
 
-                                isCitiesFetched
-                                    ? SizedBox(
-                                      width:
-                                         smallRowWidth,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text('city'.tr),
-                                          DropdownMenu<String>(
-                                            width:
-                                               smallTextFieldWidth,
-                                            // requestFocusOnTap: false,
-                                            enableSearch: true,
-                                            controller: cityController,
-                                            hintText: '',
-                                            inputDecorationTheme: InputDecorationTheme(
-                                              // filled: true,
-                                              hintStyle: const TextStyle(
-                                                fontStyle: FontStyle.italic,
+                              isCitiesFetched
+                                  ? SizedBox(
+                                    width: smallRowWidth,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('city'.tr),
+                                        DropdownMenu<String>(
+                                          width: smallTextFieldWidth,
+                                          // requestFocusOnTap: false,
+                                          enableSearch: true,
+                                          controller: cityController,
+                                          hintText: '',
+                                          inputDecorationTheme: InputDecorationTheme(
+                                            // filled: true,
+                                            hintStyle: const TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                            contentPadding:
+                                                const EdgeInsets.fromLTRB(
+                                                  20,
+                                                  0,
+                                                  25,
+                                                  5,
+                                                ),
+                                            // outlineBorder: BorderSide(color: Colors.black,),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Primary.primary
+                                                    .withAlpha(
+                                                      (0.2 * 255).toInt(),
+                                                    ),
+                                                width: 1,
                                               ),
-                                              contentPadding:
-                                                  const EdgeInsets.fromLTRB(
-                                                    20,
-                                                    0,
-                                                    25,
-                                                    5,
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                    Radius.circular(9),
                                                   ),
-                                              // outlineBorder: BorderSide(color: Colors.black,),
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Primary.primary
-                                                      .withAlpha(
-                                                        (0.2 * 255).toInt(),
-                                                      ),
-                                                  width: 1,
-                                                ),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                      Radius.circular(9),
-                                                    ),
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Primary.primary
-                                                      .withAlpha(
-                                                        (0.4 * 255).toInt(),
-                                                      ),
-                                                  width: 2,
-                                                ),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                      Radius.circular(9),
-                                                    ),
-                                              ),
                                             ),
-                                            // menuStyle: ,
-                                            menuHeight: 250,
-                                            dropdownMenuEntries:
-                                                citiesNamesList.map<
-                                                  DropdownMenuEntry<String>
-                                                >((String option) {
-                                                  return DropdownMenuEntry<
-                                                    String
-                                                  >(
-                                                    value: option,
-                                                    label: option,
-                                                  );
-                                                }).toList(),
-                                            enableFilter: true,
-                                            onSelected: (String? val) {
-                                              setState(() {
-                                                selectedCity = val!;
-                                              });
-                                            },
+                                            focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Primary.primary
+                                                    .withAlpha(
+                                                      (0.4 * 255).toInt(),
+                                                    ),
+                                                width: 2,
+                                              ),
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                    Radius.circular(9),
+                                                  ),
+                                            ),
                                           ),
-                                        ],
-                                      ),
-                                    )
-                                    : SizedBox(
-                                      width:
-                                          smallRowWidth,
-                                      child: loading(),
+                                          // menuStyle: ,
+                                          menuHeight: 250,
+                                          dropdownMenuEntries:
+                                              citiesNamesList.map<
+                                                DropdownMenuEntry<String>
+                                              >((String option) {
+                                                return DropdownMenuEntry<
+                                                  String
+                                                >(value: option, label: option);
+                                              }).toList(),
+                                          enableFilter: true,
+                                          onSelected: (String? val) {
+                                            setState(() {
+                                              selectedCity = val!;
+                                            });
+                                          },
+                                        ),
+                                      ],
                                     ),
-                              ],
-                            ),
-                            gapH40,
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Wrap(
-                                  spacing: 0.0,
-                                  direction: Axis.horizontal,
-                                  children:
-                                      tabsList
-                                          .map(
-                                            (element) => _buildTabChipItem(
-                                              element,
-                                              // element['id'],
-                                              // element['name'],
-                                              tabsList.indexOf(element),
-                                            ),
-                                          )
-                                          .toList(),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                        },
+                                  )
+                                  : SizedBox(
+                                    width: smallRowWidth,
+                                    child: loading(),
+                                  ),
+                            ],
+                          ),
+                          gapH40,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Wrap(
+                                spacing: 0.0,
+                                direction: Axis.horizontal,
+                                children:
+                                    tabsList
+                                        .map(
+                                          (element) => _buildTabChipItem(
+                                            element,
+                                            // element['id'],
+                                            // element['name'],
+                                            tabsList.indexOf(element),
+                                          ),
+                                        )
+                                        .toList(),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   Container(
                     padding: EdgeInsets.symmetric(
@@ -751,94 +724,94 @@ class _AddNewClientState extends State<AddNewClient> {
                             ? ContactsAndAddressesSection()
                             : selectedTabIndex == 2
                             ? Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width:
-                  MediaQuery.of(context).size.width * 0.3,
-                  child: Column(
-                    children: [
-                      GetBuilder<ClientController>(
-                        builder: (cont) {
-                          return DialogDropMenu(
-                            controller:
-                            cont.salesPersonController,
-                            optionsList:
-                            clientController
-                                .salesPersonListNames,
-                            text: 'sales_person'.tr,
-                            hint: 'search'.tr,
-                            rowWidth:
-                            MediaQuery.of(
-                              context,
-                            ).size.width *
-                                0.3,
-                            textFieldWidth:
-                            MediaQuery.of(
-                              context,
-                            ).size.width *
-                                0.17,
-                            onSelected: (String? val) {
-                              setState(() {
-                                var index = clientController
-                                    .salesPersonListNames
-                                    .indexOf(val!);
-                                clientController
-                                    .setSelectedSalesPerson(
-                                  val,
-                                  clientController
-                                      .salesPersonListId[index],
-                                );
-                              });
-                            },
-                          );
-                        },
-                      ),
-                      gapH16,
-                      DialogDropMenu(
-                        optionsList: [''],
-                        text: '${'payment_terms'.tr}*',
-                        hint: '',
-                        rowWidth:
-                        MediaQuery.of(context).size.width *
-                            0.3,
-                        textFieldWidth:
-                        MediaQuery.of(context).size.width *
-                            0.17,
-                        onSelected: (val) {
-                          setState(() {
-                            paymentTerm = val;
-                          });
-                        },
-                      ),
-                      gapH16,
-                      DialogDropMenu(
-                        controller: priceListController,
-                        optionsList: pricesListsCodes,
-                        text: 'pricelist'.tr,
-                        hint: '',
-                        rowWidth:
-                        MediaQuery.of(context).size.width *
-                            0.3,
-                        textFieldWidth:
-                        MediaQuery.of(context).size.width *
-                            0.17,
-                        onSelected: (val) {
-                          var index = pricesListsCodes.indexOf(
-                            val,
-                          );
-                          setState(() {
-                            selectedPriceListId =
-                            pricesListsIds[index];
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            )
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  child: Column(
+                                    children: [
+                                      GetBuilder<ClientController>(
+                                        builder: (cont) {
+                                          return DialogDropMenu(
+                                            controller:
+                                                cont.salesPersonController,
+                                            optionsList:
+                                                clientController
+                                                    .salesPersonListNames,
+                                            text: 'sales_person'.tr,
+                                            hint: 'search'.tr,
+                                            rowWidth:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.3,
+                                            textFieldWidth:
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
+                                                0.17,
+                                            onSelected: (String? val) {
+                                              setState(() {
+                                                var index = clientController
+                                                    .salesPersonListNames
+                                                    .indexOf(val!);
+                                                clientController
+                                                    .setSelectedSalesPerson(
+                                                      val,
+                                                      clientController
+                                                          .salesPersonListId[index],
+                                                    );
+                                              });
+                                            },
+                                          );
+                                        },
+                                      ),
+                                      gapH16,
+                                      DialogDropMenu(
+                                        optionsList: [''],
+                                        text: '${'payment_terms'.tr}*',
+                                        hint: '',
+                                        rowWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        textFieldWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.17,
+                                        onSelected: (val) {
+                                          setState(() {
+                                            paymentTerm = val;
+                                          });
+                                        },
+                                      ),
+                                      gapH16,
+                                      DialogDropMenu(
+                                        controller: priceListController,
+                                        optionsList: pricesListsCodes,
+                                        text: 'pricelist'.tr,
+                                        hint: '',
+                                        rowWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        textFieldWidth:
+                                            MediaQuery.of(context).size.width *
+                                            0.17,
+                                        onSelected: (val) {
+                                          var index = pricesListsCodes.indexOf(
+                                            val,
+                                          );
+                                          setState(() {
+                                            selectedPriceListId =
+                                                pricesListsIds[index];
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
                             : selectedTabIndex == 3
                             ? SizedBox()
                             : CarsSection(),
@@ -946,6 +919,7 @@ class _AddNewClientState extends State<AddNewClient> {
                                     internalNoteController.text,
                                     '',
                                     clientController.contactsList,
+                                    clientController.carsList,
                                   );
                                   if (res['success'] == true) {
                                     CommonWidgets.snackBar(
@@ -1204,16 +1178,26 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
               gapH28,
               GetBuilder<HomeController>(
                 builder: (homeCont) {
-
-                  double miniRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.19:MediaQuery.of(context).size.width * 0.25;
-                  double smallRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.22:MediaQuery.of(context).size.width * 0.27;
-                  double smallTextFieldWidth=homeCont.isMenuOpened?
-                  MediaQuery.of(context).size.width * 0.15
-                      : MediaQuery.of(context).size.width * 0.19;
-                  double middleRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.25:MediaQuery.of(context).size.width * 0.29;
-                  double middleTextFieldWidth=homeCont.isMenuOpened?
-                  MediaQuery.of(context).size.width * 0.2
-                      : MediaQuery.of(context).size.width * 0.25;
+                  double miniRowWidth =
+                      homeCont.isMenuOpened
+                          ? MediaQuery.of(context).size.width * 0.19
+                          : MediaQuery.of(context).size.width * 0.25;
+                  double smallRowWidth =
+                      homeCont.isMenuOpened
+                          ? MediaQuery.of(context).size.width * 0.22
+                          : MediaQuery.of(context).size.width * 0.27;
+                  double smallTextFieldWidth =
+                      homeCont.isMenuOpened
+                          ? MediaQuery.of(context).size.width * 0.15
+                          : MediaQuery.of(context).size.width * 0.19;
+                  double middleRowWidth =
+                      homeCont.isMenuOpened
+                          ? MediaQuery.of(context).size.width * 0.25
+                          : MediaQuery.of(context).size.width * 0.29;
+                  double middleTextFieldWidth =
+                      homeCont.isMenuOpened
+                          ? MediaQuery.of(context).size.width * 0.2
+                          : MediaQuery.of(context).size.width * 0.25;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1223,8 +1207,8 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                           DialogTextField(
                             textEditingController: contactsNameController,
                             text: 'name'.tr,
-                            rowWidth:smallRowWidth,
-                            textFieldWidth:smallTextFieldWidth,
+                            rowWidth: smallRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
                             validationFunc: (val) {},
                             onChangedFunc: (val) {
                               cont.updateContactName(widget.index, val);
@@ -1234,8 +1218,8 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                             textEditingController: contactsPhoneController,
                             text: 'phone'.tr,
                             initialValue: selectedContactsPhoneCode,
-                            rowWidth:middleRowWidth,
-                            textFieldWidth:middleTextFieldWidth,
+                            rowWidth: middleRowWidth,
+                            textFieldWidth: middleTextFieldWidth,
                             validationFunc: (String val) {
                               if (val.isNotEmpty && val.length < 7) {
                                 return '7_digits'.tr;
@@ -1243,13 +1227,19 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                               return null;
                             },
                             onCodeSelected: (value) {
-                              cont.updateContactPhoneCode(widget.index, '$value');
+                              cont.updateContactPhoneCode(
+                                widget.index,
+                                '$value',
+                              );
                               setState(() {
                                 selectedContactsPhoneCode = value;
                               });
                             },
                             onChangedFunc: (value) {
-                              cont.updateContactPhoneNumber(widget.index, '$value');
+                              cont.updateContactPhoneNumber(
+                                widget.index,
+                                '$value',
+                              );
                             },
                           ),
                           DialogTextField(
@@ -1341,8 +1331,8 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                             textEditingController: contactsMobileController,
                             text: 'mobile'.tr,
                             initialValue: selectedContactsMobileCode,
-                            rowWidth:middleRowWidth,
-                            textFieldWidth:middleTextFieldWidth,
+                            rowWidth: middleRowWidth,
+                            textFieldWidth: middleTextFieldWidth,
                             validationFunc: (val) {
                               if (val.isNotEmpty && val.length < 9) {
                                 return '7_digits'.tr;
@@ -1353,10 +1343,16 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                               setState(() {
                                 selectedContactsMobileCode = value;
                               });
-                              cont.updateContactMobileCode(widget.index, '${value!}');
+                              cont.updateContactMobileCode(
+                                widget.index,
+                                '${value!}',
+                              );
                             },
                             onChangedFunc: (value) {
-                              cont.updateContactMobileNumber(widget.index, '${value!}');
+                              cont.updateContactMobileNumber(
+                                widget.index,
+                                '${value!}',
+                              );
                             },
                           ),
                           DialogTextField(
@@ -1366,7 +1362,10 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                             textFieldWidth: smallTextFieldWidth,
                             validationFunc: (val) {},
                             onChangedFunc: (val) {
-                              cont.updateContactDeliveryAddress(widget.index, val);
+                              cont.updateContactDeliveryAddress(
+                                widget.index,
+                                val,
+                              );
                             },
                           ),
                         ],
@@ -1376,11 +1375,12 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           DialogTextField(
-                            textEditingController: contactsJobPositionController,
+                            textEditingController:
+                                contactsJobPositionController,
                             text: 'job_position'.tr,
                             hint: 'Sales Director,Sales...',
-                            rowWidth:smallRowWidth,
-                            textFieldWidth:smallTextFieldWidth,
+                            rowWidth: smallRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
                             validationFunc: (val) {},
                             onChangedFunc: (val) {
                               cont.updateContactJobPosition(widget.index, val);
@@ -1390,8 +1390,8 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                             textEditingController: contactsEmailController,
                             text: 'email'.tr,
                             hint: 'example@gmail.com',
-                            rowWidth:middleRowWidth,
-                            textFieldWidth:middleTextFieldWidth,
+                            rowWidth: middleRowWidth,
+                            textFieldWidth: middleTextFieldWidth,
                             validationFunc: (String value) {
                               if (value.isNotEmpty &&
                                   !RegExp(
@@ -1409,7 +1409,7 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                       ),
                     ],
                   );
-                }
+                },
               ),
               gapH48,
               TextField(
@@ -1454,61 +1454,68 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
   }
 }
 
-
-
 class CarsSection extends StatefulWidget {
   const CarsSection({super.key});
-
   @override
-  State<CarsSection> createState() =>
-      _CarsSectionState();
+  State<CarsSection> createState() => _CarsSectionState();
 }
 
-class _CarsSectionState
-    extends State<CarsSection> {
+class _CarsSectionState extends State<CarsSection> {
   ClientController clientController = Get.find();
   addNewCar() {
     Map car = {
       'odometer': '',
-      'registration': '',//unique
+      'registration': '', //unique
       'year': '',
-      'color': '',
-      'model': '',
-      'brand': '',
-      'chassis_no': '',//number
+      'color': {},
+      'model': {},
+      'brand': {},
+      'chassis_no': '', //number
       'rating': '',
       'comment': '',
       'car_fax': '',
-      'technician':''
+      'technician': {},
     };
     clientController.addToCarsList(car);
+  }
+
+  @override
+  void initState() {
+
+
+    if (!clientController.isAttributesFetched) {
+      clientController.getAllCarsAttributesFromBack();
+    }
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ClientController>(
       builder: (cont) {
-        return Column(
-          children: [
-            SizedBox(
-              height: cont.carsList.isEmpty ? 20 : 360,
-              child: ListView.builder(
-                itemCount: cont.carsList.length,
-                itemBuilder:
-                    (context, index) => ReusableCarSection(index: index),
-              ),
-            ),
-            gapH16,
-            ReusableAddCard(
-              text: 'add_new_car'.tr,
-              onTap: () {
-                addNewCar();
-                // print('addCar');
-                // print(cont.carsList);
-              },
-            ),
-          ],
-        );
+        return cont.isAttributesFetched
+            ? Column(
+              children: [
+                SizedBox(
+                  height: cont.carsList.isEmpty ? 20 : 360,
+                  child: ListView.builder(
+                    itemCount: cont.carsList.length,
+                    itemBuilder:
+                        (context, index) => ReusableCarSection(index: index),
+                  ),
+                ),
+                gapH16,
+                ReusableAddCard(
+                  text: 'add_new_car'.tr,
+                  onTap: () {
+                    addNewCar();
+                    // print('addCar');
+                    // print(cont.carsList);
+                  },
+                ),
+              ],
+            )
+            : Center(child: loading());
       },
     );
   }
@@ -1523,7 +1530,6 @@ class ReusableCarSection extends StatefulWidget {
 
 class _ReusableCarSectionState extends State<ReusableCarSection> {
   ClientController clientController = Get.find();
-  String selectedYear = '', selectedModel = '', selectedColor = '',selectedBrand = '', selectedRating = '', selectedTechnician = '';
   List<String> years = [];
   TextEditingController faxController = TextEditingController();
   TextEditingController odometerController = TextEditingController();
@@ -1536,31 +1542,92 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
   TextEditingController modelController = TextEditingController();
   TextEditingController yearController = TextEditingController();
   TextEditingController ratingController = TextEditingController();
+
+  GarageController garageController = Get.find();
+  List<String> carsModelsNames=[];
+  List<String> carsModelsIds=[];
+  getModelsOnlyMatchWithSelectedBrand(String selectedBrandId){
+    setState(() {
+      carsModelsNames=[];
+      carsModelsIds=[];
+      clientController.isModelsFetched=false;
+      carsModelsNames     = clientController.extractModelsNamesWithCondition(selectedBrandId);
+      carsModelsIds       = clientController.extractModelsIdsWithCondition(selectedBrandId);
+      clientController.isModelsFetched=true;
+    });
+  }
+
+  getModelsOnlyMatchWithSelectedBrandWithoutUpdate(String selectedBrandId){
+    carsModelsNames=[];
+    carsModelsIds=[];
+    clientController.isModelsFetched=false;
+    carsModelsNames     = clientController.extractModelsNamesWithCondition(selectedBrandId);
+    carsModelsIds       = clientController.extractModelsIdsWithCondition(selectedBrandId);
+    clientController.isModelsFetched=true;
+  }
+
+
+
   @override
   void initState() {
     years = generateYears();
-    technicianController.text =
-        clientController.carsList[widget.index]['technician'];
+    if (clientController.carsList[widget.index].containsKey('id')) {
+      if (clientController.carsList[widget.index]['technician'].isNotEmpty) {
+        int techIndex = clientController.carsTechnicianIds.indexOf(
+          '${clientController.carsList[widget.index]['technician']['id']}',
+        );
+        technicianController.text =
+            clientController.carsTechnicianNames[techIndex];
+      }
+      if (clientController.carsList[widget.index]['color'].isNotEmpty) {
+        int colorIndex = clientController.carsColorsIds.indexOf(
+          '${clientController.carsList[widget.index]['color']['id']}',
+        );
+        colorController.text = clientController.carsColorsNames[colorIndex];
+      }
+      if (clientController.carsList[widget.index]['brand'].isNotEmpty) {
+        int brandIndex = clientController.carsBrandsIds.indexOf(
+          '${clientController.carsList[widget.index]['brand']['id']}',
+        );
+        brandController.text = clientController.carsBrandsNames[brandIndex];
+        getModelsOnlyMatchWithSelectedBrandWithoutUpdate(
+          '${clientController.carsList[widget.index]['brand']['id']}',
+        );
+        if (clientController.carsList[widget.index]['model'].isNotEmpty) {
+          int modelIndex = carsModelsIds.indexOf(
+            '${clientController.carsList[widget.index]['model']['id']}',
+          );
+          modelController.text = carsModelsNames[modelIndex];
+        }
+      }
+    } else {
+      technicianController.text =
+          clientController.carsList[widget.index]['technician'].isEmpty
+              ? ''
+              : clientController.carsList[widget.index]['technician']['name'];
+      colorController.text =
+          clientController.carsList[widget.index]['color'].isEmpty
+              ? ''
+              : clientController.carsList[widget.index]['color'];
+      brandController.text =
+          clientController.carsList[widget.index]['brand'].isEmpty
+              ? ''
+              : clientController.carsList[widget.index]['brand'];
+      modelController.text =
+          clientController.carsList[widget.index]['model'].isEmpty
+              ? ''
+              : clientController.carsList[widget.index]['model'];
+    }
     odometerController.text =
         clientController.carsList[widget.index]['odometer'];
-    colorController.text =
-        clientController.carsList[widget.index]['color'];
     chassisNoController.text =
         clientController.carsList[widget.index]['chassis_no'];
     registrationController.text =
         clientController.carsList[widget.index]['registration'];
-    brandController.text =
-        clientController.carsList[widget.index]['brand'];
-    commentController.text =
-        clientController.carsList[widget.index]['comment'];
-    modelController.text =
-        clientController.carsList[widget.index]['model'];
-    yearController.text =
-        clientController.carsList[widget.index]['year'];
-    ratingController.text =
-        clientController.carsList[widget.index]['rating'];
-    faxController.text =
-        clientController.carsList[widget.index]['car_fax'];
+    commentController.text = clientController.carsList[widget.index]['comment'];
+    yearController.text = clientController.carsList[widget.index]['year'];
+    ratingController.text = clientController.carsList[widget.index]['rating'];
+    faxController.text = clientController.carsList[widget.index]['car_fax'];
 
     super.initState();
   }
@@ -1584,10 +1651,14 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
               // gapH28,
               GetBuilder<HomeController>(
                 builder: (homeCont) {
-                  double smallRowWidth=homeCont.isMenuOpened? MediaQuery.of(context).size.width * 0.22:MediaQuery.of(context).size.width * 0.27;
-                  double smallTextFieldWidth=homeCont.isMenuOpened?
-                  MediaQuery.of(context).size.width * 0.15
-                      : MediaQuery.of(context).size.width * 0.19;
+                  double smallRowWidth =
+                      homeCont.isMenuOpened
+                          ? MediaQuery.of(context).size.width * 0.22
+                          : MediaQuery.of(context).size.width * 0.27;
+                  double smallTextFieldWidth =
+                      homeCont.isMenuOpened
+                          ? MediaQuery.of(context).size.width * 0.15
+                          : MediaQuery.of(context).size.width * 0.19;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1608,8 +1679,8 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                             textEditingController: chassisNoController,
                             text: 'chassis_no'.tr,
                             hint: '',
-                            rowWidth:smallRowWidth,
-                            textFieldWidth:smallTextFieldWidth,
+                            rowWidth: smallRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
                             validationFunc: (val) {},
                             onChangedFunc: (val) {
                               cont.updateCarChassisNo(widget.index, val);
@@ -1618,8 +1689,8 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                           DialogTextField(
                             textEditingController: faxController,
                             text: 'car_fax'.tr,
-                            rowWidth:smallRowWidth,
-                            textFieldWidth:smallTextFieldWidth,
+                            rowWidth: smallRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
                             validationFunc: (val) {},
                             onChangedFunc: (val) {
                               cont.updateCarFax(widget.index, val);
@@ -1632,79 +1703,93 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ReusableDropDownMenuWithSearch(
-                            list: carBrands,
+                            list: cont.carsBrandsNames,
                             text: 'brand'.tr,
                             hint: '${'search'.tr}...',
                             controller: brandController,
                             onSelected: (String? val) {
-                              setState(() {
-                                selectedBrand=val!;
-                              });
-                              cont.updateCarBrand(widget.index, val!);
+                              int index = cont.carsBrandsNames.indexOf(val!);
+                              String id = cont.carsBrandsIds[index];
+                              cont.updateCarBrand(widget.index, id, val);
+                              getModelsOnlyMatchWithSelectedBrand(id);
                             },
                             validationFunc: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'select_option'.tr;
-                              }
-                              return null;
+                              // if (value == null || value.isEmpty) {
+                              //   return 'select_option'.tr;
+                              // }
+                              // return null;
                             },
                             rowWidth: smallRowWidth,
                             textFieldWidth: smallTextFieldWidth,
-                            clickableOptionText:
-                            'create_new_brand'.tr,
+                            clickableOptionText: 'create_new_brand'.tr,
                             isThereClickableOption: true,
                             onTappedClickableOption: () {
+                              garageController.setSelectedAttributeText(
+                                'brand',
+                              );
                               showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) => AlertDialog(
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(9)),
+                                context: context,
+                                builder:
+                                    (BuildContext context) => AlertDialog(
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(9),
+                                        ),
+                                      ),
+                                      elevation: 0,
+                                      content: AddGarageAttributeDialog(),
+                                      // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
                                     ),
-                                    elevation: 0,
-                                    content:AddGarageAttributeDialog(text: 'brand',),
-                                    // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
-                                  ));
+                              );
                             },
                           ),
-                          ReusableDropDownMenuWithSearch(
-                            list: carModels,
-                            text: 'model'.tr,
-                            hint: '${'search'.tr}...',
-                            controller: modelController,
-                            onSelected: (String? val) {
-                              setState(() {
-                                selectedModel=val!;
-                              });
-                              cont.updateCarModel(widget.index, val!);
-                            },
-                            validationFunc: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'select_option'.tr;
-                              }
-                              return null;
-                            },
-                            rowWidth: smallRowWidth,
-                            textFieldWidth: smallTextFieldWidth,
-                            clickableOptionText:
-                            'create_new_model'.tr,
-                            isThereClickableOption: true,
-                            onTappedClickableOption: () {
-                              showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) => AlertDialog(
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(9)),
-                                    ),
-                                    elevation: 0,
-                                    content:AddGarageAttributeDialog(text: 'model',),
-                                    // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
-                                  ));
-                            },
-                          ),
+                          cont.isModelsFetched
+                              ? ReusableDropDownMenuWithSearch(
+                                key: ValueKey( carsModelsNames.length),
+                                list:  carsModelsNames,
+                                text: 'model'.tr,
+                                hint: '${'search'.tr}...',
+                                controller: modelController,
+                                onSelected: (String? val) {
+                                  int index =  carsModelsNames.indexOf(
+                                    val!,
+                                  );
+                                  String id =  carsModelsIds[index];
+                                  cont.updateCarModel(widget.index, id, val);
+                                },
+                                validationFunc: (value) {
+                                  // if (value == null || value.isEmpty) {
+                                  //   return 'select_option'.tr;
+                                  // }
+                                  // return null;
+                                },
+                                rowWidth: smallRowWidth,
+                                textFieldWidth: smallTextFieldWidth,
+                                clickableOptionText: 'create_new_model'.tr,
+                                isThereClickableOption: true,
+                                onTappedClickableOption: () {
+                                  garageController.setSelectedAttributeText(
+                                    'model',
+                                  );
+                                  showDialog<String>(
+                                    context: context,
+                                    builder:
+                                        (BuildContext context) => AlertDialog(
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(9),
+                                            ),
+                                          ),
+                                          elevation: 0,
+                                          content: AddGarageAttributeDialog(),
+                                          // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
+                                        ),
+                                  );
+                                },
+                              )
+                              : loading(),
                           SizedBox(
                             width: smallRowWidth,
                             child: Row(
@@ -1752,19 +1837,16 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                                   ),
                                   menuHeight: 250,
                                   dropdownMenuEntries:
-                                  years.map<DropdownMenuEntry<String>>((
-                                      String option,
+                                      years.map<DropdownMenuEntry<String>>((
+                                        String option,
                                       ) {
-                                    return DropdownMenuEntry<String>(
-                                      value: option,
-                                      label: option,
-                                    );
-                                  }).toList(),
+                                        return DropdownMenuEntry<String>(
+                                          value: option,
+                                          label: option,
+                                        );
+                                      }).toList(),
                                   enableFilter: true,
                                   onSelected: (String? val) {
-                                    setState(() {
-                                      selectedYear = val!;
-                                    });
                                     cont.updateCarYear(widget.index, val!);
                                   },
                                 ),
@@ -1778,40 +1860,44 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ReusableDropDownMenuWithSearch(
-                            list: carColors,
+                            list: cont.carsColorsNames,
                             text: 'color'.tr,
                             hint: '${'search'.tr}...',
                             controller: colorController,
                             onSelected: (String? val) {
-                              setState(() {
-                                selectedColor=val!;
-                              });
-                              cont.updateCarColor(widget.index, val!);
+                              int index = cont.carsColorsNames.indexOf(val!);
+                              String id = cont.carsColorsIds[index];
+                              cont.updateCarColor(widget.index, id, val);
                             },
                             validationFunc: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'select_option'.tr;
-                              }
-                              return null;
+                              // if (value == null || value.isEmpty) {
+                              //   return 'select_option'.tr;
+                              // }
+                              // return null;
                             },
                             rowWidth: smallRowWidth,
                             textFieldWidth: smallTextFieldWidth,
-                            clickableOptionText:
-                            'create_new_color'.tr,
+                            clickableOptionText: 'create_new_color'.tr,
                             isThereClickableOption: true,
                             onTappedClickableOption: () {
+                              garageController.setSelectedAttributeText(
+                                'color',
+                              );
                               showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) => AlertDialog(
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(9)),
+                                context: context,
+                                builder:
+                                    (BuildContext context) => AlertDialog(
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(9),
+                                        ),
+                                      ),
+                                      elevation: 0,
+                                      content: AddGarageAttributeDialog(),
+                                      // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
                                     ),
-                                    elevation: 0,
-                                    content:AddGarageAttributeDialog(text: 'color',),
-                                    // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
-                                  ));
+                              );
                             },
                           ),
                           SizedBox(
@@ -1861,19 +1947,16 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                                   ),
                                   menuHeight: 250,
                                   dropdownMenuEntries:
-                                  carRatings.map<DropdownMenuEntry<String>>((
-                                      String option,
-                                      ) {
-                                    return DropdownMenuEntry<String>(
-                                      value: option,
-                                      label: option,
-                                    );
-                                  }).toList(),
+                                      carRatings.map<DropdownMenuEntry<String>>(
+                                        (String option) {
+                                          return DropdownMenuEntry<String>(
+                                            value: option,
+                                            label: option,
+                                          );
+                                        },
+                                      ).toList(),
                                   enableFilter: true,
                                   onSelected: (String? val) {
-                                    setState(() {
-                                      selectedRating = val!;
-                                    });
                                     cont.updateCarRating(widget.index, val!);
                                   },
                                 ),
@@ -1883,8 +1966,8 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                           DialogTextField(
                             textEditingController: odometerController,
                             text: 'odometer'.tr,
-                            rowWidth:smallRowWidth,
-                            textFieldWidth:smallTextFieldWidth,
+                            rowWidth: smallRowWidth,
+                            textFieldWidth: smallTextFieldWidth,
                             validationFunc: (val) {},
                             onChangedFunc: (val) {
                               cont.updateCarOdometer(widget.index, val);
@@ -1897,55 +1980,56 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ReusableDropDownMenuWithSearch(
-                            list: carTechnician,
+                            list: cont.carsTechnicianNames,
                             text: 'technician'.tr,
                             hint: '${'search'.tr}...',
                             controller: technicianController,
                             onSelected: (String? val) {
-                              setState(() {
-                                selectedTechnician=val!;
-                              });
-                              cont.updateCarTechnician(widget.index, val!);
+                              int index = cont.carsTechnicianNames.indexOf(
+                                val!,
+                              );
+                              String id = cont.carsTechnicianIds[index];
+                              cont.updateCarTechnician(widget.index, id, val);
                             },
                             validationFunc: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'select_option'.tr;
-                              }
-                              return null;
+                              // if (value == null || value.isEmpty) {
+                              //   return 'select_option'.tr;
+                              // }
+                              // return null;
                             },
                             rowWidth: smallRowWidth,
                             textFieldWidth: smallTextFieldWidth,
-                            clickableOptionText:
-                            'add_new_technician'.tr,
+                            clickableOptionText: 'add_new_technician'.tr,
                             isThereClickableOption: true,
                             onTappedClickableOption: () {
+                              garageController.setSelectedAttributeText(
+                                'color',
+                              );
                               showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) => AlertDialog(
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.all(Radius.circular(9)),
+                                context: context,
+                                builder:
+                                    (BuildContext context) => AlertDialog(
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(9),
+                                        ),
+                                      ),
+                                      elevation: 0,
+                                      content: AddGarageAttributeDialog(),
+                                      // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
                                     ),
-                                    elevation: 0,
-                                    content:AddGarageAttributeDialog(text: 'technician',),
-                                    // content:widget.idDesktop? const CreateCategoryDialogContent(): const MobileCreateCategoryDialogContent(),
-                                  ));
+                              );
                             },
                           ),
-                          SizedBox(
-                            width: smallRowWidth,
-                          ),
-                          SizedBox(
-                            width: smallRowWidth,
-                          ),
+                          SizedBox(width: smallRowWidth),
+                          SizedBox(width: smallRowWidth),
                         ],
                       ),
                       gapH10,
-
                     ],
                   );
-                }
+                },
               ),
               gapH10,
               TextField(
@@ -1979,7 +2063,7 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                   ),
                 ),
                 onChanged: (val) {
-                  cont.updateContactNote(widget.index, val);
+                  cont.updateCarComment(widget.index, val);
                 },
               ),
             ],
@@ -2143,45 +2227,18 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
                   // gapH32,
                   // const AddPhotoCircle(),
                   gapH32,
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        child: ListTile(
-                          title: Text(
-                            'individual'.tr,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            value: 1,
-                            groupValue: selectedClientType,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedClientType = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        child: ListTile(
-                          title: Text(
-                            'company'.tr,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            value: 2,
-                            groupValue: selectedClientType,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedClientType = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
+                  ReusableRadioBtns(
+                    isRow: true,
+                    groupVal: selectedClientType,
+                    title1: 'individual'.tr,
+                    title2: 'company'.tr,
+                    func: (value) {
+                      setState(() {
+                        selectedClientType = value!;
+                      });
+                    },
+                    width1: MediaQuery.of(context).size.width * 0.45,
+                    width2: MediaQuery.of(context).size.width * 0.45,
                   ),
                   gapH16,
                   DialogTextField(
@@ -2825,6 +2882,7 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
                                     internalNoteController.text,
                                     '',
                                     clientController.contactsList,
+                                    clientController.carsList,
                                   );
                                   if (res['success'] == true) {
                                     CommonWidgets.snackBar(

@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Backend/ProductsBackend/get_an_item.dart';
 import 'package:rooster_app/Locale_Memory/save_user_info_locally.dart';
+import 'package:rooster_app/Widgets/reusable_radio_btns.dart';
 import '../../Backend/ClientsBackend/delete_client.dart';
 import '../../Backend/ClientsBackend/get_client_create_info.dart';
 import '../../Backend/ClientsBackend/update_client.dart';
 import '../../Backend/get_cities_of_a_specified_country.dart';
 import '../../Backend/get_countries.dart';
 import '../../Controllers/client_controller.dart';
+import '../../Controllers/garage_controller.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Widgets/TransferWidgets/reusable_show_info_card.dart';
 import '../../Widgets/custom_snak_bar.dart';
@@ -2419,23 +2421,40 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
       clientController.contactsList.add(contact);
     }
   }
-  setCars() {
+
+  GarageController garageController = Get.find();
+  setCars() async {
+    // await clientController.getAllCarsAttributesFromBack();
     clientController.carsList = [];
-    // for (var con in widget.info['cars']) {
-    //   Map car = {
-    //     'odometer': con['odometer'] ?? '',
-    //     'registration': con['registration'] ?? '',
-    //     'year': con['year'] ?? '',
-    //     'color': con['color'] ?? '',
-    //     'model': con['model'] ?? '',
-    //     'brand': con['brand'] ?? '',
-    //     'chassis_no': con['chassis_no'] ?? '',
-    //     'rating': con['rating'] ?? '',
-    //     'comment': con['comment'] ?? '',
-    //     'car_fax': con['car_fax'] ?? '',
-    //   };
-    //   clientController.carsList.add(contact);
-    // }
+    for (var carObject in widget.info['cars']) {
+      Map car = {
+        'id': '${carObject['id']}',
+        'odometer': '${carObject['odometer'] ?? ''}',
+        'registration': '${carObject['plate_number'] ?? ''}',
+        'year': '${carObject['year'] ?? ''}',
+        'color':
+            carObject['car_color_id'] == null
+                ? {}
+                : {'id': '${carObject['car_color_id']}', 'name': ''},
+        'model':
+            carObject['car_model_id'] == null
+                ? {}
+                : {'id': '${carObject['car_model_id']}', 'name': ''},
+        'brand':
+            carObject['car_brand_id'] == null
+                ? {}
+                : {'id': '${carObject['car_brand_id']}', 'name': ''},
+        'technician':
+            carObject['car_technician_id'] == null
+                ? {}
+                : {'id': '${carObject['car_technician_id']}', 'name': ''},
+        'chassis_no': '${carObject['chassis_number'] ?? ''}',
+        'rating': carObject['rating'] ?? '',
+        'comment': carObject['comment'] ?? '',
+        'car_fax': '${carObject['car_fax'] ?? ''}',
+      };
+      clientController.carsList.add(car);
+    }
   }
 
   List tabsList = [
@@ -2445,12 +2464,13 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
     'accounting',
     // 'cars',
   ];
-  setTabsList()async{
-    var isItGarage= await getIsItGarageFromPref();
-    if(isItGarage=='1'){
+  setTabsList() async {
+    var isItGarage = await getIsItGarageFromPref();
+    if (isItGarage == '1') {
       tabsList.add('cars');
     }
   }
+
   @override
   void initState() {
     setTabsList();
@@ -2542,45 +2562,18 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                     // gapH32,
                     // const AddPhotoCircle(),
                     gapH32,
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.15,
-                          child: ListTile(
-                            title: Text(
-                              'individual'.tr,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            leading: Radio(
-                              value: 1,
-                              groupValue: selectedClientType,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedClientType = value!;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.15,
-                          child: ListTile(
-                            title: Text(
-                              'company'.tr,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            leading: Radio(
-                              value: 2,
-                              groupValue: selectedClientType,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedClientType = value!;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
+                    ReusableRadioBtns(
+                      isRow: true,
+                      groupVal: selectedClientType,
+                      title1: 'individual'.tr,
+                      title2: 'company'.tr,
+                      func: (value) {
+                        setState(() {
+                          selectedClientType = value!;
+                        });
+                      },
+                      width1: MediaQuery.of(context).size.width * 0.15,
+                      width2: MediaQuery.of(context).size.width * 0.15,
                     ),
                     gapH10,
                     Text(
@@ -3419,6 +3412,7 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                         internalNoteController.text,
                         '',
                         clientController.contactsList,
+                        clientController.carsList,
                       );
                       if (res['success'] == true) {
                         Get.back();

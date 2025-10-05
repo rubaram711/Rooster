@@ -1069,7 +1069,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                           ),
                         ),
                       ),
-                      Tooltip(
+                      widget.info['status'] == "pending"? Tooltip(
                         message: 'modify'.tr,
                         child: InkWell(
                           onTap: () async {
@@ -1094,7 +1094,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                           },
                           child: Icon(Icons.edit, color: Primary.primary),
                         ),
-                      ),
+                      ):SizedBox.shrink(),
 
                       Tooltip(
                         message: 'send'.tr,
@@ -1302,7 +1302,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
 
                               '${widget.info['valueDate'] ?? ''}',
                               warehouseId,
-                              '', //todo paymentTermsController.text,
+                               widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                               pricelistId,
                               currencyId,
                               '${widget.info['termsAndConditions']}',
@@ -1559,7 +1559,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
 
                               '${widget.info['valueDate'] ?? ''}',
                               warehouseId,
-                              '', //todo paymentTermsController.text,
+                               widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                               pricelistId,
                               currencyId,
                               '${widget.info['termsAndConditions']}',

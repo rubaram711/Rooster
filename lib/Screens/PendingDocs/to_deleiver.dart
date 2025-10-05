@@ -1162,6 +1162,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                         ),
                       ),
 
+                      widget.info['status'] == "pending"?
                       Tooltip(
                         message: 'modify'.tr,
                         child: InkWell(
@@ -1195,7 +1196,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                             size: 21.sp,
                           ),
                         ),
-                      ),
+                      ):SizedBox.shrink(),
 
                       Tooltip(
                         message: 'send'.tr,
@@ -1414,8 +1415,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
                               '${widget.info['validity'] ?? ''}',
                               '${widget.info['inputDate'] ?? ''}',
-
-                              '', //todo paymentTermsController.text,
+                              widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                               pricelistId,
                               currencyId,
                               '${widget.info['termsAndConditions']}',
@@ -1485,7 +1485,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                       //         '${widget.info['validity'] ?? ''}',
                       //         '${widget.info['inputDate'] ?? ''}',
 
-                      //         '', //todo paymentTermsController.text,
+                      //          widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                       //         pricelistId,
                       //         currencyId,
                       //         '${widget.info['termsAndConditions']}',
@@ -1856,8 +1856,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                       //
                       //           '${widget.info['validity'] ?? ''}',
                       //           '${widget.info['inputDate'] ?? ''}',
-                      //
-                      //           '', //todo paymentTermsController.text,
+                      // widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                       //           pricelistId,
                       //           currencyId,
                       //           '${widget.info['termsAndConditions']}',
@@ -1909,8 +1908,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                       //
                       //           '${widget.info['validity'] ?? ''}',
                       //           '${widget.info['inputDate'] ?? ''}',
-                      //
-                      //           '', //todo paymentTermsController.text,
+                      // widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
                       //           pricelistId,
                       //           currencyId,
                       //           '${widget.info['termsAndConditions']}',

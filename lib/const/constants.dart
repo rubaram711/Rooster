@@ -1,4 +1,5 @@
 
+
 List<String> pricesVatConditions = ['Prices are before vat', 'Prices are vat inclusive'];
 List<String> vatExemptList = [
   'Printed as "vat exempted"',
@@ -12,3 +13,9 @@ List<String> chanceLevels=[
    'MEDIUM',
    'LOW'
 ];
+
+
+
+
+
+

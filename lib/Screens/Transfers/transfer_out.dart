@@ -109,11 +109,6 @@ class _TransferOutState extends State<TransferOut> {
               child: SingleChildScrollView(
                 child: GetBuilder<HomeController>(
                   builder: (homeCont) {
-                    double containerItemRow =
-                        homeCont.isMenuOpened
-                            ? MediaQuery.of(context).size.width * 0.63
-                            : MediaQuery.of(context).size.width * 0.78;
-
                     double firstCol =
                         homeCont.isMenuOpened
                             ? MediaQuery.of(context).size.width * 0.35

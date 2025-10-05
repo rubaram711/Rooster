@@ -9,3 +9,5 @@
 -dontwarn com.dynamsoft.dlr.intermediate_results.LocalizedTextLinesUnit
 -dontwarn com.dynamsoft.dlr.intermediate_results.RawTextLinesUnit
 -dontwarn com.dynamsoft.dlr.intermediate_results.RecognizedTextLinesUnit
+-keep class com.google.mlkit.vision.text.** { *; }
+-dontwarn com.google.mlkit.vision.text.**

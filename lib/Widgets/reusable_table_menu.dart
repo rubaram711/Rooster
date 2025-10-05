@@ -35,7 +35,7 @@ class _ReusableStatusDropdownState extends State<ReusableStatusDropdown> {
   @override
   Widget build(BuildContext context) {
     Widget dropdown = DropdownButtonFormField<String>(
-      value: _selected,
+      initialValue: _selected,
       items:
           widget.options
               .map((s) => DropdownMenuItem<String>(value: s, child: Text(s)))

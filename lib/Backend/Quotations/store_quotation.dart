@@ -102,7 +102,7 @@ Future storeQuotations(
     String deliveryTerms,
     String chance,
     String companyHeaderId,
-
+    String termsAdnConditionId,
     ) async
 {
   String token = await getAccessTokenFromPref();
@@ -136,8 +136,9 @@ Future storeQuotations(
     "beforeVatPrices": beforeVatPrices,
     "code": code,
     "title": title,
-    "deliveryTerms":deliveryTerms,
+    "deliveryTermId":deliveryTerms,
     "chance":chance,
+    "termsAdnConditionId":termsAdnConditionId,
   };
   if(companyHeaderId.isNotEmpty){
     p.addAll({"companyHeaderId":companyHeaderId,});

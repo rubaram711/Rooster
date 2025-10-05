@@ -5,6 +5,7 @@ import 'package:rooster_app/Controllers/discounts_controller.dart';
 import 'package:rooster_app/Controllers/inventory_controller.dart';
 import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Screens/Configuration/currencies_and_rates.dart';
+import 'package:rooster_app/Screens/Configuration/terms_and_conditions.dart';
 import 'package:rooster_app/const/sizes.dart';
 import '../../Controllers/cashing_methods_controller.dart';
 import '../../Controllers/categories_controller.dart';
@@ -28,6 +29,7 @@ import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Screens/Authorization/sign_up_screen.dart';
 import '../../Screens/Configuration/cashing_method.dart';
 import '../../Screens/Configuration/categories_dialog.dart';
+import '../../Screens/Configuration/delivery_terms.dart';
 import '../../Screens/Configuration/discounts_dialog.dart';
 import '../../Screens/Configuration/groups_dialog.dart';
 import '../../Screens/Configuration/payment_terms.dart';
@@ -73,6 +75,8 @@ const List<AppBarEntry> data = <AppBarEntry>[
       AppBarEntry('categories', '/categories'),
       AppBarEntry('groups', '/groups'),
       AppBarEntry('payment_terms', '/payment_terms'),
+      AppBarEntry('delivery_terms', '/delivery_terms'),
+      AppBarEntry('terms_and_conditions', '/terms_and_conditions'),
       // AppBarEntry('salesmen', '/salesmen'),
       // AppBarEntry('warehouses', '/warehouses'),
       AppBarEntry('price_lists', '/price_lists'),
@@ -90,9 +94,11 @@ Map configDialogs = {
   'categories': const CategoriesDialogContent(),
   'groups': const GroupsDialogContent(),
   'payment_terms': const PaymentTermsDialogContent(),
+  'delivery_terms': const DeliveryTermsDialogContent(),
   'salesmen': const SalesmenDialogContent(),
   'warehouses': const WarehousesDialogContent(),
   'price_lists': const PriceListDialogContent(),
+  'terms_and_conditions': const TermsAndConditionsDialogContent(),
   'settings': const SettingsContent(),
 };
 
@@ -316,8 +322,8 @@ class _AdminSectionInHomeAppBarState extends State<AdminSectionInHomeAppBar> {
 
                           await saveUserInfoLocally('', '', '', '', '','','');
                           await saveCompanySettingsLocally('', '','','','', '','','', '','','',);
-                          await saveHeader1Locally('', '','', '', '', '', '','','','','','','','','' );
-                          await saveHeader2Locally('', '','', '', '', '', '','','','','','','','','' );
+                          await saveHeader1Locally('', '','', '', '', '', '','','','','','','','','' ,'','' );
+                          await saveHeader2Locally('', '','', '', '', '', '','','','','','','','','','','' );
 
                           // Get.reset();
 

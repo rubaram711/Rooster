@@ -227,6 +227,11 @@ class InventoryController extends GetxController {
     var res = await getInventoryData(selectedItemId, selectedWarehouseId,
         selectedCategoriesIdsList, selectedGroupsIds);
     if (res['success'] == true) {
+      res['data'].sort((a, b) {
+        String nameA = (a['item_name'] ?? '').toString().toLowerCase();
+        String nameB = (b['item_name'] ?? '').toString().toLowerCase();
+        return nameA.compareTo(nameB);
+      });
       inventoryData=res['data']
           .map<InventoryItem>((e)=>InventoryItem.fromJson(e)).toList();
       for (int i = 0; i < res['data'].length; i++) {

@@ -31,14 +31,16 @@ class TransferController extends GetxController{
   List<String> productsCodes = [];
   List productsIds = [];
   bool isProductsFetched = false;
+
+  bool isLoading = false;
+  var hasMore = true;
+  int currentPage=1;
   getAllProductsFromBack(String warehouseId,String search,String cat) async {
-    productsList= [];
-    productsNames = [];
-    productsCodes = [];
-    productsIds = [];
-    itemsListInReplenish = {};
-    isProductsFetched = false;
-    var p = await getAllProducts(search,cat,warehouseId,-1);
+    if(isLoading || !hasMore) return ;
+    isLoading=true;
+
+    var p = await getAllProducts(search,cat,warehouseId,currentPage);
+    if('$p'!='[]'){
     for (var item in p) {
       productsNames.add('${item['item_name']}');
       productsCodes.add('${item['mainCode']}');
@@ -47,8 +49,62 @@ class TransferController extends GetxController{
     }
     productsList.addAll(p);
     isProductsFetched= true;
+    currentPage=currentPage+1;
+    }else {
+      hasMore=false;
+    }
+    isLoading=false;
     update();
   }
+
+  getAllProductsFromBackWithSearch(String warehouseId,String search,String cat) async {
+      currentPage=1;
+      productsList= [];
+      productsNames = [];
+      productsCodes = [];
+      productsIds = [];
+      itemsListInReplenish = {};
+      isProductsFetched = false;
+    isLoading=true;
+    var p = await getAllProducts(
+        search,
+        cat,
+        warehouseId,
+        -1
+    );
+    if('$p'!='[]'){
+        for (var item in p) {
+          productsNames.add('${item['item_name']}');
+          productsCodes.add('${item['mainCode']}');
+          productsIds.add(item['id']);
+        }
+        productsList.addAll(p);
+        isProductsFetched= true;
+    }
+    isLoading=false;
+
+    // productsList.addAll(p);
+    // isProductsFetched.value = true;
+    update();
+  }
+  // getAllProductsFromBack(String warehouseId,String search,String cat) async {
+  //   productsList= [];
+  //   productsNames = [];
+  //   productsCodes = [];
+  //   productsIds = [];
+  //   itemsListInReplenish = {};
+  //   isProductsFetched = false;
+  //   var p = await getAllProducts(search,cat,warehouseId,-1);
+  //   for (var item in p) {
+  //     productsNames.add('${item['item_name']}');
+  //     productsCodes.add('${item['mainCode']}');
+  //     productsIds.add(item['id']);
+  //     update();
+  //   }
+  //   productsList.addAll(p);
+  //   isProductsFetched= true;
+  //   update();
+  // }
 
   // List<Widget> orderLinesList = [];
   double imageSpaceHeight = 90;

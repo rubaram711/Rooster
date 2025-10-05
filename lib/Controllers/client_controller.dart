@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../Backend/ClientsBackend/get_clients.dart';
 import '../Backend/ClientsBackend/get_transactions.dart';
+import '../Backend/GarageBackend/get_all_cars_attributes.dart';
 import '../Backend/UsersBackend/get_user.dart';
 
 
@@ -201,8 +202,16 @@ class ClientController extends GetxController {
     update();
   }
 
-  updateCarTechnician(int index,String newVal){
-    carsList[index]['technician']=newVal;
+  updateCarTechnician(int index,String id,String name){
+    if(carsList[index]['technician'].isEmpty){
+      carsList[index]['technician']={
+        'id':id,
+        'name':name
+      };
+    }else{
+    carsList[index]['technician']['id']=id;
+    carsList[index]['technician']['name']=name;
+    }
   }
   updateCarOdometer(int index,String newVal){
     carsList[index]['odometer']=newVal;
@@ -213,15 +222,43 @@ class ClientController extends GetxController {
   updateCarYear(int index,String newVal){
     carsList[index]['year']=newVal;
   }
-  updateCarColor(int index,String newVal){
-    carsList[index]['color']=newVal;
+  updateCarColor(int index,String id,String name){
+    // carsList[index]['color']=newVal;
+    if(carsList[index]['color'].isEmpty){
+      carsList[index]['color']={
+        'id':id,
+        'name':name
+      };
+    }else{
+      carsList[index]['color']['id']=id;
+      carsList[index]['color']['name']=name;
+    }
   }
-  updateCarModel(int index,String newVal){
-    carsList[index]['model']=newVal;
+  updateCarModel(int index,String id,String name){
+    // carsList[index]['model']=newVal;
+    if(carsList[index]['model'].isEmpty){
+      carsList[index]['model']={
+        'id':id,
+        'name':name
+      };
+    }else{
+      carsList[index]['model']['id']=id;
+      carsList[index]['model']['name']=name;
+    }
   }
-  updateCarBrand(int index,String newVal){
-    carsList[index]['brand']=newVal;
+  updateCarBrand(int index,String id,String name){
+    // carsList[index]['brand']=newVal;
+    if(carsList[index]['brand'].isEmpty){
+      carsList[index]['brand']={
+        'id':id,
+        'name':name
+      };
+    }else{
+      carsList[index]['brand']['id']=id;
+      carsList[index]['brand']['name']=name;
+    }
   }
+
   updateCarChassisNo(int index,String newVal){
     carsList[index]['chassis_no']=newVal;
   }
@@ -235,5 +272,70 @@ class ClientController extends GetxController {
     carsList[index]['car_fax']=newVal;
   }
 
+
+  // bool isItForUpdate=false;
+  // setIsItForUpdate(bool val){
+  //   isItForUpdate=val;
+  //   update();
+  // }
+  List<String> carsTechnicianNames=[];
+  List<String> carsTechnicianIds=[];
+  List<String> carsColorsNames=[];
+  List<String> carsColorsIds=[];
+  List<String> carsBrandsNames=[];
+  List<String> carsBrandsIds=[];
+
+  List<String> carsBrandsMapsToModelsIds=[];
+ bool isAttributesFetched=false;
+  bool isModelsFetched=false;
+  List carModels=[];
+  getAllCarsAttributesFromBack() async {
+    carsTechnicianNames=[];
+    carsTechnicianIds=[];
+    carsColorsNames=[];
+    carsColorsIds=[];
+    carsBrandsNames=[];
+    carsBrandsIds=[];
+    isAttributesFetched=false;
+    isModelsFetched=false;
+    carModels=[];
+    var p = await getAllCarsAttributes();
+    if (p['success']==true) {
+
+      carModels   = (p['data']['car_models'] as List?)!;
+      final technicians = p['data']['technicians'] as List?;
+      final carBrands   = p['data']['car_brands'] as List?;
+      final carColors   = p['data']['car_colors'] as List?;
+
+      carsTechnicianNames = extractNames(technicians);
+      carsTechnicianIds   = extractIds(technicians);
+
+      carsBrandsNames     = extractNames(carBrands);
+      carsBrandsIds       = extractIds(carBrands);
+
+      carsColorsNames     = extractNames(carColors);
+      carsColorsIds       = extractIds(carColors);
+
+    }
+    isModelsFetched=true;
+    isAttributesFetched=true;
+    update();
+  }
+
+  List<String> extractNames(List<dynamic>? data) =>
+      data?.map((e) => e['name'] as String).toList() ?? [];
+
+  List<String> extractIds(List<dynamic>? data) =>
+      data?.map((e) => '${e['id']}').toList() ?? [];
+
+  List<String> extractModelsIdsWithCondition(String conditionVal) =>
+      carModels.
+      where((e) =>  '${e['car_brand_id']}'==conditionVal,)
+          .map((e) => '${e['id']}').toList() ;
+
+  List<String> extractModelsNamesWithCondition(String conditionVal) =>
+      carModels.
+      where((e) =>  '${e['car_brand_id']}'==conditionVal,)
+          .map((e) => '${e['name']}').toList() ;
 
 }

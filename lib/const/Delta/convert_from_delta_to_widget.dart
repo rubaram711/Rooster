@@ -1,37 +1,43 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
 
 import 'fix_delta.dart';
 
-
- Widget quillDeltaToWidget(String jsonDelta) {
-   jsonDelta=fixQuillHeaderDelta(jsonDelta);
+Widget quillDeltaToWidget(String jsonDelta) {
+  jsonDelta = fixQuillHeaderDelta(jsonDelta);
   final ops = jsonDecode(jsonDelta) as List<dynamic>;
 
-  final List< Widget> widgets = [];
-  List< InlineSpan> currentLineSpans = [];
+  final List<Widget> widgets = [];
+  List<InlineSpan> currentLineSpans = [];
   int? currentHeaderLevel;
+  Map<String, dynamic>? lastAttrs;
+  int listIndex = 1;
+  String? lastListType;
 
   for (final op in ops) {
     final map = Map<String, dynamic>.from(op);
     final text = map['insert'] as String;
     final attrs = Map<String, dynamic>.from(map['attributes'] ?? {});
+    lastAttrs = attrs;
 
-    final style =  TextStyle(
-        fontWeight:attrs['header']!=null ?   FontWeight.bold: attrs['bold'] == true ?  FontWeight.bold :  FontWeight.normal,
-        fontStyle: attrs['italic'] == true ?  FontStyle.italic :  FontStyle.normal,
-        decoration: attrs['underline'] == true ?  TextDecoration.underline :  TextDecoration.none,
-        fontSize:attrs['header']!=null
-            ?attrs['header']==1?24:attrs['header']==2?20:attrs['header']==3?18:12
-            :_getFontSize(attrs['size'])
+    final style = TextStyle(
+      fontWeight: attrs['header'] != null || attrs['bold'] == true
+          ? FontWeight.bold
+          : FontWeight.normal,
+      fontStyle: attrs['italic'] == true ? FontStyle.italic : FontStyle.normal,
+      decoration: attrs['underline'] == true ? TextDecoration.underline : TextDecoration.none,
+      fontSize: attrs['header'] != null
+          ? _getHeaderFontSize(attrs['header'])
+          : _getFontSize(attrs['size']),
     );
 
     final lines = text.split('\n');
+
     for (int i = 0; i < lines.length; i++) {
       final line = lines[i];
 
       if (line.isNotEmpty) {
-        currentLineSpans.add( TextSpan(text: line, style: style));
+        currentLineSpans.add(TextSpan(text: line, style: style));
         if (attrs.containsKey('header')) {
           currentHeaderLevel = attrs['header'];
         }
@@ -39,26 +45,42 @@ import 'fix_delta.dart';
 
       final isLast = i == lines.length - 1;
       if (!isLast) {
-        // نهاية سطر - اطبعه مع header إن وُجد
-        if (currentLineSpans.isEmpty) {
-          widgets.add(  SizedBox(height: 10));
-        } else {
-          final lineWidget = RichText(
-            text: TextSpan(children: currentLineSpans),
-          );
+        final lineWidget = RichText(
+          text: TextSpan(children: currentLineSpans),
+        );
 
-          if (currentHeaderLevel != null) {
-            widgets.add(
-              DefaultTextStyle(
-                style: TextStyle(fontSize: _getHeaderFontSize(currentHeaderLevel)),
-                child: lineWidget,
-              ),
-            );
-            currentHeaderLevel = null; // نعيد الضبط بعد الطباعة
-          } else {
-            widgets.add(lineWidget);
+        if (attrs.containsKey('list')) {
+          final listType = attrs['list'];
+          if (lastListType != listType) {
+            listIndex = 1;
+            lastListType = listType;
           }
+
+          final bullet = listType == 'bullet' ? '·' : '${listIndex++}.';
+
+          widgets.add(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Text('$bullet ', style: TextStyle(fontSize:
+              attrs['header'] != null
+                  ? _getHeaderFontSize(attrs['header'])
+                  : _getFontSize(attrs['size']))),
+                Expanded(child: lineWidget),
+              ],
+            ),
+          );
+        } else if (currentHeaderLevel != null) {
+          widgets.add(
+            DefaultTextStyle(
+              style: TextStyle(fontSize: _getHeaderFontSize(currentHeaderLevel)),
+              child: lineWidget,
+            ),
+          );
+          currentHeaderLevel = null;
+        } else {
+          widgets.add(lineWidget);
         }
+
         currentLineSpans = [];
       }
     }
@@ -69,7 +91,21 @@ import 'fix_delta.dart';
     final lineWidget = RichText(
       text: TextSpan(children: currentLineSpans),
     );
-    if (currentHeaderLevel != null) {
+
+    if (lastAttrs != null && lastAttrs.containsKey('list')) {
+      final listType = lastAttrs['list'];
+      final bullet = listType == 'bullet' ? '·' : '${listIndex++}.';
+
+      widgets.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('$bullet ', style: TextStyle(fontSize: 11)),
+            Expanded(child: lineWidget),
+          ],
+        ),
+      );
+    } else if (currentHeaderLevel != null) {
       widgets.add(
         DefaultTextStyle(
           style: TextStyle(fontSize: _getHeaderFontSize(currentHeaderLevel)),
@@ -88,29 +124,29 @@ import 'fix_delta.dart';
 }
 
 double _getFontSize(dynamic size) {
-  if (size == null) return 12;
+  if (size == null) return 11;
   if (size is num) return size.toDouble();
   switch (size) {
     case 'small':
-      return 10;
+      return 9;
     case 'large':
-      return 14;
+      return 13;
     case 'huge':
-      return 18;
+      return 17;
     default:
-      return 12;
+      return 11;
   }
 }
 
-double _getHeaderFontSize(int level ) {
+double _getHeaderFontSize(int? level) {
   switch (level) {
     case 1:
-      return 24;
+      return 23;
     case 2:
-      return 20;
+      return 19;
     case 3:
-      return 18;
+      return 17;
     default:
-      return 14;
+      return 13;
   }
 }

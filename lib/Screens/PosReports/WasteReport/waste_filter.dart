@@ -7,6 +7,7 @@ import '../../../Widgets/custom_snak_bar.dart';
 import '../../../Widgets/loading.dart';
 import '../../../Widgets/page_title.dart';
 import '../../../Widgets/reusable_btn.dart';
+import '../../../Widgets/reusable_radio_btns.dart';
 import '../../../Widgets/reusable_text_field.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
@@ -62,46 +63,24 @@ class _WasteDetailsFilterState extends State<WasteDetailsFilter> {
               // gapH32,
               // const AddPhotoCircle(),
               gapH32,
-              Row(
-                children: [
-                  SizedBox(
-                    width: radioBtnWidth,
-                    child: ListTile(
-                      title: Text(
-                        'date'.tr,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      leading: Radio(
-                        value: 1,
-                        groupValue: selectedFilterOption,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedFilterOption = value!;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: menuWidth,
-                    child: ListTile(
-                      title: Text(
-                        'session_number'.tr,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      leading: Radio(
-                        value: 2,
-                        groupValue: selectedFilterOption,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedFilterOption = value!;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-
-                ],
+              ReusableRadioBtns(
+                isRow: true,
+                groupVal: selectedFilterOption,
+                title1: 'date'.tr,
+                title2: 'sessions_numbers'.tr,
+                func: (value) {
+                  setState(() {
+                    selectedFilterOption = value!;
+                  });
+                },
+                width1:
+                !homeController.isMobile.value
+                    ? radioBtnWidth
+                    : MediaQuery.of(context).size.width,
+                width2:
+                !homeController.isMobile.value
+                    ? menuWidth
+                    : MediaQuery.of(context).size.width,
               ),
               gapH16,
               selectedFilterOption == 1?

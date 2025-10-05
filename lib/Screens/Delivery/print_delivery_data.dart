@@ -19,6 +19,7 @@ class PrintDeliveryData extends StatefulWidget {
     super.key,
     required this.deliveryNumber,
 
+    required this.salesPerson,
     required this.creationDate,
     required this.expectedDate,
     required this.receivedUser,
@@ -31,6 +32,8 @@ class PrintDeliveryData extends StatefulWidget {
   });
 
   final String deliveryNumber;
+
+  final String salesPerson;
   final String creationDate;
   final String expectedDate;
   final String receivedUser;
@@ -251,10 +254,11 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
     final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
     double width = MediaQuery.of(context).size.width;
     var gapW20 = pw.SizedBox(width: 20);
+    var gapW16 = pw.SizedBox(width: 16);
     var gapW180 = pw.SizedBox(width: 180);
     var gapH4 = pw.SizedBox(height: 4);
     // var gapH2 = pw.SizedBox(height: 2);
-    var gapH6 = pw.SizedBox(height: 6);
+
     final font = await rootBundle.load('assets/fonts/Tajawal-Medium.ttf');
     final arabicFont = pw.Font.ttf(font);
     final italicfont = await rootBundle.load('assets/fonts/Roboto-Italic.ttf');
@@ -297,7 +301,7 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
         child: pw.Center(
           child: pw.Text(
             text,
-            style: pw.TextStyle(fontSize: 11, font: arabicFont),
+            style: pw.TextStyle(fontSize: 9.sp, font: arabicFont),
           ),
         ),
       );
@@ -565,7 +569,8 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
             image,
             fit: pw.BoxFit.contain,
             // width: 50,
-            height: 150,
+            height: 120,
+            // height: 150,
           ),
         ),
       );
@@ -855,9 +860,10 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                     color: PdfColors.black,
                                   ),
                                 ),
-                                gapH4,
 
-                                gapH4,
+                                // gapH4,
+
+                                // gapH4,
                                 // primaryCurrency != widget.deliveryCurrency
                                 //     ? pw.Text(
                                 //       '${'$primaryCurrency/${widget.deliveryCurrency} rate'.tr}:',
@@ -870,7 +876,25 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                 //     : pw.SizedBox(),
                               ],
                             ),
-                            gapW20,
+                            // gapW20,
+                            gapW16,
+                            pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                reusableText(widget.deliveryNumber),
+                                gapH4,
+                                reusableText(
+                                  widget.salesPerson.isEmpty
+                                      ? '---'
+                                      : widget.salesPerson,
+                                ),
+                                gapH4,
+                                reusableText(widget.creationDate),
+                                // gapH5,
+                                // reusableText(widget.salesOrderCurrency),
+                                // gapH5,
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -936,7 +960,8 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                         // endIndent: 250
                       ),
                       pw.ListView.builder(
-                        padding: const pw.EdgeInsets.symmetric(vertical: 10),
+                        padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                        // padding: const pw.EdgeInsets.symmetric(vertical: 10),
                         itemCount: widget.itemsInfoPrint.length,
                         itemBuilder: (context, index) {
                           final item = widget.itemsInfoPrint[index];
@@ -988,7 +1013,8 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                           ? 1500.w
                           : 1000.w,
                   // width: width * 0.365,
-                  height: 300,
+                  height: 150.h,
+                  // height: 300,
                   decoration: const pw.BoxDecoration(
                     color: PdfColors.white,
                     borderRadius: pw.BorderRadius.all(pw.Radius.circular(9)),
@@ -1054,119 +1080,405 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                       //////////////////////////////////////////////////////////////
 
                       // footer
-                      pw.Padding(
-                        padding: pw.EdgeInsets.fromLTRB(0, 10, 0, 0),
-                        child: pw.Column(
-                          crossAxisAlignment: pw.CrossAxisAlignment.end,
-                          children: [
-                            //image logo
-                            pw.Row(
-                              children: [
-                                pw.SizedBox(
-                                  width: width * 0.15,
-                                  child: pw.Row(
-                                    mainAxisAlignment:
-                                        pw.MainAxisAlignment.start,
-                                    children: [
-                                      pw.Column(
-                                        crossAxisAlignment:
-                                            pw.CrossAxisAlignment.start,
-                                        children: <pw.Widget>[
-                                          pw.Container(
-                                            width: 180,
-                                            height: 70,
-                                            child:
-                                            // pw.Text("image"),
-                                            pw.Image(image), //to be use again
-                                            // child: pw.Image(
-                                            //   pw.MemoryImage(
-                                            //     (deliveryController.logoBytes).buffer.asUint8List(),
-                                            //   ),
-                                            //   fit:
-                                            //       pw
-                                            //           .BoxFit
-                                            //           .contain, // Display the image at its original size
-                                            // ),
-                                            // alignment: pw.Alignment.topLeft, // Align the image to the top-left (optional, but recommended)
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                pw.SizedBox(
-                                  width: width * 0.15,
-                                  child: pw.Row(
-                                    mainAxisAlignment:
-                                        pw.MainAxisAlignment.start,
-                                    children: [
-                                      pw.Column(
-                                        crossAxisAlignment:
-                                            pw.CrossAxisAlignment.start,
-                                        children: [
-                                          gapH4,
-                                          reusableText(''),
-                                          gapH4,
-                                          reusableText(''),
-                                        ],
-                                      ),
-                                      gapW20,
-                                    ],
-                                  ),
-                                ),
-                                pw.SizedBox(
-                                  width: width * 0.15,
-                                  child: pw.Row(
-                                    mainAxisAlignment:
-                                        pw.MainAxisAlignment.start,
-                                    children: [
-                                      pw.Column(
-                                        crossAxisAlignment:
-                                            pw.CrossAxisAlignment.start,
-                                        children: [
-                                          gapH4,
-                                          reusableText(''),
-                                          gapH4,
-                                          reusableText(''),
-                                        ],
-                                      ),
-                                      gapW20,
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                      // pw.Padding(
+                      //   padding: pw.EdgeInsets.fromLTRB(0, 10, 0, 0),
+                      //   child: pw.Column(
+                      //     crossAxisAlignment: pw.CrossAxisAlignment.end,
+                      //     children: [
+                      //       //image logo
+                      //       pw.Row(
+                      //         children: [
+                      //           pw.SizedBox(
+                      //             width: width * 0.15,
+                      //             child: pw.Row(
+                      //               mainAxisAlignment:
+                      //                   pw.MainAxisAlignment.start,
+                      //               children: [
+                      //                 pw.Column(
+                      //                   crossAxisAlignment:
+                      //                       pw.CrossAxisAlignment.start,
+                      //                   children: <pw.Widget>[
+                      //                     pw.Container(
+                      //                       width: 180,
+                      //                       height: 70,
+                      //                       child:
+                      //                       // pw.Text("image"),
+                      //                       pw.Image(image), //to be use again
+                      //                       // child: pw.Image(
+                      //                       //   pw.MemoryImage(
+                      //                       //     (deliveryController.logoBytes).buffer.asUint8List(),
+                      //                       //   ),
+                      //                       //   fit:
+                      //                       //       pw
+                      //                       //           .BoxFit
+                      //                       //           .contain, // Display the image at its original size
+                      //                       // ),
+                      //                       // alignment: pw.Alignment.topLeft, // Align the image to the top-left (optional, but recommended)
+                      //                     ),
+                      //                   ],
+                      //                 ),
+                      //               ],
+                      //             ),
+                      //           ),
+                      //           pw.SizedBox(
+                      //             width: width * 0.15,
+                      //             child: pw.Row(
+                      //               mainAxisAlignment:
+                      //                   pw.MainAxisAlignment.start,
+                      //               children: [
+                      //                 pw.Column(
+                      //                   crossAxisAlignment:
+                      //                       pw.CrossAxisAlignment.start,
+                      //                   children: [
+                      //                     gapH4,
+                      //                     reusableText(''),
+                      //                     gapH4,
+                      //                     reusableText(''),
+                      //                   ],
+                      //                 ),
+                      //                 gapW20,
+                      //               ],
+                      //             ),
+                      //           ),
+                      //           pw.SizedBox(
+                      //             width: width * 0.15,
+                      //             child: pw.Row(
+                      //               mainAxisAlignment:
+                      //                   pw.MainAxisAlignment.start,
+                      //               children: [
+                      //                 pw.Column(
+                      //                   crossAxisAlignment:
+                      //                       pw.CrossAxisAlignment.start,
+                      //                   children: [
+                      //                     gapH4,
+                      //                     reusableText(''),
+                      //                     gapH4,
+                      //                     reusableText(''),
+                      //                   ],
+                      //                 ),
+                      //                 gapW20,
+                      //               ],
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       ),
 
-                            pw.Padding(
-                              padding: pw.EdgeInsets.fromLTRB(0, 4, 0, 0),
-                              child: pw.SizedBox(
-                                // width: width * 0.15,
-                                child: pw.Row(
-                                  mainAxisAlignment: pw.MainAxisAlignment.start,
-                                  children: [
-                                    // if( '${widget.termsAndConditions}' != '')
-                                    reusableText(fullCompanyName),
+                      //       pw.Padding(
+                      //         padding: pw.EdgeInsets.fromLTRB(0, 4, 0, 0),
+                      //         child: pw.SizedBox(
+                      //           // width: width * 0.15,
+                      //           child: pw.Row(
+                      //             mainAxisAlignment: pw.MainAxisAlignment.start,
+                      //             children: [
+                      //               // if( '${widget.termsAndConditions}' != '')
+                      //               reusableText(fullCompanyName),
 
-                                    // if( '${widget.termsAndConditions}' != '')
-                                    reusableText('terms_and_conditions'.tr),
-                                  ],
-                                ),
-                              ),
-                            ),
+                      //               // if( '${widget.termsAndConditions}' != '')
+                      //               reusableText('terms_and_conditions'.tr),
+                      //             ],
+                      //           ),
+                      //         ),
+                      //       ),
 
-                            // if( '${widget.termsAndConditions}' != '')
-                            pw.Divider(
-                              height: 5,
-                              color: PdfColors.black,
-                              // endIndent: 250
-                            ),
-                            gapH6,
+                      //       // if( '${widget.termsAndConditions}' != '')
+                      //       pw.Divider(
+                      //         height: 5,
+                      //         color: PdfColors.black,
+                      //         // endIndent: 250
+                      //       ),
+                      //       gapH6,
 
-                            // For local payments,
-                            pw.Padding(
-                              padding: pw.EdgeInsets.fromLTRB(0, 20, 0, 0),
-                              child: pw.SizedBox(
-                                // width: width * 0.15,
+                      //       // For local payments,
+                      //       pw.Padding(
+                      //         padding: pw.EdgeInsets.fromLTRB(0, 20, 0, 0),
+                      //         child: pw.SizedBox(
+                      //           // width: width * 0.15,
+                      //           child: pw.Row(
+                      //             mainAxisAlignment: pw.MainAxisAlignment.start,
+                      //             children: [
+                      //               pw.Column(
+                      //                 crossAxisAlignment:
+                      //                     pw.CrossAxisAlignment.start,
+                      //                 children: [
+                      //                   gapH4,
+
+                      //                   // reusableText('.For local payments,',),
+                      //                   if (companyLocalPayments != '')
+                      //                     reusableText(
+                      //                       '.For local payments, $companyLocalPayments',
+                      //                     ),
+
+                      //                   gapH4,
+                      //                   companyBankInfo != ''
+                      //                       ? reusableText(' $companyBankInfo')
+                      //                       : reusableText(''),
+                      //                   // reusableText(
+                      //                   //   '${'Bank name'.tr}: ${widget.senderUser}',
+                      //                   // ),
+                      //                   // gapH4,
+                      //                   // reusableText(
+                      //                   //   '${'Account Name'.tr}: ${widget.senderUser}',
+                      //                   // ),
+                      //                   // gapH4,
+                      //                   // reusableText(
+                      //                   //   '${'Account Number'.tr}: ${widget.deliveryNumber}',
+                      //                   // ),
+                      //                   // gapH4,
+                      //                 ],
+                      //               ),
+                      //             ],
+                      //           ),
+                      //         ),
+                      //       ),
+
+                      //       // international payments
+                      //       // pw.Padding(
+                      //       //   padding: pw.EdgeInsets.fromLTRB(0, 30, 0, 0),
+                      //       //   child: pw.SizedBox(
+                      //       //     // width: width * 0.15,
+                      //       //     child: pw.Row(
+                      //       //       mainAxisAlignment: pw.MainAxisAlignment.start,
+                      //       //       children: [
+                      //       //         pw.Column(
+                      //       //           crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      //       //           children: [
+                      //       //             gapH4,
+                      //       //             reusableText(
+                      //       //               '.For international payments via bank transfer, kindly refer to our account details mentioned',
+                      //       //             ),
+                      //       //             gapH4,
+                      //       //             reusableText(
+                      //       //               '${'Bank name'.tr}: ${widget.senderUser}',
+                      //       //             ),
+                      //       //             gapH4,
+                      //       //             reusableText(
+                      //       //               '${'Address'.tr}: ${widget.senderUser}',
+                      //       //             ),
+                      //       //             gapH4,
+                      //       //             reusableText(
+                      //       //               '${'ABA Number'.tr}: ${widget.deliveryNumber}',
+                      //       //             ),
+                      //       //             gapH4,
+                      //       //             reusableText(
+                      //       //               '${'SWIFT Address'.tr}: ${widget.deliveryNumber}',
+                      //       //             ),
+                      //       //             gapH4,
+                      //       //             reusableText(
+                      //       //               '${'Account Name'.tr}: ${widget.deliveryNumber}',
+                      //       //             ),
+                      //       //             gapH4,
+                      //       //             reusableText(
+                      //       //               '${'Account Number'.tr}: ${widget.deliveryNumber}',
+                      //       //             ),
+                      //       //             gapH4,
+                      //       //           ],
+                      //       //         ),
+                      //       //       ],
+                      //       //     ),
+                      //       //   ),
+                      //       // ),
+                      //       //
+                      //       // // delivery
+                      //       // pw.Padding(
+                      //       //   padding: pw.EdgeInsets.fromLTRB(0, 20, 0, 0),
+                      //       //   child: pw.SizedBox(
+                      //       //     // width: width * 0.15,
+                      //       //     child: pw.Row(
+                      //       //       mainAxisAlignment: pw.MainAxisAlignment.start,
+                      //       //       children: [
+                      //       //         reusableText(
+                      //       //           '  delivery terms and conditions',
+                      //       //         ),
+                      //       //       ],
+                      //       //     ),
+                      //       //   ),
+                      //       // ),
+                      //       //
+                      //       // pw.Divider(
+                      //       //   color: PdfColors.black,
+                      //       //   // endIndent: 250
+                      //       // ),
+                      //       // delivery
+                      //       // pw.Padding(
+                      //       //   padding: pw.EdgeInsets.fromLTRB(0, 0, 0, 40),
+                      //       //   child: pw.SizedBox(
+                      //       //     // width: width * 0.15,
+                      //       //     child: pw.Row(
+                      //       //       mainAxisAlignment: pw.MainAxisAlignment.start,
+                      //       //       children: [
+                      //       //         pw.Column(
+                      //       //           crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      //       //           children: [
+                      //       //             gapH4,
+                      //       //             reusableText(
+                      //       //               '${'.Delivery time for items available in stock'.tr}: ${widget.deliveryNumber}',
+                      //       //             ),
+                      //       //             gapH4,
+                      //       //             reusableText(
+                      //       //               '${'.Delivery time for items not available in stock'.tr}: ${widget.deliveryNumber}',
+                      //       //             ),
+                      //       //             gapH4,
+                      //       //             reusableText('${'.Additional Note'.tr}:'),
+                      //       //             gapH4,
+                      //       //             reusableText(' ${widget.deliveryNumber}'),
+                      //       //           ],
+                      //       //         ),
+                      //       //       ],
+                      //       //     ),
+                      //       //   ),
+                      //       // ),
+                      //       //signature
+                      //       pw.Padding(
+                      //         padding: pw.EdgeInsets.fromLTRB(0, 200, 0, 0),
+                      //         child: pw.Container(
+                      //           alignment: pw.Alignment.centerRight,
+                      //           margin: const pw.EdgeInsets.only(bottom: 0.5),
+                      //           child: pw.Column(
+                      //             children: [
+                      //               pw.Divider(
+                      //                 height: 5,
+                      //                 color: PdfColors.black,
+                      //               ),
+                      //               pw.Row(
+                      //                 crossAxisAlignment:
+                      //                     pw.CrossAxisAlignment.end,
+                      //                 children: [
+                      //                   pw.SizedBox(
+                      //                     width: width * 0.25,
+                      //                     child: pw.Row(
+                      //                       mainAxisAlignment:
+                      //                           pw.MainAxisAlignment.start,
+                      //                       children: [
+                      //                         pw.Column(
+                      //                           crossAxisAlignment:
+                      //                               pw.CrossAxisAlignment.start,
+                      //                           children: [
+                      //                             reusableText(
+                      //                               '(${'the_client'.tr})',
+                      //                             ),
+                      //                           ],
+                      //                         ),
+                      //                       ],
+                      //                     ),
+                      //                   ),
+
+                      //                   //date
+                      //                   pw.SizedBox(
+                      //                     width: width * 0.1,
+                      //                     child: pw.Row(
+                      //                       mainAxisAlignment:
+                      //                           pw.MainAxisAlignment.start,
+                      //                       children: [
+                      //                         pw.Column(
+                      //                           crossAxisAlignment:
+                      //                               pw.CrossAxisAlignment.start,
+                      //                           children: [
+                      //                             reusableText(
+                      //                               '(${'the_supplier'.tr})',
+                      //                             ),
+                      //                           ],
+                      //                         ),
+                      //                       ],
+                      //                     ),
+                      //                   ),
+                      //                 ],
+                      //               ),
+
+                      //               pw.Row(
+                      //                 crossAxisAlignment:
+                      //                     pw.CrossAxisAlignment.end,
+                      //                 children: [
+                      //                   buildDividersRow(1000),
+                      //                   gapW180,
+                      //                   buildDividersRow(950),
+                      //                 ],
+                      //               ),
+
+                      //               pw.Row(
+                      //                 crossAxisAlignment:
+                      //                     pw.CrossAxisAlignment.end,
+                      //                 children: [
+                      //                   pw.SizedBox(
+                      //                     width: width * 0.25,
+                      //                     child: pw.Row(
+                      //                       mainAxisAlignment:
+                      //                           pw.MainAxisAlignment.start,
+                      //                       children: [
+                      //                         pw.Column(
+                      //                           crossAxisAlignment:
+                      //                               pw.CrossAxisAlignment.start,
+                      //                           children: [
+                      //                             reusableText(
+                      //                               widget.clientName,
+                      //                             ),
+                      //                             gapH4,
+                      //                             reusableText(
+                      //                               '${'signature'.tr}:',
+                      //                             ),
+                      //                           ],
+                      //                         ),
+                      //                       ],
+                      //                     ),
+                      //                   ),
+
+                      //                   pw.SizedBox(
+                      //                     width: width * 0.1,
+                      //                     child: pw.Row(
+                      //                       mainAxisAlignment:
+                      //                           pw.MainAxisAlignment.start,
+                      //                       children: [
+                      //                         pw.Column(
+                      //                           crossAxisAlignment:
+                      //                               pw.CrossAxisAlignment.start,
+                      //                           children: [
+                      //                             reusableText(fullCompanyName),
+                      //                             gapH4,
+                      //                             reusableText(
+                      //                               '${'signature'.tr}:',
+                      //                             ),
+                      //                           ],
+                      //                         ),
+                      //                       ],
+                      //                     ),
+                      //                   ),
+                      //                 ],
+                      //               ),
+                      //             ],
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ];
+        },
+        footer: (context) {
+          return pw.Container(
+            alignment: pw.Alignment.center,
+            margin: const pw.EdgeInsets.only(top: 20),
+            child: pw.Padding(
+              padding: pw.EdgeInsets.fromLTRB(0, 0, 0, 0),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
+                children: [
+                  pw.Padding(
+                    padding: pw.EdgeInsets.fromLTRB(0, 50, 0, 0),
+                    child: pw.Container(
+                      alignment: pw.Alignment.centerRight,
+                      margin: const pw.EdgeInsets.only(bottom: 0.5),
+                      child: pw.Column(
+                        children: [
+                          pw.Divider(height: 5, color: PdfColors.black),
+                          pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.end,
+                            children: [
+                              pw.SizedBox(
+                                width: width * 0.25,
                                 child: pw.Row(
                                   mainAxisAlignment: pw.MainAxisAlignment.start,
                                   children: [
@@ -1174,262 +1486,89 @@ class _PrintDeliveryDataState extends State<PrintDeliveryData> {
                                       crossAxisAlignment:
                                           pw.CrossAxisAlignment.start,
                                       children: [
-                                        gapH4,
-
-                                        // reusableText('.For local payments,',),
-                                        if (companyLocalPayments != '')
-                                          reusableText(
-                                            '.For local payments, $companyLocalPayments',
-                                          ),
-
-                                        gapH4,
-                                        companyBankInfo != ''
-                                            ? reusableText(' $companyBankInfo')
-                                            : reusableText(''),
-                                        // reusableText(
-                                        //   '${'Bank name'.tr}: ${widget.senderUser}',
-                                        // ),
-                                        // gapH4,
-                                        // reusableText(
-                                        //   '${'Account Name'.tr}: ${widget.senderUser}',
-                                        // ),
-                                        // gapH4,
-                                        // reusableText(
-                                        //   '${'Account Number'.tr}: ${widget.deliveryNumber}',
-                                        // ),
-                                        // gapH4,
+                                        reusableText('(${'the_client'.tr})'),
                                       ],
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
 
-                            // international payments
-                            // pw.Padding(
-                            //   padding: pw.EdgeInsets.fromLTRB(0, 30, 0, 0),
-                            //   child: pw.SizedBox(
-                            //     // width: width * 0.15,
-                            //     child: pw.Row(
-                            //       mainAxisAlignment: pw.MainAxisAlignment.start,
-                            //       children: [
-                            //         pw.Column(
-                            //           crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            //           children: [
-                            //             gapH4,
-                            //             reusableText(
-                            //               '.For international payments via bank transfer, kindly refer to our account details mentioned',
-                            //             ),
-                            //             gapH4,
-                            //             reusableText(
-                            //               '${'Bank name'.tr}: ${widget.senderUser}',
-                            //             ),
-                            //             gapH4,
-                            //             reusableText(
-                            //               '${'Address'.tr}: ${widget.senderUser}',
-                            //             ),
-                            //             gapH4,
-                            //             reusableText(
-                            //               '${'ABA Number'.tr}: ${widget.deliveryNumber}',
-                            //             ),
-                            //             gapH4,
-                            //             reusableText(
-                            //               '${'SWIFT Address'.tr}: ${widget.deliveryNumber}',
-                            //             ),
-                            //             gapH4,
-                            //             reusableText(
-                            //               '${'Account Name'.tr}: ${widget.deliveryNumber}',
-                            //             ),
-                            //             gapH4,
-                            //             reusableText(
-                            //               '${'Account Number'.tr}: ${widget.deliveryNumber}',
-                            //             ),
-                            //             gapH4,
-                            //           ],
-                            //         ),
-                            //       ],
-                            //     ),
-                            //   ),
-                            // ),
-                            //
-                            // // delivery
-                            // pw.Padding(
-                            //   padding: pw.EdgeInsets.fromLTRB(0, 20, 0, 0),
-                            //   child: pw.SizedBox(
-                            //     // width: width * 0.15,
-                            //     child: pw.Row(
-                            //       mainAxisAlignment: pw.MainAxisAlignment.start,
-                            //       children: [
-                            //         reusableText(
-                            //           '  delivery terms and conditions',
-                            //         ),
-                            //       ],
-                            //     ),
-                            //   ),
-                            // ),
-                            //
-                            // pw.Divider(
-                            //   color: PdfColors.black,
-                            //   // endIndent: 250
-                            // ),
-                            // delivery
-                            // pw.Padding(
-                            //   padding: pw.EdgeInsets.fromLTRB(0, 0, 0, 40),
-                            //   child: pw.SizedBox(
-                            //     // width: width * 0.15,
-                            //     child: pw.Row(
-                            //       mainAxisAlignment: pw.MainAxisAlignment.start,
-                            //       children: [
-                            //         pw.Column(
-                            //           crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            //           children: [
-                            //             gapH4,
-                            //             reusableText(
-                            //               '${'.Delivery time for items available in stock'.tr}: ${widget.deliveryNumber}',
-                            //             ),
-                            //             gapH4,
-                            //             reusableText(
-                            //               '${'.Delivery time for items not available in stock'.tr}: ${widget.deliveryNumber}',
-                            //             ),
-                            //             gapH4,
-                            //             reusableText('${'.Additional Note'.tr}:'),
-                            //             gapH4,
-                            //             reusableText(' ${widget.deliveryNumber}'),
-                            //           ],
-                            //         ),
-                            //       ],
-                            //     ),
-                            //   ),
-                            // ),
-                            //signature
-                            pw.Padding(
-                              padding: pw.EdgeInsets.fromLTRB(0, 200, 0, 0),
-                              child: pw.Container(
-                                alignment: pw.Alignment.centerRight,
-                                margin: const pw.EdgeInsets.only(bottom: 0.5),
-                                child: pw.Column(
+                              //date
+                              pw.SizedBox(
+                                width: width * 0.1,
+                                child: pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.start,
                                   children: [
-                                    pw.Divider(
-                                      height: 5,
-                                      color: PdfColors.black,
-                                    ),
-                                    pw.Row(
+                                    pw.Column(
                                       crossAxisAlignment:
-                                          pw.CrossAxisAlignment.end,
+                                          pw.CrossAxisAlignment.start,
                                       children: [
-                                        pw.SizedBox(
-                                          width: width * 0.25,
-                                          child: pw.Row(
-                                            mainAxisAlignment:
-                                                pw.MainAxisAlignment.start,
-                                            children: [
-                                              pw.Column(
-                                                crossAxisAlignment:
-                                                    pw.CrossAxisAlignment.start,
-                                                children: [
-                                                  reusableText(
-                                                    '(${'the_client'.tr})',
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-
-                                        //date
-                                        pw.SizedBox(
-                                          width: width * 0.1,
-                                          child: pw.Row(
-                                            mainAxisAlignment:
-                                                pw.MainAxisAlignment.start,
-                                            children: [
-                                              pw.Column(
-                                                crossAxisAlignment:
-                                                    pw.CrossAxisAlignment.start,
-                                                children: [
-                                                  reusableText(
-                                                    '(${'the_supplier'.tr})',
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    pw.Row(
-                                      crossAxisAlignment:
-                                          pw.CrossAxisAlignment.end,
-                                      children: [
-                                        buildDividersRow(1000),
-                                        gapW180,
-                                        buildDividersRow(950),
-                                      ],
-                                    ),
-
-                                    pw.Row(
-                                      crossAxisAlignment:
-                                          pw.CrossAxisAlignment.end,
-                                      children: [
-                                        pw.SizedBox(
-                                          width: width * 0.25,
-                                          child: pw.Row(
-                                            mainAxisAlignment:
-                                                pw.MainAxisAlignment.start,
-                                            children: [
-                                              pw.Column(
-                                                crossAxisAlignment:
-                                                    pw.CrossAxisAlignment.start,
-                                                children: [
-                                                  reusableText(
-                                                    widget.clientName,
-                                                  ),
-                                                  gapH4,
-                                                  reusableText(
-                                                    '${'signature'.tr}:',
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-
-                                        pw.SizedBox(
-                                          width: width * 0.1,
-                                          child: pw.Row(
-                                            mainAxisAlignment:
-                                                pw.MainAxisAlignment.start,
-                                            children: [
-                                              pw.Column(
-                                                crossAxisAlignment:
-                                                    pw.CrossAxisAlignment.start,
-                                                children: [
-                                                  reusableText(fullCompanyName),
-                                                  gapH4,
-                                                  reusableText(
-                                                    '${'signature'.tr}:',
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                        reusableText('(${'the_supplier'.tr})'),
                                       ],
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+
+                          pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.end,
+                            children: [
+                              buildDividersRow(1000),
+                              gapW180,
+                              buildDividersRow(950),
+                            ],
+                          ),
+
+                          pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.end,
+                            children: [
+                              pw.SizedBox(
+                                width: width * 0.25,
+                                child: pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.start,
+                                  children: [
+                                    pw.Column(
+                                      crossAxisAlignment:
+                                          pw.CrossAxisAlignment.start,
+                                      children: [
+                                        reusableText(widget.clientName),
+                                        gapH4,
+                                        reusableText('${'signature'.tr}:'),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              pw.SizedBox(
+                                width: width * 0.1,
+                                child: pw.Row(
+                                  mainAxisAlignment: pw.MainAxisAlignment.start,
+                                  children: [
+                                    pw.Column(
+                                      crossAxisAlignment:
+                                          pw.CrossAxisAlignment.start,
+                                      children: [
+                                        reusableText(fullCompanyName),
+                                        gapH4,
+                                        reusableText('${'signature'.tr}:'),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ];
+          );
         },
       ),
     );

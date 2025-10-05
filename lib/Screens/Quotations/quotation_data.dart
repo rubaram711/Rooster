@@ -336,6 +336,9 @@ class _QuotationDataState extends State<QuotationData> {
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
                                   return PrintQuotationData(
+                                 termsAndConditions:   quotationController
+                                     .selectedQuotationData['termsAndCondition']!=null ?'${quotationController
+                                     .selectedQuotationData['termsAndCondition']['terms_and_conditions']}' : '',
                                     header:
                                         quotationController
                                             .selectedQuotationData['companyHeader'],
@@ -455,7 +458,7 @@ class _QuotationDataState extends State<QuotationData> {
                                         quotationController
                                             .selectedQuotationData['client']['name'] ??
                                         '',
-                                    termsAndConditions:
+                                    termsAndConditionsNote:
                                         quotationController
                                             .selectedQuotationData['termsAndConditions'] ??
                                         '',

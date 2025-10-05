@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
 import '../../Backend/get_cities_of_a_specified_country.dart';
 import '../../Backend/get_countries.dart';
+import '../../Widgets/reusable_radio_btns.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
@@ -42,7 +43,7 @@ class _SuppliersState extends State<Suppliers> {
       selectedCity = '';
   String selectedPhoneCode = '', selectedMobileCode = '';
 
-  int selectedClientType = 1;
+
   int selectedTabIndex = 0;
   List tabsList = ['Settings', 'Accounting'];
 
@@ -158,47 +159,18 @@ class _SuppliersState extends State<Suppliers> {
                   ),
 
                   gapH20,
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.15,
-                        child: ListTile(
-                          title: const Text(
-                            'Individual',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            activeColor: Primary.primary,
-                            value: 1,
-                            groupValue: selectedSupplierType,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedSupplierType = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.15,
-                        child: ListTile(
-                          title: const Text(
-                            'Company',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            activeColor: Primary.primary,
-                            value: 2,
-                            groupValue: selectedSupplierType,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedSupplierType = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
+                  ReusableRadioBtns(
+                    isRow: true,
+                    groupVal: selectedSupplierType,
+                    title1: 'individual'.tr,
+                    title2: 'company'.tr,
+                    func: (value) {
+                      setState(() {
+                        selectedSupplierType = value!;
+                      });
+                    },
+                    width1: MediaQuery.of(context).size.width * 0.15,
+                    width2: MediaQuery.of(context).size.width * 0.15,
                   ),
 
                   gapH16,
@@ -539,7 +511,7 @@ class _SuppliersState extends State<Suppliers> {
                         // textFieldWidth:
                         //     MediaQuery.of(context).size.width * 0.15,
                         validationFunc: (String val) {
-                          if (selectedClientType == 2 && val.isEmpty) {
+                          if (selectedSupplierType == 2 && val.isEmpty) {
                             return 'required field';
                           }
                           return null;

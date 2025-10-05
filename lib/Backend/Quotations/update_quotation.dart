@@ -40,6 +40,7 @@ Future updateQuotation(
     String deliveryTerms,
     String chance,
     String companyHeaderId,
+    String termsAdnConditionId,
     ) async {
   String token = await getAccessTokenFromPref();
   var p={
@@ -73,8 +74,9 @@ Future updateQuotation(
     "code": code,
     "status": status,
     "cancellationReason":cancellationReason,
-    "deliveryTerms":deliveryTerms,
+    "deliveryTermId":deliveryTerms,
     "chance":chance,
+    "termsAdnConditionId":termsAdnConditionId,
   };
   if(companyHeaderId.isNotEmpty){
     p.addAll({"companyHeaderId":companyHeaderId,});

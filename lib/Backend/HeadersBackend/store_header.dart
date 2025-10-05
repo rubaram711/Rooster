@@ -18,6 +18,7 @@ Future storeHeader({
   required  String vat,
   required  String companySubjectToVat,
   required  String headerName,
+  required  String quotationCurrency,
 }
     ) async {
   String token = await getAccessTokenFromPref();
@@ -41,6 +42,9 @@ Future storeHeader({
   }
   if(trn.isNotEmpty){
     p.addAll({'trn':trn,});
+  }
+  if(quotationCurrency.isNotEmpty){
+    p.addAll({'defaultQuotationCurrencyId':quotationCurrency,});
   }
   FormData formData = FormData.fromMap(p);
 if(imageFile!=null) {

@@ -151,10 +151,6 @@ class _CreateNewReturnToSupplierState extends State<CreateNewReturnToSupplier> {
                     homeCont.isMenuOpened
                         ? MediaQuery.of(context).size.width * 0.15
                         : MediaQuery.of(context).size.width * 0.18;
-                double itemTable =
-                    homeCont.isMenuOpened
-                        ? MediaQuery.of(context).size.width * 0.07
-                        : MediaQuery.of(context).size.width * 0.1;
                 return Column(
                   children: [
                     const Row(

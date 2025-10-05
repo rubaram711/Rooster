@@ -45,7 +45,7 @@ Future updateSalesInvoice(
     "reference": manualReference,
     "clientId": clientId,
     "valueDate": validity,
-    "paymentTerm": null,
+    "paymentTerm": paymentTerm,
     // "contactDetails": contactdetails,
     "deliveredFromWarehouseId": deliveredFromWarehouse,
     "pricelistId": priceList,

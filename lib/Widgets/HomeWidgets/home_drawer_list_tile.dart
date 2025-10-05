@@ -8,7 +8,6 @@ import '../../Controllers/products_controller.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Screens/Combo/combo.dart';
 import '../../Screens/Products/CreateProductDialog/create_product_dialog.dart';
-import '../../Screens/garage/add_attribute.dart';
 import '../../const/colors.dart';
 // import 'dart:html' as html;
 
@@ -479,6 +478,7 @@ class _EntryItemState extends State<EntryItem> {
           }
           else if(['technician','brand','model','color'].contains(root.title)){
             garageController.setSelectedAttributeText(root.title);
+            garageController.getAllAttributesFromBack();
             homeController.selectedTab.value='attribute_table';
               // showDialog<String>(
               //     context: context,
@@ -1062,6 +1062,9 @@ class _SideBarBasicState extends State<SideBarBasic>
   }
 
   addGarage() async {
+    if(data.last.title=='garage'){
+      data.removeLast();
+    }
     var isItGarage = await getIsItGarageFromPref();
     if (isItGarage == '1') {
       setState(() {
@@ -1080,6 +1083,7 @@ class _SideBarBasicState extends State<SideBarBasic>
       }
     }
   }
+
 
   @override
   void initState() {

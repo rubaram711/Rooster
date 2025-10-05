@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Backend/Quotations/send_by_email.dart';
 import 'package:rooster_app/Backend/Quotations/update_quotation.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
+import 'package:rooster_app/Controllers/payment_terms_controller.dart';
 import 'package:rooster_app/Controllers/pending_docs_review_controller.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
@@ -21,12 +22,18 @@ import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
 import 'package:rooster_app/Widgets/loading.dart';
 import 'package:rooster_app/Widgets/reusable_add_card.dart';
 import 'package:rooster_app/utils/image_picker_helper.dart';
+import '../../Controllers/delivery_terms_controller.dart';
 import '../../Controllers/home_controller.dart';
+import '../../Controllers/terms_and_conditions_controller.dart';
+import '../../Locale_Memory/save_header_2_locally.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
+import '../../Widgets/HomeWidgets/home_app_bar.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/page_title.dart';
+import '../../Widgets/reusable_radio_btns.dart';
+import '../../Widgets/reusable_reference_text_field.dart';
 import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_drop_down_menu.dart';
 import '../../Widgets/reusable_more.dart';
@@ -38,6 +45,8 @@ import '../../const/constants.dart';
 import '../../const/functions.dart';
 import '../../const/urls.dart';
 import '../Combo/combo.dart';
+import '../Configuration/delivery_terms.dart';
+import '../Configuration/payment_terms.dart';
 import 'add_cancelled_reason_dialog.dart';
 import 'create_new_quotation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -70,7 +79,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   TextEditingController validityController = TextEditingController();
   TextEditingController chanceController = TextEditingController();
   TextEditingController inputDateController = TextEditingController();
-  TextEditingController currencyController = TextEditingController();
+  // TextEditingController currencyController = TextEditingController();
   TextEditingController codeController = TextEditingController();
   TextEditingController vatExemptController = TextEditingController();
   TextEditingController vatController = TextEditingController();
@@ -86,6 +95,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   TextEditingController priceListController = TextEditingController();
   TextEditingController deliveryTermsController = TextEditingController();
   TextEditingController cancelledReasonController = TextEditingController();
+  TextEditingController termsAndConditionsMenuController = TextEditingController();
 
   String selectedCurrency = '';
 
@@ -97,6 +107,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   final HomeController homeController = Get.find();
   final QuotationController quotationController = Get.find();
   final PendingDocsReviewController pendingDocsController = Get.find();
+  final PaymentTermsController paymentController = Get.find();
+  final DeliveryTermsController deliveryController = Get.find();
+  final TermsAndConditionsController termsController = Get.find();
 
   String paymentTerm = '',
       priceListSelected = '',
@@ -125,15 +138,16 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     quotationController.selectedCurrencyId =
         widget.info['currency']['id'].toString();
     selectedCurrency = widget.info['currency']['name'] ?? '';
-    currencyController.text = selectedCurrency;
+    quotationController.currencyController.text = selectedCurrency;
     int index = exchangeRatesController.currenciesNamesList.indexOf(
       selectedCurrency,
     );
     quotationController.selectedCurrencyId =
         exchangeRatesController.currenciesIdsList[index];
     quotationController.selectedCurrencyName = selectedCurrency;
-    var vat = await getCompanyVatFromPref();
-    quotationController.setCompanyVat(double.parse(vat));
+    // var vat = await getCompanyVatFromPref();
+    // quotationController.setCompanyVat(double.parse(vat));
+    setVat();
     var companyCurrency = await getCompanyPrimaryCurrencyFromPref();
     quotationController.setCompanyPrimaryCurrency(companyCurrency);
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
@@ -145,9 +159,23 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     );
   }
 
+  setVat() async {
+    if (quotationController.selectedHeaderIndex == 1) {
+      var vat = await getCompanyVatFromPref();
+      quotationController.setCompanyVat(double.parse(vat));
+    } else {
+      var vat = await getCompanyVat2FromPref();
+      quotationController.setCompanyVat(double.parse(vat));
+    }
+  }
   // var isVatZero = false;
   checkVatExempt() async {
-    var companySubjectToVat = await getCompanySubjectToVatFromPref();
+    late String companySubjectToVat;
+    if (quotationController.selectedHeaderIndex == 1) {
+     companySubjectToVat = await getCompanySubjectToVatFromPref();
+    }else{
+      companySubjectToVat = await getCompanySubjectToVat2FromPref();
+    }
     if (companySubjectToVat == '1') {
       vatExemptController.clear();
       quotationController.setIsVatExempted(false, false, false);
@@ -226,13 +254,34 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     quotationController.rowsInListViewInQuotation = {};
     quotationController.orderedKeys = [];
     quotationController.quotationCounter = 0;
+
+    quotationController.selectedHeaderIndex = 1;
+    if (widget.info['companyHeader'] != null) {
+      if ('${widget.info['companyHeader']['id']}' !=
+          '${quotationController.headersList[0]['id']}') {
+        quotationController.selectedHeaderIndex = 2;
+      }
+    }
+
     checkVatExempt();
     getCurrency();
     setProgressVar();
 
     chanceController.text = widget.info['chance'] ?? '';
-    deliveryTermsController.text = widget.info['deliveryTerms'] ?? '';
+    paymentTermsController.text = widget.info['paymentTerm']!=null ?widget.info['paymentTerm']['title'] : '';
+    quotationController.selectedPaymentTermId = widget.info['paymentTerm']!=null ?'${widget.info['paymentTerm']['id']}' : '';
+    deliveryTermsController.text =widget.info['deliveryTerm']!=null ? widget.info['deliveryTerm']['name'] : '';
+    quotationController.selectedDeliveryTermId = widget.info['deliveryTerm']!=null ?'${widget.info['deliveryTerm']['id']}' : '';
+    if (widget.info['termsAndCondition'] != null) {
+      termsAndConditionsMenuController.text =
+      '${widget.info['termsAndCondition']['name'] ?? ''}';
+      quotationController.selectedTermAndConditionId =
+      '${widget.info['termsAndCondition']['id']}';
+    }
+
+
     cancelledReasonController.text = widget.info['cancellationReason'] ?? '';
+
     if (widget.info['cashingMethod'] != null) {
       cashingMethodsController.text =
           '${widget.info['cashingMethod']['title'] ?? ''}';
@@ -240,13 +289,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
           '${widget.info['cashingMethod']['id']}';
     }
 
-    quotationController.selectedHeaderIndex = 0;
-    if (widget.info['companyHeader'] != null) {
-      if ('${widget.info['companyHeader']['id']}' !=
-          '${quotationController.headersList[0]['id']}') {
-        quotationController.selectedHeaderIndex = 1;
-      }
-    }
+
 
     if (widget.info['pricelist'] != null) {
       priceListController.text = '${widget.info['pricelist']['code'] ?? ''}';
@@ -281,7 +324,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     refController.text = widget.info['reference'] ?? '';
     validityController.text = widget.info['validity'] ?? '';
     inputDateController.text = widget.info['inputDate'] ?? '';
-    currencyController.text = widget.info['currency']['name'] ?? '';
+    quotationController.currencyController.text = widget.info['currency']['name'] ?? '';
     // oldTermsAndConditionsString =
     //     widget.info['termsAndConditions'] ?? '[{"insert":"\n"}]';
     // termsAndConditionsController.text =
@@ -405,7 +448,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
         quotationController.rowsInListViewInQuotation.length;
     quotationController.listViewLengthInQuotation =
         quotationController.rowsInListViewInQuotation.length * 60;
-
+    paymentController.getPaymentTermsFromBack();
+    termsController.getTermsAndConditionsFromBack();
+    deliveryController.getDeliveryTermsFromBack();
     super.initState();
   }
 
@@ -647,7 +692,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     selectedCustomerIds,
                                     validityController.text,
                                     inputDateController.text,
-                                    '', //todo paymentTermsController.text,
+                                    quotationCont.selectedPaymentTermId,
                                     quotationCont.selectedPriceListId,
                                     quotationCont
                                         .selectedCurrencyId, //selectedCurrency
@@ -688,16 +733,17 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                         .rowsInListViewInQuotation,
                                     quotationCont.orderedKeys,
                                     cancelledReasonController.text,
-                                    deliveryTermsController.text,
+                                    quotationCont.selectedDeliveryTermId,
                                     chanceController.text,
                                     homeController.companyName == 'CASALAGO' ||
                                             homeController.companyName ==
                                                 'AMAZON'
                                         ? quotationCont
                                             .headersList[quotationCont
-                                                .selectedHeaderIndex]['id']
+                                                .selectedHeaderIndex-1]['id']
                                             .toString()
                                         : '',
+                                    quotationCont.selectedTermAndConditionId
                                   );
                                   if (res['success'] == true) {
                                     setState(() {
@@ -724,7 +770,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                             },
                           ),
                           UnderTitleBtn(
-                            text: 'cancel'.tr,
+                            text: 'lost'.tr,
                             onTap: ()
                             // {
                             //   setState(() {
@@ -825,7 +871,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                 selectedCustomerIds,
                                                 validityController.text,
                                                 inputDateController.text,
-                                                '', //todo paymentTermsController.text,
+                                                quotationCont.selectedPaymentTermId,
                                                 quotationCont
                                                     .selectedPriceListId,
                                                 quotationCont
@@ -883,7 +929,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                     .rowsInListViewInQuotation,
                                                 quotationController.orderedKeys,
                                                 cancelledReason,
-                                                deliveryTermsController.text,
+                                                quotationCont.selectedDeliveryTermId,
                                                 chanceController.text,
                                                 homeController.companyName ==
                                                             'CASALAGO' ||
@@ -892,9 +938,10 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                             'AMAZON'
                                                     ? quotationCont
                                                         .headersList[quotationCont
-                                                            .selectedHeaderIndex]['id']
+                                                            .selectedHeaderIndex-1]['id']
                                                         .toString()
                                                     : '',
+                                                  quotationCont.selectedTermAndConditionId
                                               );
                                               if (res['success'] == true) {
                                                 Get.back();
@@ -1024,26 +1071,42 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 ),
                               ],
                             ),
-                            DialogTextField(
+                            ReusableReferenceTextField(
+                              type: 'quotations',
                               textEditingController: refController,
-                              text: '${'ref'.tr}:',
-                              hint: 'manual_reference'.tr,
                               rowWidth:
                                   screenWidth > 800
                                       ? 250.w
                                       : screenWidth > 560
                                       ? 300.w
                                       : 250.w,
-                              // MediaQuery.of(context).size.width * 0.18,
                               textFieldWidth:
                                   screenWidth > 800
                                       ? 220.w
                                       : screenWidth > 560
                                       ? 270.w
                                       : 220.w,
-                              // MediaQuery.of(context).size.width * 0.15,
-                              validationFunc: (val) {},
                             ),
+                            // DialogTextField(
+                            //   textEditingController: refController,
+                            //   text: '${'ref'.tr}:',
+                            //   hint: 'manual_reference'.tr,
+                            //   rowWidth:
+                            //       screenWidth > 800
+                            //           ? 250.w
+                            //           : screenWidth > 560
+                            //           ? 300.w
+                            //           : 250.w,
+                            //   // MediaQuery.of(context).size.width * 0.18,
+                            //   textFieldWidth:
+                            //       screenWidth > 800
+                            //           ? 220.w
+                            //           : screenWidth > 560
+                            //           ? 270.w
+                            //           : 220.w,
+                            //   // MediaQuery.of(context).size.width * 0.15,
+                            //   validationFunc: (val) {},
+                            // ),
                             SizedBox(
                               width:
                                   screenWidth > 1230
@@ -1073,7 +1136,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
 
                                         requestFocusOnTap: false,
                                         enableSearch: true,
-                                        controller: currencyController,
+                                        controller:  quotationCont.currencyController,
                                         hintText: '',
                                         inputDecorationTheme: InputDecorationTheme(
                                           // filled: true,
@@ -1329,11 +1392,11 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                             if (screenWidth > 1230)
                               SizedBox(
                                 width:
-                                    homeController.isOpened.value
-                                        ? 180.w
-                                        //  MediaQuery.of(context).size.width *
-                                        //     0.10
-                                        : 210.w,
+                                    // homeController.isOpened.value
+                                    //     ? 180.w
+                                         MediaQuery.of(context).size.width *
+                                            0.12,
+                                        // : 210.w,
 
                                 // MediaQuery.of(context).size.width *
                                 //     0.14,
@@ -1341,16 +1404,16 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('chance'.tr),
-                                    DropdownMenu<String>(
+                                    Text('potential'.tr),
+                                    widget.info['status'] == "pending"?DropdownMenu<String>(
                                       width:
-                                          homeController.isOpened.value
-                                              ? 130.w
-                                              //  MediaQuery.of(
-                                              //       context,
-                                              //     ).size.width *
-                                              //     0.07
-                                              : 150.w,
+                                          // homeController.isOpened.value
+                                          //     ? 130.w
+                                               MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
+                                                  0.08,
+                                              // : 150.w,
                                       //  MediaQuery.of(
                                       //       context,
                                       //     ).size.width *
@@ -1419,7 +1482,13 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                         //         .resetItemsAfterChangePriceList();
                                         //   });
                                       },
-                                    ),
+                                    )
+                                        :ReusableShowInfoCard(text: chanceController.text, width:
+                                     MediaQuery.of(
+                                          context,
+                                        ).size.width *
+                                        0.08
+                                        ,isCentered: false,),
                                   ],
                                 ),
                               ),
@@ -1628,39 +1697,38 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                             children: [
                               SizedBox(
                                 width:
-                                    homeController.isOpened.value
-                                        ? screenWidth > 1230
-                                            ? MediaQuery.of(
+                                    // homeController.isOpened.value
+                                    //     ? screenWidth > 1230
+                                    //         ?
+                                    MediaQuery.of(
                                                   context,
                                                 ).size.width *
-                                                0.10
-                                            : MediaQuery.of(
-                                                  context,
-                                                ).size.width *
-                                                0.20
-                                        : MediaQuery.of(context).size.width *
-                                            0.14,
+                                                0.12,
+                                        //     : MediaQuery.of(
+                                        //           context,
+                                        //         ).size.width *
+                                        //         0.20
+                                        // : MediaQuery.of(context).size.width *
+                                        //     0.14,
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('chance'.tr),
-                                    DropdownMenu<String>(
+                                    Text('potential'.tr),
+                                    widget.info['status'] == "pending"?DropdownMenu<String>(
                                       width:
-                                          homeController.isOpened.value
-                                              ? screenWidth > 1230
-                                                  ? MediaQuery.of(
+                                         MediaQuery.of(
                                                         context,
                                                       ).size.width *
-                                                      0.07
-                                                  : MediaQuery.of(
-                                                        context,
-                                                      ).size.width *
-                                                      0.15
-                                              : MediaQuery.of(
-                                                    context,
-                                                  ).size.width *
-                                                  0.1,
+                                                      0.08,
+                                              //     : MediaQuery.of(
+                                              //           context,
+                                              //         ).size.width *
+                                              //         0.15
+                                              // : MediaQuery.of(
+                                              //       context,
+                                              //     ).size.width *
+                                              //     0.1,
                                       // requestFocusOnTap: false,
                                       enableSearch: true,
                                       controller: chanceController,
@@ -1725,7 +1793,12 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                         //         .resetItemsAfterChangePriceList();
                                         //   });
                                       },
-                                    ),
+                                    ):ReusableShowInfoCard(text: chanceController.text, width:
+                                    MediaQuery.of(
+                                      context,
+                                    ).size.width *
+                                        0.08
+                                      ,isCentered: false,),
                                   ],
                                 ),
                               ),
@@ -2249,99 +2322,62 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               ),
                             ),
                             if (screenWidth > 1100)
-                              DialogTextField(
-                                textEditingController: paymentTermsController,
-                                text: 'payment_terms'.tr,
-                                hint: '',
-                                rowWidth: screenWidth > 1220 ? 270.w : 350.w,
-                                // MediaQuery.of(context).size.width * 0.24,
-                                textFieldWidth:
-                                    screenWidth > 1220 ? 170.w : 240.w,
-                                // MediaQuery.of(context).size.width * 0.15,
-                                validationFunc: (val) {},
-                              ),
-                            // SizedBox(
-                            //   width: MediaQuery.of(context).size.width * 0.24,
-                            //   child: Row(
-                            //     mainAxisAlignment:
-                            //         MainAxisAlignment.spaceBetween,
-                            //     children: [
-                            //       Text('payment_terms'.tr),
-                            //       GetBuilder<ExchangeRatesController>(
-                            //         builder: (cont) {
-                            //           return DropdownMenu<String>(
-                            //             width:
-                            //                 MediaQuery.of(context).size.width *
-                            //                 0.15,
-                            //             // requestFocusOnTap: false,
-                            //             enableSearch: true,
-                            //             controller: paymentTermsController,
-                            //             hintText: '',
-                            //             inputDecorationTheme: InputDecorationTheme(
-                            //               // filled: true,
-                            //               hintStyle: const TextStyle(
-                            //                 fontStyle: FontStyle.italic,
-                            //               ),
-                            //               contentPadding:
-                            //                   const EdgeInsets.fromLTRB(
-                            //                     20,
-                            //                     0,
-                            //                     25,
-                            //                     5,
-                            //                   ),
-                            //               // outlineBorder: BorderSide(color: Colors.black,),
-                            //               enabledBorder: OutlineInputBorder(
-                            //                 borderSide: BorderSide(
-                            //                   color: Primary.primary.withAlpha(
-                            //                     (0.2 * 255).toInt(),
-                            //                   ),
-                            //                   width: 1,
-                            //                 ),
-                            //                 borderRadius:
-                            //                     const BorderRadius.all(
-                            //                       Radius.circular(9),
-                            //                     ),
-                            //               ),
-                            //               focusedBorder: OutlineInputBorder(
-                            //                 borderSide: BorderSide(
-                            //                   color: Primary.primary.withAlpha(
-                            //                     (0.4 * 255).toInt(),
-                            //                   ),
-                            //                   width: 2,
-                            //                 ),
-                            //                 borderRadius:
-                            //                     const BorderRadius.all(
-                            //                       Radius.circular(9),
-                            //                     ),
-                            //               ),
-                            //             ),
-                            //             // menuStyle: ,
-                            //             menuHeight: 250,
-                            //             dropdownMenuEntries:
-                            //                 termsList.map<
-                            //                   DropdownMenuEntry<String>
-                            //                 >((String option) {
-                            //                   return DropdownMenuEntry<String>(
-                            //                     value: option,
-                            //                     label: option,
-                            //                   );
-                            //                 }).toList(),
-                            //             enableFilter: true,
-                            //             onSelected: (String? val) {
-                            //               setState(() {
-                            //                 // selectedCurrency = val!;
-                            //                 // var index = cont.currenciesNamesList
-                            //                 //     .indexOf(val);
-                            //                 // selectedCurrencyId =
-                            //                 // cont.currenciesIdsList[index];
-                            //               });
-                            //             },
-                            //           );
-                            //         },
-                            //       ),
-                            //     ],
-                            //   ),
-                            // ),
+                              // DialogTextField(
+                              //   textEditingController: paymentTermsController,
+                              //   text: 'payment_terms'.tr,
+                              //   hint: '',
+                              //   rowWidth: screenWidth > 1220 ? 270.w : 350.w,
+                              //   // MediaQuery.of(context).size.width * 0.24,
+                              //   textFieldWidth:
+                              //       screenWidth > 1220 ? 170.w : 240.w,
+                              //   // MediaQuery.of(context).size.width * 0.15,
+                              //   validationFunc: (val) {},
+                              // ),
+
+                            GetBuilder<PaymentTermsController>(
+                              builder: (cont) {
+                                return ReusableDropDownMenuWithSearch(
+                                  list: cont.paymentTermsNamesList,
+                                  text: 'payment_terms'.tr,
+                                  hint: '${'search'.tr}...',
+                                  controller: paymentTermsController,
+                                  onSelected: (String? val) {
+                                    int index=cont.paymentTermsNamesList.indexOf(val!);
+                                    quotationCont.setSelectedPaymentTermId(cont.paymentTermsIdsList[index]);
+                                  },
+                                  validationFunc: (value) {
+                                    // if (value == null || value.isEmpty) {
+                                    //   return 'select_option'.tr;
+                                    // }
+                                    // return null;
+                                  },
+                                  rowWidth:screenWidth > 1220 ? 270.w : 350.w,
+                                  textFieldWidth:screenWidth > 1220 ? 170.w : 240.w,
+                                  clickableOptionText:
+                                  'or_create_new_payment_term'.tr,
+                                  isThereClickableOption: true,
+                                  onTappedClickableOption: () {
+                                    showDialog<String>(
+                                      context: context,
+                                      builder:
+                                          (
+                                          BuildContext context,
+                                          ) => const AlertDialog(
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                          BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                        elevation: 0,
+                                        content: PaymentTermsDialogContent(),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           ],
                         ),
 
@@ -2403,48 +2439,141 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 ),
                               ),
                             if (screenWidth < 1100)
-                              DialogTextField(
-                                textEditingController: paymentTermsController,
-                                text: 'payment_terms'.tr,
-                                hint: '',
-                                rowWidth: screenWidth > 1100 ? 270.w : 400.w,
-                                textFieldWidth:
-                                    screenWidth > 1100 ? 170.w : 280.w,
-                                validationFunc: (val) {},
+                              SizedBox(
+                                width: screenWidth > 1100 ? 270.w : 400.w,
+                                child:GetBuilder<PaymentTermsController>(
+                                  builder: (cont) {
+                                    return ReusableDropDownMenuWithSearch(
+                                      list: cont.paymentTermsNamesList,
+                                      text: 'payment_terms'.tr,
+                                      hint: '${'search'.tr}...',
+                                      controller: paymentTermsController,
+                                      onSelected: (String? val) {
+                                        int index=cont.paymentTermsNamesList.indexOf(val!);
+                                        quotationCont.setSelectedPaymentTermId(cont.paymentTermsIdsList[index]);
+                                      },
+                                      validationFunc: (value) {
+                                        // if (value == null || value.isEmpty) {
+                                        //   return 'select_option'.tr;
+                                        // }
+                                        // return null;
+                                      },
+                                      rowWidth:screenWidth > 1220 ? 270.w : 350.w,
+                                      textFieldWidth:screenWidth > 1220 ? 170.w : 240.w,
+                                      clickableOptionText:
+                                      'or_create_new_payment_term'.tr,
+                                      isThereClickableOption: true,
+                                      onTappedClickableOption: () {
+                                        showDialog<String>(
+                                          context: context,
+                                          builder:
+                                              (
+                                              BuildContext context,
+                                              ) => const AlertDialog(
+                                            backgroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                              BorderRadius.all(
+                                                Radius.circular(9),
+                                              ),
+                                            ),
+                                            elevation: 0,
+                                            content: PaymentTermsDialogContent(),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
                               ),
+                              // DialogTextField(
+                              //   textEditingController: paymentTermsController,
+                              //   text: 'payment_terms'.tr,
+                              //   hint: '',
+                              //   rowWidth: screenWidth > 1100 ? 270.w : 400.w,
+                              //   textFieldWidth:
+                              //       screenWidth > 1100 ? 170.w : 280.w,
+                              //   validationFunc: (val) {},
+                              // ),
 
                             // gapW16,
-                            DialogTextField(
-                              textEditingController: deliveryTermsController,
-                              text: '${'delivery_terms'.tr}:',
-                              hint: '',
-                              rowWidth:
-                                  screenWidth > 1220
-                                      ? 270.w
-                                      : screenWidth > 1100
-                                      ? 350.w
-                                      : screenWidth > 800
-                                      ? 400.w
-                                      : screenWidth > 610
-                                      ? 480.w
-                                      : screenWidth > 560
-                                      ? 370.w
-                                      : 300.w,
-
-                              textFieldWidth:
-                                  screenWidth > 1220
-                                      ? 170.w
-                                      : screenWidth > 1100
-                                      ? 240.w
-                                      : screenWidth > 800
-                                      ? 280.w
-                                      : screenWidth > 610
-                                      ? 350.w
-                                      : screenWidth > 560
-                                      ? 270.w
-                                      : 200.w,
-
-                              validationFunc: (val) {},
+                            // DialogTextField(
+                            //   textEditingController: deliveryTermsController,
+                            //   text: '${'delivery_terms'.tr}:',
+                            //   hint: '',
+                            //   rowWidth:
+                            //       screenWidth > 1220
+                            //           ? 270.w
+                            //           : screenWidth > 1100
+                            //           ? 350.w
+                            //           : screenWidth > 800
+                            //           ? 400.w
+                            //           : screenWidth > 610
+                            //           ? 480.w
+                            //           : screenWidth > 560
+                            //           ? 370.w
+                            //           : 300.w,
+                            //
+                            //   textFieldWidth:
+                            //       screenWidth > 1220
+                            //           ? 170.w
+                            //           : screenWidth > 1100
+                            //           ? 240.w
+                            //           : screenWidth > 800
+                            //           ? 280.w
+                            //           : screenWidth > 610
+                            //           ? 350.w
+                            //           : screenWidth > 560
+                            //           ? 270.w
+                            //           : 200.w,
+                            //
+                            //   validationFunc: (val) {},
+                            // ),
+                            GetBuilder<DeliveryTermsController>(
+                              builder: (cont) {
+                                return ReusableDropDownMenuWithSearch(
+                                  list: cont.deliveryTermsNamesList,
+                                  text: 'delivery_terms'.tr,
+                                  hint: '${'search'.tr}...',
+                                  controller: deliveryTermsController,
+                                  onSelected: (String? val) {
+                                    var index = cont.deliveryTermsNamesList
+                                        .indexOf(val!);
+                                    quotationCont.setSelectedDeliveryTermId (
+                                        cont.deliveryTermsIdsList[index]);
+                                  },
+                                  validationFunc: (value) {
+                                    // if (value == null || value.isEmpty) {
+                                    //   return 'select_option'.tr;
+                                    // }
+                                    // return null;
+                                  },
+                                  rowWidth:  screenWidth > 1100 ? 270.w : 400.w,
+                                  textFieldWidth:screenWidth > 1100 ? 170.w : 280.w,
+                                  clickableOptionText:
+                                  'or_create_new_delivery_term'.tr,
+                                  isThereClickableOption: true,
+                                  onTappedClickableOption: () {
+                                    showDialog<String>(
+                                      context: context,
+                                      builder:
+                                          (
+                                          BuildContext context,
+                                          ) => const AlertDialog(
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                          BorderRadius.all(
+                                            Radius.circular(9),
+                                          ),
+                                        ),
+                                        elevation: 0,
+                                        content: DeliveryTermsDialogContent(),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -3318,70 +3447,33 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                             ? Column(
                               children: [
                                 gapH16,
-                                Row(
-                                  children: [
-                                    SizedBox(
-                                      width:
-                                          screenWidth >= 676
-                                              ? MediaQuery.of(
-                                                    context,
-                                                  ).size.width *
-                                                  0.15
-                                              : MediaQuery.of(
-                                                    context,
-                                                  ).size.width *
-                                                  0.20,
-                                      child: ListTile(
-                                        title: Text(
-                                          quotationCont
-                                              .headersList[0]['header_name'],
-                                          style: TextStyle(fontSize: 9.sp),
-                                        ),
-                                        leading: Radio(
-                                          value: 0,
-                                          groupValue:
-                                              quotationCont.selectedHeaderIndex,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              quotationCont
-                                                  .selectedHeaderIndex = value!;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                    if (screenWidth <= 676) gapW10,
-                                    SizedBox(
-                                      width:
-                                          screenWidth >= 676
-                                              ? MediaQuery.of(
-                                                    context,
-                                                  ).size.width *
-                                                  0.15
-                                              : MediaQuery.of(
-                                                    context,
-                                                  ).size.width *
-                                                  0.20,
-                                      child: ListTile(
-                                        title: Text(
-                                          quotationCont
-                                              .headersList[1]['header_name'],
-                                          style: TextStyle(fontSize: 9.sp),
-                                        ),
-                                        leading: Radio(
-                                          value: 1,
-                                          groupValue:
-                                              quotationCont.selectedHeaderIndex,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              quotationCont
-                                                  .selectedHeaderIndex = value!;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                ReusableRadioBtns(
+                                  isRow: true,
+                                  groupVal: quotationCont
+                                      .selectedHeaderIndex,
+                                  title1: quotationCont
+                                      .headersList[0]['header_name'],
+                                  title2: quotationCont
+                                      .headersList[1]['header_name'],
+                                  func: (value) {
+                                    if(value==1){
+                                      quotationCont.setSelectedHeaderIndex(1);
+                                      quotationCont.setSelectedHeader( quotationCont
+                                          .headersList[0]);
+                                      quotationCont.setQuotationCurrency(quotationCont
+                                          .headersList[0]);
+                                    }else{
+                                      quotationCont.setSelectedHeaderIndex(2);
+                                      quotationCont.setSelectedHeader( quotationCont
+                                          .headersList[1]);
+                                      quotationCont.setQuotationCurrency(quotationCont
+                                          .headersList[1]);
+                                    }
+                                    setVat();
+                                    checkVatExempt();
+                                  },
+                                  width1: MediaQuery.of(context).size.width * 0.15,
+                                  width2: MediaQuery.of(context).size.width * 0.15,
                                 ),
                               ],
                             )
@@ -3837,7 +3929,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'terms_conditions'.tr,
+                          'note'.tr,
                           style: TextStyle(
                             fontSize: 15,
                             color: TypographyColor.titleTable,
@@ -3846,7 +3938,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                         ),
                         gapH16,
                         SizedBox(
-                          height: 300,
+                          height: 200,
                           child: Column(
                             children: [
                               QuillSimpleToolbar(
@@ -3906,7 +3998,74 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                       ],
                     ),
                   ),
-
+                  gapH10,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 40,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'terms_and_conditions'.tr,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: TypographyColor.titleTable,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        gapH16,
+                        GetBuilder<TermsAndConditionsController>(
+                          builder: (cont) {
+                            return ReusableDropDownMenuWithSearch(
+                              list: cont.termsAndConditionsNamesList,
+                              text: '',
+                              hint: '${'search'.tr}...',
+                              controller: termsAndConditionsMenuController,
+                              onSelected: (String? val) {
+                                int index=cont.termsAndConditionsNamesList.indexOf(val!);
+                                quotationCont.setSelectedTermAndConditionId(cont.termsAndConditionsIdsList[index]);
+                              },
+                              validationFunc: (value) {},
+                              rowWidth:
+                              MediaQuery.of(context).size.width * 0.24,
+                              textFieldWidth:
+                              MediaQuery.of(context).size.width * 0.24,
+                              clickableOptionText:
+                              'or_create_new_terms_and_conditions'.tr,
+                              isThereClickableOption: true,
+                              onTappedClickableOption: () {
+                                showDialog<String>(
+                                    context: context,
+                                    builder: (BuildContext context) => AlertDialog(
+                                      backgroundColor: Colors.white,
+                                      contentPadding: const EdgeInsets.all(0),
+                                      titlePadding: const EdgeInsets.all(0),
+                                      actionsPadding: const EdgeInsets.all(0),
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.all(Radius.circular(9)),
+                                      ),
+                                      elevation: 0,
+                                      content: configDialogs['terms_and_conditions'],
+                                    ));
+                              },
+                            );
+                          },)
+                      ],
+                    ),
+                  ),
                   gapH16,
 
                   GetBuilder<QuotationController>(
@@ -4315,7 +4474,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 selectedCustomerIds,
                                 validityController.text,
                                 inputDateController.text,
-                                '', //todo paymentTermsController.text,
+                                quotationCont.selectedPaymentTermId,
                                 quotationCont.selectedPriceListId,
                                 quotationCont
                                     .selectedCurrencyId, //selectedCurrency
@@ -4350,15 +4509,16 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 quotationController.rowsInListViewInQuotation,
                                 quotationController.orderedKeys,
                                 cancelledReasonController.text,
-                                deliveryTermsController.text,
+                                quotationCont.selectedDeliveryTermId,
                                 chanceController.text,
                                 homeController.companyName == 'CASALAGO' ||
                                         homeController.companyName == 'AMAZON'
                                     ? quotationCont
                                         .headersList[quotationCont
-                                            .selectedHeaderIndex]['id']
+                                            .selectedHeaderIndex-1]['id']
                                         .toString()
                                     : '',
+                                  quotationCont.selectedTermAndConditionId
                               );
                               if (res['success'] == true) {
                                 Get.back();
@@ -4902,7 +5062,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           ? 150.w
                           : 100.w,
                   // textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                  clickableOptionText: 'create_virtual_item'.tr,
+                  clickableOptionText: 'create_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
                     productController.clearData();
@@ -6228,7 +6388,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                           : 100.w,
                   // rowWidth: MediaQuery.of(context).size.width * 0.15,
                   // textFieldWidth: MediaQuery.of(context).size.width * 0.15,
-                  clickableOptionText: 'create_virtual_item'.tr,
+                  clickableOptionText: 'create_item'.tr,
                   isThereClickableOption: true,
                   onTappedClickableOption: () {
                     showDialog<String>(

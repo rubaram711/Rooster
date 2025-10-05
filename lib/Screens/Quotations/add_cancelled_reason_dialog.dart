@@ -43,7 +43,7 @@ class _AddCancelledReasonDialogState extends State<AddCancelledReasonDialog> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    DialogTitle(text: 'enter_cancelled_reason'.tr),
+                    DialogTitle(text: 'enter_lost_reason'.tr),
                     InkWell(
                       onTap: () {
                         Get.back();

@@ -7,6 +7,7 @@ import 'package:rooster_app/utils/image_picker_helper.dart';
 import '../../../Controllers/products_controller.dart';
 import '../../../Widgets/add_photo_circle.dart';
 import '../../../Widgets/dialog_drop_menu.dart';
+import '../../../Widgets/reusable_radio_btns.dart';
 import '../../../Widgets/reusable_text_field.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
@@ -221,81 +222,17 @@ class _GeneralTabContentState extends State<GeneralTabContent> {
                           children: [
                             Text('sub_ref'.tr),
                             // const DialogRadioButtonsListView(),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.5,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: ListTile(
-                                      title: Text(
-                                        cont.subrefsNames[1],
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      leading: Radio(
-                                        value: 1,
-                                        groupValue: cont.selectedSubrefsId,
-                                        onChanged: (value) {
-                                          cont.setSelectedSubrefsId(
-                                            cont.subrefsIds[1],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: ListTile(
-                                      title: Text(
-                                        cont.subrefsNames[2],
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      leading: Radio(
-                                        value: 2,
-                                        groupValue: cont.selectedSubrefsId,
-                                        onChanged: (value) {
-                                          cont.setSelectedSubrefsId(
-                                            cont.subrefsIds[2],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: ListTile(
-                                      title: Text(
-                                        cont.subrefsNames[3],
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      leading: Radio(
-                                        value: 3,
-                                        groupValue: cont.selectedSubrefsId,
-                                        onChanged: (value) {
-                                          cont.setSelectedSubrefsId(
-                                            cont.subrefsIds[3],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: ListTile(
-                                      title: Text(
-                                        cont.subrefsNames[4],
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                      leading: Radio(
-                                        value: 4,
-                                        groupValue: cont.selectedSubrefsId,
-                                        onChanged: (value) {
-                                          cont.setSelectedSubrefsId(
-                                            cont.subrefsIds[4],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            ReusableFlexibleRadioBtns(
+                              isRow: true,
+                              groupVal:  cont.selectedSubrefsId,
+                              titles:cont.subrefsNames.sublist(1) ,
+                              func: (value) {
+                                cont.setSelectedSubrefsId(
+                                  cont.subrefsIds[value],
+                                );
+                              },
+                              length: 4,
+                              widths:List.filled(4, MediaQuery.of(context).size.width*0.15) ,
                             ),
                             const DialogCheckBoxesListView(),
                           ],
@@ -310,91 +247,7 @@ class _GeneralTabContentState extends State<GeneralTabContent> {
   }
 }
 
-class DialogRadioButtonsListView extends StatefulWidget {
-  const DialogRadioButtonsListView({super.key});
 
-  @override
-  State<DialogRadioButtonsListView> createState() =>
-      _DialogRadioButtonsListViewState();
-}
-
-class _DialogRadioButtonsListViewState
-    extends State<DialogRadioButtonsListView> {
-  int selectedOption = 1;
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.5,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ListTile(
-              title: Text(
-                'serial_number'.tr,
-                style: const TextStyle(fontSize: 12),
-              ),
-              leading: Radio(
-                value: 1,
-                groupValue: selectedOption,
-                onChanged: (value) {
-                  setState(() {
-                    selectedOption = value!;
-                  });
-                },
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListTile(
-              title: Text(
-                'expiry_date'.tr,
-                style: const TextStyle(fontSize: 12),
-              ),
-              leading: Radio(
-                value: 2,
-                groupValue: selectedOption,
-                onChanged: (value) {
-                  setState(() {
-                    selectedOption = value!;
-                  });
-                },
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListTile(
-              title: Text('color'.tr, style: const TextStyle(fontSize: 12)),
-              leading: Radio(
-                value: 3,
-                groupValue: selectedOption,
-                onChanged: (value) {
-                  setState(() {
-                    selectedOption = value!;
-                  });
-                },
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListTile(
-              title: Text('size'.tr, style: const TextStyle(fontSize: 12)),
-              leading: Radio(
-                value: 4,
-                groupValue: selectedOption,
-                onChanged: (value) {
-                  setState(() {
-                    selectedOption = value!;
-                  });
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class DialogCheckBoxesListView extends StatefulWidget {
   const DialogCheckBoxesListView({super.key});
@@ -696,89 +549,17 @@ class _MobileGeneralTabContentState extends State<MobileGeneralTabContent> {
                         width: MediaQuery.of(context).size.width * 0.75,
                         child: Column(
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ListTile(
-                                    title: Text(
-                                      cont.subrefsNames[1],
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    leading: Radio(
-                                      value: 1,
-                                      groupValue: cont.selectedSubrefsId,
-                                      onChanged: (value) {
-                                        cont.setSelectedSubrefsId(
-                                          cont.subrefsIds[1],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ListTile(
-                                    title: Text(
-                                      cont.subrefsNames[2],
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    leading: Radio(
-                                      value: 2,
-                                      groupValue: cont.selectedSubrefsId,
-                                      onChanged: (value) {
-                                        cont.setSelectedSubrefsId(
-                                          cont.subrefsIds[2],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ListTile(
-                                    title: Text(
-                                      cont.subrefsNames[3],
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    leading: Radio(
-                                      value: 3,
-                                      groupValue: cont.selectedSubrefsId,
-                                      onChanged: (value) {
-                                        cont.setSelectedSubrefsId(
-                                          cont.subrefsIds[3],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ListTile(
-                                    title: Text(
-                                      cont.subrefsNames[4],
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    leading: Radio(
-                                      value: 4,
-                                      groupValue: cont.selectedSubrefsId,
-                                      onChanged: (value) {
-                                        cont.setSelectedSubrefsId(
-                                          cont.subrefsIds[4],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            ReusableFlexibleRadioBtns(
+                              isRow: false,
+                              groupVal:  cont.selectedSubrefsId,
+                              titles:cont.subrefsNames.sublist(1) ,
+                              func: (value) {
+                                cont.setSelectedSubrefsId(
+                                  cont.subrefsIds[value],
+                                );
+                              },
+                              length: 4,
+                              widths: List.filled(4, MediaQuery.of(context).size.width),
                             ),
                           ],
                         ),
@@ -1023,223 +804,5 @@ class _MobileGeneralTabContentState extends State<MobileGeneralTabContent> {
   }
 }
 
-class MobileDialogRadioButtonsListView extends StatefulWidget {
-  const MobileDialogRadioButtonsListView({super.key});
 
-  @override
-  State<MobileDialogRadioButtonsListView> createState() =>
-      _MobileDialogRadioButtonsListViewState();
-}
 
-class _MobileDialogRadioButtonsListViewState
-    extends State<MobileDialogRadioButtonsListView> {
-  int selectedOption = 1;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.8,
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: ListTile(
-                  title: Text(
-                    'serial_number'.tr,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  leading: Radio(
-                    value: 1,
-                    groupValue: selectedOption,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedOption = value!;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ListTile(
-                  title: Text(
-                    'expiry_date'.tr,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  leading: Radio(
-                    value: 2,
-                    groupValue: selectedOption,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedOption = value!;
-                      });
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: ListTile(
-                  title: Text('color'.tr, style: const TextStyle(fontSize: 12)),
-                  leading: Radio(
-                    value: 3,
-                    groupValue: selectedOption,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedOption = value!;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ListTile(
-                  title: Text('size'.tr, style: const TextStyle(fontSize: 12)),
-                  leading: Radio(
-                    value: 4,
-                    groupValue: selectedOption,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedOption = value!;
-                      });
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// class MobileDialogCheckBoxesListView extends StatefulWidget {
-//   const MobileDialogCheckBoxesListView({super.key});
-//
-//   @override
-//   State<MobileDialogCheckBoxesListView> createState() => _MobileDialogCheckBoxesListViewState();
-// }
-//
-// class _MobileDialogCheckBoxesListViewState extends State<MobileDialogCheckBoxesListView> {
-//   bool is1Checked = false;
-//   bool is2Checked = false;
-//   bool is3Checked = false;
-//   bool is4Checked = false;
-//   bool is5Checked = false;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return SizedBox(
-//       width: MediaQuery.of(context).size.width *0.8,
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.start,
-//             children: [
-//               Expanded(
-//                 child: ListTile(
-//                   title: Text('can_be_sold'.tr,style:const TextStyle(fontSize: 12)),
-//                   leading: Checkbox(
-//                     // checkColor: Colors.white,
-//                     // fillColor: MaterialStateProperty.resolveWith(getColor),
-//                     value: is1Checked,
-//                     onChanged: (bool? value) {
-//                       setState(() {
-//                         is1Checked = value!;
-//                       });
-//                     },
-//                   ),
-//                 ),
-//               ),
-//               Expanded(
-//                 child: ListTile(
-//                   title: Text('can_be_purchased'.tr,style:const TextStyle(fontSize: 12)),
-//                   leading: Checkbox(
-//                     // checkColor: Colors.white,
-//                     // fillColor: MaterialStateProperty.resolveWith(getColor),
-//                     value: is2Checked,
-//                     onChanged: (bool? value) {
-//                       setState(() {
-//                         is2Checked = value!;
-//                       });
-//                     },
-//                   ),
-//                 ),
-//               ),
-//             ],),
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.start,
-//             children: [
-//               Expanded(
-//                 child: ListTile(
-//                   title: Text('warranty'.tr,style:const TextStyle(fontSize: 12)),
-//                   leading: Checkbox(
-//                     // checkColor: Colors.white,
-//                     // fillColor: MaterialStateProperty.resolveWith(getColor),
-//                     value: is3Checked,
-//                     onChanged: (bool? value) {
-//                       setState(() {
-//                         is3Checked = value!;
-//                       });
-//                     },
-//                   ),
-//                 ),
-//               ),
-//               Expanded(
-//                   child:ListTile(
-//                     title: Text('discontinued'.tr,style:const TextStyle(fontSize: 12)),
-//                     leading: Checkbox(
-//                       // checkColor: Colors.white,
-//                       // fillColor: MaterialStateProperty.resolveWith(getColor),
-//                       value: is4Checked,
-//                       onChanged: (bool? value) {
-//                         setState(() {
-//                           is4Checked = value!;
-//                         });
-//                       },
-//                     ),
-//                   )),
-//             ],),
-//           SizedBox(
-//             width: MediaQuery.of(context).size.width *0.4,
-//             child: Row(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               children: [
-//                 Expanded(
-//                     child:ListTile(
-//                       title: Text('blocked'.tr,style:const TextStyle(fontSize: 12)),
-//                       leading: Checkbox(
-//                         // checkColor: Colors.white,
-//                         // fillColor: MaterialStateProperty.resolveWith(getColor),
-//                         value: is5Checked,
-//                         onChanged: (bool? value) {
-//                           setState(() {
-//                             is5Checked = value!;
-//                           });
-//                         },
-//                       ),
-//                     )),
-//               ],
-//             ),
-//           ),
-//           is4Checked
-//               ?DialogDateTextField(
-//             textEditingController: dateController,
-//             text: 'date'.tr,
-//             textFieldWidth:  MediaQuery.of(context).size.width * 0.5,
-//             validationFunc: (){},
-//             onChangedFunc: (){},
-//           )
-//               :const SizedBox(),
-//         ],
-//       ),
-//     );
-//   }
-// }

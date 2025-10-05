@@ -453,6 +453,7 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                             isInDelivery: true,
                                             deliveryNumber:
                                                 deliveryCont.deliveryNumber,
+                                            salesPerson: selectedSalesPerson,
                                             creationDate: dateController.text,
                                             expectedDate:
                                                 expectedDateController.text,
@@ -2298,7 +2299,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       textFieldWidth: itemFieldWidth,
                       // rowWidth: MediaQuery.of(context).size.width * 0.12,
                       // textFieldWidth: MediaQuery.of(context).size.width * 0.12,
-                      clickableOptionText: 'create_virtual_item'.tr,
+                      clickableOptionText: 'create_item'.tr,
                       isThereClickableOption: true,
                       onTappedClickableOption: () {
                         productController.clearData();
@@ -2531,7 +2532,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                     //   validationFunc: (value) {},
                     //   rowWidth: MediaQuery.of(context).size.width * 0.16,
                     //   textFieldWidth: MediaQuery.of(context).size.width * 0.16,
-                    //   clickableOptionText: 'create_virtual_item'.tr,
+                    //   clickableOptionText: 'create_item'.tr,
                     //   isThereClickableOption: true,
                     //   onTappedClickableOption: () {},
                     //   columnWidths: [100.0, 200.0, 550.0, 100.0],
@@ -3596,7 +3597,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                     //   validationFunc: (value) {},
                     //   rowWidth: MediaQuery.of(context).size.width * 0.16,
                     //   textFieldWidth: MediaQuery.of(context).size.width * 0.16,
-                    //   clickableOptionText: 'create_virtual_item'.tr,
+                    //   clickableOptionText: 'create_item'.tr,
                     //   isThereClickableOption: true,
                     //   onTappedClickableOption: () {},
                     //   columnWidths: [100.0, 200.0, 550.0, 100.0],

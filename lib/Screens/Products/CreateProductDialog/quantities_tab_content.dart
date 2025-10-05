@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rooster_app/Controllers/products_controller.dart';
+import 'package:rooster_app/Widgets/reusable_text_field.dart';
 
 import '../../../Controllers/home_controller.dart';
 import '../../../Widgets/table_item.dart';
@@ -246,6 +247,7 @@ class WarehousesAsRowInTable extends StatefulWidget {
 class _WarehousesAsRowInTableState extends State<WarehousesAsRowInTable> {
   bool isWarehousesChecked=false;
   HomeController homeController=Get.find();
+  TextEditingController shelvingTextEditingController=TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -264,10 +266,18 @@ class _WarehousesAsRowInTableState extends State<WarehousesAsRowInTable> {
             text: '${widget.data['name'] ?? ''}',
             width:homeController.isMobile.value?140:  MediaQuery.of(context).size.width * 0.08,
           ),
-          TableItem(
-            text: '${widget.data['shelving'] ?? ''}',
+          SizedBox(
             width:homeController.isMobile.value?140:  MediaQuery.of(context).size.width * 0.08,
+            child: ReusableTextField(
+                onChangedFunc: (val){},
+                validationFunc: (val){}, hint: '',
+                isPasswordField: false,
+                textEditingController: shelvingTextEditingController),
           ),
+          // TableItem(
+          //   text: '${widget.data['shelving'] ?? ''}',
+          //   width:homeController.isMobile.value?140:  MediaQuery.of(context).size.width * 0.08,
+          // ),
           TableItem(
             text: widget.data['qty_on_hand']!=null?numberWithComma('${widget.data['qty_on_hand']}'): '',
             width:homeController.isMobile.value?200:  MediaQuery.of(context).size.width * 0.1,

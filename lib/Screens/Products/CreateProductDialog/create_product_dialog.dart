@@ -4,7 +4,6 @@ import 'package:rooster_app/Screens/Products/CreateProductDialog/pos_tab_content
 import 'package:rooster_app/Screens/Products/CreateProductDialog/pricing_tab_content.dart';
 import 'package:rooster_app/Screens/Products/CreateProductDialog/procurement_tab_content.dart';
 import 'package:rooster_app/Screens/Products/CreateProductDialog/quantities_tab_content.dart';
-import 'package:rooster_app/Screens/Products/CreateProductDialog/shelving_tab_content.dart';
 import 'package:rooster_app/Screens/Products/CreateProductDialog/shipping_tab_content.dart';
 import '../../../Controllers/home_controller.dart';
 import '../../../Controllers/products_controller.dart';
@@ -24,7 +23,7 @@ List tabsList = [
   'procurement',
   'pricing',
   'quantities',
-  'shelving',
+  // 'shelving',
   'shipping',
   'pos'
 ];
@@ -48,7 +47,7 @@ List tabsContent = [
   const ProcurementTabContent(),
   const PricingTabContent(),
   const QuantitiesTabContent(),
-  const ShelvingTabContent(isDesktop: true),
+  // const ShelvingTabContent(isDesktop: true),
   const ShippingTabContent(isDesktop: true),
   const PosTabContent(isDesktop: true),
 ];

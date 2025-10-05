@@ -7,6 +7,7 @@ import '../../../Widgets/custom_snak_bar.dart';
 import '../../../Widgets/loading.dart';
 import '../../../Widgets/page_title.dart';
 import '../../../Widgets/reusable_btn.dart';
+import '../../../Widgets/reusable_radio_btns.dart';
 import '../../../Widgets/reusable_text_field.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
@@ -46,8 +47,14 @@ class _SessionDetailsFilterState extends State<SessionDetailsFilter> {
 
   @override
   Widget build(BuildContext context) {
-    var sizeBoxWidth = homeController.isMobile.value ?MediaQuery.of(context).size.width * 0.8:MediaQuery.of(context).size.width * 0.35;
-    var menuWidth =homeController.isMobile.value ?MediaQuery.of(context).size.width * 0.5: MediaQuery.of(context).size.width * 0.2;
+    var sizeBoxWidth =
+        homeController.isMobile.value
+            ? MediaQuery.of(context).size.width * 0.8
+            : MediaQuery.of(context).size.width * 0.35;
+    var menuWidth =
+        homeController.isMobile.value
+            ? MediaQuery.of(context).size.width * 0.5
+            : MediaQuery.of(context).size.width * 0.2;
     var radioBtnWidth = MediaQuery.of(context).size.width * 0.15;
     return Container(
       padding: EdgeInsets.symmetric(
@@ -70,123 +77,30 @@ class _SessionDetailsFilterState extends State<SessionDetailsFilter> {
               // const AddPhotoCircle(),
               gapH32,
               const Text('Filter sessions as:'),
-              homeController.isMobile.value
-                  ? Column(
-                    children: [
-                      SizedBox(
-                        // width: radioBtnWidth,
-                        child: ListTile(
-                          title: Text(
-                            'date'.tr,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            value: 1,
-                            groupValue: selectedFilterOption,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedFilterOption = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        // width: menuWidth,
-                        child: ListTile(
-                          title: Text(
-                            'sessions_numbers'.tr,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            value: 2,
-                            groupValue: selectedFilterOption,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedFilterOption = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        // width: menuWidth,
-                        child: ListTile(
-                          title: Text(
-                            'single_session_number'.tr,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            value: 3,
-                            groupValue: selectedFilterOption,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedFilterOption = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                  : Row(
-                    children: [
-                      SizedBox(
-                        width: radioBtnWidth,
-                        child: ListTile(
-                          title: Text(
-                            'date'.tr,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            value: 1,
-                            groupValue: selectedFilterOption,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedFilterOption = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: menuWidth,
-                        child: ListTile(
-                          title: Text(
-                            'sessions_numbers'.tr,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            value: 2,
-                            groupValue: selectedFilterOption,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedFilterOption = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: menuWidth,
-                        child: ListTile(
-                          title: Text(
-                            'single_session_number'.tr,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          leading: Radio(
-                            value: 3,
-                            groupValue: selectedFilterOption,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedFilterOption = value!;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              ReusableFlexibleRadioBtns(
+                isRow: !homeController.isMobile.value,
+                groupVal: selectedFilterOption,
+                titles: [    'date'.tr,
+                   'sessions_numbers'.tr,
+                   'single_session_number'.tr,],
+                func: (value) {
+                  setState(() {
+                    selectedFilterOption = value!;
+                  });
+                },
+                length: 3,
+                widths: [
+                !homeController.isMobile.value
+                    ? radioBtnWidth
+                    : MediaQuery.of(context).size.width,
+                  !homeController.isMobile.value
+                      ? menuWidth
+                      : MediaQuery.of(context).size.width,
+                  !homeController.isMobile.value
+                      ? menuWidth
+                      : MediaQuery.of(context).size.width,],
+
+              ),
               gapH16,
               selectedFilterOption == 1
                   ? Column(
@@ -612,8 +526,7 @@ class _SessionDetailsFilterState extends State<SessionDetailsFilter> {
                           sessionCont.toDateController.text.isEmpty) {
                         CommonWidgets.snackBar('error', 'To date is required');
                       } else if (selectedFilterOption == 2 &&
-                          sessionCont.fromSessionController.text.isEmpty)
-                      {
+                          sessionCont.fromSessionController.text.isEmpty) {
                         CommonWidgets.snackBar(
                           'error',
                           'From Session is required',

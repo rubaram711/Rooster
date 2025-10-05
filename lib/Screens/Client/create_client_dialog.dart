@@ -1,9 +1,4 @@
-import 'package:country_currency_pickers/country.dart';
-import 'package:country_currency_pickers/country_picker_dropdown.dart';
-import 'package:country_currency_pickers/utils/utils.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../Backend/ClientsBackend/get_client_create_info.dart';
 import '../../Backend/ClientsBackend/store_client.dart';
@@ -17,6 +12,7 @@ import '../../Widgets/dialog_drop_menu.dart';
 import '../../Widgets/loading.dart';
 import '../../Widgets/page_title.dart';
 import '../../Widgets/reusable_btn.dart';
+import '../../Widgets/reusable_radio_btns.dart';
 import '../../Widgets/reusable_text_field.dart';
 import '../../const/Sizes.dart';
 import '../../const/colors.dart';
@@ -177,43 +173,19 @@ class _CreateClientDialogState
                         )
                       ],
                     ),
-                    gapH10,
                     gapH32,
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.15,
-                          child: ListTile(
-                            title: Text('individual'.tr,
-                                style: const TextStyle(fontSize: 12)),
-                            leading: Radio(
-                              value: 1,
-                              groupValue: selectedClientType,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedClientType = value!;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.15,
-                          child: ListTile(
-                            title: Text('company'.tr,
-                                style: const TextStyle(fontSize: 12)),
-                            leading: Radio(
-                              value: 2,
-                              groupValue: selectedClientType,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedClientType = value!;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
+                    ReusableRadioBtns(
+                      isRow: true,
+                      groupVal: selectedClientType,
+                      title1: 'individual'.tr,
+                      title2: 'company'.tr,
+                      func: (value) {
+                        setState(() {
+                          selectedClientType = value!;
+                        });
+                      },
+                      width1: MediaQuery.of(context).size.width * 0.15,
+                      width2: MediaQuery.of(context).size.width * 0.15,
                     ),
                     gapH16,
                     DialogTextField(
@@ -947,7 +919,8 @@ class _CreateClientDialogState
                                           selectedPriceListId,
                                           internalNoteController.text,
                                           '',
-                                          clientController.contactsList);
+                                          clientController.contactsList,
+                                          clientController.carsList);
                                       if (res['success'] == true) {
                                         Get.back();
 
