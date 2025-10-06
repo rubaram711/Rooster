@@ -89,18 +89,19 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     update();
   }
   setSelectedHeader(Map val){
+    print('header is $val');
     selectedHeader=val;
     update();
   }
 
   int selectedTypeIndex = 1;
-  String selectedType='';
+  String selectedInvoiceType='real';
   setSelectedTypeIndex(int val){
     selectedTypeIndex=val;
     update();
   }
   setSelectedType(String val){
-    selectedType=val;
+    selectedInvoiceType=val;
     update();
   }
 
@@ -572,10 +573,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   Map combosMap = {};
   @override
   getFieldsForCreateSalesInvoiceFromBack() async {
-    headersList = [
-      {'header_name':'h1'},
-      {'header_name':'h2'},
-    ];
+    headersList = [];
     combosPricesCurrencies = {};
     combosPricesList = [];
     combosNamesList = [];
@@ -687,10 +685,12 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
         selectedPriceListId = '${priceList['id']}';
       }
     }
-//todo ooooooo
 
-    // for (var header in p['companyHeaders']??[]) {
-    //   headersList.add(header);
+    for (var header in p['companyHeaders'] ?? []) {
+      headersList.add(header);
+    }
+    // if(headersList.isNotEmpty && headersList[0].isNotEmpty) {
+    //   setQuotationCurrency(headersList[0]);
     // }
 
     for (var priceList in p['cashingMethods']) {

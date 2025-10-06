@@ -30,6 +30,7 @@ import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
 import '../../Widgets/custom_snak_bar.dart';
 import '../../Widgets/page_title.dart';
+import '../../Widgets/reusable_radio_btns.dart';
 import '../../Widgets/reusable_reference_text_field.dart';
 import '../../Widgets/reusable_btn.dart';
 import '../../Widgets/reusable_drop_down_menu.dart';
@@ -121,7 +122,6 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
   final PendingDocsReviewController pendingDocsController = Get.find();
   final WarehouseController wareHouseController = Get.find();
   final PaymentTermsController paymentController = Get.find();
-
 
   String cashMethodId = '';
   String clientId = '';
@@ -266,8 +266,29 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     salesInvoiceController.rowsInListViewInSalesInvoice = {};
     salesInvoiceController.salesInvoiceCounter = 0;
     setProgressVar();
-    paymentTermsController.text = widget.info['paymentTerm']!=null ?widget.info['paymentTerm']['title'] : '';
-    salesInvoiceController.selectedPaymentTermId = widget.info['paymentTerm']!=null ?'${widget.info['paymentTerm']['id']}' : '';
+    salesInvoiceController.selectedHeaderIndex = 1;
+    if (widget.info['companyHeader'] != null) {
+      salesInvoiceController.selectedHeader=widget.info['companyHeader'];
+      if ('${widget.info['companyHeader']['id']}' !=
+          '${salesInvoiceController.headersList[0]['id']}') {
+        salesInvoiceController.selectedHeaderIndex = 2;
+      }
+    }
+    salesInvoiceController.selectedInvoiceType =
+        widget.info['invoiceType'] ?? '';
+    if ('${widget.info['invoiceType']}'.toLowerCase() == 'real' ) {
+      salesInvoiceController.selectedTypeIndex = 1;
+    } else {
+      salesInvoiceController.selectedTypeIndex = 2;
+    }
+    paymentTermsController.text =
+        widget.info['paymentTerm'] != null
+            ? widget.info['paymentTerm']['title']
+            : '';
+    salesInvoiceController.selectedPaymentTermId =
+        widget.info['paymentTerm'] != null
+            ? '${widget.info['paymentTerm']['id']}'
+            : '';
     if (widget.info['deliveredFromWarehouse'] != null) {
       warehouseName = '${widget.info['deliveredFromWarehouse']['name'] ?? ''}';
       selectedWarehouseId =
@@ -432,7 +453,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
         salesInvoiceController.rowsInListViewInSalesInvoice.length;
     salesInvoiceController.listViewLengthInSalesInvoice =
         salesInvoiceController.rowsInListViewInSalesInvoice.length * 60;
-paymentController.getPaymentTermsFromBack();
+    paymentController.getPaymentTermsFromBack();
     super.initState();
   }
 
@@ -957,6 +978,8 @@ paymentController.getPaymentTermsFromBack();
                                     inputDateController.text,
                                     '${widget.info['invoiceDeliveryDate'] ?? ''}',
                                     salesInvoiceCont.orderedKeys,
+                                    salesInvoiceCont.selectedInvoiceType,
+                                    '${salesInvoiceCont.selectedHeader['id']}'
                                   );
                                   if (res['success'] == true) {
                                     Get.back();
@@ -1116,6 +1139,8 @@ paymentController.getPaymentTermsFromBack();
                                     inputDateController.text,
                                     '${widget.info['invoiceDeliveryDate'] ?? ''}',
                                     salesInvoiceCont.orderedKeys,
+                                    salesInvoiceCont.selectedInvoiceType,
+                                      '${salesInvoiceCont.selectedHeader['id']}'
                                   );
                                   if (res['success'] == true) {
                                     Get.back();
@@ -1274,6 +1299,8 @@ paymentController.getPaymentTermsFromBack();
                                     inputDateController.text,
                                     '${widget.info['invoiceDeliveryDate'] ?? ''}',
                                     salesInvoiceController.orderedKeys,
+                                    salesInvoiceCont.selectedInvoiceType,
+                                      '${salesInvoiceCont.selectedHeader['id']}'
                                   );
                                   if (res['success'] == true) {
                                     Get.back();
@@ -1364,12 +1391,12 @@ paymentController.getPaymentTermsFromBack();
                             ),
                             ReusableReferenceTextField(
                               type: 'salesInvoices',
-                                textEditingController: refController,
-                                rowWidth:
-                                    MediaQuery.of(context).size.width * 0.18,
-                                textFieldWidth:
-                                    MediaQuery.of(context).size.width * 0.15,
-                              ),
+                              textEditingController: refController,
+                              rowWidth:
+                                  MediaQuery.of(context).size.width * 0.18,
+                              textFieldWidth:
+                                  MediaQuery.of(context).size.width * 0.15,
+                            ),
                             // DialogTextField(
                             //   textEditingController: refController,
                             //   text: '${'ref'.tr}:',
@@ -1991,8 +2018,11 @@ paymentController.getPaymentTermsFromBack();
                                   hint: '${'search'.tr}...',
                                   controller: paymentTermsController,
                                   onSelected: (String? val) {
-                                    int index=cont.paymentTermsNamesList.indexOf(val!);
-                                    salesInvoiceCont.setSelectedPaymentTermId(cont.paymentTermsIdsList[index]);
+                                    int index = cont.paymentTermsNamesList
+                                        .indexOf(val!);
+                                    salesInvoiceCont.setSelectedPaymentTermId(
+                                      cont.paymentTermsIdsList[index],
+                                    );
                                   },
                                   validationFunc: (value) {
                                     // if (value == null || value.isEmpty) {
@@ -2001,27 +2031,35 @@ paymentController.getPaymentTermsFromBack();
                                     // return null;
                                   },
                                   rowWidth:
-                                  MediaQuery.of(context).size.width * 0.24,
+                                      MediaQuery.of(context).size.width * 0.24,
                                   textFieldWidth:
-                                  MediaQuery.of(context).size.width * 0.15,
+                                      MediaQuery.of(context).size.width * 0.15,
                                   clickableOptionText:
-                                  'or_create_new_payment_term'.tr,
+                                      'or_create_new_payment_term'.tr,
                                   isThereClickableOption: true,
                                   onTappedClickableOption: () {
                                     showDialog<String>(
-                                        context: context,
-                                        builder: (BuildContext context) => AlertDialog(
-                                          backgroundColor: Colors.white,
-                                          contentPadding: const EdgeInsets.all(0),
-                                          titlePadding: const EdgeInsets.all(0),
-                                          actionsPadding: const EdgeInsets.all(0),
-                                          shape: const RoundedRectangleBorder(
-                                            borderRadius:
-                                            BorderRadius.all(Radius.circular(9)),
+                                      context: context,
+                                      builder:
+                                          (BuildContext context) => AlertDialog(
+                                            backgroundColor: Colors.white,
+                                            contentPadding:
+                                                const EdgeInsets.all(0),
+                                            titlePadding: const EdgeInsets.all(
+                                              0,
+                                            ),
+                                            actionsPadding:
+                                                const EdgeInsets.all(0),
+                                            shape: const RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(9),
+                                              ),
+                                            ),
+                                            elevation: 0,
+                                            content:
+                                                configDialogs['payment_terms'],
                                           ),
-                                          elevation: 0,
-                                          content: configDialogs['payment_terms'],
-                                        ));
+                                    );
                                   },
                                 );
                               },
@@ -2775,6 +2813,66 @@ paymentController.getPaymentTermsFromBack();
                           ],
                         ),
                         gapH10,
+                        homeController.companyName == 'CASALAGO' ||
+                            homeController.companyName == 'AMAZON'
+                            ? Column(
+                          children: [
+                            gapH16,
+                            Row(
+                              children: [
+                                Text('header'.tr),
+                                gapW64,
+                                ReusableRadioBtns(
+                                  isRow: true,
+                                  groupVal: salesInvoiceCont
+                                      .selectedHeaderIndex,
+                                  title1: salesInvoiceCont
+                                      .headersList[0]['header_name'],
+                                  title2: salesInvoiceCont
+                                      .headersList[1]['header_name'],
+                                  func: (value) {
+                                    if(value==1){
+                                      salesInvoiceCont.setSelectedHeaderIndex(1);
+                                      salesInvoiceCont.setSelectedHeader( salesInvoiceCont
+                                          .headersList[0]);
+                                    }else{
+                                      salesInvoiceCont.setSelectedHeaderIndex(2);
+                                      salesInvoiceCont.setSelectedHeader( salesInvoiceCont
+                                          .headersList[1]);
+                                    }
+                                  },
+                                  width1: MediaQuery.of(context).size.width * 0.15,
+                                  width2: MediaQuery.of(context).size.width * 0.15,
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                            : SizedBox.shrink(),
+                        Row(
+                          children: [
+                            Text('invoice'.tr),
+                            gapW64,
+                            ReusableRadioBtns(
+                              isRow: true,
+                              groupVal: salesInvoiceCont
+                                  .selectedTypeIndex,
+                              title1: 'real'.tr,
+                              title2: 'estimate'.tr,
+                              func: (value) {
+                                if(value==1){
+                                  salesInvoiceCont.setSelectedTypeIndex(1);
+                                  salesInvoiceCont.setSelectedType('real');
+                                }else{
+                                  salesInvoiceCont.setSelectedTypeIndex(2);
+                                  salesInvoiceCont.setSelectedType('estimate');
+                                }
+                              },
+                              width1: MediaQuery.of(context).size.width * 0.15,
+                              width2: MediaQuery.of(context).size.width * 0.15,
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -3656,6 +3754,8 @@ paymentController.getPaymentTermsFromBack();
                                 inputDateController.text,
                                 invoiceDeliveryDate,
                                 salesInvoiceCont.orderedKeys,
+                                salesInvoiceCont.selectedInvoiceType,
+                                  '${salesInvoiceCont.selectedHeader['id']}'
                               );
                               if (res['success'] == true) {
                                 Get.back();

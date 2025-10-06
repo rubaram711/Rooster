@@ -37,7 +37,9 @@ Future storeSalesInvoice(
   String code,
   Map items,
   List<int> orderedKeys,
-) async {
+    String invoiceType,
+    String companyHeaderId,
+    ) async {
   String token = await getAccessTokenFromPref();
 
   FormData formData = FormData.fromMap({
@@ -72,6 +74,9 @@ Future storeSalesInvoice(
     "vatInclusivePrices": vatInclusivePrices, //ok
     "beforeVatPrices": beforeVatPrices, //ok
     "code": code,
+    "invoiceType": invoiceType  ,
+    "companyHeaderId": companyHeaderId,
+
   });
 
   int i = 1;

@@ -13,6 +13,7 @@ class CommonWidgets {
         backgroundColor: type == 'error' ? Colors.red : Colors.green,
         colorText:Colors.white, //type == 'error' ?Colors.white : TypographyColor.titleTable,
         icon: Icon(type == 'error'?Icons.error:Icons.check_circle, color: Colors.white),
+        duration: const Duration(milliseconds: 900),
     );
   }
 

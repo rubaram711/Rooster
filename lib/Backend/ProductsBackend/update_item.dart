@@ -50,7 +50,9 @@ Future updateProduct(
     int decimalQuantity,
     List itemGroups,
     int discontinued,
-    List codes) async {
+    List codes,
+    List shelving,
+    ) async {
   // print('mainDescription $mainDescription');
   // print('SelectedProductId $id');
   // print('shown $showCurrencyId');
@@ -159,6 +161,16 @@ Future updateProduct(
     //       '${codes[i]['print_on_invoice'] == true ? 1 : 0}'),
     // ]);
   }
+
+  for (int i = 0; i < shelving.length; i++) {
+    if(shelving[i]['pivot']['shelving']!=null) {
+      formData.fields.addAll([
+        MapEntry("shelving[$i][warehouseId]", '${shelving[i]['id']}'),
+        MapEntry("shelving[$i][position]", shelving[i]['pivot']['shelving']),
+      ]);
+    }
+  }
+
   Response response = await Dio()
       .post(kUpdateItemUrl,
           data: formData,

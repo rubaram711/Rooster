@@ -25,6 +25,15 @@ import '../Widgets/reusable_photo_card_in_update_product.dart';
 import 'home_controller.dart';
 
 class ProductController extends GetxController {
+  List shelving=[];
+  addToShelving(Map map){
+    shelving.add(map);
+    update();
+  }
+  updateShelving(int index,String val){
+    warehousesList[index]['pivot']['shelving']=val;
+    update();
+  }
   List itemGroups = [];
   List groupsList = [];
   List<TextEditingController> textEditingControllerForGroups = [];
@@ -1177,6 +1186,7 @@ class ProductController extends GetxController {
       [1],
       isDiscontinuedChecked ? 1 : 0,
       altCodesList,
+      warehousesList
     );
 
     if (res['success'] == true) {

@@ -1334,6 +1334,8 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                               '${widget.info['inputDate'] ?? ''}',
                               '${widget.info['invoiceDeliveryDate'] ?? ''}',
                               orderedKeys,
+                              '${widget.info['invoiceType'] ?? ''}',
+                              '${widget.info['companyHeaderId'] ?? ''}',
                             );
                             if (res['success'] == true) {
                               // pendingDocsController.getAllPendingDocs();
@@ -1591,6 +1593,8 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                               '${widget.info['inputDate'] ?? ''}',
                               '${widget.info['invoiceDeliveryDate'] ?? ''}',
                               orderedKeys,
+                              '${widget.info['invoiceType'] ?? ''}',
+                              '${widget.info['companyHeaderId'] ?? ''}',
                             );
                             if (res['success'] == true) {
                               // pendingDocsController.getAllPendingDocs();

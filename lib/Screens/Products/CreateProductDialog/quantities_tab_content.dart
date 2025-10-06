@@ -247,7 +247,14 @@ class WarehousesAsRowInTable extends StatefulWidget {
 class _WarehousesAsRowInTableState extends State<WarehousesAsRowInTable> {
   bool isWarehousesChecked=false;
   HomeController homeController=Get.find();
+  ProductController productController=Get.find();
   TextEditingController shelvingTextEditingController=TextEditingController();
+  @override
+  void initState() {
+    print('widget.data[widget.index] ${widget.data}' );
+    shelvingTextEditingController.text=widget.data['pivot']['shelving']??'';
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -269,7 +276,9 @@ class _WarehousesAsRowInTableState extends State<WarehousesAsRowInTable> {
           SizedBox(
             width:homeController.isMobile.value?140:  MediaQuery.of(context).size.width * 0.08,
             child: ReusableTextField(
-                onChangedFunc: (val){},
+                onChangedFunc: (val){
+                  productController.updateShelving(widget.index, val);
+                },
                 validationFunc: (val){}, hint: '',
                 isPasswordField: false,
                 textEditingController: shelvingTextEditingController),

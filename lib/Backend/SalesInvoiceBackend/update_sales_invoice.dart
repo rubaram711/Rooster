@@ -38,7 +38,8 @@ Future updateSalesInvoice(
   String inputDate,
   String invoiceDeliveryDate,
     List<int> orderedKeys ,
-
+    String invoiceType,
+    String companyHeaderId ,
 ) async {
   String token = await getAccessTokenFromPref();
   FormData formData = FormData.fromMap({
@@ -74,6 +75,8 @@ Future updateSalesInvoice(
     "status": status,
     "inputDate": inputDate,
     "invoiceDeliveryDate": invoiceDeliveryDate,
+    "invoiceType": invoiceType  ,
+    "companyHeaderId": companyHeaderId,
   });
 
   if (isTermsAndConditionsUpdated) {

@@ -5057,6 +5057,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   '${widget.info['inputDate'] ?? ''}',
                                   '${widget.info['invoiceDeliveryDate'] ?? ''}',
                                   orderedKeys,
+                                  '${widget.info['invoiceType'] ?? ''}',
+                                  '${widget.info['companyHeaderId'] ?? ''}',
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();
@@ -5336,6 +5338,8 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   '${widget.info['inputDate'] ?? ''}',
                                   '${widget.info['invoiceDeliveryDate'] ?? ''}',
                                   orderedKeys,
+                                  '${widget.info['invoiceType'] ?? ''}',
+                                  '${widget.info['companyHeaderId'] ?? ''}',
                                 );
                                 if (res['success'] == true) {
                                   // pendingDocsController.getAllPendingDocs();

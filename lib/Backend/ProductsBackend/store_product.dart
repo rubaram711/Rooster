@@ -49,68 +49,8 @@ Future storeProduct(
     int decimalQuantity,
     List itemGroups,
     int discontinued,
-    List codes
+    List codes,
     ) async {
-  // print('codes $codes');
-  // print('discontinued $discontinued');
-  // print('warranty $warranty');
-  // print(lastAllowedPurchaseDate);
-  // print(priceCurrencyId);
-  // print(showCurrencyId);
-  // final uri = Uri.parse(kAddProductUrl);
-  // String token = await getAccessTokenFromPref();
-  // var response = await http.post(uri, headers: {
-  //   "Accept": "application/json",
-  //   "Authorization": "Bearer $token"
-  // },
-  //     body: {
-  //   'posCurrencyId':'$showCurrencyId',
-  //   'isBlocked':'$isBlocked',
-  //   'categoryId':categoryId,
-  //   'itemName':itemName,
-  //   'showOnPos':showOnPos,
-  //  // "warehouseId": '2',//todo '$warehouseId',
-  //   "itemTypeId": '$itemTypeId',//todo ???
-  //   "mainCode": mainCode,
-  //   "taxationGroupId": '$taxationGroupId',
-  //   // "itemCodes[0][type]": itemCodesType,
-  //   // "itemCodes[0][code]": itemCodesCode,
-  //   // "itemCodes[0][print]": itemCodesPrint,
-  //   "mainDescription": mainDescription,
-  //   "shortDescription": shortDescription,
-  //   "secondLanguageDescription": secondLanguageDescription,
-  //   "subrefId": '$subrefId',
-  //   "canBeSold": '$canBeSold',
-  //   "canBePurchased": '$canBePurchased',
-  //   "warranty": '$warranty',
-  //   "lastAllowedPurchaseDate": lastAllowedPurchaseDate,
-  //   "unitCost": '$unitCost',
-  //   "decimalCost": '$decimalCost',
-  //   "currencyId": '$currencyId',
-  //   "priceCurrencyId": '$priceCurrencyId',
-  //   "quantity": quantity,
-  //   "unitPrice": '$unitPrice',
-  //   "decimalPrice": '$decimalPrice',
-  //   "lineDiscountLimit": '$lineDiscountLimit',
-  //   "packageId": '$packageId',
-  //   "packageUnitName": packageUnitName.toUpperCase(),
-  //   // "packageUnitQuantity": packageUnitQuantity,
-  //   "packageSetName": packageSetName.toUpperCase(),
-  //   'packageSetQuantity': packageSetQuantity,
-  //   'packageSupersetName': packageSupersetName.toUpperCase(),
-  //   'packageSupersetQuantity': packageSupersetQuantity,
-  //   'packagePaletteName': packagePaletteName.toUpperCase(),
-  //   'packagePaletteQuantity': packagePaletteQuantity,
-  //   'packageContainerName': packageContainerName.toUpperCase(),
-  //   'packageContainerQuantity': packageContainerQuantity,
-  //   'decimalQuantity': '$decimalQuantity',
-  //   // 'itemGroups': '[1]',
-  //   'discontinued': '$discontinued',
-  //   'defaultTransactionPackageId': defaultTransactionPackageId,
-  // }
-  // );
-  // var p = json.decode(response.body);
-  // // return p; //p['success']==true
   String token = await getAccessTokenFromPref();
   FormData formData = FormData.fromMap({
     'posCurrencyId':'$showCurrencyId',
@@ -118,13 +58,9 @@ Future storeProduct(
     'categoryId':categoryId,
     'itemName':itemName==''?mainCode:itemName,
     'showOnPos':showOnPos,
-    // "warehouseId": '2',//todo '$warehouseId',
-    "itemTypeId": '$itemTypeId',//todo ???
+    "itemTypeId": '$itemTypeId',
     "mainCode": mainCode,
     "taxationGroupId": '$taxationGroupId',
-    // "itemCodes[0][type]": itemCodesType,
-    // "itemCodes[0][code]": itemCodesCode,
-    // "itemCodes[0][print]": itemCodesPrint,
     "mainDescription": mainDescription,
     "shortDescription": shortDescription,
     "secondLanguageDescription": secondLanguageDescription,
@@ -175,6 +111,7 @@ Future storeProduct(
       MapEntry("itemCodes[${i-1}][print]",'${codes[i]['print_on_invoice']==true?1:0}'),
     ]);
   }
+
 
   Response response = await Dio().post(
       kAddProductUrl,

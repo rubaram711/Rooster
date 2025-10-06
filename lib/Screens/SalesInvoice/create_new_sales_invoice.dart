@@ -908,6 +908,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             salesInvoiceController
                                                 .rowsInListViewInSalesInvoice,
                                             salesInvoiceController.orderedKeys,
+                                            salesInvoiceController.selectedInvoiceType,
+                                              '${salesInvoiceCont.selectedHeader['id']}'
                                           );
                                           if (res['success'] == true) {
                                             CommonWidgets.snackBar(
@@ -1077,6 +1079,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             salesInvoiceController
                                                 .rowsInListViewInSalesInvoice,
                                             salesInvoiceController.orderedKeys,
+                                            salesInvoiceController.selectedInvoiceType,
+                                              '${salesInvoiceCont.selectedHeader['id']}'
                                           );
                                           if (res['success'] == true) {
                                             CommonWidgets.snackBar(
@@ -1246,6 +1250,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             salesInvoiceController
                                                 .rowsInListViewInSalesInvoice,
                                             salesInvoiceController.orderedKeys,
+                                            salesInvoiceController.selectedInvoiceType,
+                                              '${salesInvoiceCont.selectedHeader['id']}'
                                           );
                                           if (res['success'] == true) {
                                             CommonWidgets.snackBar(
@@ -3930,6 +3936,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             salesInvoiceController
                                                 .rowsInListViewInSalesInvoice,
                                             salesInvoiceController.orderedKeys,
+                                            salesInvoiceController.selectedInvoiceType,
+                                              '${salesInvoiceCont.selectedHeader['id']}'
                                           );
                                           if (res['success'] == true) {
                                             CommonWidgets.snackBar(
