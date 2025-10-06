@@ -36,6 +36,7 @@ import '../../../Widgets/reusable_btn.dart';
 import '../../../Widgets/reusable_text_field.dart';
 import '../../../const/Sizes.dart';
 import '../../../const/colors.dart';
+import '../../Locale_Memory/save_header_2_locally.dart';
 import '../../Widgets/HomeWidgets/home_app_bar.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
 import '../../Widgets/TransferWidgets/under_item_btn.dart';
@@ -86,8 +87,6 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
   TextEditingController controller = TextEditingController();
   TextEditingController salesPersonController = TextEditingController();
   TextEditingController commissionController = TextEditingController();
-  TextEditingController currencyController = TextEditingController();
-
   TextEditingController totalCommissionController = TextEditingController();
   TextEditingController refController = TextEditingController();
   TextEditingController validityController = TextEditingController();
@@ -163,21 +162,24 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
       selectedTabIndex = 0;
       progressVar = 0;
       selectedCustomerIds = '';
-      currencyController.text = '';
+      salesInvoiceController.currencyController.text = '';
     });
   }
 
   getCurrency() async {
     await exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
-    currencyController.text = 'USD';
+    if (salesInvoiceController.currencyController.text.isEmpty) {
+      salesInvoiceController.currencyController.text = 'USD';
     int index = exchangeRatesController.currenciesNamesList.indexOf('USD');
     salesInvoiceController.selectedCurrencyId =
         exchangeRatesController.currenciesIdsList[index];
     salesInvoiceController.selectedCurrencySymbol =
         exchangeRatesController.currenciesSymbolsList[index];
     salesInvoiceController.selectedCurrencyName = 'USD';
-    var vat = await getCompanyVatFromPref();
-    salesInvoiceController.setCompanyVat(double.parse(vat));
+    }
+    // var vat = await getCompanyVatFromPref();
+    // salesInvoiceController.setCompanyVat(double.parse(vat));
+    setVat();
     var companyCurrency = await getCompanyPrimaryCurrencyFromPref();
     var companyCurrencyLatestRate =
         await getPrimaryCurrencyLatestRateFromPref();
@@ -187,8 +189,23 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
     );
   }
 
+  setVat() async {
+    if (salesInvoiceController.selectedHeaderIndex == 1) {
+      var vat = await getCompanyVatFromPref();
+      salesInvoiceController.setCompanyVat(double.parse(vat));
+    } else {
+      var vat = await getCompanyVat2FromPref();
+      salesInvoiceController.setCompanyVat(double.parse(vat));
+    }
+  }
+
   checkVatExempt() async {
-    var companySubjectToVat = await getCompanySubjectToVatFromPref();
+    late String  companySubjectToVat ;
+    if (salesInvoiceController.selectedHeaderIndex == 1) {
+     companySubjectToVat = await getCompanySubjectToVatFromPref();
+    }else{
+      companySubjectToVat = await getCompanySubjectToVat2FromPref();
+    }
     if (companySubjectToVat == '1') {
       vatExemptController.clear();
       salesInvoiceController.setIsVatExempted(false, false, false);
@@ -288,15 +305,13 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
     salesInvoiceController.isBeforeVatPrices = true;
     priceConditionController.text = 'Prices are before vat';
     warehouseController.getWarehousesFromBack();
-    warehouseController.resetWarehouse();
-
+    // warehouseController.resetWarehouse();
     salesInvoiceController.getAllUsersSalesPersonFromBack();
     salesInvoiceController.getAllTaxationGroupsFromBack();
     setVars();
     salesInvoiceController.getFieldsForCreateSalesInvoiceFromBack();
     getCurrency();
     salesInvoiceController.resetSalesInvoice();
-    warehouseController.resetWarehouse();
     salesInvoiceController.warehouseMenuController.text = '';
     salesInvoiceController.listViewLengthInSalesInvoice = 50;
     validityController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -1374,7 +1389,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                               //     0.07,
                                               // requestFocusOnTap: false,
                                               enableSearch: true,
-                                              controller: currencyController,
+                                              controller: salesInvoiceCont.currencyController,
                                               hintText: '',
                                               inputDecorationTheme: InputDecorationTheme(
                                                 // filled: true,
@@ -3093,11 +3108,19 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             salesInvoiceCont.setSelectedHeaderIndex(1);
                                             salesInvoiceCont.setSelectedHeader( salesInvoiceCont
                                                 .headersList[0]);
+                                            salesInvoiceCont.setQuotationCurrency(
+                                              salesInvoiceCont.headersList[0],
+                                            );
                                           }else{
                                             salesInvoiceCont.setSelectedHeaderIndex(2);
                                             salesInvoiceCont.setSelectedHeader( salesInvoiceCont
                                                 .headersList[1]);
+                                            salesInvoiceCont.setQuotationCurrency(
+                                              salesInvoiceCont.headersList[1],
+                                            );
                                           }
+                                          setVat();
+                                          checkVatExempt();
                                         },
                                         width1: MediaQuery.of(context).size.width * 0.15,
                                         width2: MediaQuery.of(context).size.width * 0.15,

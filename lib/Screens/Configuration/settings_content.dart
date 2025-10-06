@@ -73,7 +73,6 @@ class _SettingsContentState extends State<SettingsContent> {
   ExchangeRatesController exchangeRatesController = Get.find();
   QuotationController quotationController = Get.find();
   getInfoFromPref() async {
-    print('ok1');
 
     var selectedCost = await getCostCalculationTypeFromPref();
     var showQuantitiesOnPos = await getShowQuantitiesOnPosFromPref();

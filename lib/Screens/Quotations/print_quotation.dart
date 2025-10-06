@@ -36,14 +36,9 @@ class PrintQuotationData extends StatefulWidget {
     required this.totalPriceAfterDiscount,
     required this.additionalSpecialDiscount,
     required this.totalPriceAfterSpecialDiscount,
-
-    // required this.itemCurrencyName,
-    // required this.itemCurrencySymbol,
-    // required this.itemCurrencyLatestRate,
     required this.specialDisc,
     required this.specialDiscount,
     required this.specialDiscountAmount,
-
     required this.totalPriceAfterSpecialDiscountByQuotationCurrency,
     required this.vatByQuotationCurrency,
     required this.finalPriceByQuotationCurrency,
@@ -74,22 +69,16 @@ class PrintQuotationData extends StatefulWidget {
   final String totalBeforeVat;
   final String discountOnAllItem;
   final String totalAllItems;
-
   final String globalDiscount;
   final String totalPriceAfterDiscount;
   final String additionalSpecialDiscount;
   final String totalPriceAfterSpecialDiscount;
-  // final String itemCurrencyName;
-  // final String itemCurrencySymbol;
-  // final String itemCurrencyLatestRate;
-  //
   final String specialDisc;
   final String specialDiscount;
   final String specialDiscountAmount;
   final String totalPriceAfterSpecialDiscountByQuotationCurrency;
   final String vatByQuotationCurrency;
   final String finalPriceByQuotationCurrency;
-
   final String salesPerson;
   final String quotationCurrency;
   final String quotationCurrencySymbol;

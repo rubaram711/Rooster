@@ -24,6 +24,7 @@ import 'package:rooster_app/Widgets/reusable_add_card.dart';
 import 'package:rooster_app/utils/image_picker_helper.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Controllers/payment_terms_controller.dart';
+import '../../Locale_Memory/save_header_2_locally.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Widgets/HomeWidgets/home_app_bar.dart';
 import '../../Widgets/TransferWidgets/reusable_time_line_tile.dart';
@@ -94,7 +95,6 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
   TextEditingController refController = TextEditingController();
   TextEditingController validityController = TextEditingController();
   TextEditingController inputDateController = TextEditingController();
-  TextEditingController currencyController = TextEditingController();
   TextEditingController codeController = TextEditingController();
   TextEditingController vatExemptController = TextEditingController();
   TextEditingController vatController = TextEditingController();
@@ -108,7 +108,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
   TextEditingController paymentTermsController = TextEditingController();
   TextEditingController priceConditionController = TextEditingController();
   TextEditingController priceListController = TextEditingController();
-  TextEditingController warehouseController = TextEditingController();
+  // TextEditingController warehouseController = TextEditingController();
 
   String selectedCurrency = '';
 
@@ -159,15 +159,16 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     salesInvoiceController.selectedCurrencyId =
         widget.info['currency']['id'].toString();
     selectedCurrency = widget.info['currency']['name'] ?? '';
-    currencyController.text = selectedCurrency;
+    salesInvoiceController.currencyController.text = selectedCurrency;
     int index = exchangeRatesController.currenciesNamesList.indexOf(
       selectedCurrency,
     );
     salesInvoiceController.selectedCurrencyId =
         exchangeRatesController.currenciesIdsList[index];
     salesInvoiceController.selectedCurrencyName = selectedCurrency;
-    var vat = await getCompanyVatFromPref();
-    salesInvoiceController.setCompanyVat(double.parse(vat));
+    // var vat = await getCompanyVatFromPref();
+    // salesInvoiceController.setCompanyVat(double.parse(vat));
+    setVat();
     var companyCurrency = await getCompanyPrimaryCurrencyFromPref();
     salesInvoiceController.setCompanyPrimaryCurrency(companyCurrency);
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
@@ -179,9 +180,24 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     );
   }
 
+  setVat() async {
+    if (salesInvoiceController.selectedHeaderIndex == 1) {
+      var vat = await getCompanyVatFromPref();
+      salesInvoiceController.setCompanyVat(double.parse(vat));
+    } else {
+      var vat = await getCompanyVat2FromPref();
+      salesInvoiceController.setCompanyVat(double.parse(vat));
+    }
+  }
+
   // var isVatZero = false;
   checkVatExempt() async {
-    var companySubjectToVat = await getCompanySubjectToVatFromPref();
+    late String companySubjectToVat ;
+    if (salesInvoiceController.selectedHeaderIndex == 1) {
+     companySubjectToVat = await getCompanySubjectToVatFromPref();
+    }else{
+      companySubjectToVat = await getCompanySubjectToVat2FromPref();
+    }
     if (companySubjectToVat == '1') {
       vatExemptController.clear();
       salesInvoiceController.setIsVatExempted(false, false, false);
@@ -255,18 +271,14 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
   }
 
   String oldTermsAndConditionsString = '';
+  WarehouseController warehouseController=Get.find();
   @override
   void initState() {
     // print('widget.info');
     // print(widget.info);
-
-    checkVatExempt();
-    getCurrency();
-    salesInvoiceController.orderedKeys = [];
-    salesInvoiceController.rowsInListViewInSalesInvoice = {};
-    salesInvoiceController.salesInvoiceCounter = 0;
-    setProgressVar();
+    warehouseController.getWarehousesFromBack();
     salesInvoiceController.selectedHeaderIndex = 1;
+
     if (widget.info['companyHeader'] != null) {
       salesInvoiceController.selectedHeader=widget.info['companyHeader'];
       if ('${widget.info['companyHeader']['id']}' !=
@@ -274,6 +286,12 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
         salesInvoiceController.selectedHeaderIndex = 2;
       }
     }
+    checkVatExempt();
+    getCurrency();
+    salesInvoiceController.orderedKeys = [];
+    salesInvoiceController.rowsInListViewInSalesInvoice = {};
+    salesInvoiceController.salesInvoiceCounter = 0;
+    setProgressVar();
     salesInvoiceController.selectedInvoiceType =
         widget.info['invoiceType'] ?? '';
     if ('${widget.info['invoiceType']}'.toLowerCase() == 'real' ) {
@@ -290,11 +308,12 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
             ? '${widget.info['paymentTerm']['id']}'
             : '';
     if (widget.info['deliveredFromWarehouse'] != null) {
+      salesInvoiceController.selectedWarehouseId='${widget.info['deliveredFromWarehouse']['id']}';
+      salesInvoiceController.warehouseMenuController.text=widget.info['deliveredFromWarehouse']['name'];
       warehouseName = '${widget.info['deliveredFromWarehouse']['name'] ?? ''}';
       selectedWarehouseId =
           widget.info['deliveredFromWarehouse']['id'].toString();
       selectedWarehouseId = selectedWarehouseId.toString();
-      warehouseController.text = warehouseName;
     }
 
     validityController.text = widget.info['valueDate'] ?? '';
@@ -338,7 +357,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
     selectedCustomerIds = widget.info['client']['id'].toString();
     refController.text = widget.info['reference'] ?? '';
 
-    currencyController.text = widget.info['currency']['name'] ?? '';
+    salesInvoiceController.currencyController.text = widget.info['currency']['name'] ?? '';
 
     if (widget.info['termsAndConditions'] == null ||
         '${widget.info['termsAndConditions']}' == 'null') {
@@ -1422,7 +1441,7 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                             0.10,
                                         // requestFocusOnTap: false,
                                         enableSearch: true,
-                                        controller: currencyController,
+                                        controller:  salesInvoiceController.currencyController,
                                         hintText: '',
                                         inputDecorationTheme: InputDecorationTheme(
                                           // filled: true,
@@ -2835,11 +2854,17 @@ class _UpdateSalesInvoiceDialogState extends State<UpdateSalesInvoiceDialog> {
                                       salesInvoiceCont.setSelectedHeaderIndex(1);
                                       salesInvoiceCont.setSelectedHeader( salesInvoiceCont
                                           .headersList[0]);
+                                      salesInvoiceCont.setQuotationCurrency(salesInvoiceCont
+                                          .headersList[0]);
                                     }else{
                                       salesInvoiceCont.setSelectedHeaderIndex(2);
                                       salesInvoiceCont.setSelectedHeader( salesInvoiceCont
                                           .headersList[1]);
+                                      salesInvoiceCont.setQuotationCurrency(salesInvoiceCont
+                                          .headersList[1]);
                                     }
+                                    setVat();
+                                    checkVatExempt();
                                   },
                                   width1: MediaQuery.of(context).size.width * 0.15,
                                   width2: MediaQuery.of(context).size.width * 0.15,

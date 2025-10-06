@@ -75,41 +75,43 @@ abstract class SalesInvoiceControllerAbstract extends GetxController {
 }
 
 class SalesInvoiceController extends SalesInvoiceControllerAbstract {
-  String selectedPaymentTermId='';
+  String selectedPaymentTermId = '';
   setSelectedPaymentTermId(String val) {
     selectedPaymentTermId = val;
     update();
   }
 
-  List<Map> headersList=[];
+  List<Map> headersList = [];
   int selectedHeaderIndex = 1;
-  Map selectedHeader={};
-  setSelectedHeaderIndex(int val){
-    selectedHeaderIndex=val;
+  Map selectedHeader = {};
+  setSelectedHeaderIndex(int val) {
+    selectedHeaderIndex = val;
     update();
   }
-  setSelectedHeader(Map val){
-    print('header is $val');
-    selectedHeader=val;
+
+  setSelectedHeader(Map val) {
+    selectedHeader = val;
     update();
   }
 
   int selectedTypeIndex = 1;
-  String selectedInvoiceType='real';
-  setSelectedTypeIndex(int val){
-    selectedTypeIndex=val;
+  String selectedInvoiceType = 'real';
+  setSelectedTypeIndex(int val) {
+    selectedTypeIndex = val;
     update();
   }
-  setSelectedType(String val){
-    selectedInvoiceType=val;
+
+  setSelectedType(String val) {
+    selectedInvoiceType = val;
     update();
   }
 
   int salesInvoiceCounter = 0;
-  setSalesInvoiceCounter(int val){
-    salesInvoiceCounter=val;
+  setSalesInvoiceCounter(int val) {
+    salesInvoiceCounter = val;
     update();
   }
+
   TextEditingController warehouseMenuController = TextEditingController();
   String selectedWarehouseId = '';
   @override
@@ -689,9 +691,9 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     for (var header in p['companyHeaders'] ?? []) {
       headersList.add(header);
     }
-    // if(headersList.isNotEmpty && headersList[0].isNotEmpty) {
-    //   setQuotationCurrency(headersList[0]);
-    // }
+    if(headersList.isNotEmpty && headersList[0].isNotEmpty) {
+      setQuotationCurrency(headersList[0]);
+    }
 
     for (var priceList in p['cashingMethods']) {
       cashingMethodsNamesList.add(priceList['title']);
@@ -821,7 +823,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
               unitPriceControllers[keys[i]]!.text,
             ).toStringAsFixed(2);
             var totalLine =
-                '${(int.parse(rowsInListViewInSalesInvoice[keys[i]]['item_quantity']) * double.parse(unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(rowsInListViewInSalesInvoice[keys[i]]['item_discount']) / 100)}';
+                '${(double.parse(rowsInListViewInSalesInvoice[keys[i]]['item_quantity']) * double.parse(unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(rowsInListViewInSalesInvoice[keys[i]]['item_discount']) / 100)}';
 
             setEnteredUnitPriceInSalesInvoice(
               keys[i],
@@ -853,7 +855,6 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     listViewLengthInSalesInvoice = listViewLengthInSalesInvoice - val;
     update();
   }
-
 
   @override
   clearList() {
@@ -939,7 +940,9 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
       for (int i = 0; i < salesInvoicesList2.length; i++) {
         var cc = salesInvoicesList2[i];
 
-        if (cc['status'] == 'confirmed' || cc['status'] == 'cancelled'  || cc['status'] == 'pending' ) {
+        if (cc['status'] == 'confirmed' ||
+            cc['status'] == 'cancelled' ||
+            cc['status'] == 'pending') {
           // Check if this item already exists in SalesOrders List pending
           bool existsCC = salesInvoicesListCC.any(
             (element) => element['id'] == cc['id'],
@@ -1011,5 +1014,81 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   addToRowsInListViewInSalesInvoiceData(List p) {
     rowsInListViewInSalesInvoiceData = p;
     update();
+  }
+
+  TextEditingController currencyController = TextEditingController();
+  setQuotationCurrency(Map header) {
+    if (header['default_quotation_currency'] != null) {
+      exchangeRateForSelectedCurrency =
+          header['default_quotation_currency']['latest_rate'];
+      selectedCurrencyId = '${header['default_quotation_currency']['id']}';
+      selectedCurrencySymbol = header['default_quotation_currency']['symbol'];
+      selectedCurrencyName = header['default_quotation_currency']['name'];
+      currencyController.text = header['default_quotation_currency']['name'];
+      setPriceAsCurrency(header['default_quotation_currency']['name']);
+      update();
+    }
+  }
+
+  setPriceAsCurrency(String val) {
+    var keys = unitPriceControllers.keys.toList();
+    for (int i = 0; i < unitPriceControllers.length; i++) {
+      var selectedItemId =
+          '${rowsInListViewInSalesInvoice[keys[i]]['item_id']}';
+      if (selectedItemId != '') {
+        if (itemsPricesCurrencies[selectedItemId] == val) {
+          unitPriceControllers[keys[i]]!.text =
+              itemUnitPrice[selectedItemId].toString();
+        } else if (val == 'USD' &&
+            itemsPricesCurrencies[selectedItemId] != val) {
+          var result = exchangeRatesController.exchangeRatesList.firstWhere(
+            (item) => item["currency"] == itemsPricesCurrencies[selectedItemId],
+            orElse: () => null,
+          );
+          var divider = '1';
+          if (result != null) {
+            divider = result["exchange_rate"].toString();
+          }
+          unitPriceControllers[keys[i]]!.text =
+              '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+        } else if (selectedCurrencyName != 'USD' &&
+            itemsPricesCurrencies[selectedItemId] == 'USD') {
+          unitPriceControllers[keys[i]]!.text =
+              '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
+        } else {
+          var result = exchangeRatesController.exchangeRatesList.firstWhere(
+            (item) => item["currency"] == itemsPricesCurrencies[selectedItemId],
+            orElse: () => null,
+          );
+          var divider = '1';
+          if (result != null) {
+            divider = result["exchange_rate"].toString();
+          }
+          var usdPrice =
+              '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+          unitPriceControllers[keys[i]]!.text =
+              '${double.parse('${(double.parse(usdPrice) * double.parse(exchangeRateForSelectedCurrency))}')}';
+        }
+        if (!isBeforeVatPrices) {
+          var taxRate = double.parse(itemsVats[selectedItemId]) / 100.0;
+          var taxValue =
+              taxRate * double.parse(unitPriceControllers[keys[i]]!.text);
+
+          unitPriceControllers[keys[i]]!.text =
+              '${double.parse(unitPriceControllers[keys[i]]!.text) + taxValue}';
+        }
+        unitPriceControllers[keys[i]]!.text = double.parse(
+          unitPriceControllers[keys[i]]!.text,
+        ).toStringAsFixed(2);
+        var totalLine =
+            '${(double.parse(rowsInListViewInSalesInvoice[keys[i]]['item_quantity']) * double.parse(unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(rowsInListViewInSalesInvoice[keys[i]]['item_discount']) / 100)}';
+        setEnteredUnitPriceInSalesInvoice(
+          keys[i],
+          unitPriceControllers[keys[i]]!.text,
+        );
+        setMainTotalInSalesInvoice(keys[i], totalLine);
+        getTotalItems();
+      }
+    }
   }
 }

@@ -251,7 +251,6 @@ class _WarehousesAsRowInTableState extends State<WarehousesAsRowInTable> {
   TextEditingController shelvingTextEditingController=TextEditingController();
   @override
   void initState() {
-    print('widget.data[widget.index] ${widget.data}' );
     shelvingTextEditingController.text=widget.data['pivot']['shelving']??'';
     super.initState();
   }
