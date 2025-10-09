@@ -8,34 +8,42 @@ saveUserInfoLocally(
   String companyId,
   String companyName,
   String isItGarage,
+  String isItHasDoubleBook,
+  String isItHasMultiHeaders,
 ) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('accessToken', accessToken);
-  prefs.setString('identifier1', userId);
+  prefs.setString('identifier2', userId);
   prefs.setString('email', email);
   prefs.setString('name', name);
   prefs.setString('companyId', companyId);
   prefs.setString('companyName', companyName);
   prefs.setString('isItGarage', isItGarage);
+  prefs.setString('isItHasDoubleBook', isItHasDoubleBook);
+  prefs.setString('isItHasMultiHeaders', isItHasMultiHeaders);
 }
 
 Future<Map> getUserInfoFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String accessToken = prefs.getString('accessToken') ?? '';
-  String userId = prefs.getString('identifier1') ?? '';
+  String userId = prefs.getString('identifier2') ?? '';
   String email = prefs.getString('email') ?? '';
   String name = prefs.getString('name') ?? '';
   String companyId = prefs.getString('companyId') ?? '';
   String companyName = prefs.getString('companyName') ?? '';
   String isItGarage = prefs.getString('isItGarage') ?? '0';
+  String isItHasDoubleBook = prefs.getString('isItHasDoubleBook') ?? '0';
+  String isItHasMultiHeaders = prefs.getString('isItHasMultiHeaders') ?? '0';
   return {
     'accessToken': accessToken,
-    'identifier1': userId,
+    'identifier2': userId,
     'email': email,
     'name': name,
     'companyId': companyId,
     'companyName': companyName,
     'isItGarage': isItGarage,
+    'isItHasDoubleBook': isItHasDoubleBook,
+    'isItHasMultiHeaders': isItHasMultiHeaders,
   };
 }
 
@@ -59,7 +67,7 @@ Future<String> getNameFromPref() async {
 
 Future<String> getIdFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String userId = prefs.getString('identifier1') ?? '';
+  String userId = prefs.getString('identifier2') ?? '';
   return userId;
 }
 
@@ -97,6 +105,16 @@ Future<String> getIsItGarageFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String isItGarage = prefs.getString('isItGarage') ?? '0';
   return isItGarage;
+}
+Future<String> getIsItHasDoubleBookFromPref() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String isItHasDoubleBook = prefs.getString('isItHasDoubleBook') ?? '0';
+  return isItHasDoubleBook;
+}
+Future<String> getIsItHasMultiHeadersFromPref() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String isItHasMultiHeaders = prefs.getString('isItHasMultiHeaders') ?? '0';
+  return isItHasMultiHeaders;
 }
 
 saveCompanySettingsLocally(

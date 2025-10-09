@@ -212,7 +212,7 @@ class _GroupRowState extends State<GroupRow> {
                 // menuStyle: ,
                 menuHeight: 250,
                 dropdownMenuEntries: cont
-                    .childGroupsCodes[widget.index]
+                    .childGroupsNames[widget.index]
                     .map<DropdownMenuEntry<String>>(
                         (String option) {
                       return DropdownMenuEntry<String>(
@@ -222,32 +222,32 @@ class _GroupRowState extends State<GroupRow> {
                     }).toList(),
                 enableFilter: true,
                 onSelected: (String? val) {
-                  var index = cont.childGroupsCodes[widget.index].indexOf(val!);
+                  var index = cont.childGroupsNames[widget.index].indexOf(val!);
                   cont.addIdToSelectedGroupsIdsList(cont.groupsIds[widget.index][index]);
                   cont.addSelectedGroupsIdsForShow([cont.groupsIds[widget.index][index]], widget.index);
-                  cont.addSelectedGroupsCodesForShow([val], widget.index);
-                  cont.addSelectedGroupsNamesForShow([cont.childGroupsNames[widget.index][index]], widget.index);
+                  cont.addSelectedGroupsNamesForShow([val], widget.index);
+                  cont.addSelectedGroupsCodesForShow([cont.childGroupsCodes[widget.index][index]], widget.index);
                 },
               ),
-              SizedBox(width: MediaQuery.of(context).size.width * 0.01),
-              Container(
-                height:widget.isMobile?55: 47,
-                padding:const EdgeInsets.symmetric(horizontal: 10),
-                width: widget.isMobile?MediaQuery.of(context).size.width * 0.2:MediaQuery.of(context).size.width * 0.15,
-                decoration: BoxDecoration(
-                  borderRadius:const BorderRadius.all( Radius.circular(9)),
-                  border:   Border.all(color: Colors.black.withAlpha((0.1 * 255).toInt()), width: 1),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                        cont.selectedGroupsNamesForShow[widget.index].isNotEmpty? cont.selectedGroupsNamesForShow[widget.index][0]:'',
-                    ),
-                  ],
-                ),
-              )
+              // SizedBox(width: MediaQuery.of(context).size.width * 0.01),
+              // Container(
+              //   height:widget.isMobile?55: 47,
+              //   padding:const EdgeInsets.symmetric(horizontal: 10),
+              //   width: widget.isMobile?MediaQuery.of(context).size.width * 0.2:MediaQuery.of(context).size.width * 0.15,
+              //   decoration: BoxDecoration(
+              //     borderRadius:const BorderRadius.all( Radius.circular(9)),
+              //     border:   Border.all(color: Colors.black.withAlpha((0.1 * 255).toInt()), width: 1),
+              //   ),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.start,
+              //     crossAxisAlignment: CrossAxisAlignment.center,
+              //     children: [
+              //       Text(
+              //           cont.selectedGroupsNamesForShow[widget.index].isNotEmpty? cont.selectedGroupsNamesForShow[widget.index][0]:'',
+              //       ),
+              //     ],
+              //   ),
+              // )
               // DialogDropMenu(
               //   controller: textEditingController,
               //   optionsList: cont.groupBranches[widget.index]??[],

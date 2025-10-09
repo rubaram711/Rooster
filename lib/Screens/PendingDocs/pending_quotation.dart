@@ -1638,7 +1638,9 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                               ),
                             ),
                           ):SizedBox.shrink(),
-
+                          widget.info['status']=='confirmed'
+                              ?SizedBox.shrink()
+                              :
                           Tooltip(
                             message: 'confirm'.tr,
                             child: InkWell(
@@ -2776,7 +2778,9 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                               ),
                             ),
                           ):SizedBox.shrink(),
-
+                          widget.info['status']=='confirmed'
+                              ?SizedBox.shrink()
+                              :
                           Tooltip(
                             message: 'confirm'.tr,
                             child: InkWell(

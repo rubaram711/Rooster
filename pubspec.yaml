@@ -67,6 +67,10 @@ dependencies:
   drag_and_drop_lists:
   flutter_screenutil: ^5.9.3
   file_picker: ^9.0.0
+#  country_pickers: ^3.0.1
+  intl_phone_field: ^3.1.0
+  flutter_intl_phone_field: ^0.0.7
+  country_picker_dialog:
 #  flutter_barcode_scanner: ^2.0.0
 #  share_plus: ^10.1.4
 #  js: ^0.6.7

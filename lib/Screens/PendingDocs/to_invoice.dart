@@ -1191,7 +1191,9 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                               ),
                             ),
                           ):SizedBox.shrink(),
-
+                          widget.info['status']=='confirmed'
+                              ?SizedBox.shrink()
+                              :
                           Tooltip(
                             message: 'confirm'.tr,
                             child: InkWell(
@@ -2589,7 +2591,9 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                               ),
                             ),
                           ):SizedBox.shrink(),
-
+                          widget.info['status']=='confirmed'
+                              ?SizedBox.shrink()
+                              :
                           Tooltip(
                             message: 'confirm'.tr,
                             child: InkWell(

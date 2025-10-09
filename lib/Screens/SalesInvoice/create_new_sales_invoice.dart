@@ -286,9 +286,17 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
       }
     });
   }
-
+  late bool isItHasTwoHeaders=false;
+  late bool isItHasDoubleBook=false;
+  checkIfItItHasTwo()async{
+    var head=await getIsItHasMultiHeadersFromPref();
+    var book=await getIsItHasMultiHeadersFromPref();
+    isItHasTwoHeaders=(head=='1');
+    isItHasDoubleBook=(book=='1');
+  }
   @override
   void initState() {
+    checkIfItItHasTwo();
     salesInvoiceController
         .rowsInListViewInSalesInvoice={};
     salesInvoiceController.orderedKeys=[];
@@ -1326,7 +1334,75 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                             ),
                           ),
                         ),
-                        gapH16,
+                        // gapH16,
+                        isItHasTwoHeaders
+                            ? Column(
+                          children: [
+                            gapH10,
+                            Row(
+                              children: [
+                                Text('header'.tr),
+                                gapW64,
+                                ReusableRadioBtns(
+                                  isRow: true,
+                                  groupVal: salesInvoiceCont
+                                      .selectedHeaderIndex,
+                                  title1: salesInvoiceCont
+                                      .headersList[0]['header_name'],
+                                  title2: salesInvoiceCont
+                                      .headersList[1]['header_name'],
+                                  func: (value) {
+                                    if(value==1){
+                                      salesInvoiceCont.setSelectedHeaderIndex(1);
+                                      salesInvoiceCont.setSelectedHeader( salesInvoiceCont
+                                          .headersList[0]);
+                                      salesInvoiceCont.setQuotationCurrency(
+                                        salesInvoiceCont.headersList[0],
+                                      );
+                                    }else{
+                                      salesInvoiceCont.setSelectedHeaderIndex(2);
+                                      salesInvoiceCont.setSelectedHeader( salesInvoiceCont
+                                          .headersList[1]);
+                                      salesInvoiceCont.setQuotationCurrency(
+                                        salesInvoiceCont.headersList[1],
+                                      );
+                                    }
+                                    setVat();
+                                    checkVatExempt();
+                                  },
+                                  width1: MediaQuery.of(context).size.width * 0.15,
+                                  width2: MediaQuery.of(context).size.width * 0.15,
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                            : SizedBox.shrink(),
+                        isItHasDoubleBook?Row(
+                          children: [
+                            Text('invoice'.tr),
+                            gapW64,
+                            ReusableRadioBtns(
+                              isRow: true,
+                              groupVal: salesInvoiceCont
+                                  .selectedTypeIndex,
+                              title1: 'real'.tr,
+                              title2: 'estimate'.tr,
+                              func: (value) {
+                                if(value==1){
+                                  salesInvoiceCont.setSelectedTypeIndex(1);
+                                  salesInvoiceCont.setSelectedType('real');
+                                }else{
+                                  salesInvoiceCont.setSelectedTypeIndex(2);
+                                  salesInvoiceCont.setSelectedType('estimate');
+                                }
+                              },
+                              width1: MediaQuery.of(context).size.width * 0.15,
+                              width2: MediaQuery.of(context).size.width * 0.15,
+                            ),
+                          ],
+                        ):SizedBox.shrink(),
+                        gapH10,
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -3086,78 +3162,10 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                       : SizedBox(),
                                 ],
                               ),
-                              homeController.companyName == 'CASALAGO' ||
-                                  homeController.companyName == 'AMAZON'
-                                  ? Column(
-                                children: [
-                                  gapH16,
-                                  Row(
-                                    children: [
-                                      Text('header'.tr),
-                                      gapW64,
-                                      ReusableRadioBtns(
-                                        isRow: true,
-                                        groupVal: salesInvoiceCont
-                                            .selectedHeaderIndex,
-                                        title1: salesInvoiceCont
-                                            .headersList[0]['header_name'],
-                                        title2: salesInvoiceCont
-                                            .headersList[1]['header_name'],
-                                        func: (value) {
-                                          if(value==1){
-                                            salesInvoiceCont.setSelectedHeaderIndex(1);
-                                            salesInvoiceCont.setSelectedHeader( salesInvoiceCont
-                                                .headersList[0]);
-                                            salesInvoiceCont.setQuotationCurrency(
-                                              salesInvoiceCont.headersList[0],
-                                            );
-                                          }else{
-                                            salesInvoiceCont.setSelectedHeaderIndex(2);
-                                            salesInvoiceCont.setSelectedHeader( salesInvoiceCont
-                                                .headersList[1]);
-                                            salesInvoiceCont.setQuotationCurrency(
-                                              salesInvoiceCont.headersList[1],
-                                            );
-                                          }
-                                          setVat();
-                                          checkVatExempt();
-                                        },
-                                        width1: MediaQuery.of(context).size.width * 0.15,
-                                        width2: MediaQuery.of(context).size.width * 0.15,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )
-                                  : SizedBox.shrink(),
-                              Row(
-                                children: [
-                                  Text('invoice'.tr),
-                                  gapW64,
-                                  ReusableRadioBtns(
-                                    isRow: true,
-                                    groupVal: salesInvoiceCont
-                                        .selectedTypeIndex,
-                                    title1: 'real'.tr,
-                                    title2: 'estimate'.tr,
-                                    func: (value) {
-                                    if(value==1){
-                                      salesInvoiceCont.setSelectedTypeIndex(1);
-                                      salesInvoiceCont.setSelectedType('real');
-                                    }else{
-                                      salesInvoiceCont.setSelectedTypeIndex(2);
-                                      salesInvoiceCont.setSelectedType('estimate');
-                                    }
-                                    },
-                                    width1: MediaQuery.of(context).size.width * 0.15,
-                                    width2: MediaQuery.of(context).size.width * 0.15,
-                                  ),
-                                ],
-                              ),
+
                             ],
                           ),
                         ),
-
                         gapH16,
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -4604,6 +4612,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
               children: [
                 Obx(
                   () => ReusableDropDownMenusWithSearch(
+                    searchList: cont.items.map((item) => {
+                      "id": '${item["id"]}',
+                      "codes": cont.allCodesForItem['${item["id"]}'],
+                    }).toList(),
                     list:
                         cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
                     text: ''.tr,

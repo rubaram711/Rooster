@@ -126,6 +126,7 @@ class CompanySettingsController extends GetxController {
         headersList.add(p['data'][i]);
 
       }
+      print('headersList++ $headersList');
       // cashTraysList=cashTraysList.reversed.toList();
 
       if(headersList.isEmpty && isItHaveHeader2){

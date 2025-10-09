@@ -249,8 +249,14 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
   }
 
   String oldTermsAndConditionsString = '';
+  late bool isItHasTwoHeaders=false;
+  checkIfItItHasTwoHeaders()async{
+    var val=await getIsItHasMultiHeadersFromPref();
+    isItHasTwoHeaders=(val=='1');
+  }
   @override
   void initState() {
+    checkIfItItHasTwoHeaders();
     quotationController.rowsInListViewInQuotation = {};
     quotationController.orderedKeys = [];
     quotationController.quotationCounter = 0;
@@ -321,6 +327,8 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     codeController.text = widget.info['code'] ?? '';
     selectedItemCode = widget.info['code'] ?? '';
     selectedCustomerIds = widget.info['client']['id'].toString();
+    print('+++++++++++++++++++++ ${widget.info}');
+
     refController.text = widget.info['reference'] ?? '';
     validityController.text = widget.info['validity'] ?? '';
     inputDateController.text = widget.info['inputDate'] ?? '';
@@ -598,7 +606,9 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                               }
                             },
                           ),
-                          UnderTitleBtn(
+                          widget.info['status']=='confirmed'
+                          ?SizedBox.shrink()
+                          :UnderTitleBtn(
                             text: 'confirm'.tr,
                             onTap: () async {
                               quotationCont.setStatus('confirmed');
@@ -735,9 +745,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     cancelledReasonController.text,
                                     quotationCont.selectedDeliveryTermId,
                                     chanceController.text,
-                                    homeController.companyName == 'CASALAGO' ||
-                                            homeController.companyName ==
-                                                'AMAZON'
+                                      isItHasTwoHeaders
                                         ? quotationCont
                                             .headersList[quotationCont
                                                 .selectedHeaderIndex-1]['id']
@@ -931,11 +939,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                 cancelledReason,
                                                 quotationCont.selectedDeliveryTermId,
                                                 chanceController.text,
-                                                homeController.companyName ==
-                                                            'CASALAGO' ||
-                                                        homeController
-                                                                .companyName ==
-                                                            'AMAZON'
+                                                  isItHasTwoHeaders
                                                     ? quotationCont
                                                         .headersList[quotationCont
                                                             .selectedHeaderIndex-1]['id']
@@ -1043,8 +1047,43 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                         ),
                       ],
                     ),
-                  gapH16,
-
+                  // gapH10,
+                  isItHasTwoHeaders
+                      ? Column(
+                    children: [
+                      gapH10,
+                      ReusableRadioBtns(
+                        isRow: true,
+                        groupVal: quotationCont
+                            .selectedHeaderIndex,
+                        title1: quotationCont
+                            .headersList[0]['header_name'],
+                        title2: quotationCont
+                            .headersList[1]['header_name'],
+                        func: (value) {
+                          if(value==1){
+                            quotationCont.setSelectedHeaderIndex(1);
+                            quotationCont.setSelectedHeader( quotationCont
+                                .headersList[0]);
+                            quotationCont.setQuotationCurrency(quotationCont
+                                .headersList[0]);
+                          }else{
+                            quotationCont.setSelectedHeaderIndex(2);
+                            quotationCont.setSelectedHeader( quotationCont
+                                .headersList[1]);
+                            quotationCont.setQuotationCurrency(quotationCont
+                                .headersList[1]);
+                          }
+                          setVat();
+                          checkVatExempt();
+                        },
+                        width1: MediaQuery.of(context).size.width * 0.15,
+                        width2: MediaQuery.of(context).size.width * 0.15,
+                      ),
+                    ],
+                  )
+                      : SizedBox.shrink(),
+                  gapH10,
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
@@ -3442,42 +3481,6 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                   : SizedBox(),
                             ],
                           ),
-                        homeController.companyName == 'CASALAGO' ||
-                                homeController.companyName == 'AMAZON'
-                            ? Column(
-                              children: [
-                                gapH16,
-                                ReusableRadioBtns(
-                                  isRow: true,
-                                  groupVal: quotationCont
-                                      .selectedHeaderIndex,
-                                  title1: quotationCont
-                                      .headersList[0]['header_name'],
-                                  title2: quotationCont
-                                      .headersList[1]['header_name'],
-                                  func: (value) {
-                                    if(value==1){
-                                      quotationCont.setSelectedHeaderIndex(1);
-                                      quotationCont.setSelectedHeader( quotationCont
-                                          .headersList[0]);
-                                      quotationCont.setQuotationCurrency(quotationCont
-                                          .headersList[0]);
-                                    }else{
-                                      quotationCont.setSelectedHeaderIndex(2);
-                                      quotationCont.setSelectedHeader( quotationCont
-                                          .headersList[1]);
-                                      quotationCont.setQuotationCurrency(quotationCont
-                                          .headersList[1]);
-                                    }
-                                    setVat();
-                                    checkVatExempt();
-                                  },
-                                  width1: MediaQuery.of(context).size.width * 0.15,
-                                  width2: MediaQuery.of(context).size.width * 0.15,
-                                ),
-                              ],
-                            )
-                            : SizedBox.shrink(),
                         gapH10,
                       ],
                     ),
@@ -4511,8 +4514,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                 cancelledReasonController.text,
                                 quotationCont.selectedDeliveryTermId,
                                 chanceController.text,
-                                homeController.companyName == 'CASALAGO' ||
-                                        homeController.companyName == 'AMAZON'
+                                  isItHasTwoHeaders
                                     ? quotationCont
                                         .headersList[quotationCont
                                             .selectedHeaderIndex-1]['id']
@@ -4938,6 +4940,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ReusableDropDownMenusWithSearch(
+                  searchList: cont.items.map((item) => {
+                    "id": '${item["id"]}',
+                    "codes": cont.allCodesForItem['${item["id"]}'],
+                  }).toList(),
                   list:
                       quotationController
                           .itemsMultiPartList, // Assuming multiList is List<List<String>>

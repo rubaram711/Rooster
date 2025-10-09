@@ -1372,6 +1372,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               ),
                             ),
                           ):SizedBox.shrink(),
+                          widget.info['status']=='confirmed'
+                              ?SizedBox.shrink()
+                              :
                           Tooltip(
                             message: 'confirm'.tr,
                             child: InkWell(
@@ -3395,6 +3398,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               ),
                             ),
                           ):SizedBox.shrink(),
+                          widget.info['status']=='confirmed'
+                              ?SizedBox.shrink()
+                              :
                           Tooltip(
                             message: 'confirm'.tr,
                             child: InkWell(

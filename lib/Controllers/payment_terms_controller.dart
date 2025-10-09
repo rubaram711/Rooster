@@ -13,22 +13,18 @@ class PaymentTermsController extends GetxController {
   List<String> paymentTermsIdsList = [];
   bool isPaymentTermsFetched = false;
 
-
+addPaymentTermsToLists(Map term){
+  paymentTermsList.add(term);
+  paymentTermsNamesList=paymentTermsList.map((e) => '${e['title']}',).toList();
+  paymentTermsIdsList=paymentTermsList.map((e) => '${e['id']}',).toList();
+  paymentTermsNamesList.add(term['title']);
+  paymentTermsIdsList.add('${term['id']}');
+  update();
+}
   getPaymentTermsFromBack()async{
     paymentTermsList = [];
     paymentTermsIdsList = [];
-    paymentTermsNamesList = [
-      // 'Immediate Payment',
-      // '21 Days',
-      // '15 Days',
-      // '30 Days',
-      // '45 Days',
-      // 'End of following month',
-      // '10 Days after end of next',
-      // 'month',
-      // '30% now, balance 60 Days',
-      // '2/7 Net 30',
-      ];
+    paymentTermsNamesList = [];
     isPaymentTermsFetched = false;
     var res= await getAllPaymentTerms();
     if (res['success'] == true) {

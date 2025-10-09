@@ -47,7 +47,7 @@ class SettingsContent extends StatefulWidget {
 class _SettingsContentState extends State<SettingsContent> {
   int selectedTabIndex = 0;
   List tabsList = ['cost_options', 'pos_options', 'company_settings', 'header'];
-  List tabsListForCASALAGO = [
+  List tabsListWithTwoHeaders = [
     'cost_options',
     'pos_options',
     'company_settings',
@@ -61,7 +61,7 @@ class _SettingsContentState extends State<SettingsContent> {
     const CompanySettingsTab(),
     ReusableHeaderSection(index: 0,),//todo change
   ];
-  List tabsContentForCASALAGO = [
+  List tabsContentWithTwoHeaders = [
     const CostOptionsTab(),
     const PosOptionsTab(),
     const CompanySettingsTab(),
@@ -144,16 +144,23 @@ class _SettingsContentState extends State<SettingsContent> {
       companySettingsController.isPosCurrencyFound = true;
     }
   }
-
+  
+  late bool isItHasTwoHeaders=false;
+  checkIfItItHasTwoHeaders()async{
+    var val=await getIsItHasMultiHeadersFromPref();
+   setState(() {
+     isItHasTwoHeaders=(val=='1');
+   });
+  }
 
   @override
   void initState() {
+    checkIfItItHasTwoHeaders();
     getInfoFromPref();
     exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
     companySettingsController.headersList=[];
     companySettingsController.isHeadersFetched=false;
-    companySettingsController.getHeadersFromBack(homeController.companyName == 'CASALAGO' ||
-        homeController.companyName == 'AMAZON');
+    companySettingsController.getHeadersFromBack(isItHasTwoHeaders);
     super.initState();
   }
 
@@ -199,23 +206,22 @@ class _SettingsContentState extends State<SettingsContent> {
                 spacing: 0.0,
                 direction: Axis.horizontal,
                 children:
-                    homeController.companyName == 'CASALAGO' ||
-                            homeController.companyName == 'AMAZON'
-                        ? tabsListForCASALAGO
+                    isItHasTwoHeaders
+                        ? tabsListWithTwoHeaders
                             .map(
                               (element) => ReusableBuildTabChipItem(
                                 isMobile: homeController.isMobile.value,
                                 name: element,
-                                index: tabsListForCASALAGO.indexOf(element),
+                                index: tabsListWithTwoHeaders.indexOf(element),
                                 function: () {
                                   setState(() {
-                                    selectedTabIndex = tabsListForCASALAGO
+                                    selectedTabIndex = tabsListWithTwoHeaders
                                         .indexOf(element);
                                   });
                                 },
                                 isClicked:
                                     selectedTabIndex ==
-                                        tabsListForCASALAGO.indexOf(element),
+                                        tabsListWithTwoHeaders.indexOf(element),
                               ),
                             )
                             .toList()
@@ -243,8 +249,8 @@ class _SettingsContentState extends State<SettingsContent> {
           ),
           GetBuilder<CompanySettingsController>(
             builder: (cont) {
-              return cont.isHeadersFetched? homeController.companyName == 'CASALAGO' || homeController.companyName == 'AMAZON'
-                  ?tabsContentForCASALAGO[selectedTabIndex]:tabsContent[selectedTabIndex]:loading();} ,),
+              return cont.isHeadersFetched? isItHasTwoHeaders
+                  ?tabsContentWithTwoHeaders[selectedTabIndex]:tabsContent[selectedTabIndex]:loading();} ,),
           const Spacer(),
           GetBuilder<CompanySettingsController>(
             builder: (cont) {
@@ -487,10 +493,6 @@ class _SettingsContentState extends State<SettingsContent> {
       ),
     );
   }
-
-  //companyId,
-  //                         costOptionsCutsList[cont.selectedCostOption-1],
-  //                         cont.isShowQuantitiesOnPosChecked?'1':'0'
 }
 
 class CostOptionsTab extends StatefulWidget {
@@ -889,530 +891,6 @@ class _CompanySettingsTabState extends State<CompanySettingsTab> {
   }
 }
 
-// class HeaderTab extends StatefulWidget {
-//   const HeaderTab({super.key});
-//
-//   @override
-//   State<HeaderTab> createState() => _HeaderTabState();
-// }
-//
-// class _HeaderTabState extends State<HeaderTab> {
-//   CompanySettingsController companySettingsController = Get.find();
-//   HomeController homeController = Get.find();
-//   addNewHeader() {
-//     Map header = {
-//       'logo': '',
-//       'fullCompanyName': '',
-//       'email': '',
-//       'vat': '',
-//       'trn': '',
-//       'bankInfo': '',
-//       'phoneCode': '+961',
-//       'phoneNumber': '',
-//       'mobileCode': '+961',
-//       'mobileNumber': '',
-//       'address': '',
-//       'localPayments': '',
-//       'companySubjectToVat': '',
-//       'headerName': '',
-//     };
-//     companySettingsController.addToHeadersList(header);
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return
-//     // homeController.companyName == 'CASALAGO' || homeController.companyName == 'AMAZON'
-//     //   ? GetBuilder<CompanySettingsController>(
-//     //     builder: (cont) {
-//     //       return Column(
-//     //         children: [
-//     //           SizedBox(
-//     //             // height: cont.headersList.isEmpty?20:420,
-//     //             height: MediaQuery.of(context).size.height * 0.65,
-//     //             child: ListView.builder(
-//     //               itemCount: cont.headersList.length,
-//     //               itemBuilder:
-//     //                   (context, index) => ReusableCASALAGOHeaderSection(index: index),
-//     //             ),
-//     //           ),
-//     //           gapH16,
-//     //           ReusableAddCard(
-//     //             text: 'add_new_header'.tr,
-//     //             onTap: () {
-//     //               addNewHeader();
-//     //             },
-//     //           ),
-//     //         ],
-//     //       );
-//     //     },
-//     //   )
-//     //   :
-//     Container(
-//       color: Colors.white, // width: MediaQuery.of(context).size.width * 0.8,
-//       height: MediaQuery.of(context).size.height * 0.65,
-//       child: ReusableHeaderSection(),
-//     );
-//   }
-// }
-
-// class ReusableHeaderSection extends StatefulWidget {
-//   const ReusableHeaderSection({super.key});
-//   @override
-//   State<ReusableHeaderSection> createState() => _ReusableHeaderSectionState();
-// }
-//
-// class _ReusableHeaderSectionState extends State<ReusableHeaderSection> {
-//   HomeController homeController = Get.find();
-//   final ScrollController scrollController = ScrollController();
-//   @override
-//   Widget build(BuildContext context) {
-//     return homeController.isMobile.value
-//         ? Container(
-//           decoration:
-//               homeController.companyName == 'CASALAGO'
-//                   ? BoxDecoration(
-//                     border: Border.all(
-//                       color: Primary.black.withAlpha((0.2 * 255).toInt()),
-//                     ),
-//                     borderRadius: BorderRadius.circular(9),
-//                   )
-//                   : BoxDecoration(color: Colors.white),
-//           // height: MediaQuery.of(context).size.height * 0.65,
-//           child: GetBuilder<CompanySettingsController>(
-//             builder: (cont) {
-//               return SingleChildScrollView(
-//                 child: Column(
-//                   mainAxisAlignment: MainAxisAlignment.start,
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     gapH32,
-//                     Row(
-//                       mainAxisAlignment: MainAxisAlignment.start,
-//                       children: [
-//                         cont.imageFile != null
-//                             ? InkWell(
-//                               onTap: () async {
-//                                 final image =
-//                                     await ImagePickerHelper.pickImage();
-//                                 cont.setImageFile(image!);
-//                               },
-//                               child: ReusablePhotoCircle(
-//                                 imageFilePassed: cont.imageFile!,
-//                               ),
-//                             )
-//                             : cont.logo.isNotEmpty
-//                             ? InkWell(
-//                               onTap: () async {
-//                                 final image =
-//                                     await ImagePickerHelper.pickImage();
-//                                 cont.setImageFile(image!);
-//                               },
-//                               child: ReusablePhotoCard(url: cont.logo),
-//                             )
-//                             : ReusableAddPhotoCircle(
-//                               onTapCircle: () async {
-//                                 final image =
-//                                     await ImagePickerHelper.pickImage();
-//                                 if (image != null) {
-//                                   cont.setImageFile(image);
-//                                 }
-//                               },
-//                             ),
-//                       ],
-//                     ),
-//                     gapH20,
-//                     DialogTextField(
-//                       textEditingController: cont.fullCompanyName,
-//                       text: 'full_company_name'.tr,
-//                       rowWidth: MediaQuery.of(context).size.width * 0.72,
-//                       textFieldWidth: MediaQuery.of(context).size.width * 0.4,
-//                       validationFunc: (value) {
-//                         // if(value.isEmpty){
-//                         //   return 'required_field'.tr;
-//                         // }
-//                         // return null;
-//                       },
-//                     ),
-//                     gapH6,
-//                     PhoneTextField(
-//                       textEditingController: cont.mobile,
-//                       initialValue: cont.selectedMobileCode,
-//                       text: 'mobile'.tr,
-//                       rowWidth: MediaQuery.of(context).size.width * 0.72,
-//                       textFieldWidth: MediaQuery.of(context).size.width * 0.55,
-//                       validationFunc: (val) {
-//                         if (val.isNotEmpty && val.length < 9) {
-//                           return '7_digits'.tr;
-//                         }
-//                         return null;
-//                       },
-//                       onCodeSelected: (value) {
-//                         cont.setSelectedMobileCode(value);
-//                       },
-//                       onChangedFunc: (value) {
-//                         setState(() {
-//                           // mainDescriptionController.text=value;
-//                         });
-//                       },
-//                     ),
-//                     gapH6,
-//                     PhoneTextField(
-//                       textEditingController: cont.phone,
-//                       text: 'phone'.tr,
-//                       initialValue: cont.selectedPhoneCode,
-//                       rowWidth: MediaQuery.of(context).size.width * 0.72,
-//                       textFieldWidth: MediaQuery.of(context).size.width * 0.55,
-//                       validationFunc: (val) {
-//                         if (val.isNotEmpty && val.length < 9) {
-//                           return '7_digits'.tr;
-//                         }
-//                         return null;
-//                       },
-//                       onCodeSelected: (value) {
-//                         cont.setSelectedPhoneCode(value);
-//                       },
-//                       onChangedFunc: (value) {
-//                         setState(() {
-//                           // mainDescriptionController.text=value;
-//                         });
-//                       },
-//                     ),
-//                     gapH6,
-//                     DialogTextField(
-//                       textEditingController: cont.email,
-//                       text: 'email'.tr,
-//                       rowWidth: MediaQuery.of(context).size.width * 0.72,
-//                       textFieldWidth: MediaQuery.of(context).size.width * 0.4,
-//                       validationFunc: (value) {
-//                         // if(value.isEmpty){
-//                         //   return 'required_field'.tr;
-//                         // }
-//                         // return null;
-//                       },
-//                     ),
-//                     gapH6,
-//                     DialogTextField(
-//                       textEditingController: cont.address,
-//                       text: 'address'.tr,
-//                       rowWidth: MediaQuery.of(context).size.width * 0.72,
-//                       textFieldWidth: MediaQuery.of(context).size.width * 0.4,
-//                       validationFunc: (value) {
-//                         // if(value.isEmpty){
-//                         //   return 'required_field'.tr;
-//                         // }
-//                         // return null;
-//                       },
-//                     ),
-//                     gapH6,
-//                     DialogTextField(
-//                       textEditingController: cont.bankInformation,
-//                       text: 'bank_information'.tr,
-//                       rowWidth: MediaQuery.of(context).size.width * 0.72,
-//                       textFieldWidth: MediaQuery.of(context).size.width * 0.4,
-//                       validationFunc: (value) {
-//                         // if(value.isEmpty){
-//                         //   return 'required_field'.tr;
-//                         // }
-//                         // return null;
-//                       },
-//                     ),
-//                     gapH6,
-//                     DialogTextField(
-//                       textEditingController: cont.localPayments,
-//                       text: 'local_payments'.tr,
-//                       rowWidth: MediaQuery.of(context).size.width * 0.72,
-//                       textFieldWidth: MediaQuery.of(context).size.width * 0.4,
-//                       validationFunc: (value) {
-//                         // if(value.isEmpty){
-//                         //   return 'required_field'.tr;
-//                         // }
-//                         // return null;
-//                       },
-//                     ),
-//                     gapH6,
-//                     DialogTextField(
-//                       textEditingController: cont.trn,
-//                       text: 'trn'.tr,
-//                       rowWidth: MediaQuery.of(context).size.width * 0.72,
-//                       textFieldWidth: MediaQuery.of(context).size.width * 0.4,
-//                       validationFunc: (value) {
-//                         // if(value.isEmpty){
-//                         //   return 'required_field'.tr;
-//                         // }
-//                         // return null;
-//                       },
-//                     ),
-//                     gapH6,
-//                     DialogNumericTextField(
-//                       textEditingController: cont.vat,
-//                       text: '${'vat'.tr} %',
-//                       rowWidth: MediaQuery.of(context).size.width * 0.72,
-//                       textFieldWidth: MediaQuery.of(context).size.width * 0.4,
-//                       validationFunc: (value) {
-//                         // if(value.isEmpty){
-//                         //   return 'required_field'.tr;
-//                         // }
-//                         // return null;
-//                       },
-//                     ),
-//                     gapH6,
-//                     Row(
-//                       children: [
-//                         Checkbox(
-//                           value: cont.isCompanySubjectToVat,
-//                           onChanged: (bool? value) {
-//                             cont.setIsCompanySubjectToVat(value!);
-//                           },
-//                         ),
-//                         gapW8,
-//                         Text('company_subject_to_vat'.tr),
-//                       ],
-//                     ),
-//                   ],
-//                 ),
-//               );
-//             },
-//           ),
-//         )
-//         : Container(
-//           color: Colors.white,
-//           width: MediaQuery.of(context).size.width * 0.8,
-//           height: MediaQuery.of(context).size.height * 0.65,
-//           child: GetBuilder<CompanySettingsController>(
-//             builder: (cont) {
-//               return RawScrollbar(
-//                 controller: scrollController,
-//                 thumbVisibility: true,
-//                 thickness: 8,
-//                 child: SingleChildScrollView(
-//                   controller: scrollController,
-//                   child: Column(
-//                     mainAxisAlignment: MainAxisAlignment.start,
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       gapH32,
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.start,
-//                         children: [
-//                           cont.imageFile != null
-//                               ? InkWell(
-//                                 onTap: () async {
-//                                   final image =
-//                                       await ImagePickerHelper.pickImage();
-//                                   cont.setImageFile(image!);
-//                                 },
-//                                 child: ReusablePhotoCircle(
-//                                   imageFilePassed: cont.imageFile!,
-//                                 ),
-//                               )
-//                               : cont.logo.isNotEmpty
-//                               ? InkWell(
-//                                 onTap: () async {
-//                                   final image =
-//                                       await ImagePickerHelper.pickImage();
-//                                   cont.setImageFile(image!);
-//                                 },
-//                                 child: ReusablePhotoCard(url: cont.logo),
-//                               )
-//                               : ReusableAddPhotoCircle(
-//                                 onTapCircle: () async {
-//                                   final image =
-//                                       await ImagePickerHelper.pickImage();
-//                                   if (image != null) {
-//                                     cont.setImageFile(image);
-//                                   }
-//                                 },
-//                               ),
-//                         ],
-//                       ),
-//                       gapH20,
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                         children: [
-//                           DialogTextField(
-//                             textEditingController: cont.fullCompanyName,
-//                             text: 'full_company_name'.tr,
-//                             rowWidth: MediaQuery.of(context).size.width * 0.35,
-//                             textFieldWidth:
-//                                 MediaQuery.of(context).size.width * 0.25,
-//                             validationFunc: (value) {
-//                               // if(value.isEmpty){
-//                               //   return 'required_field'.tr;
-//                               // }
-//                               // return null;
-//                             },
-//                           ),
-//                         ],
-//                       ),
-//                       gapH6,
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                         children: [
-//                           PhoneTextField(
-//                             textEditingController: cont.mobile,
-//                             initialValue: cont.selectedMobileCode,
-//                             text: 'mobile'.tr,
-//                             rowWidth: MediaQuery.of(context).size.width * 0.35,
-//                             textFieldWidth:
-//                                 MediaQuery.of(context).size.width * 0.25,
-//                             validationFunc: (val) {
-//                               if (val.isNotEmpty && val.length < 9) {
-//                                 return '7_digits'.tr;
-//                               }
-//                               return null;
-//                             },
-//                             onCodeSelected: (value) {
-//                               cont.setSelectedMobileCode(value);
-//                             },
-//                             onChangedFunc: (value) {
-//                               setState(() {
-//                                 // mainDescriptionController.text=value;
-//                               });
-//                             },
-//                           ),
-//                           PhoneTextField(
-//                             textEditingController: cont.phone,
-//                             text: 'phone'.tr,
-//                             initialValue: cont.selectedPhoneCode,
-//                             rowWidth: MediaQuery.of(context).size.width * 0.35,
-//                             textFieldWidth:
-//                                 MediaQuery.of(context).size.width * 0.25,
-//                             validationFunc: (val) {
-//                               if (val.isNotEmpty && val.length < 9) {
-//                                 return '7_digits'.tr;
-//                               }
-//                               return null;
-//                             },
-//                             onCodeSelected: (value) {
-//                               cont.setSelectedPhoneCode(value);
-//                             },
-//                             onChangedFunc: (value) {
-//                               setState(() {
-//                                 // mainDescriptionController.text=value;
-//                               });
-//                             },
-//                           ),
-//                         ],
-//                       ),
-//                       gapH6,
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                         children: [
-//                           DialogTextField(
-//                             textEditingController: cont.email,
-//                             text: 'email'.tr,
-//                             rowWidth: MediaQuery.of(context).size.width * 0.35,
-//                             textFieldWidth:
-//                                 MediaQuery.of(context).size.width * 0.25,
-//                             validationFunc: (value) {
-//                               // if(value.isEmpty){
-//                               //   return 'required_field'.tr;
-//                               // }
-//                               // return null;
-//                             },
-//                           ),
-//                           DialogTextField(
-//                             textEditingController: cont.address,
-//                             text: 'address'.tr,
-//                             rowWidth: MediaQuery.of(context).size.width * 0.35,
-//                             textFieldWidth:
-//                                 MediaQuery.of(context).size.width * 0.25,
-//                             validationFunc: (value) {
-//                               // if(value.isEmpty){
-//                               //   return 'required_field'.tr;
-//                               // }
-//                               // return null;
-//                             },
-//                           ),
-//                         ],
-//                       ),
-//                       gapH6,
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                         children: [
-//                           DialogTextField(
-//                             textEditingController: cont.bankInformation,
-//                             text: 'bank_information'.tr,
-//                             rowWidth: MediaQuery.of(context).size.width * 0.35,
-//                             textFieldWidth:
-//                                 MediaQuery.of(context).size.width * 0.25,
-//                             validationFunc: (value) {
-//                               // if(value.isEmpty){
-//                               //   return 'required_field'.tr;
-//                               // }
-//                               // return null;
-//                             },
-//                           ),
-//                           DialogTextField(
-//                             textEditingController: cont.localPayments,
-//                             text: 'local_payments'.tr,
-//                             rowWidth: MediaQuery.of(context).size.width * 0.35,
-//                             textFieldWidth:
-//                                 MediaQuery.of(context).size.width * 0.25,
-//                             validationFunc: (value) {
-//                               // if(value.isEmpty){
-//                               //   return 'required_field'.tr;
-//                               // }
-//                               // return null;
-//                             },
-//                           ),
-//                         ],
-//                       ),
-//                       gapH6,
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                         children: [
-//                           DialogTextField(
-//                             textEditingController: cont.trn,
-//                             text: 'trn'.tr,
-//                             rowWidth: MediaQuery.of(context).size.width * 0.35,
-//                             textFieldWidth:
-//                                 MediaQuery.of(context).size.width * 0.25,
-//                             validationFunc: (value) {
-//                               // if(value.isEmpty){
-//                               //   return 'required_field'.tr;
-//                               // }
-//                               // return null;
-//                             },
-//                           ),
-//                           DialogNumericTextField(
-//                             textEditingController: cont.vat,
-//                             text: '${'vat'.tr} %',
-//                             rowWidth: MediaQuery.of(context).size.width * 0.35,
-//                             textFieldWidth:
-//                                 MediaQuery.of(context).size.width * 0.25,
-//                             validationFunc: (value) {
-//                               // if(value.isEmpty){
-//                               //   return 'required_field'.tr;
-//                               // }
-//                               // return null;
-//                             },
-//                           ),
-//                         ],
-//                       ),
-//                       gapH10,
-//                       Row(
-//                         children: [
-//                           Checkbox(
-//                             value: cont.isCompanySubjectToVat,
-//                             onChanged: (bool? value) {
-//                               cont.setIsCompanySubjectToVat(value!);
-//                             },
-//                           ),
-//                           gapW8,
-//                           Text('company_subject_to_vat'.tr),
-//                         ],
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               );
-//             },
-//           ),
-//         );
-//   }
-// }
 
 class ReusableHeaderSection extends StatefulWidget {
   const ReusableHeaderSection({super.key, required this.index});
@@ -1640,7 +1118,7 @@ class _ReusableHeaderSectionState
                 children: [
                   DialogTextField(
                     textEditingController: bankInformation,
-                    text: 'bank_information'.tr,
+                    text: 'website'.tr,
                     rowWidth: MediaQuery.of(context).size.width * 0.35,
                     textFieldWidth: MediaQuery.of(context).size.width * 0.25,
                     validationFunc: (value) {
@@ -1651,42 +1129,6 @@ class _ReusableHeaderSectionState
                     },
                     onChangedFunc: (val) {
                       cont.updateBankInfo(widget.index, val);
-                    },
-                  ),
-                  DialogTextField(
-                    textEditingController: localPayments,
-                    text: 'local_payments'.tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.35,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.25,
-                    validationFunc: (value) {
-                      // if(value.isEmpty){
-                      //   return 'required_field'.tr;
-                      // }
-                      // return null;
-                    },
-                    onChangedFunc: (val) {
-                      cont.updateLocalPayments(widget.index, val);
-                    },
-                  ),
-                ],
-              ),
-              gapH6,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  DialogTextField(
-                    textEditingController: trn,
-                    text: 'trn'.tr,
-                    rowWidth: MediaQuery.of(context).size.width * 0.35,
-                    textFieldWidth: MediaQuery.of(context).size.width * 0.25,
-                    validationFunc: (value) {
-                      // if(value.isEmpty){
-                      //   return 'required_field'.tr;
-                      // }
-                      // return null;
-                    },
-                    onChangedFunc: (val) {
-                      cont.updateTrn(widget.index, val);
                     },
                   ),
                   ReusableInputNumberField(
@@ -1704,12 +1146,42 @@ class _ReusableHeaderSectionState
                       cont.updateVat(widget.index, val);
                     },
                   ),
+                  // DialogTextField(
+                  //   textEditingController: localPayments,
+                  //   text: 'local_payments'.tr,
+                  //   rowWidth: MediaQuery.of(context).size.width * 0.35,
+                  //   textFieldWidth: MediaQuery.of(context).size.width * 0.25,
+                  //   validationFunc: (value) {
+                  //     // if(value.isEmpty){
+                  //     //   return 'required_field'.tr;
+                  //     // }
+                  //     // return null;
+                  //   },
+                  //   onChangedFunc: (val) {
+                  //     cont.updateLocalPayments(widget.index, val);
+                  //   },
+                  // ),
                 ],
               ),
-              gapH10,
+              gapH6,
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  DialogTextField(
+                    textEditingController: trn,
+                    text: 'tin'.tr,
+                    rowWidth: MediaQuery.of(context).size.width * 0.35,
+                    textFieldWidth: MediaQuery.of(context).size.width * 0.25,
+                    validationFunc: (value) {
+                      // if(value.isEmpty){
+                      //   return 'required_field'.tr;
+                      // }
+                      // return null;
+                    },
+                    onChangedFunc: (val) {
+                      cont.updateTrn(widget.index, val);
+                    },
+                  ),
                   Row(
                     children: [
                       SizedBox(
@@ -1789,6 +1261,12 @@ class _ReusableHeaderSectionState
                       ),
                     ],
                   ),
+                ],
+              ),
+              gapH10,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   SizedBox(
                     width:  MediaQuery.of(context).size.width * 0.35,
                     child: Row(

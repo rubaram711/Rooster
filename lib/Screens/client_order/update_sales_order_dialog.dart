@@ -4233,6 +4233,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ReusableDropDownMenusWithSearch(
+                  searchList: cont.items.map((item) => {
+                    "id": '${item["id"]}',
+                    "codes": cont.allCodesForItem['${item["id"]}'],
+                  }).toList(),
                   list:
                       salesOrderController
                           .itemsMultiPartList, // Assuming multiList is List<List<String>>

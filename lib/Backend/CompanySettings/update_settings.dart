@@ -26,7 +26,7 @@ Future updateSettings({required String companyId,
 }
 ) async {
   String token = await getAccessTokenFromPref();
-  FormData formData = FormData.fromMap({
+  var p={
     "companyId": companyId,
     "costCalculationType": costCalculationType,
     "showQuantitiesOnPos": showQuantitiesOnPos,
@@ -43,10 +43,16 @@ Future updateSettings({required String companyId,
     // 'localPayments':localPayments,
     'primaryCurrencyId':primaryCurrencyId,
     // 'companySubjectToVat':companySubjectToVat,
-    'posCurrencyId':posCurrencyId,
+    // 'posCurrencyId':posCurrencyId,
     'showLogoOnPos':showLogoOnPos,
     // 'headerName':headerName,
-  });
+  };
+  if(posCurrencyId.isNotEmpty){
+    p.addAll(
+        {'posCurrencyId': posCurrencyId,}
+    );
+  }
+  FormData formData = FormData.fromMap(p);
 // if(imageFile!=null) {
 //   formData.files.add(
 //     MapEntry("logo", MultipartFile.fromBytes(imageFile, filename: "image.jpg")),

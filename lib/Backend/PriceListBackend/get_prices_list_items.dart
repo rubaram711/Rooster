@@ -7,7 +7,7 @@ import '../../const/urls.dart';
 
 
 Future getPriceListItems(String id) async {
-  final uri = Uri.parse('$kGetPriceListItemsUrl/$id');
+  final uri = Uri.parse('$kGetPriceListItemsUrl/$id').replace(queryParameters: {'search':'blusher'});
   String token = await getAccessTokenFromPref();
   var response = await http.get(
     uri,

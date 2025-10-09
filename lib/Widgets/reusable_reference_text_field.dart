@@ -84,6 +84,9 @@ HomeController homeController=Get.find();
                   widget.textEditingController.text = selection;
                 },
                 fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+                  if( widget.textEditingController.text.isNotEmpty ){
+                    fieldTextEditingController.text= widget.textEditingController.text;
+                  }
                   return TextField(
                     controller: fieldTextEditingController,
                     focusNode: focusNode,
@@ -128,6 +131,9 @@ HomeController homeController=Get.find();
                         borderSide: BorderSide(width: 1, color: Colors.red),
                       ),
                     ),
+                    onChanged: (String? val){
+                      widget.textEditingController.text=val!;
+                    },
                   );
                 },
                 optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {

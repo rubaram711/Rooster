@@ -7,23 +7,35 @@ import 'package:rooster_app/Controllers/sales_order_controller.dart';
 import 'package:rooster_app/Screens/Configuration/currencies_and_rates.dart';
 import 'package:rooster_app/Screens/Configuration/terms_and_conditions.dart';
 import 'package:rooster_app/const/sizes.dart';
+import '../../Controllers/cash_trays_controller.dart';
 import '../../Controllers/cashing_methods_controller.dart';
 import '../../Controllers/categories_controller.dart';
 import '../../Controllers/client_controller.dart';
 import '../../Controllers/combo_controller.dart';
+import '../../Controllers/company_settings_controller.dart';
+import '../../Controllers/delivery_controller.dart';
+import '../../Controllers/delivery_terms_controller.dart';
 import '../../Controllers/exchange_rates_controller.dart';
+import '../../Controllers/garage_controller.dart';
 import '../../Controllers/groups_controller.dart';
 import '../../Controllers/home_controller.dart';
+import '../../Controllers/pending_docs_review_controller.dart';
 import '../../Controllers/pos_controller.dart';
+import '../../Controllers/price_list_controller.dart';
 import '../../Controllers/products_controller.dart';
 import '../../Controllers/quotation_controller.dart';
 import '../../Controllers/roles_and_permissions_controller.dart';
+import '../../Controllers/sales_invoice_controller.dart';
 import '../../Controllers/session_controller.dart';
+import '../../Controllers/settings_controller.dart';
+import '../../Controllers/task_controller.dart';
 import '../../Controllers/taxation_controller.dart';
+import '../../Controllers/terms_and_conditions_controller.dart';
 import '../../Controllers/transfer_controller.dart';
 import '../../Controllers/users_controller.dart';
 import '../../Controllers/warehouse_controller.dart';
 import '../../Controllers/languages_controller.dart';
+import '../../Controllers/waste_reports_controller.dart';
 import '../../Locale_Memory/save_header_2_locally.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Screens/Authorization/sign_up_screen.dart';
@@ -39,6 +51,7 @@ import '../../Screens/Configuration/settings_content.dart';
 import '../../Screens/Configuration/sup_references_dialog.dart';
 import '../../Screens/Configuration/taxation_groups_dialog.dart';
 import '../../Screens/Configuration/warehouses_dialog.dart';
+import '../../Screens/DocsReview/docs_review.dart';
 import '../../const/colors.dart';
 
 class AppBarEntry {
@@ -320,7 +333,7 @@ class _AdminSectionInHomeAppBarState extends State<AdminSectionInHomeAppBar> {
                           //   return const SignUpScreen();
                           // }));
 
-                          await saveUserInfoLocally('', '', '', '', '','','');
+                          await saveUserInfoLocally('', '', '', '', '','','','','');
                           await saveCompanySettingsLocally('', '','','','', '','','', '','','',);
                           await saveHeader1Locally('', '','', '', '', '', '','','','','','','','','' ,'','' );
                           await saveHeader2Locally('', '','', '', '', '', '','','','','','','','','','','' );
@@ -350,6 +363,20 @@ class _AdminSectionInHomeAppBarState extends State<AdminSectionInHomeAppBar> {
                           Get.reload<ComboController>();
                           Get.reload<DiscountsController>();
                           Get.reload<TaxationGroupsController>();
+                          Get.reload<SalesInvoiceController>();
+                          Get.reload<GarageController>();
+                          Get.reload<DeliveryTermsController>();
+                          Get.reload<TermsAndConditionsController>();
+                          Get.reload<DeliveryController>();
+                          Get.reload<DocsReview>();
+                          Get.reload<PendingDocsReviewController>();
+                          Get.reload<CashTraysController>();
+                          Get.reload<WasteReportsController>();
+                          Get.reload<PriceListController>();
+                          Get.reload<TaskController>();
+                          Get.reload<CompanySettingsController>();
+                          Get.reload<SettingsController>();
+
 
 
                           Get.offAll(() => const SignUpScreen());

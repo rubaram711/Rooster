@@ -161,6 +161,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.27"
+  country_picker_dialog:
+    dependency: "direct main"
+    description:
+      name: country_picker_dialog
+      sha256: "1336934ea0f0d20205a956e1d589e90183f8cee0f0f5d33f7af8ed09e045cee3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   cross_file:
     dependency: transitive
     description:
@@ -398,6 +406,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.0"
+  flutter_intl_phone_field:
+    dependency: "direct main"
+    description:
+      name: flutter_intl_phone_field
+      sha256: ec38faf32e62f1e0d3efe2c2630202728c024d17eef0c6ababc877c9b3c9d113
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.7"
   flutter_keyboard_visibility_linux:
     dependency: transitive
     description:
@@ -773,6 +789,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.20.2"
+  intl_phone_field:
+    dependency: "direct main"
+    description:
+      name: intl_phone_field
+      sha256: "73819d3dfcb68d2c85663606f6842597c3ddf6688ac777f051b17814fe767bbf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.0"
   jiffy:
     dependency: transitive
     description:
@@ -821,6 +845,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.1"
+  lottie:
+    dependency: transitive
+    description:
+      name: lottie
+      sha256: a93542cc2d60a7057255405f62252533f8e8956e7e06754955669fd32fb4b216
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.0"
   markdown:
     dependency: transitive
     description:

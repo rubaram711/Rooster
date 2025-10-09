@@ -123,7 +123,7 @@ class _QuantitiesTabContentState extends State<QuantitiesTabContent> {
                       width: MediaQuery.of(context).size.width * 0.08,
                     ),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.43,
+                      width: MediaQuery.of(context).size.width * 0.5,
                        child: Column(
                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -149,6 +149,10 @@ class _QuantitiesTabContentState extends State<QuantitiesTabContent> {
                                   ),
                                   TableTitle(
                                     text: 'shelving'.tr,
+                                    width: MediaQuery.of(context).size.width * 0.08,
+                                  ),
+                                  TableTitle(
+                                    text: 'min_qty'.tr,
                                     width: MediaQuery.of(context).size.width * 0.08,
                                   ),
                                   TableTitle(
@@ -249,9 +253,11 @@ class _WarehousesAsRowInTableState extends State<WarehousesAsRowInTable> {
   HomeController homeController=Get.find();
   ProductController productController=Get.find();
   TextEditingController shelvingTextEditingController=TextEditingController();
+  TextEditingController minQtyTextEditingController=TextEditingController();
   @override
   void initState() {
     shelvingTextEditingController.text=widget.data['pivot']['shelving']??'';
+    minQtyTextEditingController.text=widget.data['pivot']['min_qty']??'';
     super.initState();
   }
   @override
@@ -272,7 +278,8 @@ class _WarehousesAsRowInTableState extends State<WarehousesAsRowInTable> {
             text: '${widget.data['name'] ?? ''}',
             width:homeController.isMobile.value?140:  MediaQuery.of(context).size.width * 0.08,
           ),
-          SizedBox(
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 3),
             width:homeController.isMobile.value?140:  MediaQuery.of(context).size.width * 0.08,
             child: ReusableTextField(
                 onChangedFunc: (val){
@@ -281,6 +288,17 @@ class _WarehousesAsRowInTableState extends State<WarehousesAsRowInTable> {
                 validationFunc: (val){}, hint: '',
                 isPasswordField: false,
                 textEditingController: shelvingTextEditingController),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 3),
+            width:homeController.isMobile.value?140:  MediaQuery.of(context).size.width * 0.08,
+            child: ReusableNumberField(
+                onChangedFunc: (val){
+                  productController.updateMinQty(widget.index, val);
+                },
+                validationFunc: (val){}, hint: '',
+                isPasswordField: false,
+                textEditingController: minQtyTextEditingController),
           ),
           // TableItem(
           //   text: '${widget.data['shelving'] ?? ''}',

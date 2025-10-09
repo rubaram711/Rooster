@@ -540,6 +540,9 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   List<String> warehousesName = [];
   List<String> warehousesForSplit = [];
   List<List<String>> warehousesMultiPartList = [];
+  Map<String,List<String>> allCodesForItem={};
+  List<String> allCodesForAllItems=[];
+  List items=[];
   @override
   getFieldsForCreateSalesOrderFromBack() async {
     warehousesNameList = [];
@@ -559,14 +562,14 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     combosForSplit = [];
     cashingMethodsNamesList = [];
     cashingMethodsIdsList = [];
-    itemsDescription = {};
-    itemsMap = {};
-    itemsCodes = {};
-    itemsNames = {};
-    warehousesInfo = {};
-    itemUnitPrice = {};
-    itemsVats = {};
-    itemsPricesCurrencies = {};
+    // itemsDescription = {};
+    // itemsMap = {};
+    // itemsCodes = {};
+    // itemsNames = {};
+    // warehousesInfo = {};
+    // itemUnitPrice = {};
+    // itemsVats = {};
+    // itemsPricesCurrencies = {};
     salesOrderNumber = '';
     customersMap = {};
     customersPricesListsIds = [];
@@ -580,14 +583,14 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     priceListsIds = [];
     priceLists = [];
     selectedPriceListId = '';
-    itemsCode = [];
-    itemsIds = [];
-    itemsMap = {};
-    combosMap = {};
-    itemsMultiPartList = [];
-    itemsDes = [];
-    itemsName = [];
-    itemsTotalQuantity = [];
+    // itemsCode = [];
+    // itemsIds = [];
+    // itemsMap = {};
+    // combosMap = {};
+    // itemsMultiPartList = [];
+    // itemsDes = [];
+    // itemsName = [];
+    // itemsTotalQuantity = [];
     customerForSplit = [];
     itemsForSplit = [];
     phoneNumber = {};
@@ -660,13 +663,13 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     }
     customersMultiPartList = splitList(customerForSplit, 2);
 
-    for (int i = 0; i < itemsCode.length; i++) {
-      itemsForSplit.add(itemsCode[i]);
-      itemsForSplit.add(itemsName[i]);
-      itemsForSplit.add(itemsDes[i]);
-      itemsForSplit.add('${itemsTotalQuantity[i]} Pcs');
-    }
-    itemsMultiPartList = splitList(itemsForSplit, 4);
+    // for (int i = 0; i < itemsCode.length; i++) {
+    //   itemsForSplit.add(itemsCode[i]);
+    //   itemsForSplit.add(itemsName[i]);
+    //   itemsForSplit.add(itemsDes[i]);
+    //   itemsForSplit.add('${itemsTotalQuantity[i]} Pcs');
+    // }
+    // itemsMultiPartList = splitList(itemsForSplit, 4);
 
     priceLists = p['pricelists'];
     for (var priceList in p['pricelists']) {
@@ -710,6 +713,9 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     itemsIds = [];
     itemsInfo = [];
     itemsMultiPartList = [];
+    allCodesForItem={};
+    allCodesForAllItems=[];
+    items=[];
     itemsDes = [];
     itemsName = [];
     itemsTotalQuantity = [];
@@ -726,6 +732,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     var res = await getPriceListItems(selectedPriceListId);
     if (res['success'] == true) {
       for (var item in res['data']) {
+        items.add(item);
         itemsCode.add('${item['mainCode']}');
         itemsIds.add('${item['id']}');
         itemsInfo.add(
@@ -744,6 +751,16 @@ class SalesOrderController extends SalesOrderControllerAbstract {
         helper = helper.reversed.toList();
         itemsVats["${item['id']}"] = helper[0]['tax_rate'];
         warehousesInfo["${item['id']}"] = item['warehouses'];
+        allCodesForItem["${item['id']}"] = [
+          ...?item["barcodes"]?.map((e) => e["code"].toString()),
+          ...?item["supplierCodes"]?.map((e) => e["code"].toString()),
+          ...?item["alternativeCodes"]?.map((e) => e["code"].toString()),
+        ];
+        allCodesForAllItems.addAll([
+          ...?item["barcodes"]?.map((e) => e["code"].toString()),
+          ...?item["supplierCodes"]?.map((e) => e["code"].toString()),
+          ...?item["alternativeCodes"]?.map((e) => e["code"].toString()),
+        ]);
       }
       for (int i = 0; i < itemsCode.length; i++) {
         itemsForSplit.add(itemsCode[i]);

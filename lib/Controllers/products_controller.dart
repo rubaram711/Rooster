@@ -34,6 +34,10 @@ class ProductController extends GetxController {
     warehousesList[index]['pivot']['shelving']=val;
     update();
   }
+  updateMinQty(int index,String val){
+    warehousesList[index]['pivot']['min_qty']=val;
+    update();
+  }
   List itemGroups = [];
   List groupsList = [];
   List<TextEditingController> textEditingControllerForGroups = [];

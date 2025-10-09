@@ -272,7 +272,8 @@ class ComboController extends ComboControllerAbstract {
   List<List<String>> itemsMultiPartList = [];
   List<String> itemsForSplit = [];
   Map priceCurrency = {}, itemUnitPrice = {}, itemsCodes = {};
-
+  Map<String,List<String>> allCodesForItem={};
+  List<String> allCodesForAllItems=[];
   @override
   getComboCreatFieldFromBack() async {
     itemsIds = [];
@@ -284,10 +285,14 @@ class ComboController extends ComboControllerAbstract {
     priceCurrency = {};
     itemUnitPrice = {};
     itemsCodes = {};
+    allCodesForItem={};
+    allCodesForAllItems=[];
+    items=[];
     isCombosInfoFetched = false;
     var response = await getFieldsForCreateCombo();
     code = response['code'];
     items = response['items'];
+    print('666666666666666666666666 $items');
 
     for (var item in items) {
       itemsName.add('${item['item_name']}');
@@ -303,6 +308,16 @@ class ComboController extends ComboControllerAbstract {
       itemsDes.add('${item['mainDescription']}');
       itemsName.add('${item['item_name']}');
       itemsTotalQuantity.add('${item['totalQuantities']}');
+      allCodesForItem["${item['id']}"] = [
+        ...?item["barcodes"]?.map((e) => e["code"].toString()),
+        ...?item["supplierCodes"]?.map((e) => e["code"].toString()),
+        ...?item["alternativeCodes"]?.map((e) => e["code"].toString()),
+      ];
+      allCodesForAllItems.addAll([
+        ...?item["barcodes"]?.map((e) => e["code"].toString()),
+        ...?item["supplierCodes"]?.map((e) => e["code"].toString()),
+        ...?item["alternativeCodes"]?.map((e) => e["code"].toString()),
+      ]);
     }
     for (int i = 0; i < itemsCode.length; i++) {
       itemsForSplit.add(itemsCode[i]);

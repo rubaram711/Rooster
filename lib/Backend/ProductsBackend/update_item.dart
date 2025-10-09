@@ -167,6 +167,7 @@ Future updateProduct(
       formData.fields.addAll([
         MapEntry("shelving[$i][warehouseId]", '${shelving[i]['id']}'),
         MapEntry("shelving[$i][position]", shelving[i]['pivot']['shelving']),
+        MapEntry("shelving[$i][minQty]", shelving[i]['pivot']['min_qty']),
       ]);
     }
   }

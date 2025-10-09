@@ -113,12 +113,12 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
 
   bool isActiveVatChecked = false;
   bool isActiveDeliveredChecked = false;
-  final QuotationController quotationController = Get.find();
-  final HomeController homeController = Get.find();
-  final TermsAndConditionsController termsController = Get.find();
-  final PaymentTermsController paymentController = Get.find();
-  final DeliveryTermsController deliveryController = Get.find();
-  final ExchangeRatesController exchangeRatesController = Get.find();
+  QuotationController quotationController = Get.find();
+  HomeController homeController = Get.find();
+  TermsAndConditionsController termsController = Get.find();
+  PaymentTermsController paymentController = Get.find();
+  DeliveryTermsController deliveryController = Get.find();
+  ExchangeRatesController exchangeRatesController = Get.find();
 
   int progressVar = 0;
   String selectedCustomerIds = '';
@@ -223,10 +223,15 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
     termsAndConditionsController.text = jsonString;
   }
 
-
+late bool isItHasTwoHeaders=false;
+  checkIfItItHasTwoHeaders()async{
+    var val=await getIsItHasMultiHeadersFromPref();
+    isItHasTwoHeaders=(val=='1');
+  }
 
   @override
   void initState() {
+    checkIfItItHasTwoHeaders();
     quotationController.orderedKeys = [];
     quotationController.rowsInListViewInQuotation = {};
     quotationController.selectedHeaderIndex = 1;
@@ -747,9 +752,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                     titleController.text,
                                     deliveryTermsController.text,
                                     chanceController.text,
-                                    homeController.companyName == 'CASALAGO' ||
-                                            homeController.companyName ==
-                                                'AMAZON'
+                                   isItHasTwoHeaders
                                         ? quotationCont
                                             .headersList[quotationCont
                                                     .selectedHeaderIndex -
@@ -1175,7 +1178,52 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                         ),
                       ],
                     ),
-                    gapH16,
+                    // gapH10,
+                    isItHasTwoHeaders
+                        ? Column(
+                      children: [
+                        gapH10,
+                        ReusableRadioBtns(
+                          isRow: true,
+                          groupVal: quotationCont.selectedHeaderIndex,
+                          title1:
+                          quotationCont
+                              .headersList[0]['header_name'],
+                          title2:
+                          quotationCont
+                              .headersList[1]['header_name'],
+                          func: (value) {
+                            if (value == 1) {
+                              quotationCont.setSelectedHeaderIndex(1);
+                              quotationCont.setSelectedHeader(
+                                quotationCont.headersList[0],
+                              );
+                              quotationCont.setQuotationCurrency(
+                                quotationCont.headersList[0],
+                              );
+                            } else {
+                              quotationCont.setSelectedHeaderIndex(2);
+                              quotationCont.setSelectedHeader(
+                                quotationCont.headersList[1],
+                              );
+                              quotationCont.setQuotationCurrency(
+                                quotationCont.headersList[1],
+                              );
+                            }
+                            setVat();
+                            checkVatExempt();
+                          },
+                          width1:
+                          MediaQuery.of(context).size.width *
+                              0.15,
+                          width2:
+                          MediaQuery.of(context).size.width *
+                              0.15,
+                        ),
+                      ],
+                    )
+                        : SizedBox.shrink(),
+                    gapH10,
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
@@ -1207,7 +1255,6 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         ReusableReferenceTextField(
                                           type: 'quotations',
                                           textEditingController: refController,
-
                                           rowWidth:
                                               homeController.isOpened.value
                                                   ? MediaQuery.of(
@@ -4126,6 +4173,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                               GetBuilder<PaymentTermsController>(
                                 builder: (cont) {
                                   return ReusableDropDownMenuWithSearch(
+                                    key: ValueKey(cont.paymentTermsNamesList.length),
                                     list: cont.paymentTermsNamesList,
                                     text: 'payment_terms'.tr,
                                     hint: '${'search'.tr}...',
@@ -4243,7 +4291,8 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                               gapW16,
                               GetBuilder<DeliveryTermsController>(
                                 builder: (cont) {
-                                  return ReusableDropDownMenuWithSearch(
+                                  return cont.isDeliveryTermsFetched?ReusableDropDownMenuWithSearch(
+                                    key: ValueKey(cont.deliveryTermsNamesList.length),
                                     list: cont.deliveryTermsNamesList,
                                     text: 'delivery_terms'.tr,
                                     hint: '${'search'.tr}...',
@@ -4289,7 +4338,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                             ),
                                       );
                                     },
-                                  );
+                                  ):loading();
                                 },
                               ),
                             ],
@@ -4843,51 +4892,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                   : SizedBox(),
                             ],
                           ),
-                          homeController.companyName == 'CASALAGO' ||
-                                  homeController.companyName == 'AMAZON'
-                              ? Column(
-                                children: [
-                                  gapH16,
-                                  ReusableRadioBtns(
-                                    isRow: true,
-                                    groupVal: quotationCont.selectedHeaderIndex,
-                                    title1:
-                                        quotationCont
-                                            .headersList[0]['header_name'],
-                                    title2:
-                                        quotationCont
-                                            .headersList[1]['header_name'],
-                                    func: (value) {
-                                      if (value == 1) {
-                                        quotationCont.setSelectedHeaderIndex(1);
-                                        quotationCont.setSelectedHeader(
-                                          quotationCont.headersList[0],
-                                        );
-                                        quotationCont.setQuotationCurrency(
-                                          quotationCont.headersList[0],
-                                        );
-                                      } else {
-                                        quotationCont.setSelectedHeaderIndex(2);
-                                        quotationCont.setSelectedHeader(
-                                          quotationCont.headersList[1],
-                                        );
-                                        quotationCont.setQuotationCurrency(
-                                          quotationCont.headersList[1],
-                                        );
-                                      }
-                                      setVat();
-                                      checkVatExempt();
-                                    },
-                                    width1:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                    width2:
-                                        MediaQuery.of(context).size.width *
-                                        0.15,
-                                  ),
-                                ],
-                              )
-                              : SizedBox.shrink(),
+
                         ],
                       ),
                     ),
@@ -5325,6 +5330,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                   GetBuilder<TermsAndConditionsController>(
                                     builder: (cont) {
                                       return ReusableDropDownMenuWithSearch(
+                                        key: ValueKey(cont.termsAndConditionsNamesList.length),
                                         list: cont.termsAndConditionsNamesList,
                                         text: '',
                                         hint: '${'search'.tr}...',
@@ -5754,9 +5760,7 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
                                         quotationCont.selectedDeliveryTermId,
                                         chanceController.text,
                                         homeController.companyName ==
-                                                    'CASALAGO' ||
-                                                homeController.companyName ==
-                                                    'AMAZON'
+                                            isItHasTwoHeaders
                                             ? quotationCont
                                                 .headersList[quotationCont
                                                         .selectedHeaderIndex -
@@ -6264,7 +6268,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
               Obx(
                 () => ReusableDropDownMenusWithSearch(
                   list:
-                      cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
+                      cont.itemsMultiPartList,
+                  searchList: cont.items.map((item) => {
+                    "id": '${item["id"]}',
+                    "codes": cont.allCodesForItem['${item["id"]}'],
+                  }).toList(),
                   text: ''.tr,
                   hint: 'Item Code'.tr,
                   controller: itemCodeController,

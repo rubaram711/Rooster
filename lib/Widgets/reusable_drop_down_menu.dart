@@ -481,7 +481,8 @@ class ReusableDropDownMenusWithSearch extends StatefulWidget {
     required this.onTappedClickableOption,
     required this.columnWidths,
     this.focusNode, // Added focusNode
-    this.nextFocusNode, // Added nextFocusNode
+    this.nextFocusNode,
+    this.searchList=const[], // Added nextFocusNode
   });
 
   final List<List<String>> list;
@@ -499,7 +500,7 @@ class ReusableDropDownMenusWithSearch extends StatefulWidget {
   final List<double> columnWidths;
   final FocusNode? focusNode; // Added focusNode
   final FocusNode? nextFocusNode; // Added nextFocusNode
-
+  final List searchList;
   @override
   State<ReusableDropDownMenusWithSearch> createState() =>
       _ReusableDropDownMenusWithSearchState();
@@ -528,14 +529,40 @@ class _ReusableDropDownMenusWithSearchState
 
 
   // search for any element in dropDown
+  // void _handleSearch() {
+  //   final filter = widget.controller.text.toLowerCase();
+  //
+  //   final List<List<String>> filtered = widget.list
+  //       .where((option) =>
+  //   option.any((element) => element.toLowerCase().contains(filter)) &&
+  //       option[0] != widget.clickableOptionText)
+  //       .toList();
+  //
+  //   setState(() {
+  //     _filteredOptions = [
+  //       if (widget.isThereClickableOption) [widget.clickableOptionText],
+  //       ...filtered
+  //     ];
+  //   });
+  // }
   void _handleSearch() {
+    // print('searc++++++++++ ${widget.searchList}');
     final filter = widget.controller.text.toLowerCase();
 
-    final List<List<String>> filtered = widget.list
-        .where((option) =>
-    option.any((element) => element.toLowerCase().contains(filter)) &&
-        option[0] != widget.clickableOptionText)
-        .toList();
+    final List<List<String>> filtered = widget.list.where((option) {
+      // نفلتر حسب النص الموجود بأي عمود
+      final matchByText = option.any((element) => element.toLowerCase().contains(filter));
+
+      // نفلتر حسب الأكواد من searchList
+      final index = widget.list.indexOf(option);
+      final codes = widget.searchList.length > index
+          ? (widget.searchList[index]["codes"] as List<String>?)
+          : null;
+
+      final matchByCodes = codes?.any((code) => code.toLowerCase().contains(filter)) ?? false;
+
+      return (matchByText || matchByCodes) && option[0] != widget.clickableOptionText;
+    }).toList();
 
     setState(() {
       _filteredOptions = [

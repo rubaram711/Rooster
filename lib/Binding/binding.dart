@@ -72,7 +72,6 @@ class MyBinding extends Bindings {
     Get.lazyPut<InventoryController>(() => InventoryController());
     Get.lazyPut<SalesInvoiceController>(() => SalesInvoiceController());
     Get.lazyPut<DeliveryController>(() => DeliveryController());
-    Get.lazyPut<DeliveryController>(() => DeliveryController());
     Get.lazyPut<GarageController>(() => GarageController());
     Get.lazyPut<DeliveryTermsController>(() => DeliveryTermsController());
     Get.lazyPut<TermsAndConditionsController>(() => TermsAndConditionsController());

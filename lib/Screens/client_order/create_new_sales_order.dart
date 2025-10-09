@@ -4157,6 +4157,10 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
               children: [
                 Obx(
                   () => ReusableDropDownMenusWithSearch(
+                    searchList: cont.items.map((item) => {
+                      "id": '${item["id"]}',
+                      "codes": cont.allCodesForItem['${item["id"]}'],
+                    }).toList(),
                     list:
                         cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
                     text: ''.tr,

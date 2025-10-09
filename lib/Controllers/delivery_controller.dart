@@ -549,8 +549,14 @@ class DeliveryController extends DeliveryControllerAbstract {
   List<String> combosForSplit = [];
   Map combosPricesCurrencies = {};
   Map combosMap = {};
+  Map<String,List<String>> allCodesForItem={};
+  List<String> allCodesForAllItems=[];
+  List items=[];
   @override
   getFieldsForCreateDeliveryFromBack() async {
+    allCodesForItem={};
+     allCodesForAllItems=[];
+     items=[];
     combosPricesCurrencies = {};
     combosPricesList = [];
     combosNamesList = [];
@@ -616,6 +622,7 @@ class DeliveryController extends DeliveryControllerAbstract {
     isDeliveredInfoFetched = false;
     var p = await getFieldsForCreateDelivery();
     for (var item in p['items']) {
+      items.add(item);
       itemsCode.add('${item['mainCode']}');
       itemsIds.add('${item['id']}');
       itemsInfo.add(
@@ -634,6 +641,16 @@ class DeliveryController extends DeliveryControllerAbstract {
       helper = helper.reversed.toList();
       itemsVats["${item['id']}"] = helper[0]['tax_rate'];
       warehousesInfo["${item['id']}"] = item['warehouses'];
+      allCodesForItem["${item['id']}"] = [
+        ...?item["barcodes"]?.map((e) => e["code"].toString()),
+        ...?item["supplierCodes"]?.map((e) => e["code"].toString()),
+        ...?item["alternativeCodes"]?.map((e) => e["code"].toString()),
+      ];
+      allCodesForAllItems.addAll([
+        ...?item["barcodes"]?.map((e) => e["code"].toString()),
+        ...?item["supplierCodes"]?.map((e) => e["code"].toString()),
+        ...?item["alternativeCodes"]?.map((e) => e["code"].toString()),
+      ]);
     }
     for (var warehouse in p['warehouses']) {
       warehouseIds.add('${warehouse['id']}');

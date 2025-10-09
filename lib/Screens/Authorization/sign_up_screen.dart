@@ -375,6 +375,8 @@ class _SignFormState extends State<SignForm> {
                           '${res['data']['user']['company']['id']}',
                           '${res['data']['user']['company']['name']}',
                           res['data']['user']['company']['has_garage']==true?'1':'0',
+                          res['data']['user']['company']['has_double_book']==true?'1':'0',
+                          res['data']['user']['company']['has_multi_headers']==true?'1':'0',
                         );
                         if (res['data']['companySettings'].isNotEmpty) {
                           await saveCompanySettingsLocally(
@@ -569,6 +571,8 @@ class _SignFormState extends State<SignForm> {
                         '${res['data']['user']['company']['id']}',
                         '${res['data']['user']['company']['name']}',
                         res['data']['user']['company']['has_garage']==true?'1':'0',
+                        res['data']['user']['company']['has_double_book']==true?'1':'0',
+                        res['data']['user']['company']['has_multi_headers']==true?'1':'0',
                       );
                       if (res['data']['companySettings'].isNotEmpty) {
                         // print('object');print(res['data']['companySettings']);

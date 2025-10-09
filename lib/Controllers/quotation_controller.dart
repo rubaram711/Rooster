@@ -286,7 +286,8 @@ class QuotationController extends GetxController {
   List<String> combosForSplit = [];
   Map combosPricesCurrencies = {};
   Map combosMap = {};
-
+  Map<String,List<String>> allCodesForItem={};
+  List<String> allCodesForAllItems=[];
   getFieldsForCreateQuotationFromBack() async {
     combosPricesCurrencies = {};
     combosPricesList = [];
@@ -299,14 +300,14 @@ class QuotationController extends GetxController {
     cashingMethodsNamesList = [];
     headersList = [];
     cashingMethodsIdsList = [];
-    itemsDescription = {};
-    itemsMap = {};
-    itemsCodes = {};
-    itemsNames = {};
-    warehousesInfo = {};
-    itemUnitPrice = {};
-    itemsVats = {};
-    itemsPricesCurrencies = {};
+    // itemsDescription = {};
+    // itemsMap = {};
+    // itemsCodes = {};
+    // itemsNames = {};
+    // warehousesInfo = {};
+    // itemUnitPrice = {};
+    // itemsVats = {};
+    // itemsPricesCurrencies = {};
     quotationNumber = '';
     customersMap = {};
     customersPricesListsIds = [];
@@ -320,13 +321,13 @@ class QuotationController extends GetxController {
     priceListsIds = [];
     priceLists = [];
     selectedPriceListId = '';
-    itemsCode = [];
-    itemsIds = [];
-    itemsMap = {};
-    combosMap = {};
-    itemsMultiPartList = [];
-    itemsDes = [];
-    itemsName = [];
+    // itemsCode = [];
+    // itemsIds = [];
+    // itemsMap = {};
+    // combosMap = {};
+    // itemsMultiPartList = [];
+    // itemsDes = [];
+    // itemsName = [];
     itemsTotalQuantity = [];
     customerForSplit = [];
     itemsForSplit = [];
@@ -337,8 +338,10 @@ class QuotationController extends GetxController {
     city = {};
     floorAndBuilding = {};
     street = {};
-    warehousesInfo = {};
+    // warehousesInfo = {};
     isQuotationsInfoFetched = false;
+    allCodesForItem={};
+    allCodesForAllItems=[];
     var p = await getFieldsForCreateQuotation();
     //todo i remove this for test
     // for (var item in p['items']) {
@@ -379,19 +382,20 @@ class QuotationController extends GetxController {
       street["${client['id']}"] = client['street'] ?? '';
       clientNumber["${client['id']}"] = client['client_number'];
     }
+
     for (int i = 0; i < customerNumberList.length; i++) {
       customerForSplit.add(customerNumberList[i]);
       customerForSplit.add(customerNameList[i]);
     }
     customersMultiPartList = splitList(customerForSplit, 2);
 
-    for (int i = 0; i < itemsCode.length; i++) {
-      itemsForSplit.add(itemsCode[i]);
-      itemsForSplit.add(itemsName[i]);
-      itemsForSplit.add(itemsDes[i]);
-      itemsForSplit.add('${itemsTotalQuantity[i]} Pcs');
-    }
-    itemsMultiPartList = splitList(itemsForSplit, 4);
+    // for (int i = 0; i < itemsCode.length; i++) {
+    //   itemsForSplit.add(itemsCode[i]);
+    //   itemsForSplit.add(itemsName[i]);
+    //   itemsForSplit.add(itemsDes[i]);
+    //   itemsForSplit.add('${itemsTotalQuantity[i]} Pcs');
+    // }
+    // itemsMultiPartList = splitList(itemsForSplit, 4);
 
     priceLists = p['pricelists'];
     for (var priceList in p['pricelists']) {
@@ -439,7 +443,9 @@ class QuotationController extends GetxController {
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
+  List items=[];
   resetItemsAfterChangePriceList() async {
+    items=[];
     itemsCode = [];
     itemsIds = [];
     itemsInfo = [];
@@ -459,7 +465,9 @@ class QuotationController extends GetxController {
     update();
     var res = await getPriceListItems(selectedPriceListId);
     if (res['success'] == true) {
+      // print('+++++++++++++++res $res');
       for (var item in res['data']) {
+        items.add(item);
         itemsCode.add('${item['mainCode']}');
         itemsIds.add('${item['id']}');
         itemsInfo.add(
@@ -474,10 +482,21 @@ class QuotationController extends GetxController {
         itemsCodes["${item['id']}"] = item['mainCode'];
         itemUnitPrice["${item['id']}"] = item['unitPrice'];
         itemsPricesCurrencies["${item['id']}"] = item['priceCurrency']['name'];
-        List helper = item['taxationGroup']['tax_rates'];
+        List helper =item['taxationGroup'] !=null? item['taxationGroup']['tax_rates']:[];
         helper = helper.reversed.toList();
-        itemsVats["${item['id']}"] = helper[0]['tax_rate'];
+        itemsVats["${item['id']}"] = helper.isNotEmpty? helper[0]['tax_rate']:'1';
         warehousesInfo["${item['id']}"] = item['warehouses'];
+        allCodesForItem["${item['id']}"] = [
+          ...?item["barcodes"]?.map((e) => e["code"].toString()),
+          ...?item["supplierCodes"]?.map((e) => e["code"].toString()),
+          ...?item["alternativeCodes"]?.map((e) => e["code"].toString()),
+        ];
+        allCodesForAllItems.addAll([
+          ...?item["barcodes"]?.map((e) => e["code"].toString()),
+          ...?item["supplierCodes"]?.map((e) => e["code"].toString()),
+          ...?item["alternativeCodes"]?.map((e) => e["code"].toString()),
+        ]);
+        // print('++++++++++++++++++ $allCodesForItem');
       }
       for (int i = 0; i < itemsCode.length; i++) {
         itemsForSplit.add(itemsCode[i]);
