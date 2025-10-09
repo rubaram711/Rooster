@@ -292,7 +292,6 @@ class ComboController extends ComboControllerAbstract {
     var response = await getFieldsForCreateCombo();
     code = response['code'];
     items = response['items'];
-    print('666666666666666666666666 $items');
 
     for (var item in items) {
       itemsName.add('${item['item_name']}');

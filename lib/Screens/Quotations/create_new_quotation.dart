@@ -5759,7 +5759,6 @@ late bool isItHasTwoHeaders=false;
                                         titleController.text,
                                         quotationCont.selectedDeliveryTermId,
                                         chanceController.text,
-                                        homeController.companyName ==
                                             isItHasTwoHeaders
                                             ? quotationCont
                                                 .headersList[quotationCont

@@ -341,7 +341,6 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
       // print(taxationGroupsList);
 
       for (var tax in taxationGroupsList) {
-        print('tax is $tax');
         for (var rate in tax['tax_rates']) {
           // ratesInTaxationGroupList[rate['id']] = rate['tax_rate'];
           ratesInTaxationGroupList["${rate['id']}"] = rate['tax_rate']; //map
