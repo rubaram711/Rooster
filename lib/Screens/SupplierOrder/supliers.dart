@@ -218,7 +218,7 @@ class _SuppliersState extends State<Suppliers> {
                         // rowWidth: MediaQuery.of(context).size.width * 0.25,
                         // textFieldWidth: MediaQuery.of(context).size.width * 0.2,
                         validationFunc: (String val) {
-                          if (val.isNotEmpty && val.length < 7) {
+                          if (val.isNotEmpty && val.length < 6) {
                             return '7_digits';
                           }
                           return null;

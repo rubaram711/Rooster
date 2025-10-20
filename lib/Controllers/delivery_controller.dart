@@ -9,90 +9,24 @@ import 'package:rooster_app/Backend/DeliveryBackend/get_delivery_for_create_fiel
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/const/functions.dart';
 
-abstract class DeliveryControllerAbstract extends GetxController {
-  getFieldsForCreateDeliveryFromBack();
-  resetItemsAfterChangePriceList();
-  incrementListViewLengthInDelivery(double val);
-  decrementListViewLengthInDelivery(double val);
-  addToOrderLinesInDeliveryList(String index, Widget p);
-  removeFromOrderLinesInDeliveryList(String index);
-  setSelectedPriceListId(String value);
-  setIsVatExempted(
-      bool isPrintedAsVatExemptVal,
-      bool isPrint0Val,
-      bool isVatNoPrintedVal,
-      );
-  setSpecialDisc(String specialDiscountPercentage);
-  setGlobalDisc(String globalDiscountPercentage);
-  setSelectedCashingMethodId(String value);
-  setIsVatExemptCheckBoxShouldAppear(bool val);
-  addToUnitPriceControllers(int index);
-  addToCombosPricesControllers(int index);
-  setItemIdInDelivery(int index, String val);
-  setItemNameInDelivery(int index, String val);
-  setMainCodeInDelivery(int index, String val);
-  setTypeInDelivery(int index, String val);
-  setTitleInDelivery(int index, String val);
-  setNoteInDelivery(int index, String val);
-  setImageInDelivery(int index, Uint8List imageFile);
-  setMainDescriptionInDelivery(int index, String val);
-  setItemWareHouseInDelivery(int index, String val);
 
-  setComboWareHouseInDelivery(int index, String val);
-  setEnteredQtyInDelivery(int index, String val);
-  setComboInDelivery(int index, String val);
-  setEnteredUnitPriceInDelivery(int index, String val);
-  setEnteredDiscInDelivery(int index, String val);
-  setMainTotalInDelivery(int index, String val);
-  getTotalItems();
-  setStatus(String val);
-  setCompanyVat(double val);
-  setLatestRate(double val);
-  setComboWarehouseId(int index, String val);
-  setVat11();
-  setTotalAllDelivery();
-  setIsVatExemptChecked(bool val);
-  setSelectedCurrency(String id, String name);
-  setSelectedCurrencySymbol(String val);
-  setExchangeRateForSelectedCurrency(String val);
-  changeBoolVar(bool val);
-  increaseImageSpace(double val);
-  setLogo(Uint8List val);
-  setIsBeforeVatPrices(bool val);
-  getAllTaxationGroupsFromBack();
-  resetDeliveries();
-  clearList();
-  addToRowsInListViewInDelivery(int index, Map p);
-  removeFromRowsInListViewInDelivery(int index);
-  setSearchInDeliveryController(String value);
-  getAllDeliveryFromBack();
-  getAllDeliveryFromBackWithoutExcept();
-  getAllUsersSalesPersonFromBack();
-  setDeliveries(List value);
-  setSelectedDelivery(Map map);
-  resetDeliveriesData();
-  clearRowsInListViewInDeliveryData();
-  addToRowsInListViewInDeliveryData(List p);
-  setIsSubmitAndPreviewClicked(bool val);
-  setSelectedDriverId(String val);
-}
 
-class DeliveryController extends DeliveryControllerAbstract {
+class DeliveryController extends GetxController {
   String selectedDriverId = '';
-  @override
+
   setSelectedDriverId(String val) {
     selectedDriverId = val;
   }
 
   bool isSubmitAndPreviewClicked = false;
-  @override
+
   setIsSubmitAndPreviewClicked(bool val) {
     isSubmitAndPreviewClicked = val;
     update();
   }
 
   String status = '';
-  @override
+
   setStatus(String val) {
     status = val;
     update();
@@ -100,163 +34,169 @@ class DeliveryController extends DeliveryControllerAbstract {
 
   Map<int, TextEditingController> unitPriceControllers = {};
   Map<int, TextEditingController> combosPriceControllers = {};
-  @override
+
   addToUnitPriceControllers(int index) {
     unitPriceControllers[index] = TextEditingController();
     update();
   }
 
-  @override
+
   addToCombosPricesControllers(int index) {
     combosPriceControllers[index] = TextEditingController();
     update();
   }
 
-  @override
+
   setItemIdInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['item_id'] = val;
     update();
   }
 
-  @override
+
   setItemNameInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['itemName'] = val;
     update();
   }
 
-  @override
+
   setMainCodeInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['item_main_code'] = val;
     update();
   }
 
-  @override
+
   setTypeInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['line_type_id'] = val;
     update();
   }
 
-  @override
+
   setTitleInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['title'] = val;
     update();
   }
 
-  @override
+
   setNoteInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['note'] = val;
     update();
   }
 
-  @override
+
   setImageInDelivery(int index, Uint8List imageFile) {
     // print(imageFile);
     rowsInListViewInDelivery[index]['image'] = imageFile;
     update();
   }
 
-  @override
+
   setMainDescriptionInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['item_description'] = val;
     update();
   }
 
-  @override
+
   setItemWareHouseInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['item_warehouseId'] = val;
     update();
   }
 
-  @override
+
   setComboWareHouseInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['combo_warehouseId'] = val;
     update();
   }
 
-  @override
+
   setEnteredQtyInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['item_quantity'] = val;
     update();
   }
 
-  @override
+
   setComboInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['combo'] = val;
     update();
   }
 
-  @override
+
   setComboWarehouseId(int index, String val) {
     rowsInListViewInDelivery[index]['combo_warehouseId'] = val;
     update();
   }
 
-  @override
+
   setEnteredUnitPriceInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['item_unit_price'] = val;
     update();
   }
 
-  @override
+
   setEnteredDiscInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['item_discount'] = val;
     update();
   }
 
-  @override
   setMainTotalInDelivery(int index, String val) {
     rowsInListViewInDelivery[index]['item_total'] = val;
     update();
   }
 
-  double totalAllItems = 0.0;
-  String totalItem = '';
-  double totalItems = 0.0;
-  double totalAfterGlobalDis = 0.0;
-  double totalAfterGlobalSpecialDis = 0.0;
-  bool updateItem = false;
-  @override
-  getTotalItems() {
-    if (rowsInListViewInDelivery != {}) {
-      totalItems = rowsInListViewInDelivery.values
-          .map((item) => double.parse(item['item_total'] ?? '0'))
-          .reduce((a, b) => a + b);
-    }
+  // double totalAllItems = 0.0;
+  // String totalItem = '';
+  // double totalItems = 0.0;
+  // double totalAfterGlobalDis = 0.0;
+  // double totalAfterGlobalSpecialDis = 0.0;
+  // bool updateItem = false;
+  //
+  // getTotalItems() {
+  //   if (rowsInListViewInDelivery != {}) {
+  //     totalItems = rowsInListViewInDelivery.values
+  //         .map((item) => double.parse(item['item_total'] ?? '0'))
+  //         .reduce((a, b) => a + b);
+  //   }
+  //
+  //   setTotalDeliveryAfterVat();
+  //   if (globalDiscountPercentageValue != '' ||
+  //       globalDiscountPercentageValue != '0') {
+  //     setGlobalDisc(globalDiscountPercentageValue);
+  //   }
+  //   if ((specialDiscountPercentageValue != '' ||
+  //       specialDiscountPercentageValue != '0') &&
+  //       (globalDiscountPercentageValue == '' ||
+  //           globalDiscountPercentageValue == '0')) {
+  //     setSpecialDisc(specialDiscountPercentageValue);
+  //   }
+  //
+  //   update();
+  // }
 
-    setVat11();
-    setTotalAllDelivery();
-    // setGlobalDisc(globalDiscountPercentageValue);
-    // setSpecialDisc(specialDiscountPercentageValue);
+  // String exchangeRateForSelectedCurrency = '';
+  // String selectedCurrencyId = '';
+  // String selectedCurrencySymbol = '';
+  // String selectedCurrencyName = 'USD';
+  //
+  // setSelectedCurrency(String id, String name) {
+  //   selectedCurrencyId = id;
+  //   selectedCurrencyName = name;
+  //   update();
+  // }
 
-    update();
-  }
 
-  String exchangeRateForSelectedCurrency = '';
-  String selectedCurrencyId = '';
-  String selectedCurrencySymbol = '';
-  String selectedCurrencyName = 'USD';
-  @override
-  setSelectedCurrency(String id, String name) {
-    selectedCurrencyId = id;
-    selectedCurrencyName = name;
-    update();
-  }
-
-  @override
-  setSelectedCurrencySymbol(String val) {
-    selectedCurrencySymbol = val;
-    update();
-  }
-
-  @override
-  setExchangeRateForSelectedCurrency(String val) {
-    exchangeRateForSelectedCurrency = val;
-    update();
-  }
+  // setSelectedCurrencySymbol(String val) {
+  //   selectedCurrencySymbol = val;
+  //   update();
+  // }
+  //
+  //
+  // setExchangeRateForSelectedCurrency(String val) {
+  //   exchangeRateForSelectedCurrency = val;
+  //   update();
+  // }
 
   bool imageAvailable = false;
   double imageSpaceHeight = 90;
-  @override
+
   changeBoolVar(bool val) {
     imageAvailable = val;
     update();
@@ -265,59 +205,32 @@ class DeliveryController extends DeliveryControllerAbstract {
   List<Widget> photosWidgetsList = [];
   List photosFilesList = [];
   double photosListWidth = 0;
-  @override
+
   increaseImageSpace(double val) {
     imageSpaceHeight = imageSpaceHeight + val;
     update();
   }
 
   Uint8List logoBytes = Uint8List(0);
-  @override
+
   setLogo(Uint8List val) {
     logoBytes = val;
     update();
   }
 
   bool isBeforeVatPrices = true;
-  @override
+
   setIsBeforeVatPrices(bool val) {
     isBeforeVatPrices = val;
     update();
   }
 
-  double companyVat = 0.0;
   List taxationGroupsList = [];
   bool isTaxationGroupsFetched = false;
   Map ratesInTaxationGroupList = {};
-  // List ratesInTaxationGroupList= [];
   int selectedTaxationGroupIndex = 0;
-  @override
-  getAllTaxationGroupsFromBack() async {
-    // taxationGroupsList = [];
-    // // taxationGroupsList = {};
-    // isTaxationGroupsFetched = false;
-    // var p = await getCurrencies();
-    // if ('$p' != '[]') {
-    //   taxationGroupsList.addAll(p['taxationGroups']);
-    //   // print(taxationGroupsList);
-
-    //   for (var tax in taxationGroupsList) {
-    //     for (var rate in tax['tax_rates']) {
-    //       // ratesInTaxationGroupList[rate['id']] = rate['tax_rate'];
-    //       ratesInTaxationGroupList["${rate['id']}"] = rate['tax_rate']; //map
-    //     }
-    //   }
-
-    //   isTaxationGroupsFetched = true;
-    //   update();
-    // }
-
-    // isTaxationGroupsFetched = true;
-    // update();
-  }
-
   Map<String, Widget> orderLinesDeliveryList = {};
-  @override
+
   resetDeliveries() {
     cashingMethodsNamesList = [];
     cashingMethodsIdsList = [];
@@ -328,23 +241,22 @@ class DeliveryController extends DeliveryControllerAbstract {
     itemsIds = [];
     isDeliveredInfoFetched = false;
 
-    totalItems = 0;
-    specialDisc = '0';
-    globalDisc = '0';
-    vatInPrimaryCurrency = '0';
-    vat11 = '0';
-    totalDelivery = '0.00';
+    // totalItems = 0;
+    // specialDiscountAmount.text = '';
+    // globalDiscountAmount.text = '';
+    // vatInDeliveryCurrency = 0;
+    // totalDelivery = '0.00';
     update();
   }
 
-  @override
+
   setSelectedPriceListId(String value) {
     selectedPriceListId = value;
     update();
   }
 
   bool isVatExemptCheckBoxShouldAppear = true;
-  @override
+
   setIsVatExemptCheckBoxShouldAppear(bool val) {
     isVatExemptCheckBoxShouldAppear = val;
     update();
@@ -353,7 +265,7 @@ class DeliveryController extends DeliveryControllerAbstract {
   bool isPrintedAsVatExempt = false;
   bool isPrintedAs0 = false;
   bool isVatNoPrinted = false;
-  @override
+
   setIsVatExempted(
       bool isPrintedAsVatExemptVal,
       bool isPrint0Val,
@@ -366,123 +278,129 @@ class DeliveryController extends DeliveryControllerAbstract {
   }
 
   String selectedCashingMethodId = '';
-  @override
+
   setSelectedCashingMethodId(String value) {
     selectedCashingMethodId = value;
     update();
   }
 
-  double preGlobalDisc = 0.0; //GlobalDisc as double used in calc
-  String globalDisc = ''; // GlobalDisc as int to show it in ui
-  String globalDiscountPercentageValue = '';
+  // double preGlobalDisc = 0.0; //GlobalDisc as double used in calc
+  // TextEditingController globalDiscountAmount = TextEditingController(); // GlobalDisc as int to show it in ui
+  // String globalDiscountPercentageValue = '';
+  //
+  //
+  // setGlobalDisc(String globalDiscountPercentage) {
+  //   if (globalDiscountPercentage != '0'){
+  //     globalDiscountPercentageValue = globalDiscountPercentage;
+  //     preGlobalDisc =
+  //         (totalItems) * double.parse(globalDiscountPercentageValue) / 100;
+  //     globalDiscountAmount.text = preGlobalDisc.toStringAsFixed(2);
+  //
+  //     totalAfterGlobalDis = totalItems - preGlobalDisc;
+  //     totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+  //     setSpecialDisc(specialDiscountPercentageValue);
+  //     setTotalDeliveryAfterVat();
+  //     update();
+  //   }
+  // }
+  // setGlobalDiscPercentage(String globalDiscountAmount) {
+  //   if (globalDiscountAmount != '0') {
+  //     preGlobalDisc = double.parse(globalDiscountAmount);
+  //     globalDiscountPercentageValue =
+  //         ((double.parse(globalDiscountAmount) / totalItems) * 100)
+  //             .toStringAsFixed(2);
+  //     totalAfterGlobalDis = totalItems - preGlobalDisc;
+  //     totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+  //     setSpecialDisc(specialDiscountPercentageValue);
+  //     setTotalDeliveryAfterVat();
+  //     update();
+  //   }
+  // }
+  //
+  // double preSpecialDisc = 0.0;
+  // TextEditingController specialDiscountAmount = TextEditingController();
+  // String specialDiscountPercentageValue = '0';
+  //
+  // setSpecialDisc(String specialDiscountPercentage) {
+  //   if (specialDiscountPercentage != '0') {
+  //     specialDiscountPercentageValue = specialDiscountPercentage;
+  //     preSpecialDisc =
+  //         totalAfterGlobalDis *
+  //         double.parse(specialDiscountPercentageValue) /
+  //         100;
+  //     specialDiscountAmount.text = preSpecialDisc.toStringAsFixed(2);
+  //     totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+  //     setTotalDeliveryAfterVat();
+  //     update();
+  //   }
+  // }
+  // setSpecialDiscPercentage(String specialDiscountAmount) {
+  //   if (specialDiscountAmount != '0') {
+  //     preSpecialDisc = double.parse(specialDiscountAmount);
+  //     specialDiscountPercentageValue =
+  //         ((double.parse(specialDiscountAmount) / totalItems) * 100)
+  //             .toStringAsFixed(2);
+  //     totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+  //     setTotalDeliveryAfterVat();
+  //     update();
+  //   }
+  // }
 
-  @override
-  setGlobalDisc(String globalDiscountPercentage) {
-    globalDiscountPercentageValue = globalDiscountPercentage;
-    preGlobalDisc =
-        (totalItems) * double.parse(globalDiscountPercentageValue) / 100;
-    globalDisc = preGlobalDisc.toStringAsFixed(2);
+  // double companyVat = 0.0;
+  // double vatInDeliveryCurrency = 0;
+  // double latestRate = 1;
+  // String companyPrimaryCurrency = 'USD';
+  // setCompanyPrimaryCurrency(String val) {
+  //   companyPrimaryCurrency = val;
+  //   update();
+  // }
+  //
+  //
+  // setCompanyVat(double val) {
+  //   companyVat = val;
+  //   update();
+  // }
+  //
+  //
+  // setLatestRate(double val) {
+  //   latestRate = val;
+  //   update();
+  // }
 
-    totalAfterGlobalDis = totalItems - preGlobalDisc;
-    totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
-    setSpecialDisc(specialDiscountPercentageValue);
-    setVat11();
-    setTotalAllDelivery();
-    update();
-  }
 
-  double preSpecialDisc = 0.0;
-  String specialDisc = '';
-  String specialDiscountPercentageValue = '0';
-  @override
-  setSpecialDisc(String specialDiscountPercentage) {
-    specialDiscountPercentageValue = specialDiscountPercentage;
-    preSpecialDisc =
-        totalAfterGlobalDis *
-            double.parse(specialDiscountPercentageValue) /
-            100;
-    specialDisc = preSpecialDisc.toStringAsFixed(2);
-    totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
-    setVat11();
-    setTotalAllDelivery();
-    update();
-  }
 
-  double preVat = 0.0;
-  double preVatInPrimaryCurrency = 0.0;
-  String vat11 = '';
-  String vatInPrimaryCurrency = '';
-  double vat = 11;
-  double latestRate = 89500;
-  String companyPrimaryCurrency = 'USD';
-  setCompanyPrimaryCurrency(String val) {
-    companyPrimaryCurrency = val;
-    update();
-  }
 
-  @override
-  setCompanyVat(double val) {
-    vat = val;
-    update();
-  }
+  // double preTotalDelivery = 0;
+  // String totalDelivery = '';
+  //
+  // setTotalDeliveryAfterVat() {
+  //   // preTotalDelivery = (totalItems - preGlobalDisc - preSpecialDisc) + preVat;
+  //   // totalDelivery = preTotalDelivery.toStringAsFixed(2);
+  //   var valueBeforeVat = (totalItems - preGlobalDisc - preSpecialDisc);
+  //   if (companyVat == 0 ||
+  //       isPrintedAsVatExempt ||
+  //       isPrintedAs0 ||
+  //       isVatNoPrinted) {
+  //     companyVat = 0;
+  //     vatInDeliveryCurrency = 0;
+  //     totalDelivery = valueBeforeVat.toStringAsFixed(2);
+  //   } else {
+  //     vatInDeliveryCurrency = double.parse(
+  //       (valueBeforeVat * (companyVat / 100)).toStringAsFixed(2),
+  //     );
+  //     preTotalDelivery = valueBeforeVat + vatInDeliveryCurrency;
+  //     totalDelivery = preTotalDelivery.toStringAsFixed(2);
+  //   }
+  //   update();
+  // }
 
-  @override
-  setLatestRate(double val) {
-    latestRate = val;
-    update();
-  }
-
-  @override
-  setVat11() {
-    if (isVatExemptChecked) {
-      preVat = 0;
-      vat11 = '0';
-      preVatInPrimaryCurrency = 0;
-      vatInPrimaryCurrency = '0';
-    } else {
-      preVat =
-          (totalItems - preGlobalDisc - preSpecialDisc) *
-              vat /
-              100; //all variables as double
-      vat11 = preVat.toStringAsFixed(2);
-      if (companyPrimaryCurrency == selectedCurrencyName) {
-        preVatInPrimaryCurrency = double.parse(vat11);
-      } else if (companyPrimaryCurrency == 'USD') {
-        preVatInPrimaryCurrency =
-            double.parse(vat11) / double.parse(exchangeRateForSelectedCurrency);
-      } else {
-        if (selectedCurrencyName == 'USD') {
-          preVatInPrimaryCurrency = double.parse(vat11) * latestRate;
-        } else {
-          var usdPreVat =
-              double.parse(vat11) /
-                  double.parse(exchangeRateForSelectedCurrency);
-          preVatInPrimaryCurrency = usdPreVat * latestRate;
-        }
-      }
-      // preVat11LBP = double.parse(vat11)  * latestRate;
-      vatInPrimaryCurrency = preVatInPrimaryCurrency.toStringAsFixed(2);
-      update();
-    }
-  }
-
-  double preTotalDelivery = 0;
-  String totalDelivery = '';
-  @override
-  setTotalAllDelivery() {
-    preTotalDelivery = (totalItems - preGlobalDisc - preSpecialDisc) + preVat;
-    totalDelivery = preTotalDelivery.toStringAsFixed(2);
-    // setVat11();
-  }
-
-  bool isVatExemptChecked = false;
-  @override
-  setIsVatExemptChecked(bool val) {
-    isVatExemptChecked = val;
-    setVat11();
-    setTotalAllDelivery();
-    update();
-  }
+  // bool isVatExemptChecked = false;
+  //
+  // setIsVatExemptChecked(bool val) {
+  //   isVatExemptChecked = val;
+  //   setTotalDeliveryAfterVat();
+  //   update();
+  // }
 
   List<String> cashingMethodsNamesList = [];
   List<String> cashingMethodsIdsList = [];
@@ -492,6 +410,7 @@ class DeliveryController extends DeliveryControllerAbstract {
   bool isDeliveredInfoFetched = false;
   Map email = {};
   Map phoneNumber = {};
+  Map mobileNumber = {};
   Map clientNumber = {};
   Map name = {};
   Map country = {};
@@ -552,7 +471,7 @@ class DeliveryController extends DeliveryControllerAbstract {
   Map<String,List<String>> allCodesForItem={};
   List<String> allCodesForAllItems=[];
   List items=[];
-  @override
+
   getFieldsForCreateDeliveryFromBack() async {
     allCodesForItem={};
      allCodesForAllItems=[];
@@ -611,6 +530,7 @@ class DeliveryController extends DeliveryControllerAbstract {
     itemsForSplit = [];
     warehousesForSplit = [];
     phoneNumber = {};
+    mobileNumber = {};
     email = {};
     clientNumber = {};
     country = {};
@@ -679,7 +599,10 @@ class DeliveryController extends DeliveryControllerAbstract {
       customerNameList.add('${client['name']}');
       customerNumberList.add('${client['client_number']}');
       customerIdsList.add('${client['id']}');
-      phoneNumber["${client['id']}"] = client['phone_number'] ?? '';
+      phoneNumber["${client['id']}"] =
+      '${client['phone_code'] ?? ''}-${client['phone_number'] ?? ''}';
+      mobileNumber["${client['id']}"] =
+      '${client['mobile_code'] ?? ''}-${client['mobile_number'] ?? ''}';
       email["${client['id']}"] = client['email'] ?? '';
       country["${client['id']}"] = client['country'] ?? '';
       city["${client['id']}"] = client['city'] ?? '';
@@ -738,147 +661,148 @@ class DeliveryController extends DeliveryControllerAbstract {
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
-  @override
-  resetItemsAfterChangePriceList() async {
-    itemsCode = [];
-    itemsIds = [];
-    itemsInfo = [];
-    itemsMultiPartList = [];
-    itemsDes = [];
-    itemsName = [];
-    itemsTotalQuantity = [];
-    itemsForSplit = [];
-    itemsDescription = {};
-    itemsMap = {};
-    itemsCodes = {};
-    itemsNames = {};
-    warehousesInfo = {};
-    itemUnitPrice = {};
-    itemsVats = {};
-    itemsPricesCurrencies = {};
-    update();
-    // var res = await getPriceListItems(selectedPriceListId);
-    // if (res['success'] == true) {
-    //   for (var item in res['data']) {
-    //     itemsCode.add('${item['mainCode']}');
-    //     itemsIds.add('${item['id']}');
-    //     itemsInfo.add(
-    //       '${item['mainCode']}, ${item['mainDescription']} , ${item['totalQuantities']} Pcs',
-    //     );
-    //     itemsDes.add('${item['mainDescription']}');
-    //     itemsName.add('${item['item_name']}');
-    //     itemsTotalQuantity.add('${item['totalQuantities']}');
-    //     itemsMap["${item['id']}"] = item;
-    //     itemsDescription["${item['id']}"] = item['mainDescription'];
-    //     itemsNames["${item['id']}"] = item['item_name'];
-    //     itemsCodes["${item['id']}"] = item['mainCode'];
-    //     itemUnitPrice["${item['id']}"] = item['unitPrice'];
-    //     itemsPricesCurrencies["${item['id']}"] = item['priceCurrency']['name'];
-    //     List helper = item['taxationGroup']['tax_rates'];
-    //     helper = helper.reversed.toList();
-    //     itemsVats["${item['id']}"] = helper[0]['tax_rate'];
-    //     warehousesInfo["${item['id']}"] = item['warehouses'];
-    //   }
-    //   for (int i = 0; i < itemsCode.length; i++) {
-    //     itemsForSplit.add(itemsCode[i]);
-    //     itemsForSplit.add(itemsName[i]);
-    //     itemsForSplit.add(itemsDes[i]);
-    //     itemsForSplit.add('${itemsTotalQuantity[i]} Pcs');
-    //   }
-    //   itemsMultiPartList = splitList(itemsForSplit, 4);
-    //   var keys = unitPriceControllers.keys.toList();
-    //   for (int i = 0; i < unitPriceControllers.length; i++) {
-    //     var selectedItemId = '${rowsInListViewInDelivery[keys[i]]['item_id']}';
-    //     if (selectedItemId != '') {
-    //       if (itemUnitPrice.keys.contains(selectedItemId)) {
-    //         if (itemsPricesCurrencies[selectedItemId] == selectedCurrencyName) {
-    //           unitPriceControllers[keys[i]]!.text =
-    //               itemUnitPrice[selectedItemId].toString();
-    //         } else if (selectedCurrencyName == 'USD' &&
-    //             itemsPricesCurrencies[selectedItemId] != selectedCurrencyName) {
-    //           var result = exchangeRatesController.exchangeRatesList.firstWhere(
-    //             (item) =>
-    //                 item["currency"] == itemsPricesCurrencies[selectedItemId],
-    //             orElse: () => null,
-    //           );
-    //           var divider = '1';
-    //           if (result != null) {
-    //             divider = result["exchange_rate"].toString();
-    //           }
-    //           unitPriceControllers[keys[i]]!.text =
-    //               '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-    //         } else if (selectedCurrencyName != 'USD' &&
-    //             itemsPricesCurrencies[selectedItemId] == 'USD') {
-    //           unitPriceControllers[keys[i]]!.text =
-    //               '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
-    //         } else {
-    //           var result = exchangeRatesController.exchangeRatesList.firstWhere(
-    //             (item) =>
-    //                 item["currency"] == itemsPricesCurrencies[selectedItemId],
-    //             orElse: () => null,
-    //           );
-    //           var divider = '1';
-    //           if (result != null) {
-    //             divider = result["exchange_rate"].toString();
-    //           }
-    //           var usdPrice =
-    //               '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-    //           unitPriceControllers[keys[i]]!.text =
-    //               '${double.parse('${(double.parse(usdPrice) * double.parse(exchangeRateForSelectedCurrency))}')}';
-    //         }
-    //         if (!isBeforeVatPrices) {
-    //           var taxRate = double.parse(itemsVats[selectedItemId]) / 100.0;
-    //           var taxValue =
-    //               taxRate * double.parse(unitPriceControllers[keys[i]]!.text);
 
-    //           unitPriceControllers[keys[i]]!.text =
-    //               '${double.parse(unitPriceControllers[keys[i]]!.text) + taxValue}';
-    //         }
-    //         unitPriceControllers[keys[i]]!.text = double.parse(
-    //           unitPriceControllers[keys[i]]!.text,
-    //         ).toStringAsFixed(2);
-    //         var totalLine =
-    //             '${(int.parse(rowsInListViewInDelivery[keys[i]]['item_quantity']) * double.parse(unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(rowsInListViewInDelivery[keys[i]]['item_discount']) / 100)}';
-
-    //         setEnteredUnitPriceInDelivery(
-    //           keys[i],
-    //           unitPriceControllers[keys[i]]!.text,
-    //         );
-    //         setMainTotalInDelivery(keys[i], totalLine);
-    //         getTotalItems();
-    //       } else {
-    //         rowsInListViewInDelivery.remove(keys[i]);
-    //         orderLinesDeliveryList.remove('${keys[i]}');
-    //         unitPriceControllers.remove(keys[i]);
-    //         decrementListViewLengthInDelivery(increment);
-    //       }
-    //     }
-    //   }
-    // }
-    update();
-  }
+  //
+  // resetItemsAfterChangePriceList() async {
+  //   itemsCode = [];
+  //   itemsIds = [];
+  //   itemsInfo = [];
+  //   itemsMultiPartList = [];
+  //   itemsDes = [];
+  //   itemsName = [];
+  //   itemsTotalQuantity = [];
+  //   itemsForSplit = [];
+  //   itemsDescription = {};
+  //   itemsMap = {};
+  //   itemsCodes = {};
+  //   itemsNames = {};
+  //   warehousesInfo = {};
+  //   itemUnitPrice = {};
+  //   itemsVats = {};
+  //   itemsPricesCurrencies = {};
+  //   update();
+  //   // var res = await getPriceListItems(selectedPriceListId);
+  //   // if (res['success'] == true) {
+  //   //   for (var item in res['data']) {
+  //   //     itemsCode.add('${item['mainCode']}');
+  //   //     itemsIds.add('${item['id']}');
+  //   //     itemsInfo.add(
+  //   //       '${item['mainCode']}, ${item['mainDescription']} , ${item['totalQuantities']} Pcs',
+  //   //     );
+  //   //     itemsDes.add('${item['mainDescription']}');
+  //   //     itemsName.add('${item['item_name']}');
+  //   //     itemsTotalQuantity.add('${item['totalQuantities']}');
+  //   //     itemsMap["${item['id']}"] = item;
+  //   //     itemsDescription["${item['id']}"] = item['mainDescription'];
+  //   //     itemsNames["${item['id']}"] = item['item_name'];
+  //   //     itemsCodes["${item['id']}"] = item['mainCode'];
+  //   //     itemUnitPrice["${item['id']}"] = item['unitPrice'];
+  //   //     itemsPricesCurrencies["${item['id']}"] = item['priceCurrency']['name'];
+  //   //     List helper = item['taxationGroup']['tax_rates'];
+  //   //     helper = helper.reversed.toList();
+  //   //     itemsVats["${item['id']}"] = helper[0]['tax_rate'];
+  //   //     warehousesInfo["${item['id']}"] = item['warehouses'];
+  //   //   }
+  //   //   for (int i = 0; i < itemsCode.length; i++) {
+  //   //     itemsForSplit.add(itemsCode[i]);
+  //   //     itemsForSplit.add(itemsName[i]);
+  //   //     itemsForSplit.add(itemsDes[i]);
+  //   //     itemsForSplit.add('${itemsTotalQuantity[i]} Pcs');
+  //   //   }
+  //   //   itemsMultiPartList = splitList(itemsForSplit, 4);
+  //   //   var keys = unitPriceControllers.keys.toList();
+  //   //   for (int i = 0; i < unitPriceControllers.length; i++) {
+  //   //     var selectedItemId = '${rowsInListViewInDelivery[keys[i]]['item_id']}';
+  //   //     if (selectedItemId != '') {
+  //   //       if (itemUnitPrice.keys.contains(selectedItemId)) {
+  //   //         if (itemsPricesCurrencies[selectedItemId] == selectedCurrencyName) {
+  //   //           unitPriceControllers[keys[i]]!.text =
+  //   //               itemUnitPrice[selectedItemId].toString();
+  //   //         } else if (selectedCurrencyName == 'USD' &&
+  //   //             itemsPricesCurrencies[selectedItemId] != selectedCurrencyName) {
+  //   //           var result = exchangeRatesController.exchangeRatesList.firstWhere(
+  //   //             (item) =>
+  //   //                 item["currency"] == itemsPricesCurrencies[selectedItemId],
+  //   //             orElse: () => null,
+  //   //           );
+  //   //           var divider = '1';
+  //   //           if (result != null) {
+  //   //             divider = result["exchange_rate"].toString();
+  //   //           }
+  //   //           unitPriceControllers[keys[i]]!.text =
+  //   //               '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+  //   //         } else if (selectedCurrencyName != 'USD' &&
+  //   //             itemsPricesCurrencies[selectedItemId] == 'USD') {
+  //   //           unitPriceControllers[keys[i]]!.text =
+  //   //               '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
+  //   //         } else {
+  //   //           var result = exchangeRatesController.exchangeRatesList.firstWhere(
+  //   //             (item) =>
+  //   //                 item["currency"] == itemsPricesCurrencies[selectedItemId],
+  //   //             orElse: () => null,
+  //   //           );
+  //   //           var divider = '1';
+  //   //           if (result != null) {
+  //   //             divider = result["exchange_rate"].toString();
+  //   //           }
+  //   //           var usdPrice =
+  //   //               '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+  //   //           unitPriceControllers[keys[i]]!.text =
+  //   //               '${double.parse('${(double.parse(usdPrice) * double.parse(exchangeRateForSelectedCurrency))}')}';
+  //   //         }
+  //   //         if (!isBeforeVatPrices) {
+  //   //           var taxRate = double.parse(itemsVats[selectedItemId]) / 100.0;
+  //   //           var taxValue =
+  //   //               taxRate * double.parse(unitPriceControllers[keys[i]]!.text);
+  //
+  //   //           unitPriceControllers[keys[i]]!.text =
+  //   //               '${double.parse(unitPriceControllers[keys[i]]!.text) + taxValue}';
+  //   //         }
+  //   //         unitPriceControllers[keys[i]]!.text = double.parse(
+  //   //           unitPriceControllers[keys[i]]!.text,
+  //   //         ).toStringAsFixed(2);
+  //   //         var totalLine =
+  //   //             '${(int.parse(rowsInListViewInDelivery[keys[i]]['item_quantity']) * double.parse(unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(rowsInListViewInDelivery[keys[i]]['item_discount']) / 100)}';
+  //
+  //   //         setEnteredUnitPriceInDelivery(
+  //   //           keys[i],
+  //   //           unitPriceControllers[keys[i]]!.text,
+  //   //         );
+  //   //         setMainTotalInDelivery(keys[i], totalLine);
+  //   //         getTotalItems();
+  //   //       } else {
+  //   //         rowsInListViewInDelivery.remove(keys[i]);
+  //   //         orderLinesDeliveryList.remove('${keys[i]}');
+  //   //         unitPriceControllers.remove(keys[i]);
+  //   //         decrementListViewLengthInDelivery(increment);
+  //   //       }
+  //   //     }
+  //   //   }
+  //   // }
+  //   update();
+  // }
 
   double listViewLengthInDelivery = 50;
   double increment = 60;
-  @override
+
   incrementListViewLengthInDelivery(double val) {
     listViewLengthInDelivery = listViewLengthInDelivery + val;
     update();
   }
 
-  @override
+
   decrementListViewLengthInDelivery(double val) {
     listViewLengthInDelivery = listViewLengthInDelivery - val;
     update();
   }
 
-  @override
+
   addToOrderLinesInDeliveryList(String index, Widget p) {
     orderLinesDeliveryList[index] = p;
     update();
   }
 
-  @override
+
   removeFromOrderLinesInDeliveryList(String index) {
     orderLinesDeliveryList.remove(index);
     update();
@@ -896,19 +820,19 @@ class DeliveryController extends DeliveryControllerAbstract {
     //    'total': '0',
     //  }
   };
-  @override
+
   clearList() {
     rowsInListViewInDelivery = {};
     update();
   }
 
-  @override
+
   addToRowsInListViewInDelivery(int index, Map p) {
     rowsInListViewInDelivery[index] = p;
     update();
   }
 
-  @override
+
   removeFromRowsInListViewInDelivery(int index) {
     rowsInListViewInDelivery.remove(index);
 
@@ -916,7 +840,7 @@ class DeliveryController extends DeliveryControllerAbstract {
   }
 
   TextEditingController searchInDeliveryController = TextEditingController();
-  @override
+
   setSearchInDeliveryController(String value) {
     searchInDeliveryController.text = value;
     update();
@@ -924,11 +848,10 @@ class DeliveryController extends DeliveryControllerAbstract {
 
   List deliveryList = [];
   bool isDeliveryFetched = false;
-  @override
+
   getAllDeliveryFromBack() async {
     deliveryList = [];
     isDeliveryFetched = false;
-    update();
     var p = await getAllDeliveries(searchInDeliveryController.text);
     if ('$p' != '[]') {
       deliveryList = p;
@@ -941,12 +864,11 @@ class DeliveryController extends DeliveryControllerAbstract {
   }
 
   List deliveryListPending = [];
-  @override
+
   getAllDeliveryFromBackWithoutExcept() async {
     deliveryList = [];
     deliveryListPending = [];
     isDeliveryFetched = false;
-    update();
     var p = await getAllDeliveriesWithoutExcept(
       searchInDeliveryController.text,
     );
@@ -976,7 +898,7 @@ class DeliveryController extends DeliveryControllerAbstract {
     update();
   }
 
-  @override
+
   setDeliveries(List value) {
     deliveryList = value;
     update();
@@ -987,48 +909,48 @@ class DeliveryController extends DeliveryControllerAbstract {
   List salesPersonListId = [];
   String salesPersonName = '';
   int salesPersonId = 0;
-  @override
-  getAllUsersSalesPersonFromBack() async {
-    //   deliveryList = [];
-    //   isDeliveryFetched = false;
-    //   update();
-    //   var p = await getAllUsersSalesPerson();
-    //   if ('$p' != '[]') {
-    //     salesPersonList = p;
-    //     for (var salesPerson in salesPersonList) {
-    //       salesPersonName = salesPerson['name'];
-    //       salesPersonId = salesPerson['id'];
-    //       salesPersonListNames.add(salesPersonName);
-    //       salesPersonListId.add(salesPersonId);
-    //     }
-    //   }
-    //   isDeliveryFetched = true;
-    //   update();
-  }
+
+  // getAllUsersSalesPersonFromBack() async {
+  //   //   deliveryList = [];
+  //   //   isDeliveryFetched = false;
+  //   //   update();
+  //   //   var p = await getAllUsersSalesPerson();
+  //   //   if ('$p' != '[]') {
+  //   //     salesPersonList = p;
+  //   //     for (var salesPerson in salesPersonList) {
+  //   //       salesPersonName = salesPerson['name'];
+  //   //       salesPersonId = salesPerson['id'];
+  //   //       salesPersonListNames.add(salesPersonName);
+  //   //       salesPersonListId.add(salesPersonId);
+  //   //     }
+  //   //   }
+  //   //   isDeliveryFetched = true;
+  //   //   update();
+  // }
   // sales order in document
 
   Map selectedDeliveryData = {};
   List rowsInListViewInDeliveryData = [];
-  @override
+
   setSelectedDelivery(Map map) {
     selectedDeliveryData = map;
     update();
   }
 
-  @override
+
   resetDeliveriesData() {
     rowsInListViewInDeliveryData = [];
     selectedDeliveryData = {};
     update();
   }
 
-  @override
+
   clearRowsInListViewInDeliveryData() {
     rowsInListViewInDeliveryData = [];
     update();
   }
 
-  @override
+
   addToRowsInListViewInDeliveryData(List p) {
     rowsInListViewInDeliveryData = p;
     update();

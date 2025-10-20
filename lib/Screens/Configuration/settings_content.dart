@@ -1043,8 +1043,8 @@ class _ReusableHeaderSectionState
                     rowWidth: MediaQuery.of(context).size.width * 0.35,
                     textFieldWidth: MediaQuery.of(context).size.width * 0.25,
                     validationFunc: (val) {
-                      if (val.isNotEmpty && val.length < 9) {
-                        return '7_digits'.tr;
+                      if (val.isNotEmpty && val.length < 6) {
+                        return '6_digits'.tr;
                       }
                       return null;
                     },
@@ -1062,8 +1062,8 @@ class _ReusableHeaderSectionState
                     rowWidth: MediaQuery.of(context).size.width * 0.35,
                     textFieldWidth: MediaQuery.of(context).size.width * 0.25,
                     validationFunc: (val) {
-                      if (val.isNotEmpty && val.length < 9) {
-                        return '7_digits'.tr;
+                      if (val.isNotEmpty && val.length < 6) {
+                        return '6_digits'.tr;
                       }
                       return null;
                     },

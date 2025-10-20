@@ -163,6 +163,13 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
       progressVar = 0;
       selectedCustomerIds = '';
       salesInvoiceController.currencyController.text = '';
+      salesInvoiceController.globalDiscountAmount.text = '';
+      salesInvoiceController.specialDiscAmount.text = '';
+      salesInvoiceController.preSpecialDisc = 0.0;
+      salesInvoiceController.preGlobalDisc = 0.0;
+      salesInvoiceController.vatInSalesInvoiceCurrency = 0.0;
+      salesInvoiceController.specialDiscountPercentageValue = '0';
+      salesInvoiceController.globalDiscountPercentageValue = '0';
     });
   }
 
@@ -170,12 +177,12 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
     await exchangeRatesController.getExchangeRatesListAndCurrenciesFromBack();
     if (salesInvoiceController.currencyController.text.isEmpty) {
       salesInvoiceController.currencyController.text = 'USD';
-    int index = exchangeRatesController.currenciesNamesList.indexOf('USD');
-    salesInvoiceController.selectedCurrencyId =
-        exchangeRatesController.currenciesIdsList[index];
-    salesInvoiceController.selectedCurrencySymbol =
-        exchangeRatesController.currenciesSymbolsList[index];
-    salesInvoiceController.selectedCurrencyName = 'USD';
+      int index = exchangeRatesController.currenciesNamesList.indexOf('USD');
+      salesInvoiceController.selectedCurrencyId =
+          exchangeRatesController.currenciesIdsList[index];
+      salesInvoiceController.selectedCurrencySymbol =
+          exchangeRatesController.currenciesSymbolsList[index];
+      salesInvoiceController.selectedCurrencyName = 'USD';
     }
     // var vat = await getCompanyVatFromPref();
     // salesInvoiceController.setCompanyVat(double.parse(vat));
@@ -191,19 +198,28 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
 
   setVat() async {
     if (salesInvoiceController.selectedHeaderIndex == 1) {
-      var vat = await getCompanyVatFromPref();
-      salesInvoiceController.setCompanyVat(double.parse(vat));
+      var companySubjectToVat = await getCompanySubjectToVatFromPref();
+      if(companySubjectToVat == '1'){
+        var vat = await getCompanyVatFromPref();
+        salesInvoiceController.setCompanyVat(double.parse(vat));}else{
+        salesInvoiceController.setCompanyVat(0);
+      }
     } else {
-      var vat = await getCompanyVat2FromPref();
-      salesInvoiceController.setCompanyVat(double.parse(vat));
+      var companySubjectToVat = await getCompanySubjectToVat2FromPref();
+      if(companySubjectToVat == '1'){
+        var vat = await getCompanyVat2FromPref();
+        salesInvoiceController.setCompanyVat(double.parse(vat));}else{
+        salesInvoiceController.setCompanyVat(0);
+      }
     }
+
   }
 
   checkVatExempt() async {
-    late String  companySubjectToVat ;
+    late String companySubjectToVat;
     if (salesInvoiceController.selectedHeaderIndex == 1) {
-     companySubjectToVat = await getCompanySubjectToVatFromPref();
-    }else{
+      companySubjectToVat = await getCompanySubjectToVatFromPref();
+    } else {
       companySubjectToVat = await getCompanySubjectToVat2FromPref();
     }
     if (companySubjectToVat == '1') {
@@ -245,8 +261,6 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
     termsAndConditionsController.text = jsonString;
   }
 
-
-
   List termsAndConditionsList = [];
   int currentIndex = 0;
   getAllTermsAndConditions() async {
@@ -286,20 +300,24 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
       }
     });
   }
-  late bool isItHasTwoHeaders=false;
-  late bool isItHasDoubleBook=false;
-  checkIfItItHasTwo()async{
-    var head=await getIsItHasMultiHeadersFromPref();
-    var book=await getIsItHasMultiHeadersFromPref();
-    isItHasTwoHeaders=(head=='1');
-    isItHasDoubleBook=(book=='1');
+
+  late bool isItHasTwoHeaders = false;
+  late bool isItHasDoubleBook = false;
+  checkIfItItHasTwo() async {
+    var head = await getIsItHasMultiHeadersFromPref();
+    var book = await getIsItHasMultiHeadersFromPref();
+    isItHasTwoHeaders = (head == '1');
+    isItHasDoubleBook = (book == '1');
   }
+
   @override
   void initState() {
     checkIfItItHasTwo();
-    salesInvoiceController
-        .rowsInListViewInSalesInvoice={};
-    salesInvoiceController.orderedKeys=[];
+    setVars();
+    salesInvoiceController.rowsInListViewInSalesInvoice = {};
+    salesInvoiceController.unitPriceControllers = {};
+    salesInvoiceController.orderedKeys = [];
+    salesInvoiceController.selectedHeaderIndex = 1;
     _controller = QuillController(
       document: Document(),
       selection: const TextSelection.collapsed(offset: 0),
@@ -316,7 +334,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
     // warehouseController.resetWarehouse();
     salesInvoiceController.getAllUsersSalesPersonFromBack();
     salesInvoiceController.getAllTaxationGroupsFromBack();
-    setVars();
+    // setVars();
     salesInvoiceController.getFieldsForCreateSalesInvoiceFromBack();
     getCurrency();
     salesInvoiceController.resetSalesInvoice();
@@ -532,21 +550,21 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                   var itemTotal = double.parse(
                                                     '${item['item_total']}',
                                                   );
-                                                  var combosmap =
+                                                  var combosMap =
                                                       salesInvoiceCont
                                                           .combosMap[item['combo']
                                                           .toString()];
                                                   var comboImage =
-                                                      '${combosmap['image']}' !=
+                                                      '${combosMap['image']}' !=
                                                                   '' &&
-                                                              combosmap['image'] !=
+                                                              combosMap['image'] !=
                                                                   null &&
-                                                              combosmap['image']
+                                                              combosMap['image']
                                                                   .isNotEmpty
-                                                          ? '${combosmap['image']}'
+                                                          ? '${combosMap['image']}'
                                                           : '';
-                                                  var combobrand =
-                                                      combosmap['brand'] ??
+                                                  var comboBrand =
+                                                      combosMap['brand'] ??
                                                       '---';
                                                   totalAllItems += itemTotal;
                                                   // double.parse(qty) * itemPrice;
@@ -571,7 +589,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                     'item_image': '',
                                                     'item_brand': '',
                                                     'combo_image': comboImage,
-                                                    'combo_brand': combobrand,
+                                                    'combo_brand': comboBrand,
                                                     'isImageList': true,
                                                     'title': '',
                                                     'image': '',
@@ -647,9 +665,10 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                   );
                                                 }
                                               }
-
                                               return PrintSalesInvoice(
-                                                vat: salesInvoiceCont.vat11,
+                                                header:
+                                                salesInvoiceCont.selectedHeader,
+                                                vat: salesInvoiceCont.companyVat.toString(),
                                                 fromPage: 'createSi',
 
                                                 quotationNumber: '',
@@ -689,7 +708,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                 globalDiscount:
                                                     globalDiscPercentController
                                                         .text,
-                                                //widget.info['globalDiscount'] ?? '0',
+                                                globalDiscountAmount:salesInvoiceCont.globalDiscountAmount.text.isEmpty?'0':salesInvoiceCont.globalDiscountAmount.text ,
                                                 totalPriceAfterDiscount:
                                                     salesInvoiceCont
                                                                 .preGlobalDisc ==
@@ -702,10 +721,10 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                           salesInvoiceCont
                                                               .totalAfterGlobalDis,
                                                         ),
-                                                additionalSpecialDiscount:
-                                                    salesInvoiceCont
-                                                        .preSpecialDisc
-                                                        .toStringAsFixed(2),
+                                                // additionalSpecialDiscount:
+                                                //     salesInvoiceCont
+                                                //         .preSpecialDisc
+                                                //         .toStringAsFixed(2),
                                                 totalPriceAfterSpecialDiscount:
                                                     salesInvoiceCont
                                                                 .preSpecialDisc ==
@@ -733,10 +752,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
 
                                                 vatBySalesInvoiceCurrency:
                                                     formatDoubleWithCommas(
-                                                      double.parse(
-                                                        salesInvoiceCont.vat11,
+                                                        salesInvoiceCont.companyVat,
                                                       ),
-                                                    ),
                                                 finalPriceBySalesInvoiceCurrency:
                                                     formatDoubleWithCommas(
                                                       double.parse(
@@ -749,9 +766,7 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                 specialDiscount:
                                                     specialDiscPercentController
                                                         .text,
-                                                specialDiscountAmount:
-                                                    salesInvoiceCont
-                                                        .specialDisc,
+                                                specialDiscountAmount:salesInvoiceCont.specialDiscAmount.text.isEmpty?'0':salesInvoiceCont.specialDiscAmount.text,
                                                 salesPerson:
                                                     selectedSalesPerson,
                                                 salesInvoiceCurrency:
@@ -764,9 +779,17 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                     salesInvoiceCont
                                                         .exchangeRateForSelectedCurrency,
                                                 clientPhoneNumber:
-                                                    salesInvoiceCont
-                                                        .phoneNumber[selectedCustomerIds] ??
+                                                salesInvoiceCont
+                                                    .phoneNumber[selectedCustomerIds] ??
                                                     '---',
+                                                clientMobileNumber:
+                                                salesInvoiceCont
+                                                    .mobileNumber[selectedCustomerIds] ??
+                                                    '---',
+                                                clientAddress: '${salesInvoiceCont
+                                                    .city[selectedCustomerIds]!=''?'${salesInvoiceCont
+                                                    .city[selectedCustomerIds]} - ' :''} ${salesInvoiceCont
+                                                    .country[selectedCustomerIds]!=''?salesInvoiceCont.country[selectedCustomerIds]:'---'}' ,
                                                 clientName:
                                                     clientNameController.text,
                                                 termsAndConditions:
@@ -879,7 +902,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             inputDateController.text,
                                             salesInvoiceCont
                                                 .selectedWarehouseId,
-                                            salesInvoiceCont.selectedPaymentTermId,
+                                            salesInvoiceCont
+                                                .selectedPaymentTermId,
                                             salesInvoiceCont.salesInvoiceNumber,
                                             salesInvoiceCont
                                                 .selectedPriceListId,
@@ -896,14 +920,13 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                 .toString(), //total before vat
                                             specialDiscPercentController
                                                 .text, // inserted by user
-                                            salesInvoiceController
-                                                .specialDisc, // calculated
+                                            salesInvoiceCont.specialDiscAmount.text.isEmpty?'0':salesInvoiceCont.specialDiscAmount.text, // calculated
                                             globalDiscPercentController.text,
-                                            salesInvoiceController.globalDisc,
-                                            salesInvoiceController.vat11
+                                            salesInvoiceCont.globalDiscountAmount.text.isEmpty?'0':salesInvoiceCont.globalDiscountAmount.text,
+                                            salesInvoiceController.companyVat
                                                 .toString(), //vat
                                             salesInvoiceController
-                                                .vatInPrimaryCurrency
+                                                .vatInSalesInvoiceCurrency
                                                 .toString(), //vatLebanese
                                             salesInvoiceController
                                                 .totalSalesInvoice, //total
@@ -931,8 +954,16 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             salesInvoiceController
                                                 .rowsInListViewInSalesInvoice,
                                             salesInvoiceController.orderedKeys,
-                                            salesInvoiceController.selectedInvoiceType,
-                                              '${salesInvoiceCont.selectedHeader['id']}'
+                                            salesInvoiceController
+                                                .selectedInvoiceType,
+                                            isItHasTwoHeaders
+                                                ? salesInvoiceCont
+                                                .headersList[salesInvoiceCont
+                                                .selectedHeaderIndex -
+                                                1]['id']
+                                                .toString()
+                                                : '',
+                                            // '${salesInvoiceCont.selectedHeader['id']}',
                                           );
                                           if (res['success'] == true) {
                                             CommonWidgets.snackBar(
@@ -1050,7 +1081,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             inputDateController.text,
                                             salesInvoiceCont
                                                 .selectedWarehouseId,
-                                            salesInvoiceCont.selectedPaymentTermId,
+                                            salesInvoiceCont
+                                                .selectedPaymentTermId,
                                             salesInvoiceCont.salesInvoiceNumber,
                                             salesInvoiceCont
                                                 .selectedPriceListId,
@@ -1067,14 +1099,13 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                 .toString(), //total before vat
                                             specialDiscPercentController
                                                 .text, // inserted by user
-                                            salesInvoiceController
-                                                .specialDisc, // calculated
+                                            salesInvoiceCont.specialDiscAmount.text.isEmpty?'0':salesInvoiceCont.specialDiscAmount.text, // calculated
                                             globalDiscPercentController.text,
-                                            salesInvoiceController.globalDisc,
-                                            salesInvoiceController.vat11
+                                            salesInvoiceCont.globalDiscountAmount.text.isEmpty?'0':salesInvoiceCont.globalDiscountAmount.text,
+                                            salesInvoiceController.companyVat
                                                 .toString(), //vat
                                             salesInvoiceController
-                                                .vatInPrimaryCurrency
+                                                .vatInSalesInvoiceCurrency
                                                 .toString(), //vatLebanese
                                             salesInvoiceController
                                                 .totalSalesInvoice, //total
@@ -1102,8 +1133,16 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             salesInvoiceController
                                                 .rowsInListViewInSalesInvoice,
                                             salesInvoiceController.orderedKeys,
-                                            salesInvoiceController.selectedInvoiceType,
-                                              '${salesInvoiceCont.selectedHeader['id']}'
+                                            salesInvoiceController
+                                                .selectedInvoiceType,
+                                            isItHasTwoHeaders
+                                                ? salesInvoiceCont
+                                                .headersList[salesInvoiceCont
+                                                .selectedHeaderIndex -
+                                                1]['id']
+                                                .toString()
+                                                : '',
+                                            // '${salesInvoiceCont.selectedHeader['id']}',
                                           );
                                           if (res['success'] == true) {
                                             CommonWidgets.snackBar(
@@ -1221,7 +1260,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             inputDateController.text,
                                             salesInvoiceCont
                                                 .selectedWarehouseId,
-                                            salesInvoiceCont.selectedPaymentTermId,
+                                            salesInvoiceCont
+                                                .selectedPaymentTermId,
                                             salesInvoiceCont.salesInvoiceNumber,
                                             salesInvoiceCont
                                                 .selectedPriceListId,
@@ -1238,15 +1278,14 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                 .toString(), //total before vat
                                             specialDiscPercentController
                                                 .text, // inserted by user
-                                            salesInvoiceController
-                                                .specialDisc, // calculated
+                                            salesInvoiceCont.specialDiscAmount.text.isEmpty?'0':salesInvoiceCont.specialDiscAmount.text, // calculated
                                             globalDiscPercentController.text,
-                                            salesInvoiceController.globalDisc,
-                                            salesInvoiceController.vat11
+                                            salesInvoiceCont.globalDiscountAmount.text.isEmpty?'0':salesInvoiceCont.globalDiscountAmount.text,
+                                            salesInvoiceController.companyVat
                                                 .toString(), //vat
                                             salesInvoiceController
-                                                .vatInPrimaryCurrency
-                                                .toString(), //vatLebanese
+                                                .vatInSalesInvoiceCurrency
+                                                .toString(),
                                             salesInvoiceController
                                                 .totalSalesInvoice, //total
 
@@ -1273,8 +1312,9 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             salesInvoiceController
                                                 .rowsInListViewInSalesInvoice,
                                             salesInvoiceController.orderedKeys,
-                                            salesInvoiceController.selectedInvoiceType,
-                                              '${salesInvoiceCont.selectedHeader['id']}'
+                                            salesInvoiceController
+                                                .selectedInvoiceType,
+                                            '${salesInvoiceCont.selectedHeader['id']}',
                                           );
                                           if (res['success'] == true) {
                                             CommonWidgets.snackBar(
@@ -1337,71 +1377,87 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                         // gapH16,
                         isItHasTwoHeaders
                             ? Column(
-                          children: [
-                            gapH10,
-                            Row(
                               children: [
-                                Text('header'.tr),
+                                gapH10,
+                                Row(
+                                  children: [
+                                    Text('header'.tr),
+                                    gapW64,
+                                    ReusableRadioBtns(
+                                      isRow: true,
+                                      groupVal:
+                                          salesInvoiceCont.selectedHeaderIndex,
+                                      title1:
+                                          salesInvoiceCont
+                                              .headersList[0]['header_name'],
+                                      title2:
+                                          salesInvoiceCont
+                                              .headersList[1]['header_name'],
+                                      func: (value) {
+                                        if (value == 1) {
+                                          salesInvoiceCont
+                                              .setSelectedHeaderIndex(1);
+                                          salesInvoiceCont.setSelectedHeader(
+                                            salesInvoiceCont.headersList[0],
+                                          );
+                                          salesInvoiceCont.setQuotationCurrency(
+                                            salesInvoiceCont.headersList[0],
+                                          );
+                                        } else {
+                                          salesInvoiceCont
+                                              .setSelectedHeaderIndex(2);
+                                          salesInvoiceCont.setSelectedHeader(
+                                            salesInvoiceCont.headersList[1],
+                                          );
+                                          salesInvoiceCont.setQuotationCurrency(
+                                            salesInvoiceCont.headersList[1],
+                                          );
+                                        }
+                                        setVat();
+                                        checkVatExempt();
+                                        salesInvoiceCont.setGlobalDisc(globalDiscountPercentage);
+                                      },
+                                      width1:
+                                          MediaQuery.of(context).size.width *
+                                          0.15,
+                                      width2:
+                                          MediaQuery.of(context).size.width *
+                                          0.15,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
+                            : SizedBox.shrink(),
+                        isItHasDoubleBook
+                            ? Row(
+                              children: [
+                                Text('invoice'.tr),
                                 gapW64,
                                 ReusableRadioBtns(
                                   isRow: true,
-                                  groupVal: salesInvoiceCont
-                                      .selectedHeaderIndex,
-                                  title1: salesInvoiceCont
-                                      .headersList[0]['header_name'],
-                                  title2: salesInvoiceCont
-                                      .headersList[1]['header_name'],
+                                  groupVal: salesInvoiceCont.selectedTypeIndex,
+                                  title1: 'real'.tr,
+                                  title2: 'estimate'.tr,
                                   func: (value) {
-                                    if(value==1){
-                                      salesInvoiceCont.setSelectedHeaderIndex(1);
-                                      salesInvoiceCont.setSelectedHeader( salesInvoiceCont
-                                          .headersList[0]);
-                                      salesInvoiceCont.setQuotationCurrency(
-                                        salesInvoiceCont.headersList[0],
-                                      );
-                                    }else{
-                                      salesInvoiceCont.setSelectedHeaderIndex(2);
-                                      salesInvoiceCont.setSelectedHeader( salesInvoiceCont
-                                          .headersList[1]);
-                                      salesInvoiceCont.setQuotationCurrency(
-                                        salesInvoiceCont.headersList[1],
+                                    if (value == 1) {
+                                      salesInvoiceCont.setSelectedTypeIndex(1);
+                                      salesInvoiceCont.setSelectedType('real');
+                                    } else {
+                                      salesInvoiceCont.setSelectedTypeIndex(2);
+                                      salesInvoiceCont.setSelectedType(
+                                        'estimate',
                                       );
                                     }
-                                    setVat();
-                                    checkVatExempt();
                                   },
-                                  width1: MediaQuery.of(context).size.width * 0.15,
-                                  width2: MediaQuery.of(context).size.width * 0.15,
+                                  width1:
+                                      MediaQuery.of(context).size.width * 0.15,
+                                  width2:
+                                      MediaQuery.of(context).size.width * 0.15,
                                 ),
                               ],
-                            ),
-                          ],
-                        )
+                            )
                             : SizedBox.shrink(),
-                        isItHasDoubleBook?Row(
-                          children: [
-                            Text('invoice'.tr),
-                            gapW64,
-                            ReusableRadioBtns(
-                              isRow: true,
-                              groupVal: salesInvoiceCont
-                                  .selectedTypeIndex,
-                              title1: 'real'.tr,
-                              title2: 'estimate'.tr,
-                              func: (value) {
-                                if(value==1){
-                                  salesInvoiceCont.setSelectedTypeIndex(1);
-                                  salesInvoiceCont.setSelectedType('real');
-                                }else{
-                                  salesInvoiceCont.setSelectedTypeIndex(2);
-                                  salesInvoiceCont.setSelectedType('estimate');
-                                }
-                              },
-                              width1: MediaQuery.of(context).size.width * 0.15,
-                              width2: MediaQuery.of(context).size.width * 0.15,
-                            ),
-                          ],
-                        ):SizedBox.shrink(),
                         gapH10,
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -1465,7 +1521,9 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                               //     0.07,
                                               // requestFocusOnTap: false,
                                               enableSearch: true,
-                                              controller: salesInvoiceCont.currencyController,
+                                              controller:
+                                                  salesInvoiceCont
+                                                      .currencyController,
                                               hintText: '',
                                               inputDecorationTheme: InputDecorationTheme(
                                                 // filled: true,
@@ -2363,8 +2421,12 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                         hint: '${'search'.tr}...',
                                         controller: paymentTermsController,
                                         onSelected: (String? val) {
-                                          int index=cont.paymentTermsNamesList.indexOf(val!);
-                                          salesInvoiceCont.setSelectedPaymentTermId(cont.paymentTermsIdsList[index]);
+                                          int index = cont.paymentTermsNamesList
+                                              .indexOf(val!);
+                                          salesInvoiceCont
+                                              .setSelectedPaymentTermId(
+                                                cont.paymentTermsIdsList[index],
+                                              );
                                         },
                                         validationFunc: (value) {
                                           // if (value == null || value.isEmpty) {
@@ -2373,27 +2435,42 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                           // return null;
                                         },
                                         rowWidth:
-                                        MediaQuery.of(context).size.width * 0.24,
+                                            MediaQuery.of(context).size.width *
+                                            0.24,
                                         textFieldWidth:
-                                        MediaQuery.of(context).size.width * 0.15,
+                                            MediaQuery.of(context).size.width *
+                                            0.15,
                                         clickableOptionText:
-                                        'or_create_new_payment_term'.tr,
+                                            'or_create_new_payment_term'.tr,
                                         isThereClickableOption: true,
                                         onTappedClickableOption: () {
                                           showDialog<String>(
-                                              context: context,
-                                              builder: (BuildContext context) => AlertDialog(
-                                                backgroundColor: Colors.white,
-                                                contentPadding: const EdgeInsets.all(0),
-                                                titlePadding: const EdgeInsets.all(0),
-                                                actionsPadding: const EdgeInsets.all(0),
-                                                shape: const RoundedRectangleBorder(
-                                                  borderRadius:
-                                                  BorderRadius.all(Radius.circular(9)),
+                                            context: context,
+                                            builder:
+                                                (
+                                                  BuildContext context,
+                                                ) => AlertDialog(
+                                                  backgroundColor: Colors.white,
+                                                  contentPadding:
+                                                      const EdgeInsets.all(0),
+                                                  titlePadding:
+                                                      const EdgeInsets.all(0),
+                                                  actionsPadding:
+                                                      const EdgeInsets.all(0),
+                                                  shape:
+                                                      const RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                              Radius.circular(
+                                                                9,
+                                                              ),
+                                                            ),
+                                                      ),
+                                                  elevation: 0,
+                                                  content:
+                                                      configDialogs['payment_terms'],
                                                 ),
-                                                elevation: 0,
-                                                content: configDialogs['payment_terms'],
-                                              ));
+                                          );
                                         },
                                       );
                                     },
@@ -3162,7 +3239,6 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                       : SizedBox(),
                                 ],
                               ),
-
                             ],
                           ),
                         ),
@@ -3630,39 +3706,84 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                         isCentered: true,
                                                         hint: '0',
                                                         onChangedFunc: (val) {
-                                                          setState(() {
-                                                            if (val == '') {
-                                                              globalDiscPercentController
-                                                                  .text = '0';
-                                                              globalDiscountPercentage =
-                                                                  '0';
-                                                            } else {
-                                                              globalDiscountPercentage =
-                                                                  val;
-                                                            }
-                                                          });
-                                                          salesInvoiceCont
-                                                              .setGlobalDisc(
-                                                                globalDiscountPercentage,
-                                                              );
+                                                          if(salesInvoiceCont.totalItems==0){
+                                                            globalDiscPercentController.text= '';
+                                                          }else {
+                                                            setState(() {
+                                                              if (val == '') {
+                                                                globalDiscPercentController
+                                                                    .text = '0';
+                                                                globalDiscountPercentage =
+                                                                    '0';
+                                                              } else {
+                                                                globalDiscountPercentage =
+                                                                    val;
+                                                              }
+                                                            });
+                                                            salesInvoiceCont
+                                                                .setGlobalDisc(
+                                                                  globalDiscountPercentage,
+                                                                );
+                                                          }
                                                         },
                                                         validationFunc:
                                                             (val) {},
                                                       ),
                                                     ),
                                                     gapW10,
-                                                    ReusableShowInfoCard(
-                                                      text: formatDoubleWithCommas(
-                                                        double.parse(
-                                                          salesInvoiceController
-                                                              .globalDisc,
-                                                        ),
-                                                      ),
+                                                    SizedBox(
                                                       width:
                                                           MediaQuery.of(
                                                             context,
                                                           ).size.width *
                                                           0.1,
+                                                      child: ReusableNumberField(
+                                                        textEditingController:
+                                                            salesInvoiceCont
+                                                                .globalDiscountAmount,
+                                                        isPasswordField: false,
+                                                        isCentered: true,
+                                                        hint: '0.00',
+                                                        onChangedFunc: (val) {
+                                                          if (salesInvoiceCont
+                                                                  .totalItems ==
+                                                              0) {
+                                                            salesInvoiceCont
+                                                                .globalDiscountAmount
+                                                                .text = '';
+                                                          } else {
+                                                            setState(() {
+                                                              if (val == '') {
+                                                                globalDiscPercentController
+                                                                    .text = '0';
+                                                                salesInvoiceCont
+                                                                    .globalDiscountAmount
+                                                                    .text = '0';
+                                                                globalDiscountPercentage =
+                                                                    '0';
+                                                              } else {
+                                                                globalDiscountPercentage = ((double.parse(
+                                                                              val,
+                                                                            ) /
+                                                                            salesInvoiceCont.totalItems) *
+                                                                        100)
+                                                                    .toStringAsFixed(
+                                                                      2,
+                                                                    );
+                                                                globalDiscPercentController
+                                                                        .text =
+                                                                    globalDiscountPercentage;
+                                                              }
+                                                            });
+                                                            salesInvoiceCont
+                                                                .setGlobalDiscPercentage(
+                                                                  val,
+                                                                );
+                                                          }
+                                                        },
+                                                        validationFunc:
+                                                            (val) {},
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -3690,41 +3811,87 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                         isCentered: true,
                                                         hint: '0',
                                                         onChangedFunc: (val) {
-                                                          setState(() {
-                                                            if (val == '') {
-                                                              specialDiscPercentController
-                                                                  .text = '0';
-                                                              specialDiscountPercentage =
-                                                                  '0';
-                                                            } else {
-                                                              specialDiscountPercentage =
-                                                                  val;
-                                                            }
-                                                          });
-                                                          salesInvoiceCont
-                                                              .setSpecialDisc(
-                                                                specialDiscountPercentage,
-                                                              );
+                                                          if (salesInvoiceCont
+                                                                  .totalItems ==
+                                                              0) {
+                                                            specialDiscPercentController
+                                                                .text = '';
+                                                          } else {
+                                                            setState(() {
+                                                              if (val == '') {
+                                                                specialDiscPercentController
+                                                                    .text = '0';
+                                                                specialDiscountPercentage =
+                                                                    '0';
+                                                              } else {
+                                                                specialDiscountPercentage =
+                                                                    val;
+                                                              }
+                                                            });
+                                                            salesInvoiceCont
+                                                                .setSpecialDisc(
+                                                                  specialDiscountPercentage,
+                                                                );
+                                                          }
                                                         },
                                                         validationFunc:
                                                             (val) {},
                                                       ),
                                                     ),
                                                     gapW10,
-                                                    ReusableShowInfoCard(
-                                                      text: formatDoubleWithCommas(
-                                                        double.parse(
-                                                          salesInvoiceController
-                                                              .specialDisc,
-                                                        ),
-                                                      ),
-
-                                                      // salesInvoiceCont.specialDisc,
+                                                    SizedBox(
                                                       width:
                                                           MediaQuery.of(
                                                             context,
                                                           ).size.width *
                                                           0.1,
+                                                      child: ReusableNumberField(
+                                                        textEditingController:
+                                                            salesInvoiceCont
+                                                                .specialDiscAmount,
+                                                        isPasswordField: false,
+                                                        isCentered: true,
+                                                        hint: '0.00',
+                                                        onChangedFunc: (val) {
+                                                          if (salesInvoiceCont
+                                                                  .totalItems ==
+                                                              0) {
+                                                            salesInvoiceCont
+                                                                .specialDiscAmount
+                                                                .text = '';
+                                                          } else {
+                                                            setState(() {
+                                                              if (val == '') {
+                                                                salesInvoiceCont
+                                                                    .specialDiscAmount
+                                                                    .text = '0';
+                                                                specialDiscPercentController
+                                                                    .text = '0';
+                                                                specialDiscountPercentage =
+                                                                    '0';
+                                                              } else {
+                                                                specialDiscountPercentage = ((double.parse(
+                                                                              val,
+                                                                            ) /
+                                                                            salesInvoiceCont.totalItems) *
+                                                                        100)
+                                                                    .toStringAsFixed(
+                                                                      2,
+                                                                    );
+                                                                specialDiscPercentController
+                                                                        .text =
+                                                                    specialDiscountPercentage;
+                                                              }
+                                                            });
+                                                            salesInvoiceCont
+                                                                .setSpecialDiscPercentage(
+                                                                  val,
+                                                                );
+                                                          }
+                                                        },
+                                                        validationFunc:
+                                                            (val) {},
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -3751,12 +3918,11 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                     Row(
                                                       children: [
                                                         ReusableShowInfoCard(
-                                                          text: formatDoubleWithCommas(
-                                                            double.parse(
-                                                              salesInvoiceCont
-                                                                  .vatInPrimaryCurrency,
-                                                            ),
-                                                          ),
+                                                          text:
+                                                              formatDoubleWithCommas(
+                                                                salesInvoiceCont
+                                                                    .companyVat,
+                                                              ),
                                                           width:
                                                               MediaQuery.of(
                                                                 context,
@@ -3766,10 +3932,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                         gapW10,
                                                         ReusableShowInfoCard(
                                                           text: formatDoubleWithCommas(
-                                                            double.parse(
-                                                              salesInvoiceCont
-                                                                  .vat11,
-                                                            ),
+                                                            salesInvoiceCont
+                                                                .vatInSalesInvoiceCurrency,
                                                           ),
                                                           width:
                                                               MediaQuery.of(
@@ -3915,7 +4079,8 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             inputDateController.text,
                                             salesInvoiceCont
                                                 .selectedWarehouseId,
-                                            salesInvoiceCont.selectedPaymentTermId,
+                                            salesInvoiceCont
+                                                .selectedPaymentTermId,
                                             salesInvoiceCont.salesInvoiceNumber,
                                             salesInvoiceCont
                                                 .selectedPriceListId,
@@ -3932,14 +4097,13 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                                 .toString(), //total before vat
                                             specialDiscPercentController
                                                 .text, // inserted by user
-                                            salesInvoiceController
-                                                .specialDisc, // calculated
+                                            salesInvoiceCont.specialDiscAmount.text.isEmpty?'0':salesInvoiceCont.specialDiscAmount.text, // calculated
                                             globalDiscPercentController.text,
-                                            salesInvoiceController.globalDisc,
-                                            salesInvoiceController.vat11
+                                            salesInvoiceCont.globalDiscountAmount.text.isEmpty?'0':salesInvoiceCont.globalDiscountAmount.text,
+                                            salesInvoiceController.companyVat
                                                 .toString(), //vat
                                             salesInvoiceController
-                                                .vatInPrimaryCurrency
+                                                .vatInSalesInvoiceCurrency
                                                 .toString(), //vatLebanese
                                             salesInvoiceController
                                                 .totalSalesInvoice, //total
@@ -3967,8 +4131,16 @@ class _CreateNewSalesInvoiceState extends State<CreateNewSalesInvoice> {
                                             salesInvoiceController
                                                 .rowsInListViewInSalesInvoice,
                                             salesInvoiceController.orderedKeys,
-                                            salesInvoiceController.selectedInvoiceType,
-                                              '${salesInvoiceCont.selectedHeader['id']}'
+                                            salesInvoiceController
+                                                .selectedInvoiceType,
+                                            isItHasTwoHeaders
+                                                ? salesInvoiceCont
+                                                .headersList[salesInvoiceCont
+                                                .selectedHeaderIndex -
+                                                1]['id']
+                                                .toString()
+                                                : '',
+                                            // '${salesInvoiceCont.selectedHeader['id']}',
                                           );
                                           if (res['success'] == true) {
                                             CommonWidgets.snackBar(
@@ -4612,10 +4784,15 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
               children: [
                 Obx(
                   () => ReusableDropDownMenusWithSearch(
-                    searchList: cont.items.map((item) => {
-                      "id": '${item["id"]}',
-                      "codes": cont.allCodesForItem['${item["id"]}'],
-                    }).toList(),
+                    searchList:
+                        cont.items
+                            .map(
+                              (item) => {
+                                "id": '${item["id"]}',
+                                "codes": cont.allCodesForItem['${item["id"]}'],
+                              },
+                            )
+                            .toList(),
                     list:
                         cont.itemsMultiPartList, // Assuming multiList is List<List<String>>
                     text: ''.tr,
@@ -5177,12 +5354,12 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                             });
                             setState(() {
                               cont.totalItems = 0.0;
-                              cont.globalDisc = "0.0";
+                              cont.globalDiscountAmount.text = "";
                               cont.globalDiscountPercentageValue = "0.0";
-                              cont.specialDisc = "0.0";
+                              cont.specialDiscAmount.text = "";
                               cont.specialDiscountPercentageValue = "0.0";
-                              cont.vat11 = "0.0";
-                              cont.vatInPrimaryCurrency = "0.0";
+                              // cont.vat11 = "0.0";
+                              cont.vatInSalesInvoiceCurrency = 0.0;
                               cont.totalSalesInvoice = "0.0";
                             });
                             if (cont.rowsInListViewInSalesInvoice != {}) {
@@ -6243,12 +6420,11 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                             });
                             setState(() {
                               cont.totalItems = 0.0;
-                              cont.globalDisc = "0.0";
+                              cont.globalDiscountAmount.text = "";
                               cont.globalDiscountPercentageValue = "0.0";
-                              cont.specialDisc = "0.0";
+                              cont.specialDiscAmount.text = "";
                               cont.specialDiscountPercentageValue = "0.0";
-                              cont.vat11 = "0.0";
-                              cont.vatInPrimaryCurrency = "0.0";
+                              cont.vatInSalesInvoiceCurrency = 0.0;
                               cont.totalSalesInvoice = "0.0";
                             });
                             if (cont.rowsInListViewInSalesInvoice != {}) {

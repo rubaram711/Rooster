@@ -39,8 +39,8 @@ class _QuotationSummaryState extends State<QuotationSummary> {
   int start = 1;
   bool isArrowBackClicked = false;
   bool isArrowForwardClicked = false;
-  final HomeController homeController = Get.find();
-  final QuotationController quotationController = Get.find();
+   HomeController homeController = Get.find();
+   QuotationController quotationController = Get.find();
   bool isNumberOrderedUp = true;
   bool isCreationOrderedUp = true;
   bool isCustomerOrderedUp = true;
@@ -66,7 +66,7 @@ class _QuotationSummaryState extends State<QuotationSummary> {
       searchValue = value;
     });
     // await quotationController.getAllQuotationsFromBack();
-    await quotationController.getAllQuotationsFromBack();
+    await quotationController.getSummary();
   }
 
   TaskController taskController = Get.find();
@@ -116,7 +116,7 @@ class _QuotationSummaryState extends State<QuotationSummary> {
 
   searchOnQuotation(value) async {
     quotationController.setSearchInQuotationsController(value);
-    await quotationController.getAllQuotationsFromBack();
+    await quotationController.getSummary();
   }
   //
   //   Future<void> generatePdfFromImageUrl() async {
@@ -141,6 +141,7 @@ class _QuotationSummaryState extends State<QuotationSummary> {
   @override
   void initState() {
     // generatePdfFromImageUrl();
+    super.initState();
     quotationController.itemsMultiPartList = [];
     quotationController.salesPersonListNames = [];
     quotationController.salesPersonListId = [];
@@ -150,8 +151,8 @@ class _QuotationSummaryState extends State<QuotationSummary> {
     quotationController.searchInQuotationsController.text = '';
     listViewLength =
         Sizes.deviceHeight * (0.09 * quotationController.quotationsList.length);
-    quotationController.getAllQuotationsFromBack();
-    super.initState();
+    quotationController.getSummary();
+
   }
 
   @override
@@ -255,11 +256,11 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                   setState(() {
                                     isNumberOrderedUp = !isNumberOrderedUp;
                                     isNumberOrderedUp
-                                        ? cont.quotationsListCC.sort(
+                                        ? cont.quotationsList.sort(
                                           (a, b) => a['quotationNumber']
                                               .compareTo(b['quotationNumber']),
                                         )
-                                        : cont.quotationsListCC.sort(
+                                        : cont.quotationsList.sort(
                                           (a, b) => b['quotationNumber']
                                               .compareTo(a['quotationNumber']),
                                         );
@@ -274,11 +275,11 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                   setState(() {
                                     isCreationOrderedUp = !isCreationOrderedUp;
                                     isCreationOrderedUp
-                                        ? cont.quotationsListCC.sort(
+                                        ? cont.quotationsList.sort(
                                           (a, b) => a['createdAtDate']
                                               .compareTo(b['createdAtDate']),
                                         )
-                                        : cont.quotationsListCC.sort(
+                                        : cont.quotationsList.sort(
                                           (a, b) => b['createdAtDate']
                                               .compareTo(a['createdAtDate']),
                                         );
@@ -293,13 +294,13 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                   setState(() {
                                     isCustomerOrderedUp = !isCustomerOrderedUp;
                                     isCustomerOrderedUp
-                                        ? cont.quotationsListCC.sort(
+                                        ? cont.quotationsList.sort(
                                           (a, b) => '${a['client']['name']}'
                                               .compareTo(
                                                 '${b['client']['name']}',
                                               ),
                                         )
-                                        : cont.quotationsListCC.sort(
+                                        : cont.quotationsList.sort(
                                           (a, b) => '${b['client']['name']}'
                                               .compareTo(
                                                 '${a['client']['name']}',
@@ -317,12 +318,12 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                     isSalespersonOrderedUp =
                                         !isSalespersonOrderedUp;
                                     isSalespersonOrderedUp
-                                        ? cont.quotationsListCC.sort(
+                                        ? cont.quotationsList.sort(
                                           (a, b) => a['salesperson'].compareTo(
                                             b['salesperson'],
                                           ),
                                         )
-                                        : cont.quotationsListCC.sort(
+                                        : cont.quotationsList.sort(
                                           (a, b) => b['salesperson'].compareTo(
                                             a['salesperson'],
                                           ),
@@ -398,13 +399,13 @@ class _QuotationSummaryState extends State<QuotationSummary> {
                                   MediaQuery.of(context).size.height *
                                   0.4, //listViewLength
                               child: ListView.builder(
-                                itemCount: cont.quotationsListCC.length,
+                                itemCount: cont.quotationsList.length,
                                 // itemCount:  cont.quotationsList.length>9?selectedNumberOfRowsAsInt:cont.quotationsList.length,
                                 itemBuilder:
                                     (context, index) => Column(
                                       children: [
                                         QuotationAsRowInTable(
-                                          info: cont.quotationsListCC[index],
+                                          info: cont.quotationsList[index],
                                           index: index,
                                         ),
                                         const Divider(),
@@ -1323,15 +1324,16 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
 
                             totalPriceAfterDiscount =
                                 totalAllItems - discountOnAllItem;
-                            additionalSpecialDiscount =
-                                totalPriceAfterDiscount *
-                                double.parse(
-                                  widget.info['specialDiscount'] ?? '0',
-                                ) /
-                                100;
+                            additionalSpecialDiscount =double.parse(
+                              widget.info['specialDiscountAmount'] ?? '0',
+                            );
                             totalPriceAfterSpecialDiscount =
-                                totalPriceAfterDiscount -
-                                additionalSpecialDiscount;
+                                double.parse(widget.info['totalBeforeVat'] ?? '0') -
+                                    double.parse(
+                                      widget.info['globalDiscountAmount'] ?? '0',
+                                    )-double.parse(
+                                  widget.info['specialDiscountAmount'] ?? '0',
+                                );
                             totalPriceAfterSpecialDiscountByQuotationCurrency =
                                 totalPriceAfterSpecialDiscount;
                             vatByQuotationCurrency =
@@ -1343,13 +1345,12 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                             )) /
                                         100;
                             finalPriceByQuotationCurrency =
-                                totalPriceAfterSpecialDiscountByQuotationCurrency +
-                                vatByQuotationCurrency;
+                                double.parse('${widget.info['total'] ?? '0'}');
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
-                                  // print('widget.info[ ${widget.info['termsAndConditions']}');
                                   return PrintQuotationData(
                                     termsAndConditions:   widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['terms_and_conditions']}' : '',
                                     header: widget.info['companyHeader'],
@@ -1389,14 +1390,14 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
 
                                     globalDiscount:
                                         widget.info['globalDiscount'] ?? '0',
-
+                                    globalDiscountAmount: widget.info['globalDiscountAmount'] ?? '0',
                                     totalPriceAfterDiscount:
                                         formatDoubleWithCommas(
                                           totalPriceAfterDiscount,
                                         ),
-                                    additionalSpecialDiscount:
-                                        additionalSpecialDiscount
-                                            .toStringAsFixed(2),
+                                    // additionalSpecialDiscount:
+                                    //     additionalSpecialDiscount
+                                    //         .toStringAsFixed(2),
                                     totalPriceAfterSpecialDiscount:
                                         formatDoubleWithCommas(
                                           totalPriceAfterSpecialDiscount,
@@ -1437,10 +1438,17 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                             .info['currency']['latest_rate'] ??
                                         '',
                                     clientPhoneNumber:
-                                        widget.info['client'] != null
-                                            ? widget.info['client']['phoneNumber'] ??
-                                                '---'
-                                            : "---",
+                                        widget.info['client'] == null? "---"
+                                            : widget.info['client']['phoneNumber'] ==null
+                                                ?'---':
+                                            '${widget.info['client']['phoneCode']}-${widget.info['client']['phoneNumber']}',
+                                    clientMobileNumber:
+                                    widget.info['client'] == null? "---"
+                                        : widget.info['client']['mobileNumber'] ==null
+                                        ?'---':
+                                    '${widget.info['client']['mobileCode']}-${widget.info['client']['mobileNumber']}',
+                                    clientAddress:widget.info['client'] == null? "---" : '${widget.info['client']['city']!=null
+                                        ?'${widget.info['client']['city']} - ' :''} ${widget.info['client']['country'] ?? '---'}' ,
                                     clientName:
                                         widget.info['client']['name'] ?? '',
                                     vat: widget.info['vat'] ?? '',
@@ -1495,375 +1503,8 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                 );
               },
             ),
-            // GetBuilder<QuotationController>(
-            //   builder: (cont) {
-            //     return SizedBox(
-            //       width:
-            //           widget.isDesktop
-            //               ? MediaQuery.of(context).size.width * 0.07
-            //               : 150,
-            //       child: ReusableMore(
-            //         itemsList: [
-            //           PopupMenuItem<String>(
-            //             value: '1',
-            //             onTap: () async {
-            //               itemsInfoPrint = [];
-            //               quotationItemInfo = {};
-            //               totalAllItems = 0;
-            //               cont.totalAllItems = 0;
-            //               totalAllItems = 0;
-            //               cont.totalAllItems = 0;
-            //               totalPriceAfterDiscount = 0;
-            //               additionalSpecialDiscount = 0;
-            //               totalPriceAfterSpecialDiscount = 0;
-            //               totalPriceAfterSpecialDiscountByQuotationCurrency = 0;
-            //               vatByQuotationCurrency = 0;
-            //               vatByQuotationCurrency = 0;
-            //               finalPriceByQuotationCurrency = 0;
-            //
-            //               for (var item in widget.info['orderLines']) {
-            //                 if ('${item['line_type_id']}' == '2') {
-            //                   qty = item['item_quantity'];
-            //                   var map =
-            //                       cont.itemsMap[item['item_id'].toString()];
-            //                   itemName = map['item_name'];
-            //                   itemPrice = double.parse(
-            //                     '${item['item_unit_price'] ?? '0'}',
-            //                   );
-            //                   //     map['unitPrice'] ?? 0.0;
-            //                   // formatDoubleWithCommas(map['unitPrice']);
-            //
-            //                   itemDescription = item['item_description'];
-            //
-            //                   itemImage =
-            //                       '${map['images']}' != '[]'
-            //                           ? map['images'][0]
-            //                           : '';
-            //                   // itemCurrencyName = map['currency']['name'];
-            //                   // itemCurrencySymbol = map['currency']['symbol'];
-            //                   // itemCurrencyLatestRate =
-            //                   //     map['currency']['latest_rate'];
-            //                   var firstBrandObject = map['itemGroups']
-            //                       .firstWhere(
-            //                         (obj) =>
-            //                             obj["root_name"]?.toLowerCase() ==
-            //                             "brand".toLowerCase(),
-            //                         orElse: () => null,
-            //                       );
-            //                   brand =
-            //                       firstBrandObject == null
-            //                           ? ''
-            //                           : firstBrandObject['name'] ?? '';
-            //                   itemTotal = double.parse('${item['item_total']}');
-            //                   // itemTotal = double.parse(qty) * itemPrice;
-            //                   totalAllItems += itemTotal;
-            //                   quotationItemInfo = {
-            //                     'line_type_id': '2',
-            //                     'item_name': itemName,
-            //                     'item_description': itemDescription,
-            //                     'item_quantity': qty,
-            //                     'item_discount': item['item_discount'] ?? '0',
-            //                     'item_unit_price': formatDoubleWithCommas(
-            //                       itemPrice,
-            //                     ),
-            //                     'item_total': formatDoubleWithCommas(itemTotal),
-            //                     'item_image': itemImage,
-            //                     'item_brand': brand,
-            //                     'title': '',
-            //                     'isImageList': false,
-            //                     'note': '',
-            //                     'image': '',
-            //                   };
-            //                   itemsInfoPrint.add(quotationItemInfo);
-            //                 } else if ('${item['line_type_id']}' == '3') {
-            //                   var qty = item['item_quantity'];
-            //                   // var map =
-            //                   // cont
-            //                   //     .combosMap[item['combo_id']
-            //                   //     .toString()];
-            //                   var ind = cont.combosIdsList.indexOf(
-            //                     item['combo_id'].toString(),
-            //                   );
-            //                   var itemName = cont.combosNamesList[ind];
-            //                   var itemPrice = double.parse(
-            //                     '${item['combo_price'] ?? 0.0}',
-            //                   );
-            //                   var itemDescription = item['combo_description'];
-            //
-            //                   var itemTotal = double.parse(
-            //                     '${item['combo_total']}',
-            //                   );
-            //                   // double.parse(qty) * itemPrice;
-            //                   var quotationItemInfo = {
-            //                     'line_type_id': '3',
-            //                     'item_name': itemName,
-            //                     'item_description': itemDescription,
-            //                     'item_quantity': qty,
-            //                     'item_unit_price': formatDoubleWithCommas(
-            //                       itemPrice,
-            //                     ),
-            //                     'item_discount': item['combo_discount'] ?? '0',
-            //                     'item_total': formatDoubleWithCommas(itemTotal),
-            //                     'note': '',
-            //                     'item_image': '',
-            //                     'item_brand': '',
-            //                     'isImageList': false,
-            //                     'title': '',
-            //                     'image': '',
-            //                   };
-            //                   itemsInfoPrint.add(quotationItemInfo);
-            //                 } else if ('${item['line_type_id']}' == '1') {
-            //                   var quotationItemInfo = {
-            //                     'line_type_id': '1',
-            //                     'item_name': '',
-            //                     'item_description': '',
-            //                     'item_quantity': '',
-            //                     'item_unit_price': '',
-            //                     'item_discount': '0',
-            //                     'item_total': '',
-            //                     'item_image': '',
-            //                     'item_brand': '',
-            //                     'note': '',
-            //                     'isImageList': false,
-            //                     'title': item['title'],
-            //                     'image': '',
-            //                   };
-            //                   itemsInfoPrint.add(quotationItemInfo);
-            //                 } else if ('${item['line_type_id']}' == '5') {
-            //                   var quotationItemInfo = {
-            //                     'line_type_id': '5',
-            //                     'item_name': '',
-            //                     'item_description': '',
-            //                     'item_quantity': '',
-            //                     'item_unit_price': '',
-            //                     'item_discount': '0',
-            //                     'item_total': '',
-            //                     'item_image': '',
-            //                     'item_brand': '',
-            //                     'title': '',
-            //                     'note': item['note'],
-            //                     'isImageList': false,
-            //                     'image': '',
-            //                   };
-            //                   itemsInfoPrint.add(quotationItemInfo);
-            //                 } else if ('${item['line_type_id']}' == '4') {
-            //                   var quotationItemInfo = {
-            //                     'line_type_id': '4',
-            //                     'item_name': '',
-            //                     'item_description': '',
-            //                     'item_quantity': '',
-            //                     'item_unit_price': '',
-            //                     'item_discount': '0',
-            //                     'item_total': '',
-            //                     'item_image': '',
-            //                     'item_brand': '',
-            //                     'title': '',
-            //                     'note': '',
-            //                     'image': '$baseImage${item['image']}',
-            //                     'isImageList': false,
-            //                   };
-            //                   itemsInfoPrint.add(quotationItemInfo);
-            //                 }
-            //               }
-            //               // var primaryCurrency = await getCompanyPrimaryCurrencyFromPref();
-            //               // var result = exchangeRatesController
-            //               //     .exchangeRatesList
-            //               //     .firstWhere(
-            //               //       (item) =>
-            //               //   item["currency"] == primaryCurrency,
-            //               //   orElse: () => null,
-            //               // );
-            //               // var primaryLatestRate=
-            //               // result != null
-            //               //     ? '${result["exchange_rate"]}'
-            //               //     : '1';
-            //               // discountOnAllItem =
-            //               //     totalAllItems *
-            //               //     double.parse(
-            //               //       widget.info['globalDiscount'] ?? '0',
-            //               //     ) /
-            //               //     100;
-            //
-            //               totalPriceAfterDiscount =
-            //                   totalAllItems - discountOnAllItem;
-            //               additionalSpecialDiscount =
-            //                   totalPriceAfterDiscount *
-            //                   double.parse(
-            //                     widget.info['specialDiscount'] ?? '0',
-            //                   ) /
-            //                   100;
-            //               totalPriceAfterSpecialDiscount =
-            //                   totalPriceAfterDiscount -
-            //                   additionalSpecialDiscount;
-            //               totalPriceAfterSpecialDiscountByQuotationCurrency =
-            //                   totalPriceAfterSpecialDiscount;
-            //               vatByQuotationCurrency =
-            //                   '${widget.info['vatExempt']}' == '1'
-            //                       ? 0
-            //                       : (totalPriceAfterSpecialDiscountByQuotationCurrency *
-            //                               double.parse(
-            //                                 await getCompanyVatFromPref(),
-            //                               )) /
-            //                           100;
-            //               finalPriceByQuotationCurrency =
-            //                   totalPriceAfterSpecialDiscountByQuotationCurrency +
-            //                   vatByQuotationCurrency;
-            //               Navigator.push(
-            //                 context,
-            //                 MaterialPageRoute(
-            //                   builder: (BuildContext context) {
-            //                     // print('widget.info[ ${widget.info['termsAndConditions']}');
-            //                     return PrintQuotationData(
-            //                       isPrintedAs0:
-            //                           '${widget.info['printedAsPercentage']}' ==
-            //                                   '1'
-            //                               ? true
-            //                               : false,
-            //                       isVatNoPrinted:
-            //                           '${widget.info['notPrinted']}' == '1'
-            //                               ? true
-            //                               : false,
-            //                       isPrintedAsVatExempt:
-            //                           '${widget.info['printedAsVatExempt']}' ==
-            //                                   '1'
-            //                               ? true
-            //                               : false,
-            //                       isInQuotation: true,
-            //                       quotationNumber:
-            //                           widget.info['quotationNumber'] ?? '',
-            //                       creationDate: widget.info['validity'] ?? '',
-            //                       ref: widget.info['reference'] ?? '',
-            //                       receivedUser: '',
-            //                       senderUser: homeController.userName,
-            //                       status: widget.info['status'] ?? '',
-            //                       totalBeforeVat:
-            //                           widget.info['totalBeforeVat'] ?? '',
-            //                       discountOnAllItem:
-            //                           discountOnAllItem.toString(),
-            //                       totalAllItems:
-            //                       // totalAllItems.toString()  ,
-            //                       formatDoubleWithCommas(
-            //                         totalPriceAfterDiscount,
-            //                       ),
-            //
-            //                       globalDiscount:
-            //                           widget.info['globalDiscount'] ?? '0',
-            //
-            //                       totalPriceAfterDiscount:
-            //                           formatDoubleWithCommas(
-            //                             totalPriceAfterDiscount,
-            //                           ),
-            //                       additionalSpecialDiscount:
-            //                           additionalSpecialDiscount.toStringAsFixed(
-            //                             2,
-            //                           ),
-            //                       totalPriceAfterSpecialDiscount:
-            //                           formatDoubleWithCommas(
-            //                             totalPriceAfterSpecialDiscount,
-            //                           ),
-            //                       // itemCurrencyName: itemCurrencyName,
-            //                       // itemCurrencySymbol: itemCurrencySymbol,
-            //                       // itemCurrencyLatestRate:
-            //                       //     itemCurrencyLatestRate,
-            //                       totalPriceAfterSpecialDiscountByQuotationCurrency:
-            //                           formatDoubleWithCommas(
-            //                             totalPriceAfterSpecialDiscountByQuotationCurrency,
-            //                           ),
-            //
-            //                       vatByQuotationCurrency:
-            //                           formatDoubleWithCommas(
-            //                             vatByQuotationCurrency,
-            //                           ),
-            //                       finalPriceByQuotationCurrency:
-            //                           formatDoubleWithCommas(
-            //                             finalPriceByQuotationCurrency,
-            //                           ),
-            //                       specialDisc: specialDisc.toString(),
-            //                       specialDiscount:
-            //                           widget.info['specialDiscount'] ?? '0',
-            //                       specialDiscountAmount:
-            //                           widget.info['specialDiscountAmount'] ??
-            //                           '',
-            //                       salesPerson:
-            //                           widget.info['salesperson'] != null
-            //                               ? widget.info['salesperson']['name']
-            //                               : '---',
-            //                       quotationCurrency:
-            //                           widget.info['currency']['name'] ?? '',
-            //                       quotationCurrencySymbol:
-            //                           widget.info['currency']['symbol'] ?? '',
-            //                       quotationCurrencyLatestRate:
-            //                           widget.info['currency']['latest_rate'] ??
-            //                           '',
-            //                       clientPhoneNumber:
-            //                           widget.info['client'] != null
-            //                               ? widget.info['client']['phoneNumber'] ??
-            //                                   '---'
-            //                               : "---",
-            //                       clientName:
-            //                           widget.info['client']['name'] ?? '',
-            //                       termsAndConditions:
-            //                           widget.info['termsAndConditions'] ?? '',
-            //                       itemsInfoPrint: itemsInfoPrint,
-            //                     );
-            //                   },
-            //                 ),
-            //               );
-            //             },
-            //             child: Text('preview'.tr),
-            //           ),
-            //           PopupMenuItem<String>(
-            //             value: '2',
-            //             onTap: () async {
-            //               showDialog<String>(
-            //                 context: context,
-            //                 builder:
-            //                     (BuildContext context) => AlertDialog(
-            //                       backgroundColor: Colors.white,
-            //                       shape: const RoundedRectangleBorder(
-            //                         borderRadius: BorderRadius.all(
-            //                           Radius.circular(9),
-            //                         ),
-            //                       ),
-            //                       elevation: 0,
-            //                       content: UpdateQuotationDialog(
-            //                         index: widget.index,
-            //                         info: widget.info,
-            //                       ),
-            //                     ),
-            //               );
-            //             },
-            //             child: Text('Update'.tr),
-            //           ),
-            //         ],
-            //       ),
-            //     );
-            //   },
-            // ),
             SizedBox(
               width: 30.w,
-              // width: MediaQuery.of(context).size.width * 0.03,
-              // child: InkWell(
-              //   onTap: () async {
-              //     var res = await deleteQuotation(
-              //       '${quotationController.quotationsList[widget.index]['id']}',
-              //     );
-              //     var p = json.decode(res.body);
-              //     if (res.statusCode == 200) {
-              //       quotationController.quotationsListCC = [];
-              //       quotationController.isQuotationsFetched = false;
-              //       quotationController.getAllQuotationsFromBack();
-              //       CommonWidgets.snackBar('Success', p['message']);
-              //     } else {
-              //       CommonWidgets.snackBar('error', p['message']);
-              //     }
-              //   },
-              //   child: Icon(
-              //     Icons.delete_outline,
-              //     color: Primary.primary,
-              //     size: 22.sp,
-              //   ),
-              // ),
             ),
           ],
         ),

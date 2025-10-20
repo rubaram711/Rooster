@@ -37,12 +37,12 @@ abstract class ComboControllerAbstract extends GetxController {
     String name,
     String code,
     String description,
-    String currencyid,
+    String currencyId,
     String price,
     String active,
     String brand,
     List<int> image,
-    Map itemss,
+    Map itemsMap,
   );
   deleteItemFromComboFromDB(String id);
   setSelectedCurrency(String id, String name);
@@ -271,20 +271,22 @@ class ComboController extends ComboControllerAbstract {
   List<String> itemsTotalQuantity = [];
   List<List<String>> itemsMultiPartList = [];
   List<String> itemsForSplit = [];
-  Map priceCurrency = {}, itemUnitPrice = {}, itemsCodes = {};
+  Map priceCurrencyMap = {}, itemUnitPriceMap = {}, itemsCodesMap = {};
   Map<String,List<String>> allCodesForItem={};
   List<String> allCodesForAllItems=[];
   @override
   getComboCreatFieldFromBack() async {
+    itemsCode = [];
+    itemsName = [];
     itemsIds = [];
     itemsInfo = [];
     itemsDes = [];
     itemsTotalQuantity = [];
     itemsMultiPartList = [];
     itemsForSplit = [];
-    priceCurrency = {};
-    itemUnitPrice = {};
-    itemsCodes = {};
+    priceCurrencyMap = {};
+    itemUnitPriceMap = {};
+    itemsCodesMap = {};
     allCodesForItem={};
     allCodesForAllItems=[];
     items=[];
@@ -292,20 +294,17 @@ class ComboController extends ComboControllerAbstract {
     var response = await getFieldsForCreateCombo();
     code = response['code'];
     items = response['items'];
-
+// print('object+++ $items');
     for (var item in items) {
-      itemsName.add('${item['item_name']}');
+      itemsName.add('${item['item_name']??''}');
       itemsIds.add('${item['id']}');
-      itemUnitPrice["${item['id']}"] = item['unitPrice'];
-      priceCurrency["${item['id']}"] = item['priceCurrency']['name'];
-      itemsCodes["${item['id']}"] = item['mainCode'];
+      itemUnitPriceMap["${item['id']}"] = item['unitPrice'];
+      priceCurrencyMap["${item['id']}"] = item['priceCurrency']['name'];
+      itemsCodesMap["${item['id']}"] = item['mainCode'];
       itemsCode.add('${item['mainCode']}');
-      itemsIds.add('${item['id']}');
-      itemsInfo.add(
-        '${item['mainCode']}, ${item['mainDescription']} , ${item['totalQuantities']} Pcs',
-      );
+      itemsInfo.add('${item['mainCode']}, ${item['mainDescription']} , ${item['totalQuantities']} Pcs',);
       itemsDes.add('${item['mainDescription']}');
-      itemsName.add('${item['item_name']}');
+      // itemsName.add('${item['item_name']}');
       itemsTotalQuantity.add('${item['totalQuantities']}');
       allCodesForItem["${item['id']}"] = [
         ...?item["barcodes"]?.map((e) => e["code"].toString()),
@@ -318,6 +317,7 @@ class ComboController extends ComboControllerAbstract {
         ...?item["alternativeCodes"]?.map((e) => e["code"].toString()),
       ]);
     }
+    // print('itemUnitPriceMap ${itemUnitPriceMap}');
     for (int i = 0; i < itemsCode.length; i++) {
       itemsForSplit.add(itemsCode[i]);
       itemsForSplit.add(itemsName[i]);
@@ -394,24 +394,24 @@ class ComboController extends ComboControllerAbstract {
     String name,
     String code,
     String description,
-    String currencyid,
+    String currencyId,
     String price,
     String active,
     String brand,
-    List<int> image,
-    Map itemss,
+    List<int>? image,
+    Map itemsMap,
   ) async {
     var res = await storeCombo(
       companyId,
       name,
       code,
       description,
-      currencyid,
+      currencyId,
       price,
       active,
       brand,
       image,
-      itemss,
+      itemsMap,
     );
     if (res['success'] == true) {
       Get.back();

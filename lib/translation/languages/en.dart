@@ -337,7 +337,7 @@ Map<String, String> en = {
   'granted_discount': 'Granted Discount %',
   'create_warehouse': 'Create Warehouse',
   'warehouse_name': 'Warehouse Name',
-  '7_digits': 'Minimum required 7 digits.',
+  '6_digits': 'Minimum required 6 digits.',
   'error': 'There is an error.',
   'product_updated_successfully': 'Product updated Successfully',
   'product_created_successfully': 'Product Created Successfully',
@@ -644,4 +644,5 @@ Map<String, String> en = {
   'or_create_new_payment_term':'Or Create new payment term',
   'or_create_new_terms_and_conditions':'Or Create new Terms And Conditions',
   'create_terms_and_conditions':'Create Terms And Conditions',
+  'total_quantity':'Total Quantity'
 };

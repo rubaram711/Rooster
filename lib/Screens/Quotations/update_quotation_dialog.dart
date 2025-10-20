@@ -147,7 +147,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     quotationController.selectedCurrencyName = selectedCurrency;
     // var vat = await getCompanyVatFromPref();
     // quotationController.setCompanyVat(double.parse(vat));
-    setVat();
+    // setVat();
     var companyCurrency = await getCompanyPrimaryCurrencyFromPref();
     quotationController.setCompanyPrimaryCurrency(companyCurrency);
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
@@ -199,6 +199,10 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     }
     quotationController.isVatExemptChecked =
         '${widget.info['vatExempt'] ?? ''}' == '1' ? true : false;
+    quotationController.isPrintedAs0='${widget.info['printedAsPercentage']??'0'}'=='1';
+    quotationController.isPrintedAsVatExempt='${widget.info['printedAsVatExempt']??'0'}'=='1';
+    quotationController.isVatNoPrinted='${widget.info['notPrinted']??'0'}'=='1';
+    quotationController.isVatExemptChecked='${widget.info['vatExempt']??'0'}'=='1';
   }
 
   late QuillController _controller;
@@ -254,14 +258,17 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     var val=await getIsItHasMultiHeadersFromPref();
     isItHasTwoHeaders=(val=='1');
   }
+
   @override
   void initState() {
     checkIfItItHasTwoHeaders();
     quotationController.rowsInListViewInQuotation = {};
+    quotationController.unitPriceControllers={};
     quotationController.orderedKeys = [];
     quotationController.quotationCounter = 0;
 
     quotationController.selectedHeaderIndex = 1;
+
     if (widget.info['companyHeader'] != null) {
       if ('${widget.info['companyHeader']['id']}' !=
           '${quotationController.headersList[0]['id']}') {
@@ -327,7 +334,6 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
     codeController.text = widget.info['code'] ?? '';
     selectedItemCode = widget.info['code'] ?? '';
     selectedCustomerIds = widget.info['client']['id'].toString();
-    print('+++++++++++++++++++++ ${widget.info}');
 
     refController.text = widget.info['reference'] ?? '';
     validityController.text = widget.info['validity'] ?? '';
@@ -354,29 +360,35 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
         widget.info['globalDiscount'] ?? '0.0'; // entered by user
     specialDiscPercentController.text =
         widget.info['specialDiscount'] ?? '0.0'; //entered by user
-    quotationController.globalDisc =
+    quotationController.globalDiscountAmount.text =
         widget.info['globalDiscountAmount'] ?? '0.0';
-    quotationController.specialDisc =
+    quotationController.specialDiscAmount.text =
         widget.info['specialDiscountAmount'] ?? '0.0';
     quotationController.totalItems = double.parse(
       '${widget.info['totalBeforeVat'] ?? '0.0'}',
     );
-    // print('isVatZero $isVatZero');
-    quotationController.vat11 =
-        quotationController.isVatExemptChecked
-            ? '0'
-            : '${widget.info['vat'] ?? ''}';
-    quotationController.vatInPrimaryCurrency =
-        quotationController.isVatExemptChecked
-            ? '0'
-            : '${widget.info['vatLebanese'] ?? ''}';
+    quotationController.preGlobalDisc=double.parse( widget.info['globalDiscountAmount'] ?? '0.0');
+    quotationController.preSpecialDisc=double.parse( widget.info['specialDiscountAmount'] ?? '0.0');
 
-    // quotationController.totalQuotation = '${widget.info['total'] ?? ''}';
-    quotationController.totalQuotation = ((quotationController.totalItems -
-                double.parse(quotationController.globalDisc) -
-                double.parse(quotationController.specialDisc)) +
-            double.parse(quotationController.vat11))
-        .toStringAsFixed(2);
+// if(isItWithVat) {
+  quotationController.companyVat =
+  quotationController.isVatExemptChecked
+      ? 0
+      : double.parse('${widget.info['vat'] ?? ''}');
+  quotationController.vatInQuotationCurrency =
+  quotationController.isVatExemptChecked
+      ? 0
+      : double.parse('${widget.info['vatLebanese'] ?? ''}');
+// }else{
+//   quotationController.companyVat=0;
+//   quotationController.vatInQuotationCurrency =0;
+// }
+    quotationController.totalQuotation = '${widget.info['total'] ?? '0'}';
+    // var totalBeforeVat=(quotationController.totalItems -
+    //     double.parse(quotationController.globalDiscountAmount) -
+    //     double.parse(quotationController.specialDisc));
+    // quotationController.totalQuotation = (totalBeforeVat + quotationController.vatInQuotationCurrency)
+    //     .toStringAsFixed(2);
     quotationController.city[selectedCustomerIds] =
         widget.info['client']['city'] ?? '';
     quotationController.country[selectedCustomerIds] =
@@ -412,46 +424,6 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
             quotationController.selectedQuotationData['orderLines'][i]['image'];
       }
     }
-    //
-    // for (int i = 0; i < widget.info['orderLines'].length; i++) {
-    //   quotationController.orderedKeys.add(i + 1);
-    //   if (widget.info['orderLines'][i]['line_type_id'] == 2) {
-    //     quotationController.unitPriceControllers[i + 1] =
-    //         TextEditingController();
-    //     //   Widget p = ReusableItemRow(
-    //     //     index: i + 1,
-    //     //     info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     //   );
-    //     //
-    //     //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //     // } else if (widget.info['orderLines'][i]['line_type_id'] == 1) {
-    //     //   Widget p = ReusableTitleRow(
-    //     //     index: i + 1,
-    //     //     info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     //   );
-    //     //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //     // } else if (widget.info['orderLines'][i]['line_type_id'] == 5) {
-    //     //   Widget p = ReusableNoteRow(
-    //     //     index: i + 1,
-    //     //     info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     //   );
-    //     //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //     // } else if (widget.info['orderLines'][i]['line_type_id'] == 4) {
-    //     //   Widget p = ReusableImageRow(
-    //     //     index: i + 1,
-    //     //     info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     //   );
-    //     //   quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //   } else if (widget.info['orderLines'][i]['line_type_id'] == 3) {
-    //     quotationController.combosPriceControllers[i + 1] =
-    //         TextEditingController();
-    //     // Widget p = ReusableComboRow(
-    //     //   index: i + 1,
-    //     //   info: quotationController.rowsInListViewInQuotation[keys[i]],
-    //     // );
-    //     // quotationController.orderLinesQuotationList['${i + 1}'] = p;
-    //   }
-    // }
     quotationController.quotationCounter =
         quotationController.rowsInListViewInQuotation.length;
     quotationController.listViewLengthInQuotation =
@@ -717,14 +689,14 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     specialDiscPercentController
                                         .text, // inserted by user
                                     quotationController
-                                        .specialDisc, // calculated
+                                        .specialDiscAmount.text.isEmpty?'0':quotationCont.specialDiscAmount.text, // calculated
                                     globalDiscPercentController.text,
-                                    quotationController.globalDisc,
-                                    quotationController.vat11.toString(), //vat
-                                    quotationController.vatInPrimaryCurrency
+                                    quotationController.globalDiscountAmount.text.isEmpty?'0':quotationCont.globalDiscountAmount.text,
+                                    quotationController.companyVat.toString(), //vat
+                                    quotationController.vatInQuotationCurrency
                                         .toString(),
                                     quotationController
-                                        .totalQuotation, // quotationController.totalQuotation
+                                        .totalQuotation,
 
                                     quotationCont.isVatExemptChecked
                                         ? '1'
@@ -898,17 +870,17 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                 specialDiscPercentController
                                                     .text, // inserted by user
                                                 quotationController
-                                                    .specialDisc, // calculated
+                                                    .specialDiscAmount.text.isEmpty?'0':quotationCont.specialDiscAmount.text, // calculated
                                                 globalDiscPercentController
                                                     .text,
-                                                quotationController.globalDisc,
-                                                quotationController.vat11
+                                                quotationController.globalDiscountAmount.text.isEmpty?'0':quotationCont.globalDiscountAmount.text,
+                                                quotationController.companyVat
                                                     .toString(), //vat
                                                 quotationController
-                                                    .vatInPrimaryCurrency
+                                                    .vatInQuotationCurrency
                                                     .toString(),
                                                 quotationController
-                                                    .totalQuotation, // quotationController.totalQuotation
+                                                    .totalQuotation,
 
                                                 quotationCont.isVatExemptChecked
                                                     ? '1'
@@ -1076,6 +1048,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                           }
                           setVat();
                           checkVatExempt();
+                          quotationCont.setGlobalDisc(globalDiscountPercentage);
                         },
                         width1: MediaQuery.of(context).size.width * 0.15,
                         width2: MediaQuery.of(context).size.width * 0.15,
@@ -2426,7 +2399,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                           children: [
                             if (screenWidth > 1100)
                               SizedBox(
-                                width: 500.w,
+                                // width: 500.w,
                                 // width: MediaQuery.of(context).size.width * 0.5,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -2622,7 +2595,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               SizedBox(
-                                width: 400.w,
+                                // width: 400.w,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -4128,35 +4101,83 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                                 // totalAllItems =
                                                 //     quotationController
                                                 //         .totalItems ;
-
-                                                setState(() {
-                                                  if (val == '') {
-                                                    globalDiscPercentController
-                                                        .text = '0';
-                                                    globalDiscountPercentage =
-                                                        '0';
-                                                  } else {
-                                                    globalDiscountPercentage =
-                                                        val;
-                                                  }
-                                                });
-                                                cont.setGlobalDisc(
-                                                  globalDiscountPercentage,
-                                                );
+                                                if(quotationCont.totalItems==0){
+                                                  globalDiscPercentController.text= '';
+                                                }else{
+                                                  setState(() {
+                                                    if (val == '') {
+                                                      globalDiscPercentController
+                                                          .text = '0';
+                                                      globalDiscountPercentage =
+                                                      '0';
+                                                    } else {
+                                                      globalDiscountPercentage =
+                                                          val;
+                                                    }
+                                                  });
+                                                  cont.setGlobalDisc(
+                                                    globalDiscountPercentage,
+                                                  );
+                                                }
                                                 // cont.getTotalItems();
                                               },
                                               validationFunc: (val) {},
                                             ),
                                           ),
                                           gapW10,
-                                          ReusableShowInfoCard(
-                                            text: cont.globalDisc,
+                                          SizedBox(
                                             width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
+                                            MediaQuery.of(
+                                              context,
+                                            ).size.width *
                                                 0.1,
+                                            child: ReusableNumberField(
+                                              textEditingController:
+                                              quotationCont.globalDiscountAmount,
+                                              isPasswordField: false,
+                                              isCentered: true,
+                                              hint: '0.00',
+                                              onChangedFunc: (val) {
+                                                if(quotationCont.totalItems==0){
+                                                  quotationCont.globalDiscountAmount.text= '';
+                                                }else {
+                                                  setState(() {
+                                                    if (val == '') {
+                                                      globalDiscPercentController
+                                                          .text = '0';
+                                                      quotationCont
+                                                          .globalDiscountAmount
+                                                          .text = '0';
+                                                      globalDiscountPercentage =
+                                                      '0';
+                                                    } else {
+                                                      globalDiscountPercentage =
+                                                      ((double.parse(val) /
+                                                          quotationCont
+                                                              .totalItems) *
+                                                          100).toStringAsFixed(2);
+                                                      globalDiscPercentController
+                                                          .text =
+                                                          globalDiscountPercentage;
+                                                    }
+                                                  });
+                                                  quotationCont
+                                                      .setGlobalDiscPercentage(
+                                                      val
+                                                  );
+                                                }
+                                              },
+                                              validationFunc: (val) {},
+                                            ),
                                           ),
+                                          // ReusableShowInfoCard(
+                                          //   text: cont.globalDiscountAmount.text,
+                                          //   width:
+                                          //       MediaQuery.of(
+                                          //         context,
+                                          //       ).size.width *
+                                          //       0.1,
+                                          // ),
                                         ],
                                       ),
                                     ],
@@ -4182,39 +4203,87 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                               isCentered: true,
                                               hint: '0',
                                               onChangedFunc: (val) {
-                                                setState(() {
-                                                  if (val == '') {
-                                                    specialDiscPercentController
-                                                        .text = '0';
-                                                    specialDiscountPercentage =
-                                                        '0';
-                                                  } else {
-                                                    specialDiscountPercentage =
-                                                        val;
-                                                  }
-                                                });
-                                                cont.setSpecialDisc(
-                                                  specialDiscountPercentage,
-                                                );
+                                                if(quotationCont.totalItems==0){
+                                                  specialDiscPercentController.text= '';
+                                                }else {
+                                                  setState(() {
+                                                    if (val == '') {
+                                                      specialDiscPercentController
+                                                          .text = '0';
+                                                      specialDiscountPercentage =
+                                                      '0';
+                                                    } else {
+                                                      specialDiscountPercentage =
+                                                          val;
+                                                    }
+                                                  });
+                                                  cont.setSpecialDisc(
+                                                    specialDiscountPercentage,
+                                                  );
+                                                }
                                               },
                                               validationFunc: (val) {},
                                             ),
                                           ),
                                           gapW10,
-                                          ReusableShowInfoCard(
-                                            text: cont.specialDisc,
+                                          SizedBox(
                                             width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
+                                            MediaQuery.of(
+                                              context,
+                                            ).size.width *
                                                 0.1,
+                                            child: ReusableNumberField(
+                                              textEditingController:
+                                              quotationCont.specialDiscAmount,
+                                              isPasswordField: false,
+                                              isCentered: true,
+                                              hint: '0.00',
+                                              onChangedFunc: (val) {
+                                                if(quotationCont.totalItems==0){
+                                                  quotationCont.specialDiscAmount.text= '';
+                                                }else {
+                                                  setState(() {
+                                                    if (val == '') {
+                                                      quotationCont.specialDiscAmount
+                                                          .text = '0';
+                                                      specialDiscPercentController
+                                                          .text = '0';
+                                                      specialDiscountPercentage =
+                                                      '0';
+                                                    } else {
+                                                      specialDiscountPercentage =
+                                                      ((double.parse(val) /
+                                                          quotationCont
+                                                              .totalItems) *
+                                                          100).toStringAsFixed(2);
+                                                      specialDiscPercentController
+                                                          .text =
+                                                          specialDiscountPercentage;
+                                                    }
+                                                  });
+                                                  quotationCont
+                                                      .setSpecialDiscPercentage(
+                                                    val,
+                                                  );
+                                                }
+                                              },
+                                              validationFunc: (val) {},
+                                            ),
                                           ),
+                                          // ReusableShowInfoCard(
+                                          //   text: cont.specialDisc.text,
+                                          //   width:
+                                          //       MediaQuery.of(
+                                          //         context,
+                                          //       ).size.width *
+                                          //       0.1,
+                                          // ),
                                         ],
                                       ),
                                     ],
                                   ),
                                   gapH6,
-                                  quotationCont.isVatExemptCheckBoxShouldAppear
+                                  quotationCont.isVatExemptCheckBoxShouldAppear && !quotationCont.isVatExemptChecked
                                       ? Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -4223,7 +4292,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                           Row(
                                             children: [
                                               ReusableShowInfoCard(
-                                                text: cont.vatInPrimaryCurrency,
+                                                text: cont.companyVat.toString(),
                                                 // .toString(),
                                                 width:
                                                     MediaQuery.of(
@@ -4233,8 +4302,7 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                               ),
                                               gapW10,
                                               ReusableShowInfoCard(
-                                                text: cont.vat11,
-                                                // .toString(),
+                                                text: cont.vatInQuotationCurrency.toString(),
                                                 width:
                                                     MediaQuery.of(
                                                       context,
@@ -4491,14 +4559,14 @@ class _UpdateQuotationDialogState extends State<UpdateQuotationDialog> {
                                     .toString(), //total before vat
                                 specialDiscPercentController
                                     .text, // inserted by user
-                                quotationController.specialDisc, // calculated
+                                quotationController.specialDiscAmount.text.isEmpty?'0':quotationCont.specialDiscAmount.text, // calculated
                                 globalDiscPercentController.text,
-                                quotationController.globalDisc,
-                                quotationController.vat11.toString(), //vat
-                                quotationController.vatInPrimaryCurrency
+                                quotationController.globalDiscountAmount.text.isEmpty?'0':quotationCont.globalDiscountAmount.text,
+                                quotationController.companyVat.toString(), //vat
+                                quotationController.vatInQuotationCurrency
                                     .toString(),
                                 quotationController
-                                    .totalQuotation, // quotationController.totalQuotation
+                                    .totalQuotation,
 
                                 quotationCont.isVatExemptChecked ? '1' : '0',
                                 quotationCont.isVatNoPrinted ? '1' : '0',
@@ -5515,12 +5583,12 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
                           setState(() {
                             cont.totalItems = 0.0;
-                            cont.globalDisc = "0.0";
+                            cont.globalDiscountAmount.text = "";
                             cont.globalDiscountPercentageValue = "0.0";
-                            cont.specialDisc = "0.0";
+                            cont.specialDiscAmount.text = "";
                             cont.specialDiscountPercentageValue = "0.0";
-                            cont.vat11 = "0.0";
-                            cont.vatInPrimaryCurrency = "0.0";
+                            // cont.vat11 = "0.0";
+                            cont.vatInQuotationCurrency = 0.0;
                             cont.totalQuotation = "0.0";
 
                             cont.getTotalItems();
@@ -6836,12 +6904,12 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
                           setState(() {
                             cont.totalItems = 0.0;
-                            cont.globalDisc = "0.0";
+                            cont.globalDiscountAmount.text = "";
                             cont.globalDiscountPercentageValue = "0.0";
-                            cont.specialDisc = "0.0";
+                            cont.specialDiscAmount.text = "";
                             cont.specialDiscountPercentageValue = "0.0";
-                            cont.vat11 = "0.0";
-                            cont.vatInPrimaryCurrency = "0.0";
+                            // cont.vat11 = "0.0";
+                            cont.vatInQuotationCurrency = 0.0;
                             cont.totalQuotation = "0.0";
 
                             cont.getTotalItems();

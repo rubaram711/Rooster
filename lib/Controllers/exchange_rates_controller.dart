@@ -16,7 +16,6 @@ class ExchangeRatesController extends GetxController {
     currenciesSymbolsList = [];
     currenciesIdsList = [];
       isExchangeRatesFetched = false;
-      // update();
       var p = await getCurrencies();
       if('$p' != '[]'){
         currenciesList=p['currencies'];

@@ -140,8 +140,9 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
     comboController.photosWidgetsMap = {};
 
     // _loadImage();
-
-    _loadImage();
+if('${widget.info['image']}'!='https://theravenstyle.com/rooster-backend/public/') {
+  _loadImage();
+}
 
     getCurrency();
     comboController.orderLinesComboList = {};
@@ -191,7 +192,8 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
     setState(() {
       isLoading = true;
     });
-    if (widget.info['image'].isNotEmpty) {
+    print('objecthhhhhhhhhhhhh ${widget.info['image']}');
+    if (widget.info['image'].isNotEmpty ) {
       try {
         // final response = await http.get(Uri.parse(widget.info['image']));
         final response = await http
@@ -254,7 +256,7 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     DialogTitle(text: 'update_combo'.tr),
-                    gapW100,
+                    // gapW100,
                     InkWell(
                       onTap: () {
                         Get.back();
@@ -277,7 +279,8 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        SizedBox(
+                        cont.photosWidgetsMap.isNotEmpty
+                            ?SizedBox(
                           height: 150,
                           width: 150,
                           // width:
@@ -293,7 +296,7 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                         cont.photosWidgetsMap.values.toList(),
                                   )
                                   : Text(""),
-                        ),
+                        ):SizedBox.shrink(),
                         // SizedBox(width: 10.w),
                         ReusableAddPhotoCircle(
                           onTapCircle: () async {
@@ -487,16 +490,16 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
 
                                     if (selectedItemId != '') {
                                       if (comboController
-                                              .priceCurrency[selectedItemId] ==
+                                              .priceCurrencyMap[selectedItemId] ==
                                           val) {
                                         comboController
                                             .unitPriceControllers[keys[i]]!
                                             .text = comboController
-                                                .itemUnitPrice[selectedItemId]
+                                                .itemUnitPriceMap[selectedItemId]
                                                 .toString();
                                       } else if (val == 'USD' &&
                                           comboController
-                                                  .priceCurrency[selectedItemId] !=
+                                                  .priceCurrencyMap[selectedItemId] !=
                                               val) {
                                         var result = exchangeRatesController
                                             .exchangeRatesList
@@ -504,7 +507,7 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                               (item) =>
                                                   item["currency"] ==
                                                   comboController
-                                                      .priceCurrency[selectedItemId],
+                                                      .priceCurrencyMap[selectedItemId],
                                               orElse: () => null,
                                             );
                                         var divider = '1';
@@ -516,17 +519,17 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                         comboController
                                                 .unitPriceControllers[keys[i]]!
                                                 .text =
-                                            '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                            '${double.parse('${(double.parse(comboController.itemUnitPriceMap[selectedItemId].toString()) / double.parse(divider))}')}';
                                       } else if (comboController
                                                   .selectedCurrencyName !=
                                               'USD' &&
                                           comboController
-                                                  .priceCurrency[selectedItemId] ==
+                                                  .priceCurrencyMap[selectedItemId] ==
                                               'USD') {
                                         comboController
                                                 .unitPriceControllers[keys[i]]!
                                                 .text =
-                                            '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) * double.parse(comboController.exchangeRateForSelectedCurrency))}')}';
+                                            '${double.parse('${(double.parse(comboController.itemUnitPriceMap[selectedItemId].toString()) * double.parse(comboController.exchangeRateForSelectedCurrency))}')}';
                                         comboController
                                             .unitPriceControllers[keys[i]]!
                                             .text = (comboController
@@ -540,7 +543,7 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                               (item) =>
                                                   item["currency"] ==
                                                   comboController
-                                                      .priceCurrency[selectedItemId],
+                                                      .priceCurrencyMap[selectedItemId],
                                               orElse: () => null,
                                             );
                                         var divider = '1';
@@ -550,7 +553,7 @@ class _UpdateComboDialogState extends State<UpdateComboDialog> {
                                                   .toString();
                                         }
                                         var usdPrice =
-                                            '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                            '${double.parse('${(double.parse(comboController.itemUnitPriceMap[selectedItemId].toString()) / double.parse(divider))}')}';
                                         comboController
                                                 .unitPriceControllers[keys[i]]!
                                                 .text =
@@ -979,15 +982,15 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
         '${widget.info['unit_price'] ?? ''}';
     selectedItemId = widget.info['item_id'].toString();
 
-    if (combocont.priceCurrency[selectedItemId] ==
+    if (combocont.priceCurrencyMap[selectedItemId] ==
         combocont.selectedCurrencyName) {
       combocont.unitPriceControllers[widget.index]!.text =
-          combocont.itemUnitPrice[selectedItemId].toString();
+          combocont.itemUnitPriceMap[selectedItemId].toString();
     } else if (combocont.selectedCurrencyName == 'USD' &&
-        combocont.priceCurrency[selectedItemId] !=
+        combocont.priceCurrencyMap[selectedItemId] !=
             combocont.selectedCurrencyName) {
       var result = exchangeRatesController.exchangeRatesList.firstWhere(
-        (item) => item["currency"] == combocont.priceCurrency[selectedItemId],
+        (item) => item["currency"] == combocont.priceCurrencyMap[selectedItemId],
         orElse: () => null,
       );
       var divider = '1';
@@ -995,14 +998,14 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
         divider = result["exchange_rate"].toString();
       }
       combocont.unitPriceControllers[widget.index]!.text =
-          '${double.parse('${(double.parse(combocont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+          '${double.parse('${(double.parse(combocont.itemUnitPriceMap[selectedItemId].toString()) / double.parse(divider))}')}';
     } else if (combocont.selectedCurrencyName != 'USD' &&
-        combocont.priceCurrency[selectedItemId] == 'USD') {
+        combocont.priceCurrencyMap[selectedItemId] == 'USD') {
       combocont.unitPriceControllers[widget.index]!.text =
-          '${double.parse('${(double.parse(combocont.itemUnitPrice[selectedItemId].toString()) * double.parse(combocont.exchangeRateForSelectedCurrency))}')}';
+          '${double.parse('${(double.parse(combocont.itemUnitPriceMap[selectedItemId].toString()) * double.parse(combocont.exchangeRateForSelectedCurrency))}')}';
     } else {
       var result = exchangeRatesController.exchangeRatesList.firstWhere(
-        (item) => item["currency"] == combocont.priceCurrency[selectedItemId],
+        (item) => item["currency"] == combocont.priceCurrencyMap[selectedItemId],
         orElse: () => null,
       );
       var divider = '1';
@@ -1010,7 +1013,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
         divider = result["exchange_rate"].toString();
       }
       var usdPrice =
-          '${double.parse('${(double.parse(combocont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+          '${double.parse('${(double.parse(combocont.itemUnitPriceMap[selectedItemId].toString()) / double.parse(divider))}')}';
       combocont.unitPriceControllers[widget.index]!.text =
           '${double.parse('${(double.parse(usdPrice) * double.parse(combocont.exchangeRateForSelectedCurrency))}')}';
     }
@@ -1143,18 +1146,18 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           )]['mainDescription'];
 
                       // **************************Currency***********************************************************************************
-                      if (cont.priceCurrency[selectedItemId] ==
+                      if (cont.priceCurrencyMap[selectedItemId] ==
                           cont.selectedCurrencyName) {
                         cont.unitPriceControllers[widget.index]!.text =
-                            cont.itemUnitPrice[selectedItemId].toString();
+                            cont.itemUnitPriceMap[selectedItemId].toString();
                       } else if (cont.selectedCurrencyName == 'USD' &&
-                          cont.priceCurrency[selectedItemId] !=
+                          cont.priceCurrencyMap[selectedItemId] !=
                               cont.selectedCurrencyName) {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
                                   item["currency"] ==
-                                  cont.priceCurrency[selectedItemId],
+                                  cont.priceCurrencyMap[selectedItemId],
                               orElse: () => null,
                             );
                         var divider = '1';
@@ -1162,17 +1165,17 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           divider = result["exchange_rate"].toString();
                         }
                         cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                            '${double.parse('${(double.parse(cont.itemUnitPriceMap[selectedItemId].toString()) / double.parse(divider))}')}';
                       } else if (cont.selectedCurrencyName != 'USD' &&
-                          cont.priceCurrency[selectedItemId] == 'USD') {
+                          cont.priceCurrencyMap[selectedItemId] == 'USD') {
                         cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                            '${double.parse('${(double.parse(cont.itemUnitPriceMap[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       } else {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
                                   item["currency"] ==
-                                  cont.priceCurrency[selectedItemId],
+                                  cont.priceCurrencyMap[selectedItemId],
                               orElse: () => null,
                             );
                         var divider = '1';
@@ -1180,7 +1183,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           divider = result["exchange_rate"].toString();
                         }
                         var usdPrice =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                            '${double.parse('${(double.parse(cont.itemUnitPriceMap[selectedItemId].toString()) / double.parse(divider))}')}';
                         cont.unitPriceControllers[widget.index]!.text =
                             '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       }

@@ -135,6 +135,14 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
       progressVar = 0;
       selectedCustomerIds = '';
       quotationController.currencyController.text = '';
+      quotationController.globalDiscountAmount.text = '';
+      quotationController.specialDiscAmount.text = '';
+      quotationController.preSpecialDisc = 0.0;
+      quotationController.preGlobalDisc = 0.0;
+      quotationController.vatInQuotationCurrency = 0.0;
+      quotationController.specialDiscountPercentageValue = '0';
+      quotationController.globalDiscountPercentageValue = '0';
+      // quotationController.companyVat = 0.0;
     });
   }
 
@@ -161,11 +169,19 @@ class _CreateNewQuotationState extends State<CreateNewQuotation> {
 
   setVat() async {
     if (quotationController.selectedHeaderIndex == 1) {
+      var companySubjectToVat = await getCompanySubjectToVatFromPref();
+      if(companySubjectToVat == '1'){
       var vat = await getCompanyVatFromPref();
-      quotationController.setCompanyVat(double.parse(vat));
+      quotationController.setCompanyVat(double.parse(vat));}else{
+        quotationController.setCompanyVat(0);
+      }
     } else {
+      var companySubjectToVat = await getCompanySubjectToVat2FromPref();
+      if(companySubjectToVat == '1'){
       var vat = await getCompanyVat2FromPref();
-      quotationController.setCompanyVat(double.parse(vat));
+      quotationController.setCompanyVat(double.parse(vat));}else{
+        quotationController.setCompanyVat(0);
+      }
     }
   }
 
@@ -232,8 +248,10 @@ late bool isItHasTwoHeaders=false;
   @override
   void initState() {
     checkIfItItHasTwoHeaders();
+    setVars();
     quotationController.orderedKeys = [];
     quotationController.rowsInListViewInQuotation = {};
+    quotationController.unitPriceControllers={};
     quotationController.selectedHeaderIndex = 1;
     chanceController.text = chanceLevels[0];
     quotationController.quotationCounter = 0;
@@ -245,7 +263,7 @@ late bool isItHasTwoHeaders=false;
     checkVatExempt();
     quotationController.isVatExemptChecked = false;
     // quotationController.newRowMap = {};
-    quotationController.rowsInListViewInQuotation = {};
+    // quotationController.rowsInListViewInQuotation = {};
     quotationController.itemsMultiPartList = [];
     quotationController.salesPersonListNames = [];
     quotationController.salesPersonListId = [];
@@ -253,7 +271,6 @@ late bool isItHasTwoHeaders=false;
     priceConditionController.text = 'Prices are before vat';
     quotationController.getAllUsersSalesPersonFromBack();
     quotationController.getAllTaxationGroupsFromBack();
-    setVars();
     quotationController.resetQuotation();
     quotationController.getFieldsForCreateQuotationFromBack();
     getCurrency();
@@ -542,7 +559,7 @@ late bool isItHasTwoHeaders=false;
                                         quotationNumber:
                                             quotationCont.quotationNumber,
                                         creationDate: validityController.text,
-                                        vat: quotationCont.vat11,
+                                        vat: quotationCont.companyVat.toString(),
                                         fromPage: 'createQuotation',
                                         ref: refController.text,
                                         receivedUser: '',
@@ -559,6 +576,7 @@ late bool isItHasTwoHeaders=false;
                                         ),
                                         globalDiscount:
                                             globalDiscPercentController.text,
+                                        globalDiscountAmount: quotationCont.globalDiscountAmount.text.isEmpty?'0':quotationCont.globalDiscountAmount.text,
                                         //widget.info['globalDiscount'] ?? '0',
                                         totalPriceAfterDiscount:
                                             quotationCont.preGlobalDisc == 0.0
@@ -569,9 +587,9 @@ late bool isItHasTwoHeaders=false;
                                                   quotationCont
                                                       .totalAfterGlobalDis,
                                                 ),
-                                        additionalSpecialDiscount: quotationCont
-                                            .preSpecialDisc
-                                            .toStringAsFixed(2),
+                                        // additionalSpecialDiscount: quotationCont
+                                        //     .preSpecialDisc
+                                        //     .toStringAsFixed(2),
                                         totalPriceAfterSpecialDiscount:
                                             quotationCont.preSpecialDisc == 0
                                                 ? formatDoubleWithCommas(
@@ -593,7 +611,7 @@ late bool isItHasTwoHeaders=false;
 
                                         vatByQuotationCurrency:
                                             formatDoubleWithCommas(
-                                              double.parse(quotationCont.vat11),
+                                              quotationCont.vatInQuotationCurrency
                                             ),
                                         finalPriceByQuotationCurrency:
                                             formatDoubleWithCommas(
@@ -606,7 +624,7 @@ late bool isItHasTwoHeaders=false;
                                         specialDiscount:
                                             specialDiscPercentController.text,
                                         specialDiscountAmount:
-                                            quotationCont.specialDisc,
+                                            quotationCont.specialDiscAmount.text.isEmpty?'0':quotationCont.specialDiscAmount.text,
                                         salesPerson: selectedSalesPerson,
                                         quotationCurrency:
                                             quotationCont.selectedCurrencyName,
@@ -620,6 +638,13 @@ late bool isItHasTwoHeaders=false;
                                             quotationCont
                                                 .phoneNumber[selectedCustomerIds] ??
                                             '---',
+                                        clientMobileNumber: quotationCont
+                                            .mobileNumber[selectedCustomerIds] ??
+                                            '---',
+                                        clientAddress: '${quotationCont
+                                            .city[selectedCustomerIds]!=''?'${quotationCont
+                                            .city[selectedCustomerIds]} - ' :''} ${quotationCont
+                                            .country[selectedCustomerIds]!=''?quotationCont.country[selectedCustomerIds]:'---'}' ,
                                         clientName: clientNameController.text,
                                         termsAndConditionsNote: terms,
                                         itemsInfoPrint: itemsInfoPrint,
@@ -725,14 +750,13 @@ late bool isItHasTwoHeaders=false;
                                     specialDiscPercentController
                                         .text, // inserted by user
                                     quotationController
-                                        .specialDisc, // calculated
+                                        .specialDiscAmount.text.isEmpty?'0':quotationCont.specialDiscAmount.text, // calculated
                                     globalDiscPercentController.text,
-                                    quotationController.globalDisc,
-                                    quotationController.vat11.toString(), //vat
-                                    quotationController.vatInPrimaryCurrency
-                                        .toString(),
+                                    quotationController.globalDiscountAmount.text.isEmpty?'0':quotationCont.globalDiscountAmount.text,
+                                    quotationController.companyVat.toString(), //vat
+                                    quotationController.vatInQuotationCurrency.toString(),
                                     quotationController
-                                        .totalQuotation, // quotationController.totalQuotation
+                                        .totalQuotation,
 
                                     quotationCont.isVatExemptChecked
                                         ? '1'
@@ -1010,7 +1034,7 @@ late bool isItHasTwoHeaders=false;
                                                 quotationCont.quotationNumber,
                                             creationDate:
                                                 validityController.text,
-                                            vat: quotationCont.vat11,
+                                            vat: quotationCont.companyVat.toString(),
                                             fromPage: 'createQuotation',
                                             ref: refController.text,
                                             receivedUser: '',
@@ -1030,7 +1054,7 @@ late bool isItHasTwoHeaders=false;
                                             globalDiscount:
                                                 globalDiscPercentController
                                                     .text,
-
+                                            globalDiscountAmount: quotationCont.globalDiscountAmount.text.isEmpty?'0':quotationCont.globalDiscountAmount.text,
                                             //widget.info['globalDiscount'] ?? '0',
                                             totalPriceAfterDiscount:
                                                 quotationCont.preGlobalDisc ==
@@ -1042,9 +1066,9 @@ late bool isItHasTwoHeaders=false;
                                                       quotationCont
                                                           .totalAfterGlobalDis,
                                                     ),
-                                            additionalSpecialDiscount:
-                                                quotationCont.preSpecialDisc
-                                                    .toStringAsFixed(2),
+                                            // additionalSpecialDiscount:
+                                            //     quotationCont.preSpecialDisc
+                                            //         .toStringAsFixed(2),
                                             totalPriceAfterSpecialDiscount:
                                                 quotationCont.preSpecialDisc ==
                                                         0
@@ -1068,9 +1092,7 @@ late bool isItHasTwoHeaders=false;
 
                                             vatByQuotationCurrency:
                                                 formatDoubleWithCommas(
-                                                  double.parse(
-                                                    quotationCont.vat11,
-                                                  ),
+                                                    quotationCont.vatInQuotationCurrency
                                                 ),
                                             finalPriceByQuotationCurrency:
                                                 formatDoubleWithCommas(
@@ -1084,7 +1106,7 @@ late bool isItHasTwoHeaders=false;
                                                 specialDiscPercentController
                                                     .text,
                                             specialDiscountAmount:
-                                                quotationCont.specialDisc,
+                                                quotationCont.specialDiscAmount.text.isEmpty?'0':quotationCont.specialDiscAmount.text,
                                             salesPerson: selectedSalesPerson,
                                             quotationCurrency:
                                                 quotationCont
@@ -1099,6 +1121,14 @@ late bool isItHasTwoHeaders=false;
                                                 quotationCont
                                                     .phoneNumber[selectedCustomerIds] ??
                                                 '---',
+                                            clientMobileNumber:
+                                                quotationCont
+                                                    .mobileNumber[selectedCustomerIds] ??
+                                                '---',
+                                            clientAddress: '${quotationCont
+                                                .city[selectedCustomerIds]!=''?'${quotationCont
+                                                .city[selectedCustomerIds]} - ' :''} ${quotationCont
+                                                .country[selectedCustomerIds]!=''?quotationCont.country[selectedCustomerIds]:'---'}' ,
                                             clientName:
                                                 clientNameController.text,
                                             termsAndConditionsNote:
@@ -1212,6 +1242,7 @@ late bool isItHasTwoHeaders=false;
                             }
                             setVat();
                             checkVatExempt();
+                            quotationCont.setGlobalDisc(globalDiscountPercentage);
                           },
                           width1:
                           MediaQuery.of(context).size.width *
@@ -1327,375 +1358,6 @@ late bool isItHasTwoHeaders=false;
                                                   return cont
                                                           .isExchangeRatesFetched
                                                       ?
-                                                      //   CustomSearchableDropdown(hint: '',width:  homeController.isOpened.value? MediaQuery.of(context).size.width * 0.07:
-                                                      //   MediaQuery.of(context).size.width * 0.1, items: cont.currenciesNamesList, onSelected: (String? val) {
-                                                      //   setState(() {
-                                                      //     selectedCurrency = val!;
-                                                      //     var index = cont
-                                                      //         .currenciesNamesList
-                                                      //         .indexOf(val);
-                                                      //     quotationCont.setSelectedCurrency(
-                                                      //       cont.currenciesIdsList[index],
-                                                      //       val,
-                                                      //     );
-                                                      //     quotationCont
-                                                      //         .setSelectedCurrencySymbol(
-                                                      //       cont.currenciesSymbolsList[index],
-                                                      //     );
-                                                      //     var matchedItems =
-                                                      //     exchangeRatesController
-                                                      //         .exchangeRatesList
-                                                      //         .where(
-                                                      //           (item) =>
-                                                      //       item["currency"] ==
-                                                      //           val,
-                                                      //     );
-                                                      //
-                                                      //     var result =
-                                                      //     matchedItems.isNotEmpty
-                                                      //         ? matchedItems.reduce(
-                                                      //           (a, b) =>
-                                                      //       DateTime.parse(
-                                                      //         a["start_date"],
-                                                      //       ).isAfter(
-                                                      //         DateTime.parse(
-                                                      //           b["start_date"],
-                                                      //         ),
-                                                      //       )
-                                                      //           ? a
-                                                      //           : b,
-                                                      //     )
-                                                      //         : null;
-                                                      //     quotationCont
-                                                      //         .setExchangeRateForSelectedCurrency(
-                                                      //       result != null
-                                                      //           ? '${result["exchange_rate"]}'
-                                                      //           : '1',
-                                                      //     );
-                                                      //   });
-                                                      //   var keys =
-                                                      //   quotationCont
-                                                      //       .unitPriceControllers
-                                                      //       .keys
-                                                      //       .toList();
-                                                      //   for (
-                                                      //   int i = 0;
-                                                      //   i <
-                                                      //       quotationCont
-                                                      //           .unitPriceControllers
-                                                      //           .length;
-                                                      //   i++
-                                                      //   ) {
-                                                      //     var selectedItemId =
-                                                      //         '${quotationCont.rowsInListViewInQuotation[keys[i]]['item_id']}';
-                                                      //     if (selectedItemId != '') {
-                                                      //       if (quotationCont
-                                                      //           .itemsPricesCurrencies[selectedItemId] ==
-                                                      //           val) {
-                                                      //         quotationCont
-                                                      //             .unitPriceControllers[keys[i]]!
-                                                      //             .text = quotationCont
-                                                      //             .itemUnitPrice[selectedItemId]
-                                                      //             .toString();
-                                                      //       } else if (quotationCont
-                                                      //           .selectedCurrencyName ==
-                                                      //           'USD' &&
-                                                      //           quotationCont
-                                                      //               .itemsPricesCurrencies[selectedItemId] !=
-                                                      //               val) {
-                                                      //         var matchedItems =
-                                                      //         exchangeRatesController
-                                                      //             .exchangeRatesList
-                                                      //             .where(
-                                                      //               (item) =>
-                                                      //           item["currency"] ==
-                                                      //               quotationCont
-                                                      //                   .itemsPricesCurrencies[selectedItemId],
-                                                      //         );
-                                                      //
-                                                      //         var result =
-                                                      //         matchedItems.isNotEmpty
-                                                      //             ? matchedItems.reduce(
-                                                      //               (a, b) =>
-                                                      //           DateTime.parse(
-                                                      //             a["start_date"],
-                                                      //           ).isAfter(
-                                                      //             DateTime.parse(
-                                                      //               b["start_date"],
-                                                      //             ),
-                                                      //           )
-                                                      //               ? a
-                                                      //               : b,
-                                                      //         )
-                                                      //             : null;
-                                                      //         var divider = '1';
-                                                      //         if (result != null) {
-                                                      //           divider =
-                                                      //               result["exchange_rate"]
-                                                      //                   .toString();
-                                                      //         }
-                                                      //         quotationCont
-                                                      //             .unitPriceControllers[keys[i]]!
-                                                      //             .text =
-                                                      //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                      //       } else if (quotationCont
-                                                      //           .selectedCurrencyName !=
-                                                      //           'USD' &&
-                                                      //           quotationCont
-                                                      //               .itemsPricesCurrencies[selectedItemId] ==
-                                                      //               'USD') {
-                                                      //         quotationCont
-                                                      //             .unitPriceControllers[keys[i]]!
-                                                      //             .text =
-                                                      //         '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                      //       } else {
-                                                      //         var matchedItems =
-                                                      //         exchangeRatesController
-                                                      //             .exchangeRatesList
-                                                      //             .where(
-                                                      //               (item) =>
-                                                      //           item["currency"] ==
-                                                      //               quotationCont
-                                                      //                   .itemsPricesCurrencies[selectedItemId],
-                                                      //         );
-                                                      //
-                                                      //         var result =
-                                                      //         matchedItems.isNotEmpty
-                                                      //             ? matchedItems.reduce(
-                                                      //               (a, b) =>
-                                                      //           DateTime.parse(
-                                                      //             a["start_date"],
-                                                      //           ).isAfter(
-                                                      //             DateTime.parse(
-                                                      //               b["start_date"],
-                                                      //             ),
-                                                      //           )
-                                                      //               ? a
-                                                      //               : b,
-                                                      //         )
-                                                      //             : null;
-                                                      //         var divider = '1';
-                                                      //         if (result != null) {
-                                                      //           divider =
-                                                      //               result["exchange_rate"]
-                                                      //                   .toString();
-                                                      //         }
-                                                      //         var usdPrice =
-                                                      //             '${double.parse('${(double.parse(quotationCont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                                                      //         quotationCont
-                                                      //             .unitPriceControllers[keys[i]]!
-                                                      //             .text =
-                                                      //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                      //       }
-                                                      //       if (!quotationCont
-                                                      //           .isBeforeVatPrices) {
-                                                      //         var taxRate =
-                                                      //             double.parse(
-                                                      //               quotationCont
-                                                      //                   .itemsVats[selectedItemId],
-                                                      //             ) /
-                                                      //                 100.0;
-                                                      //         var taxValue =
-                                                      //             taxRate *
-                                                      //                 double.parse(
-                                                      //                   quotationCont
-                                                      //                       .unitPriceControllers[keys[i]]!
-                                                      //                       .text,
-                                                      //                 );
-                                                      //
-                                                      //         quotationCont
-                                                      //             .unitPriceControllers[keys[i]]!
-                                                      //             .text =
-                                                      //         '${double.parse(quotationCont.unitPriceControllers[keys[i]]!.text) + taxValue}';
-                                                      //       }
-                                                      //       quotationCont
-                                                      //           .unitPriceControllers[keys[i]]!
-                                                      //           .text = double.parse(
-                                                      //         quotationCont
-                                                      //             .unitPriceControllers[keys[i]]!
-                                                      //             .text,
-                                                      //       ).toStringAsFixed(2);
-                                                      //       var totalLine =
-                                                      //           '${(int.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(quotationCont.unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-                                                      //
-                                                      //       quotationCont
-                                                      //           .setEnteredUnitPriceInQuotation(
-                                                      //         keys[i],
-                                                      //         quotationCont
-                                                      //             .unitPriceControllers[keys[i]]!
-                                                      //             .text,
-                                                      //       );
-                                                      //       quotationCont
-                                                      //           .setMainTotalInQuotation(
-                                                      //         keys[i],
-                                                      //         totalLine,
-                                                      //       );
-                                                      //       quotationCont.getTotalItems();
-                                                      //     }
-                                                      //   }
-                                                      //   var comboKeys =
-                                                      //   quotationCont
-                                                      //       .combosPriceControllers
-                                                      //       .keys
-                                                      //       .toList();
-                                                      //   for (
-                                                      //   int i = 0;
-                                                      //   i <
-                                                      //       quotationCont
-                                                      //           .combosPriceControllers
-                                                      //           .length;
-                                                      //   i++
-                                                      //   ) {
-                                                      //     var selectedComboId =
-                                                      //         '${quotationCont.rowsInListViewInQuotation[comboKeys[i]]['combo']}';
-                                                      //     if (selectedComboId != '') {
-                                                      //       var ind = quotationCont
-                                                      //           .combosIdsList
-                                                      //           .indexOf(selectedComboId);
-                                                      //       if (quotationCont
-                                                      //           .combosPricesCurrencies[selectedComboId] ==
-                                                      //           quotationCont
-                                                      //               .selectedCurrencyName) {
-                                                      //         quotationCont
-                                                      //             .combosPriceControllers[comboKeys[i]]!
-                                                      //             .text = quotationCont
-                                                      //             .combosPricesList[ind]
-                                                      //             .toString();
-                                                      //       } else if (quotationCont
-                                                      //           .selectedCurrencyName ==
-                                                      //           'USD' &&
-                                                      //           quotationCont
-                                                      //               .combosPricesCurrencies[selectedComboId] !=
-                                                      //               quotationCont
-                                                      //                   .selectedCurrencyName) {
-                                                      //         var matchedItems =
-                                                      //         exchangeRatesController
-                                                      //             .exchangeRatesList
-                                                      //             .where(
-                                                      //               (item) =>
-                                                      //           item["currency"] ==
-                                                      //               quotationCont
-                                                      //                   .combosPricesCurrencies[selectedComboId],
-                                                      //         );
-                                                      //
-                                                      //         var result =
-                                                      //         matchedItems.isNotEmpty
-                                                      //             ? matchedItems.reduce(
-                                                      //               (a, b) =>
-                                                      //           DateTime.parse(
-                                                      //             a["start_date"],
-                                                      //           ).isAfter(
-                                                      //             DateTime.parse(
-                                                      //               b["start_date"],
-                                                      //             ),
-                                                      //           )
-                                                      //               ? a
-                                                      //               : b,
-                                                      //         )
-                                                      //             : null;
-                                                      //         var divider = '1';
-                                                      //         if (result != null) {
-                                                      //           divider =
-                                                      //               result["exchange_rate"]
-                                                      //                   .toString();
-                                                      //         }
-                                                      //         quotationCont
-                                                      //             .combosPriceControllers[comboKeys[i]]!
-                                                      //             .text =
-                                                      //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                                                      //       } else if (quotationCont
-                                                      //           .selectedCurrencyName !=
-                                                      //           'USD' &&
-                                                      //           quotationCont
-                                                      //               .combosPricesCurrencies[selectedComboId] ==
-                                                      //               'USD') {
-                                                      //         quotationCont
-                                                      //             .combosPriceControllers[comboKeys[i]]!
-                                                      //             .text =
-                                                      //         '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                      //       } else {
-                                                      //         var matchedItems =
-                                                      //         exchangeRatesController
-                                                      //             .exchangeRatesList
-                                                      //             .where(
-                                                      //               (item) =>
-                                                      //           item["currency"] ==
-                                                      //               quotationCont
-                                                      //                   .combosPricesCurrencies[selectedComboId],
-                                                      //         );
-                                                      //
-                                                      //         var result =
-                                                      //         matchedItems.isNotEmpty
-                                                      //             ? matchedItems.reduce(
-                                                      //               (a, b) =>
-                                                      //           DateTime.parse(
-                                                      //             a["start_date"],
-                                                      //           ).isAfter(
-                                                      //             DateTime.parse(
-                                                      //               b["start_date"],
-                                                      //             ),
-                                                      //           )
-                                                      //               ? a
-                                                      //               : b,
-                                                      //         )
-                                                      //             : null;
-                                                      //         var divider = '1';
-                                                      //         if (result != null) {
-                                                      //           divider =
-                                                      //               result["exchange_rate"]
-                                                      //                   .toString();
-                                                      //         }
-                                                      //         var usdPrice =
-                                                      //             '${double.parse('${(double.parse(quotationCont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                                                      //         quotationCont
-                                                      //             .combosPriceControllers[comboKeys[i]]!
-                                                      //             .text =
-                                                      //         '${double.parse('${(double.parse(usdPrice) * double.parse(quotationCont.exchangeRateForSelectedCurrency))}')}';
-                                                      //       }
-                                                      //       quotationCont
-                                                      //           .combosPriceControllers[comboKeys[i]]!
-                                                      //           .text =
-                                                      //       '${double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)}';
-                                                      //
-                                                      //       quotationCont
-                                                      //           .combosPriceControllers[comboKeys[i]]!
-                                                      //           .text = double.parse(
-                                                      //         quotationCont
-                                                      //             .combosPriceControllers[comboKeys[i]]!
-                                                      //             .text,
-                                                      //       ).toStringAsFixed(2);
-                                                      //       var totalLine =
-                                                      //           '${(int.parse(quotationCont.rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(quotationCont.combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(quotationCont.rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
-                                                      //       quotationCont
-                                                      //           .setEnteredQtyInQuotation(
-                                                      //         comboKeys[i],
-                                                      //         quotationCont
-                                                      //             .rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
-                                                      //       );
-                                                      //       quotationCont
-                                                      //           .setMainTotalInQuotation(
-                                                      //         comboKeys[i],
-                                                      //         totalLine,
-                                                      //       );
-                                                      //       // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
-                                                      //       quotationCont.getTotalItems();
-                                                      //
-                                                      //       quotationCont
-                                                      //           .setEnteredUnitPriceInQuotation(
-                                                      //         comboKeys[i],
-                                                      //         quotationCont
-                                                      //             .combosPriceControllers[comboKeys[i]]!
-                                                      //             .text,
-                                                      //       );
-                                                      //       quotationCont
-                                                      //           .setMainTotalInQuotation(
-                                                      //         comboKeys[i],
-                                                      //         totalLine,
-                                                      //       );
-                                                      //       quotationCont.getTotalItems();
-                                                      //     }
-                                                      //   }
-                                                      // });
                                                       DropdownMenu<String>(
                                                         width:
                                                             homeController
@@ -4238,7 +3900,7 @@ late bool isItHasTwoHeaders=false;
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.3,
+                                // width: MediaQuery.of(context).size.width * 0.3,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -5447,37 +5109,88 @@ late bool isItHasTwoHeaders=false;
                                                     isCentered: true,
                                                     hint: '0',
                                                     onChangedFunc: (val) {
-                                                      setState(() {
-                                                        if (val == '') {
-                                                          globalDiscPercentController
-                                                              .text = '0';
-                                                          globalDiscountPercentage =
-                                                              '0';
-                                                        } else {
-                                                          globalDiscountPercentage =
-                                                              val;
-                                                        }
-                                                      });
-                                                      quotationCont.setGlobalDisc(
-                                                        globalDiscountPercentage,
-                                                      );
+                                                      if(quotationCont.totalItems==0){
+                                                        globalDiscPercentController.text= '';
+                                                      }else {
+                                                        setState(() {
+                                                          if (val == '') {
+                                                            globalDiscPercentController
+                                                                .text = '0';
+                                                            globalDiscountPercentage =
+                                                            '0';
+                                                          } else {
+                                                            globalDiscountPercentage =
+                                                                val;
+                                                          }
+                                                        });
+                                                        quotationCont
+                                                            .setGlobalDisc(
+                                                          globalDiscountPercentage,
+                                                        );
+                                                      }
                                                     },
                                                     validationFunc: (val) {},
                                                   ),
                                                 ),
                                                 gapW10,
-                                                ReusableShowInfoCard(
-                                                  text: formatDoubleWithCommas(
-                                                    double.parse(
-                                                      quotationCont.globalDisc,
-                                                    ),
-                                                  ),
+                                                SizedBox(
                                                   width:
-                                                      MediaQuery.of(
-                                                        context,
-                                                      ).size.width *
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
                                                       0.1,
+                                                  child: ReusableNumberField(
+                                                    textEditingController:
+                                                    quotationCont.globalDiscountAmount,
+                                                    isPasswordField: false,
+                                                    isCentered: true,
+                                                    hint: '0.00',
+                                                    onChangedFunc: (val) {
+                                                      if(quotationCont.totalItems==0){
+                                                        quotationCont.globalDiscountAmount.text= '';
+                                                      }else {
+                                                        setState(() {
+                                                          if (val == '') {
+                                                            globalDiscPercentController
+                                                                .text = '0';
+                                                            quotationCont
+                                                                .globalDiscountAmount
+                                                                .text = '0';
+                                                            globalDiscountPercentage =
+                                                            '0';
+                                                          } else {
+                                                            globalDiscountPercentage =
+                                                            ((double.parse(
+                                                                val) /
+                                                                quotationCont
+                                                                    .totalItems) *
+                                                                100).toStringAsFixed(2);
+                                                            globalDiscPercentController
+                                                                .text =
+                                                                globalDiscountPercentage;
+                                                          }
+                                                        });
+                                                        quotationCont
+                                                            .setGlobalDiscPercentage(
+                                                            val
+                                                        );
+                                                      }
+                                                    },
+                                                    validationFunc: (val) {},
+                                                  ),
                                                 ),
+                                                // ReusableShowInfoCard(
+                                                //   text: formatDoubleWithCommas(
+                                                //     double.parse(
+                                                //       quotationCont.globalDiscountAmount,
+                                                //     ),
+                                                //   ),
+                                                //   width:
+                                                //       MediaQuery.of(
+                                                //         context,
+                                                //       ).size.width *
+                                                //       0.1,
+                                                // ),
                                               ],
                                             ),
                                           ],
@@ -5503,39 +5216,92 @@ late bool isItHasTwoHeaders=false;
                                                     isCentered: true,
                                                     hint: '0',
                                                     onChangedFunc: (val) {
-                                                      setState(() {
-                                                        if (val == '') {
-                                                          specialDiscPercentController
-                                                              .text = '0';
-                                                          specialDiscountPercentage =
-                                                              '0';
-                                                        } else {
-                                                          specialDiscountPercentage =
-                                                              val;
-                                                        }
-                                                      });
-                                                      quotationCont.setSpecialDisc(
-                                                        specialDiscountPercentage,
-                                                      );
+                                                      if(quotationCont.totalItems==0){
+                                                        specialDiscPercentController.text= '';
+                                                      }else{
+                                                        setState(() {
+                                                          if (val == '') {
+                                                            specialDiscPercentController
+                                                                .text = '0';
+                                                            specialDiscountPercentage =
+                                                            '0';
+                                                          } else {
+                                                            specialDiscountPercentage =
+                                                                val;
+                                                          }
+                                                        });
+                                                        quotationCont
+                                                            .setSpecialDisc(
+                                                          specialDiscountPercentage,
+                                                        );
+                                                      }
                                                     },
                                                     validationFunc: (val) {},
                                                   ),
                                                 ),
                                                 gapW10,
-                                                ReusableShowInfoCard(
-                                                  text: formatDoubleWithCommas(
-                                                    double.parse(
-                                                      quotationCont.specialDisc,
-                                                    ),
-                                                  ),
-
-                                                  // quotationCont.specialDisc,
+                                                SizedBox(
                                                   width:
-                                                      MediaQuery.of(
-                                                        context,
-                                                      ).size.width *
+                                                  MediaQuery.of(
+                                                    context,
+                                                  ).size.width *
                                                       0.1,
+                                                  child: ReusableNumberField(
+                                                    textEditingController:
+                                                    quotationCont.specialDiscAmount,
+                                                    isPasswordField: false,
+                                                    isCentered: true,
+                                                    hint: '0.00',
+                                                    onChangedFunc: (val) {
+                                                      if(quotationCont.totalItems==0){
+                                                        quotationCont.specialDiscAmount.text= '';
+                                                      }else {
+                                                        setState(() {
+                                                          if (val == '') {
+                                                            quotationCont
+                                                                .specialDiscAmount
+                                                                .text = '0';
+                                                            specialDiscPercentController
+                                                                .text = '0';
+                                                            specialDiscountPercentage =
+                                                            '0';
+                                                          } else {
+                                                            specialDiscountPercentage =
+                                                                ((double.parse(
+                                                                    val) /
+                                                                    quotationCont
+                                                                        .totalItems) *
+                                                                    100)
+                                                                    .toStringAsFixed(
+                                                                    2);
+                                                            specialDiscPercentController
+                                                                .text =
+                                                                specialDiscountPercentage;
+                                                          }
+                                                        });
+                                                        quotationCont
+                                                            .setSpecialDiscPercentage(
+                                                          val,
+                                                        );
+                                                      }
+                                                    },
+                                                    validationFunc: (val) {},
+                                                  ),
                                                 ),
+                                                // ReusableShowInfoCard(
+                                                //   text: formatDoubleWithCommas(
+                                                //     double.parse(
+                                                //       quotationCont.specialDisc,
+                                                //     ),
+                                                //   ),
+                                                //
+                                                //   // quotationCont.specialDisc,
+                                                //   width:
+                                                //       MediaQuery.of(
+                                                //         context,
+                                                //       ).size.width *
+                                                //       0.1,
+                                                // ),
                                               ],
                                             ),
                                           ],
@@ -5562,10 +5328,8 @@ late bool isItHasTwoHeaders=false;
                                                   children: [
                                                     ReusableShowInfoCard(
                                                       text: formatDoubleWithCommas(
-                                                        double.parse(
                                                           quotationCont
-                                                              .vatInPrimaryCurrency,
-                                                        ),
+                                                              .companyVat,
                                                       ),
                                                       width:
                                                           MediaQuery.of(
@@ -5577,10 +5341,8 @@ late bool isItHasTwoHeaders=false;
                                                     ReusableShowInfoCard(
                                                       text:
                                                           formatDoubleWithCommas(
-                                                            double.parse(
                                                               quotationCont
-                                                                  .vat11,
-                                                            ),
+                                                                  .vatInQuotationCurrency,
                                                           ),
                                                       width:
                                                           MediaQuery.of(
@@ -5725,12 +5487,12 @@ late bool isItHasTwoHeaders=false;
                                         specialDiscPercentController
                                             .text, // inserted by user
                                         quotationController
-                                            .specialDisc, // calculated
+                                            .specialDiscAmount.text.isEmpty?'0':quotationCont.specialDiscAmount.text, // calculated
                                         globalDiscPercentController.text,
-                                        quotationController.globalDisc,
-                                        quotationController.vat11
+                                        quotationController.globalDiscountAmount.text.isEmpty?'0':quotationCont.globalDiscountAmount.text,
+                                        quotationController.companyVat
                                             .toString(), //vat
-                                        quotationController.vatInPrimaryCurrency
+                                        quotationController.vatInQuotationCurrency
                                             .toString(),
                                         quotationController
                                             .totalQuotation, // quotationController.totalQuotation
@@ -6834,12 +6596,12 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           });
                           setState(() {
                             cont.totalItems = 0.0;
-                            cont.globalDisc = "0.0";
+                            cont.globalDiscountAmount.text = "";
                             cont.globalDiscountPercentageValue = "0.0";
-                            cont.specialDisc = "0.0";
+                            cont.specialDiscAmount.text = "";
                             cont.specialDiscountPercentageValue = "0.0";
-                            cont.vat11 = "0.0";
-                            cont.vatInPrimaryCurrency = "0.0";
+                            // cont.vat11 = "0.0";
+                            cont.vatInQuotationCurrency =0.0;
                             cont.totalQuotation = "0.0";
                           });
                           if (cont.rowsInListViewInQuotation != {}) {
@@ -7888,12 +7650,12 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                           });
                           setState(() {
                             cont.totalItems = 0.0;
-                            cont.globalDisc = "0.0";
+                            cont.globalDiscountAmount.text = "";
                             cont.globalDiscountPercentageValue = "0.0";
-                            cont.specialDisc = "0.0";
+                            cont.specialDiscAmount.text = "";
                             cont.specialDiscountPercentageValue = "0.0";
-                            cont.vat11 = "0.0";
-                            cont.vatInPrimaryCurrency = "0.0";
+                            // cont.vat11 = "0.0";
+                            cont.vatInQuotationCurrency =0.0;
                             cont.totalQuotation = "0.0";
                           });
                           if (cont.rowsInListViewInQuotation != {}) {
@@ -8033,1430 +7795,4 @@ class ShowItemQuantitiesDialog extends StatelessWidget {
   }
 }
 
-// //mobile
-// class MobileCreateNewQuotation extends StatefulWidget {
-//   const MobileCreateNewQuotation({super.key});
-//
-//   @override
-//   State<MobileCreateNewQuotation> createState() =>
-//       _MobileCreateNewQuotationState();
-// }
-//
-// class _MobileCreateNewQuotationState extends State<MobileCreateNewQuotation> {
-//   String selectedSalesPerson = '';
-//   int selectedSalesPersonId = 0;
-//   // bool imageAvailable=false;
-//   GlobalKey accMoreKey2 = GlobalKey();
-//   TextEditingController commissionController = TextEditingController();
-//   TextEditingController totalCommissionController = TextEditingController();
-//   TextEditingController refController = TextEditingController();
-//   TextEditingController validityController = TextEditingController();
-//   TextEditingController searchController = TextEditingController();
-//   String selectedPaymentTerm = '',
-//       selectedPriceList = '',
-//       selectedCurrency = '',
-//       termsAndConditions = '',
-//       specialDisc = '',
-//       globalDisc = '';
-//   late Uint8List imageFile;
-//
-//   int currentStep = 0;
-//   int selectedTabIndex = 0;
-//   GlobalKey accMoreKey = GlobalKey();
-//   List tabsList = ['order_lines', 'other_information'];
-//   String selectedTab = 'order_lines'.tr;
-//   String? selectedItem = '';
-//
-//   double listViewLength = Sizes.deviceHeight * 0.08;
-//   double increment = Sizes.deviceHeight * 0.08;
-//   // double imageSpaceHeight = Sizes.deviceHeight * 0.1;
-//   // List<Widget> orderLinesList = [];
-//   final QuotationController quotationController = Get.find();
-//   final HomeController homeController = Get.find();
-//   int progressVar = 0;
-//   Map data = {};
-//   bool isQuotationsInfoFetched = false;
-//   List<String> customerNameList = [];
-//   List<String> customerTitleList = [];
-//   List customerIdsList = [];
-//   String selectedCustomerIds = '';
-//   String quotationNumber = '';
-//   getFieldsForCreateQuotationFromBack() async {
-//     setState(() {
-//       selectedPaymentTerm = '';
-//       selectedPriceList = '';
-//       selectedCurrency = '';
-//       termsAndConditions = '';
-//       specialDisc = '';
-//       globalDisc = '';
-//       currentStep = 0;
-//       selectedTabIndex = 0;
-//       selectedItem = '';
-//       progressVar = 0;
-//       selectedCustomerIds = '';
-//
-//       quotationNumber = '';
-//       data = {};
-//       customerNameList = [];
-//       customerIdsList = [];
-//     });
-//     var p = await getFieldsForCreateQuotation();
-//     if ('$p' != '[]') {
-//       setState(() {
-//         data.addAll(p);
-//         quotationNumber = p['quotationNumber'].toString();
-//         for (var client in p['clients']) {
-//           customerNameList.add('${client['name']}');
-//           customerIdsList.add('${client['id']}');
-//         }
-//         isQuotationsInfoFetched = true;
-//       });
-//     }
-//   }
-//
-//   @override
-//   void initState() {
-//     getFieldsForCreateQuotationFromBack();
-//     super.initState();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return isQuotationsInfoFetched
-//         ? Container(
-//       padding: EdgeInsets.symmetric(
-//         horizontal: MediaQuery.of(context).size.width * 0.03,
-//       ),
-//       height: MediaQuery.of(context).size.height * 0.75,
-//       child: SingleChildScrollView(
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               children: [PageTitle(text: 'create_new_quotation'.tr)],
-//             ),
-//             gapH16,
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 UnderTitleBtn(
-//                   text: 'preview'.tr,
-//                   onTap: () {
-//                     // setState(() {
-//                     //   // progressVar+=1;
-//                     // });
-//                   },
-//                 ),
-//                 UnderTitleBtn(
-//                   text: 'send_by_email'.tr,
-//                   onTap: () {
-//                     if (progressVar == 0) {
-//                       setState(() {
-//                         progressVar += 1;
-//                       });
-//                     }
-//                   },
-//                 ),
-//                 UnderTitleBtn(
-//                   text: 'confirm'.tr,
-//                   onTap: () {
-//                     if (progressVar == 1) {
-//                       setState(() {
-//                         progressVar += 1;
-//                       });
-//                     }
-//                   },
-//                 ),
-//                 UnderTitleBtn(
-//                   text: 'cancel'.tr,
-//                   onTap: () {
-//                     setState(() {
-//                       progressVar = 0;
-//                     });
-//                   },
-//                 ),
-//                 // UnderTitleBtn(
-//                 //   text: 'task'.tr,
-//                 //   onTap: () {
-//                 //     showDialog<String>(
-//                 //         context: context,
-//                 //         builder: (BuildContext context) =>
-//                 //         const AlertDialog(
-//                 //             backgroundColor: Colors.white,
-//                 //             shape: RoundedRectangleBorder(
-//                 //               borderRadius: BorderRadius.all(
-//                 //                   Radius.circular(9)),
-//                 //             ),
-//                 //             elevation: 0,
-//                 //             content: ScheduleTaskDialogContent()));
-//                 //   },
-//                 // ),
-//               ],
-//             ),
-//             gapH10,
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               children: [
-//                 ReusableTimeLineTile(
-//                   id: 0,
-//                   isDesktop: false,
-//                   progressVar: progressVar,
-//                   isFirst: true,
-//                   isLast: false,
-//                   isPast: true,
-//                   text: 'processing'.tr,
-//                 ),
-//                 ReusableTimeLineTile(
-//                   id: 1,
-//                   progressVar: progressVar,
-//                   isFirst: false,
-//                   isDesktop: false,
-//                   isLast: false,
-//                   isPast: false,
-//                   text: 'quotation_sent'.tr,
-//                 ),
-//                 ReusableTimeLineTile(
-//                   id: 2,
-//                   progressVar: progressVar,
-//                   isFirst: false,
-//                   isLast: true,
-//                   isDesktop: false,
-//                   isPast: false,
-//                   text: 'confirmed'.tr,
-//                 ),
-//               ],
-//             ),
-//             gapH24,
-//             Container(
-//               padding: const EdgeInsets.symmetric(
-//                 horizontal: 20,
-//                 vertical: 20,
-//               ),
-//               decoration: BoxDecoration(
-//                 border: Border.all(color: Others.divider),
-//                 borderRadius: const BorderRadius.all(Radius.circular(9)),
-//               ),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   isQuotationsInfoFetched
-//                       ? Text(
-//                     quotationNumber, //'${data['quotationNumber'].toString() ?? ''}',
-//                     style: TextStyle(
-//                       fontWeight: FontWeight.bold,
-//                       fontSize: 20,
-//                       color: TypographyColor.titleTable,
-//                     ),
-//                   )
-//                       : const CircularProgressIndicator(),
-//                   gapH16,
-//                   DialogTextField(
-//                     textEditingController: refController,
-//                     text: '${'ref'.tr}:',
-//                     hint: 'manual_reference'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.5,
-//                     validationFunc: (val) {},
-//                   ),
-//                   gapH16,
-//                   DialogDropMenu(
-//                     optionsList: ['usd'.tr, 'lbp'.tr],
-//                     text: 'currency'.tr,
-//                     hint: 'usd'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.1,
-//                     onSelected: (value) {
-//                       setState(() {
-//                         selectedCurrency = value;
-//                       });
-//                     },
-//                   ),
-//                   gapH16,
-//
-//                   DialogTextField(
-//                     textEditingController: validityController,
-//                     text: 'validity'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.5,
-//                     validationFunc: (val) {},
-//                   ),
-//                   gapH16,
-//
-//                   DialogTextField(
-//                     textEditingController: validityController,
-//                     text: 'code'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.5,
-//                     validationFunc: (val) {},
-//                   ),
-//                   gapH16,
-//                   SizedBox(
-//                     width: MediaQuery.of(context).size.width * 0.9,
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         Text('${'name'.tr}*'),
-//                         DropdownMenu<String>(
-//                           width: MediaQuery.of(context).size.width * 0.5,
-//                           // requestFocusOnTap: false,
-//                           enableSearch: true,
-//                           controller: searchController,
-//                           hintText: '${'search'.tr}...',
-//                           inputDecorationTheme: InputDecorationTheme(
-//                             // filled: true,
-//                             hintStyle: const TextStyle(
-//                               fontStyle: FontStyle.italic,
-//                             ),
-//                             contentPadding: const EdgeInsets.fromLTRB(
-//                               20,
-//                               0,
-//                               25,
-//                               5,
-//                             ),
-//                             // outlineBorder: BorderSide(color: Colors.black,),
-//                             enabledBorder: OutlineInputBorder(
-//                               borderSide: BorderSide(
-//                                 color: Primary.primary.withAlpha(
-//                                   (0.2 * 255).toInt(),
-//                                 ),
-//                                 width: 1,
-//                               ),
-//                               borderRadius: const BorderRadius.all(
-//                                 Radius.circular(9),
-//                               ),
-//                             ),
-//                             focusedBorder: OutlineInputBorder(
-//                               borderSide: BorderSide(
-//                                 color: Primary.primary.withAlpha(
-//                                   (0.4 * 255).toInt(),
-//                                 ),
-//                                 width: 2,
-//                               ),
-//                               borderRadius: const BorderRadius.all(
-//                                 Radius.circular(9),
-//                               ),
-//                             ),
-//                           ),
-//                           // menuStyle: ,
-//                           menuHeight: 250,
-//                           dropdownMenuEntries:
-//                           customerNameList
-//                               .map<DropdownMenuEntry<String>>((
-//                               String option,
-//                               ) {
-//                             return DropdownMenuEntry<String>(
-//                               value: option,
-//                               label: option,
-//                             );
-//                           })
-//                               .toList(),
-//                           enableFilter: true,
-//                           onSelected: (String? val) {
-//                             setState(() {
-//                               selectedItem = val!;
-//                               var index = customerNameList.indexOf(val);
-//                               selectedCustomerIds = customerIdsList[index];
-//                             });
-//                           },
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                   gapH16,
-//
-//                   // Row(
-//                   //   mainAxisAlignment: MainAxisAlignment.start,
-//                   //   children: [
-//                   //     Text('contact_details'.tr),
-//                   //   ],
-//                   // ),
-//                   // gapH16,
-//                   DialogDropMenu(
-//                     optionsList: ['cash'.tr, 'on_account'.tr],
-//                     text: 'payment_terms'.tr,
-//                     hint: 'cash'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.5,
-//                     onSelected: (value) {
-//                       setState(() {
-//                         selectedPaymentTerm = value;
-//                       });
-//                     },
-//                   ),
-//                   gapH16,
-//                   DialogDropMenu(
-//                     optionsList: ['standard'.tr],
-//                     text: 'price_list'.tr,
-//                     hint: 'standard'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth: MediaQuery.of(context).size.width * 0.5,
-//                     onSelected: (value) {
-//                       setState(() {
-//                         selectedPriceList = value;
-//                       });
-//                     },
-//                   ),
-//                   gapH16,
-//                 ],
-//               ),
-//             ),
-//             // Container(
-//             //   padding:
-//             //   const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-//             //   decoration: BoxDecoration(
-//             //       border: Border.all(color: Others.divider),
-//             //       borderRadius: const BorderRadius.all(Radius.circular(9))),
-//             //   child: Row(
-//             //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             //     crossAxisAlignment: CrossAxisAlignment.start,
-//             //     children: [
-//             //
-//             //       SizedBox(
-//             //         width: MediaQuery.of(context).size.width * 0.3,
-//             //         child: Column(
-//             //           crossAxisAlignment: CrossAxisAlignment.start,
-//             //           children: [
-//             //             // SizedBox(
-//             //             //   width: MediaQuery.of(context).size.width * 0.25,
-//             //             //   child: Row(
-//             //             //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             //             //     children: [
-//             //             //       Text('validity'.tr),
-//             //             //       DialogDateTextField(
-//             //             //         text: '',
-//             //             //         textFieldWidth:
-//             //             //             MediaQuery.of(context).size.width * 0.15,
-//             //             //         validationFunc: () {},
-//             //             //         onChangedFunc: (value) {
-//             //             //           setState(() {
-//             //             //             validity=value;
-//             //             //           });
-//             //             //         },
-//             //             //       ),
-//             //             //     ],
-//             //             //   ),
-//             //             // ),
-//             //
-//             //           ],
-//             //         ),
-//             //       ),
-//             //     ],
-//             //   ),
-//             // ),
-//             gapH16,
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               children: [
-//                 Wrap(
-//                   spacing: 0.0,
-//                   direction: Axis.horizontal,
-//                   children:
-//                   tabsList
-//                       .map(
-//                         (element) => _buildTabChipItem(
-//                       element,
-//                       // element['id'],
-//                       // element['name'],
-//                       tabsList.indexOf(element),
-//                     ),
-//                   )
-//                       .toList(),
-//                 ),
-//               ],
-//             ),
-//             // tabsContent[selectedTabIndex],
-//             selectedTabIndex == 0
-//                 ? Column(
-//               children: [
-//                 Container(
-//                   padding: const EdgeInsets.symmetric(
-//                     // horizontal:
-//                     //     MediaQuery.of(context).size.width * 0.01,
-//                     vertical: 15,
-//                   ),
-//                   decoration: BoxDecoration(
-//                     color: Primary.primary,
-//                     borderRadius: const BorderRadius.all(
-//                       Radius.circular(6),
-//                     ),
-//                   ),
-//                   child: Row(
-//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                     children: [
-//                       SizedBox(width: MediaQuery.of(context).size.width * 0.02,),
-//                       TableTitle(
-//                         text: 'item_code'.tr,
-//                         width: MediaQuery.of(context).size.width * 0.13,
-//                       ),
-//                       TableTitle(
-//                         text: 'description'.tr,
-//                         width: MediaQuery.of(context).size.width * 0.27,
-//                       ),
-//                       TableTitle(
-//                         text: 'quantity'.tr,
-//                         width: MediaQuery.of(context).size.width * 0.05,
-//                       ),
-//                       TableTitle(
-//                         text: 'unit_price'.tr,
-//                         width: MediaQuery.of(context).size.width * 0.05,
-//                       ),
-//                       TableTitle(
-//                         text: '${'disc'.tr}. %',
-//                         width: MediaQuery.of(context).size.width * 0.05,
-//                       ),
-//                       TableTitle(
-//                         text: 'total'.tr,
-//                         width: MediaQuery.of(context).size.width * 0.07,
-//                       ),
-//                       TableTitle(
-//                         text: '     ${'more_options'.tr}',
-//                         width: MediaQuery.of(context).size.width * 0.07,
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 GetBuilder<QuotationController>(
-//                   builder: (cont) {
-//                     return Container(
-//                       padding: EdgeInsets.symmetric(
-//                         horizontal:
-//                         MediaQuery.of(context).size.width * 0.01,
-//                       ),
-//                       decoration: const BoxDecoration(
-//                         borderRadius: BorderRadius.only(
-//                           bottomLeft: Radius.circular(6),
-//                           bottomRight: Radius.circular(6),
-//                         ),
-//                         color: Colors.white,
-//                       ),
-//                       child: Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           SizedBox(
-//                             height: listViewLength,
-//                             child: ListView.builder(
-//                               padding: const EdgeInsets.symmetric(
-//                                 vertical: 10,
-//                               ),
-//                               itemCount: 5,
-//                               // cont.orderLinesList
-//                               //     .length, //products is data from back res
-//                               itemBuilder:
-//                                   (context, index) => Row(
-//                                 children: [
-//                                   Container(
-//                                     width: 20,
-//                                     height: 20,
-//                                     margin:
-//                                     const EdgeInsets.symmetric(
-//                                       vertical: 15,
-//                                     ),
-//                                     decoration: const BoxDecoration(
-//                                       image: DecorationImage(
-//                                         image: AssetImage(
-//                                           'assets/images/newRow.png',
-//                                         ),
-//                                         fit: BoxFit.contain,
-//                                       ),
-//                                     ),
-//                                   ),
-//                                   // cont.orderLinesList[index],
-//                                   SizedBox(
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.03,
-//                                     child: const ReusableMore(
-//                                       itemsList: [],
-//                                     ),
-//                                   ),
-//                                   SizedBox(
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.03,
-//                                     child: InkWell(
-//                                       onTap: () {
-//                                         setState(() {
-//                                           // cont.removeFromOrderLinesList(
-//                                           //     index);
-//                                           listViewLength =
-//                                               listViewLength -
-//                                                   increment;
-//                                         });
-//                                       },
-//                                       child: Icon(
-//                                         Icons.delete_outline,
-//                                         color: Primary.primary,
-//                                       ),
-//                                     ),
-//                                   ),
-//                                 ],
-//                               ),
-//                             ),
-//                           ),
-//                           Row(
-//                             children: [
-//                               ReusableAddCard(
-//                                 text: 'title'.tr,
-//                                 onTap: () {
-//                                   addNewTitle();
-//                                 },
-//                               ),
-//                               gapW32,
-//                               ReusableAddCard(
-//                                 text: 'item'.tr,
-//                                 onTap: () {
-//                                   addNewItem();
-//                                 },
-//                               ),
-//                               gapW32,
-//                               ReusableAddCard(
-//                                 text: 'combo'.tr,
-//                                 onTap: () {
-//                                   addNewCombo();
-//                                 },
-//                               ),
-//                               gapW32,
-//                               ReusableAddCard(
-//                                 text: 'image'.tr,
-//                                 onTap: () {
-//                                   addNewImage();
-//                                 },
-//                               ),
-//                               gapW32,
-//                               ReusableAddCard(
-//                                 text: 'note'.tr,
-//                                 onTap: () {
-//                                   addNewNote();
-//                                 },
-//                               ),
-//                             ],
-//                           ),
-//                         ],
-//                       ),
-//                     );
-//                   },
-//                 ),
-//                 SizedBox(
-//                   width: MediaQuery.of(context).size.width,
-//                   height: listViewLength + 100,
-//                   child: ListView(
-//                     // physics: AlwaysScrollableScrollPhysics(),
-//                     scrollDirection: Axis.horizontal,
-//                     children: [
-//                       SizedBox(
-//                         height: listViewLength + 100,
-//                         width: MediaQuery.of(context).size.width,
-//                         child: ListView(
-//                           children: [
-//                             Container(
-//                               padding: EdgeInsets.symmetric(
-//                                 horizontal:
-//                                 MediaQuery.of(context).size.width *
-//                                     0.01,
-//                                 vertical: 15,
-//                               ),
-//                               decoration: BoxDecoration(
-//                                 color: Primary.primary,
-//                                 borderRadius: const BorderRadius.all(
-//                                   Radius.circular(6),
-//                                 ),
-//                               ),
-//                               child: Row(
-//                                 children: [
-//                                   TableTitle(
-//                                     text: 'item_code'.tr,
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.07,
-//                                   ),
-//                                   TableTitle(
-//                                     text: 'description'.tr,
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.33,
-//                                   ),
-//                                   TableTitle(
-//                                     text: 'quantity'.tr,
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.05,
-//                                   ),
-//                                   TableTitle(
-//                                     text: 'unit_price'.tr,
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.05,
-//                                   ),
-//                                   TableTitle(
-//                                     text: '${'disc'.tr}. %',
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.05,
-//                                   ),
-//                                   TableTitle(
-//                                     text: 'total'.tr,
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.07,
-//                                   ),
-//                                   TableTitle(
-//                                     text: '     ${'more_options'.tr}',
-//                                     width:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.07,
-//                                   ),
-//                                 ],
-//                               ),
-//                             ),
-//                             GetBuilder<QuotationController>(
-//                               builder: (cont) {
-//                                 return Container(
-//                                   padding: EdgeInsets.symmetric(
-//                                     horizontal:
-//                                     MediaQuery.of(
-//                                       context,
-//                                     ).size.width *
-//                                         0.01,
-//                                   ),
-//                                   decoration: const BoxDecoration(
-//                                     borderRadius: BorderRadius.only(
-//                                       bottomLeft: Radius.circular(6),
-//                                       bottomRight: Radius.circular(6),
-//                                     ),
-//                                     color: Colors.white,
-//                                   ),
-//                                   child: Column(
-//                                     crossAxisAlignment:
-//                                     CrossAxisAlignment.start,
-//                                     children: [
-//                                       SizedBox(
-//                                         height: listViewLength,
-//                                         child: ListView.builder(
-//                                           padding:
-//                                           const EdgeInsets.symmetric(
-//                                             vertical: 10,
-//                                           ),
-//                                           itemCount: 2,
-//                                           // cont
-//                                           //     .orderLinesList
-//                                           //     .length, //products is data from back res
-//                                           itemBuilder:
-//                                               (context, index) => Row(
-//                                             children: [
-//                                               Container(
-//                                                 width: 20,
-//                                                 height: 20,
-//                                                 margin:
-//                                                 const EdgeInsets.symmetric(
-//                                                   vertical: 15,
-//                                                 ),
-//                                                 decoration: const BoxDecoration(
-//                                                   image: DecorationImage(
-//                                                     image: AssetImage(
-//                                                       'assets/images/newRow.png',
-//                                                     ),
-//                                                     fit:
-//                                                     BoxFit
-//                                                         .contain,
-//                                                   ),
-//                                                 ),
-//                                               ),
-//                                               // cont.orderLinesList[
-//                                               //     index],
-//                                               SizedBox(
-//                                                 width:
-//                                                 MediaQuery.of(
-//                                                   context,
-//                                                 ).size.width *
-//                                                     0.03,
-//                                                 child:
-//                                                 const ReusableMore(
-//                                                   itemsList: [],
-//                                                 ),
-//                                               ),
-//                                             ],
-//                                           ),
-//                                         ),
-//                                       ),
-//                                       Row(
-//                                         children: [
-//                                           ReusableAddCard(
-//                                             text: 'title'.tr,
-//                                             onTap: () {
-//                                               addNewTitle();
-//                                             },
-//                                           ),
-//                                           gapW32,
-//                                           ReusableAddCard(
-//                                             text: 'item'.tr,
-//                                             onTap: () {
-//                                               addNewItem();
-//                                             },
-//                                           ),
-//                                           gapW32,
-//                                           ReusableAddCard(
-//                                             text: 'combo'.tr,
-//                                             onTap: () {
-//                                               addNewCombo();
-//                                             },
-//                                           ),
-//                                           gapW32,
-//                                           ReusableAddCard(
-//                                             text: 'image'.tr,
-//                                             onTap: () {
-//                                               addNewImage();
-//                                             },
-//                                           ),
-//                                           gapW32,
-//                                           ReusableAddCard(
-//                                             text: 'note'.tr,
-//                                             onTap: () {
-//                                               addNewNote();
-//                                             },
-//                                           ),
-//                                         ],
-//                                       ),
-//                                     ],
-//                                   ),
-//                                 );
-//                               },
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 gapH24,
-//                 Container(
-//                   padding: const EdgeInsets.symmetric(
-//                     vertical: 20,
-//                     horizontal: 20,
-//                   ),
-//                   decoration: BoxDecoration(
-//                     color: Colors.white,
-//                     borderRadius: BorderRadius.circular(6),
-//                   ),
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Text(
-//                         'terms_conditions'.tr,
-//                         style: TextStyle(
-//                           fontSize: 15,
-//                           color: TypographyColor.titleTable,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-//                       gapH16,
-//                       ReusableTextField(
-//                         textEditingController: controller, //todo
-//                         isPasswordField: false,
-//                         hint: 'terms_conditions'.tr,
-//                         onChangedFunc: () {},
-//                         validationFunc: (val) {
-//                           setState(() {
-//                             termsAndConditions = val;
-//                           });
-//                         },
-//                       ),
-//                       gapH16,
-//                       Text(
-//                         'or_create_new_terms_conditions'.tr,
-//                         style: TextStyle(
-//                           fontSize: 16,
-//                           color: Primary.primary,
-//                           decoration: TextDecoration.underline,
-//                           fontStyle: FontStyle.italic,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 Container(
-//                   padding: const EdgeInsets.symmetric(
-//                     vertical: 20,
-//                     horizontal: 20,
-//                   ),
-//                   decoration: BoxDecoration(
-//                     color: Primary.p20,
-//                     borderRadius: BorderRadius.circular(6),
-//                   ),
-//                   child: Row(
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     children: [
-//                       SizedBox(
-//                         width: MediaQuery.of(context).size.width * 0.8,
-//                         child: Column(
-//                           children: [
-//                             Row(
-//                               mainAxisAlignment:
-//                               MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Text('total_before_vat'.tr),
-//                                 Container(
-//                                   width:
-//                                   MediaQuery.of(
-//                                     context,
-//                                   ).size.width *
-//                                       0.2,
-//                                   height: 47,
-//                                   decoration: BoxDecoration(
-//                                     border: Border.all(
-//                                       color:
-//                                       Colors.black..withAlpha(
-//                                         (0.1 * 255).toInt(),
-//                                       ),
-//                                       width: 1,
-//                                     ),
-//                                     borderRadius: BorderRadius.circular(
-//                                       6,
-//                                     ),
-//                                   ),
-//                                   child: const Center(child: Text('0')),
-//                                 ),
-//                               ],
-//                             ),
-//                             gapH6,
-//                             Row(
-//                               mainAxisAlignment:
-//                               MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Text('global_disc'.tr),
-//                                 Row(
-//                                   children: [
-//                                     SizedBox(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       child: ReusableTextField(
-//                                         textEditingController:
-//                                         controller, //todo
-//                                         isPasswordField: false,
-//                                         hint: '0',
-//                                         onChangedFunc: (val) {
-//                                           setState(() {
-//                                             globalDisc = val;
-//                                           });
-//                                         },
-//                                         validationFunc: (val) {},
-//                                       ),
-//                                     ),
-//                                     gapW10,
-//                                     Container(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       height: 47,
-//                                       decoration: BoxDecoration(
-//                                         border: Border.all(
-//                                           color: Colors.black.withAlpha(
-//                                             (0.1 * 255).toInt(),
-//                                           ),
-//                                           width: 1,
-//                                         ),
-//                                         borderRadius:
-//                                         BorderRadius.circular(6),
-//                                       ),
-//                                       child: const Center(
-//                                         child: Text('0'),
-//                                       ),
-//                                     ),
-//                                   ],
-//                                 ),
-//                               ],
-//                             ),
-//                             gapH6,
-//                             Row(
-//                               mainAxisAlignment:
-//                               MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Text('special_disc'.tr),
-//                                 Row(
-//                                   children: [
-//                                     SizedBox(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       child: ReusableTextField(
-//                                         textEditingController:
-//                                         controller, //todo
-//                                         isPasswordField: false,
-//                                         hint: '0',
-//                                         onChangedFunc: (val) {
-//                                           setState(() {
-//                                             specialDisc = val;
-//                                           });
-//                                         },
-//                                         validationFunc: (val) {},
-//                                       ),
-//                                     ),
-//                                     gapW10,
-//                                     Container(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       height: 47,
-//                                       decoration: BoxDecoration(
-//                                         border: Border.all(
-//                                           color: Colors.black.withAlpha(
-//                                             (0.1 * 255).toInt(),
-//                                           ),
-//                                           width: 1,
-//                                         ),
-//                                         borderRadius:
-//                                         BorderRadius.circular(6),
-//                                       ),
-//                                       child: const Center(
-//                                         child: Text('0'),
-//                                       ),
-//                                     ),
-//                                   ],
-//                                 ),
-//                               ],
-//                             ),
-//                             gapH6,
-//                             Row(
-//                               mainAxisAlignment:
-//                               MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Text('vat_11'.tr),
-//                                 Row(
-//                                   children: [
-//                                     Container(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       height: 47,
-//                                       decoration: BoxDecoration(
-//                                         border: Border.all(
-//                                           color: Colors.black.withAlpha(
-//                                             (0.1 * 255).toInt(),
-//                                           ),
-//                                           width: 1,
-//                                         ),
-//                                         borderRadius:
-//                                         BorderRadius.circular(6),
-//                                       ),
-//                                       child: const Center(
-//                                         child: Text('0'),
-//                                       ),
-//                                     ),
-//                                     gapW10,
-//                                     Container(
-//                                       width:
-//                                       MediaQuery.of(
-//                                         context,
-//                                       ).size.width *
-//                                           0.2,
-//                                       height: 47,
-//                                       decoration: BoxDecoration(
-//                                         border: Border.all(
-//                                           color: Colors.black.withAlpha(
-//                                             (0.1 * 255).toInt(),
-//                                           ),
-//                                           width: 1,
-//                                         ),
-//                                         borderRadius:
-//                                         BorderRadius.circular(6),
-//                                       ),
-//                                       child: const Center(
-//                                         child: Text('0.00'),
-//                                       ),
-//                                     ),
-//                                   ],
-//                                 ),
-//                               ],
-//                             ),
-//                             gapH10,
-//                             Row(
-//                               mainAxisAlignment:
-//                               MainAxisAlignment.spaceBetween,
-//                               children: [
-//                                 Text(
-//                                   'total_amount'.tr,
-//                                   style: TextStyle(
-//                                     fontSize: 16,
-//                                     color: Primary.primary,
-//                                     fontWeight: FontWeight.bold,
-//                                   ),
-//                                 ),
-//                                 Text(
-//                                   '${'usd'.tr} 0.00',
-//                                   style: TextStyle(
-//                                     fontSize: 16,
-//                                     color: Primary.primary,
-//                                     fontWeight: FontWeight.bold,
-//                                   ),
-//                                 ),
-//                               ],
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 gapH28,
-//                 Row(
-//                   mainAxisAlignment: MainAxisAlignment.end,
-//                   children: [
-//                     ReusableButtonWithColor(
-//                       width: MediaQuery.of(context).size.width * 0.3,
-//                       height: 45,
-//                       onTapFunction: () async {
-//                         var res = await storeQuotation(
-//                           refController.text,
-//                           selectedCustomerIds,
-//                           validityController.text,
-//                           '',
-//                           '',
-//                           '',
-//                           termsAndConditions,
-//                           '',
-//                           '',
-//                           '',
-//                           commissionController.text,
-//                           totalCommissionController.text,
-//                           '',
-//                           specialDisc,
-//                           '',
-//                           globalDisc,
-//                           '',
-//                           '',
-//                           '',
-//                           '',
-//                         );
-//                         if (res['success'] == true) {
-//                           CommonWidgets.snackBar(
-//                             'Success',
-//                             res['message'],
-//                           );
-//                           setState(() {
-//                             isQuotationsInfoFetched = false;
-//                             getFieldsForCreateQuotationFromBack();
-//                           });
-//                           homeController.selectedTab.value =
-//                           'quotation_summary';
-//                         } else {
-//                           CommonWidgets.snackBar(
-//                             'error',
-//                             res['message'],
-//                           );
-//                         }
-//                       },
-//                       btnText: 'create_quotation'.tr,
-//                     ),
-//                   ],
-//                 ),
-//               ],
-//             )
-//                 : Container(
-//               padding: const EdgeInsets.symmetric(
-//                 horizontal: 20,
-//                 vertical: 15,
-//               ),
-//               decoration: const BoxDecoration(
-//                 borderRadius: BorderRadius.only(
-//                   bottomLeft: Radius.circular(6),
-//                   bottomRight: Radius.circular(6),
-//                 ),
-//                 color: Colors.white,
-//               ),
-//               child: Column(
-//                 children: [
-//                   DialogDropMenu(
-//                     optionsList:  quotationController.salesPersonListNames,
-//                     text: 'sales_person'.tr,
-//                     hint: 'search'.tr,
-//                     rowWidth:
-//                     MediaQuery.of(context).size.width *
-//                         0.3,
-//                     textFieldWidth:
-//                     MediaQuery.of(context).size.width *
-//                         0.15,
-//                     onSelected: (String? val) {
-//                       setState(() {
-//                         selectedSalesPerson = val!;
-//                         var index = quotationController.salesPersonListNames
-//                             .indexOf(val);
-//                         selectedSalesPersonId =
-//                         quotationController.salesPersonListId[index];
-//                         print(selectedSalesPerson);
-//                         print(selectedSalesPersonId);
-//                       });
-//
-//                     },
-//                   ),
-//                   gapH16,
-//                   DialogDropMenu(
-//                     optionsList: const [''],
-//                     text: 'commission_method'.tr,
-//                     hint: '',
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth:
-//                     MediaQuery.of(context).size.width * 0.4,
-//                     onSelected: () {},
-//                   ),
-//                   gapH16,
-//                   DialogDropMenu(
-//                     optionsList: ['cash'.tr],
-//                     text: 'cashing_method'.tr,
-//                     hint: '',
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth:
-//                     MediaQuery.of(context).size.width * 0.4,
-//                     onSelected: () {},
-//                   ),
-//                   gapH16,
-//                   DialogTextField(
-//                     textEditingController: commissionController,
-//                     text: 'commission'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth:
-//                     MediaQuery.of(context).size.width * 0.4,
-//                     validationFunc: (val) {},
-//                   ),
-//                   gapH16,
-//                   DialogTextField(
-//                     textEditingController: totalCommissionController,
-//                     text: 'total_commission'.tr,
-//                     rowWidth: MediaQuery.of(context).size.width * 0.9,
-//                     textFieldWidth:
-//                     MediaQuery.of(context).size.width * 0.4,
-//                     validationFunc: (val) {},
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             gapH40,
-//           ],
-//         ),
-//       ),
-//     )
-//         : const CircularProgressIndicator();
-//   }
-//
-//   Widget _buildTabChipItem(String name, int index) {
-//     return GestureDetector(
-//       onTap: () {
-//         setState(() {
-//           selectedTabIndex = index;
-//         });
-//       },
-//       child: ClipPath(
-//         clipper: const ShapeBorderClipper(
-//           shape: RoundedRectangleBorder(
-//             borderRadius: BorderRadius.only(
-//               topLeft: Radius.circular(9),
-//               topRight: Radius.circular(9),
-//             ),
-//           ),
-//         ),
-//         child: Container(
-//           width: MediaQuery.of(context).size.width * 0.25,
-//           height: MediaQuery.of(context).size.height * 0.07,
-//           decoration: BoxDecoration(
-//             color: selectedTabIndex == index ? Primary.p20 : Colors.white,
-//             border:
-//             selectedTabIndex == index
-//                 ? Border(top: BorderSide(color: Primary.primary, width: 3))
-//                 : null,
-//             boxShadow: [
-//               BoxShadow(
-//                 color: Colors.grey.withAlpha((0.5 * 255).toInt()),
-//                 spreadRadius: 9,
-//                 blurRadius: 9,
-//                 // offset: const Offset(0, 3),
-//               ),
-//             ],
-//           ),
-//           child: Center(
-//             child: Text(
-//               name.tr,
-//               style: TextStyle(
-//                 fontWeight: FontWeight.bold,
-//                 color: Primary.primary,
-//               ),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   addNewTitle() {
-//     setState(() {
-//       listViewLength = listViewLength + increment;
-//     });
-//     // Widget p =
-//     Container(
-//       width: MediaQuery.of(context).size.width * 0.63,
-//       margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-//       child: ReusableTextField(
-//         textEditingController: controller, //todo
-//         isPasswordField: false,
-//         hint: 'title'.tr,
-//         onChangedFunc: (val) {},
-//         validationFunc: (val) {},
-//       ),
-//     );
-//     // quotationController.addToOrderLinesList(p);
-//   }
-//
-//   // String price='0',disc='0',result='0',quantity='0';
-//   addNewItem() {
-//     setState(() {
-//       listViewLength = listViewLength + increment;
-//     });
-//
-//
-//
-//     // quotationController.addToOrderLinesList(p);
-//   }
-//
-//   addNewCombo() {
-//     setState(() {
-//       listViewLength = listViewLength + increment;
-//     });
-//     // Widget p = const ReusableComboRow();
-//     // quotationController.addToOrderLinesList(p);
-//   }
-//
-//   addNewImage() {
-//     setState(() {
-//       listViewLength = listViewLength + 100;
-//     });
-//     // Widget p =
-//     GetBuilder<QuotationController>(
-//       builder: (cont) {
-//         return InkWell(
-//           onTap: () async {
-//             final image = await ImagePickerHelper.pickImage();
-//             setState(() {
-//               imageFile = image!;
-//               cont.changeBoolVar(true);
-//               cont.increaseImageSpace(90);
-//               listViewLength = listViewLength + (cont.imageSpaceHeight) + 10;
-//             });
-//           },
-//           child: Container(
-//             margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-//             child: DottedBorder(
-//               dashPattern: const [10, 10],
-//               color: Others.borderColor,
-//               radius: const Radius.circular(9),
-//               child: SizedBox(
-//                 width: MediaQuery.of(context).size.width * 0.63,
-//                 height: cont.imageSpaceHeight,
-//                 child:
-//                 cont.imageAvailable
-//                     ? Row(
-//                   mainAxisAlignment: MainAxisAlignment.start,
-//                   children: [
-//                     Image.memory(
-//                       imageFile,
-//                       height: cont.imageSpaceHeight,
-//                     ),
-//                   ],
-//                 )
-//                     : Row(
-//                   mainAxisAlignment: MainAxisAlignment.start,
-//                   crossAxisAlignment: CrossAxisAlignment.center,
-//                   children: [
-//                     gapW20,
-//                     Icon(
-//                       Icons.cloud_upload_outlined,
-//                       color: Others.iconColor,
-//                       size: 32,
-//                     ),
-//                     gapW20,
-//                     Text(
-//                       'drag_drop_image'.tr,
-//                       style: TextStyle(
-//                         color: TypographyColor.textTable,
-//                       ),
-//                     ),
-//                     Text(
-//                       'browse'.tr,
-//                       style: TextStyle(color: Primary.primary),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//     // quotationController.addToOrderLinesList(p);
-//   }
-//
-//   addNewNote() {
-//     setState(() {
-//       listViewLength = listViewLength + increment;
-//     });
-//     // Widget p =
-//     Container(
-//       width: MediaQuery.of(context).size.width * 0.63,
-//       margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-//       child: ReusableTextField(
-//         textEditingController: controller, //todo
-//         isPasswordField: false,
-//         hint: 'note'.tr,
-//         onChangedFunc: (val) {},
-//         validationFunc: (val) {},
-//       ),
-//     );
-//     // quotationController.addToOrderLinesList(p);
-//   }
-//
-//   List<Step> getSteps() => [
-//     Step(
-//       title: const Text(''),
-//       content: Container(
-//         //page
-//       ),
-//       isActive: currentStep >= 0,
-//     ),
-//     Step(
-//       title: const Text(''),
-//       content: Container(),
-//       isActive: currentStep >= 1,
-//     ),
-//     Step(
-//       title: const Text(''),
-//       content: Container(),
-//       isActive: currentStep >= 2,
-//     ),
-//   ];
-// }
+

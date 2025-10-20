@@ -130,7 +130,7 @@ class _CreateAssignedToDialogState extends State<CreateAssignedToDialog> {
       //                 textFieldWidth: textFieldWidth,
       //                 validationFunc: (String val) {
       //                   if(val.isNotEmpty && val.length<7){
-      //                     return '7_digits'.tr;
+      //                     return '6_digits'.tr;
       //                   }return null;
       //                 },
       //                 onCodeSelected: (value) {
@@ -152,7 +152,7 @@ class _CreateAssignedToDialogState extends State<CreateAssignedToDialog> {
       //                 textFieldWidth: textFieldWidth,
       //                 validationFunc: (val) {
       //                   if(val.isNotEmpty && val.length<9){
-      //                     return '7_digits'.tr;
+      //                     return '6_digits'.tr;
       //                   }return null;
       //                 },
       //                 onCodeSelected: (value) {

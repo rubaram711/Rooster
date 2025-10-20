@@ -13,7 +13,7 @@ saveUserInfoLocally(
 ) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('accessToken', accessToken);
-  prefs.setString('identifier2', userId);
+  prefs.setString('id', userId);
   prefs.setString('email', email);
   prefs.setString('name', name);
   prefs.setString('companyId', companyId);
@@ -26,7 +26,7 @@ saveUserInfoLocally(
 Future<Map> getUserInfoFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String accessToken = prefs.getString('accessToken') ?? '';
-  String userId = prefs.getString('identifier2') ?? '';
+  String userId = prefs.getString('id') ?? '';
   String email = prefs.getString('email') ?? '';
   String name = prefs.getString('name') ?? '';
   String companyId = prefs.getString('companyId') ?? '';
@@ -36,7 +36,7 @@ Future<Map> getUserInfoFromPref() async {
   String isItHasMultiHeaders = prefs.getString('isItHasMultiHeaders') ?? '0';
   return {
     'accessToken': accessToken,
-    'identifier2': userId,
+    'id': userId,
     'email': email,
     'name': name,
     'companyId': companyId,
@@ -67,7 +67,7 @@ Future<String> getNameFromPref() async {
 
 Future<String> getIdFromPref() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  String userId = prefs.getString('identifier2') ?? '';
+  String userId = prefs.getString('id') ?? '';
   return userId;
 }
 

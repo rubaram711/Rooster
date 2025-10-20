@@ -381,18 +381,18 @@ class _ComboState extends State<Combo> {
                                                 '${comboController.rowsInListViewInCombo[keys[i]]['item_id']}';
                                             if (selectedItemId != '') {
                                               if (comboController
-                                                      .priceCurrency[selectedItemId] ==
+                                                      .priceCurrencyMap[selectedItemId] ==
                                                   val) {
                                                 comboController
                                                     .unitPriceControllers[keys[i]]!
                                                     .text = comboController
-                                                        .itemUnitPrice[selectedItemId]
+                                                        .itemUnitPriceMap[selectedItemId]
                                                         .toString();
                                               } else if (comboController
                                                           .selectedCurrencyName ==
                                                       'USD' &&
                                                   comboController
-                                                          .priceCurrency[selectedItemId] !=
+                                                          .priceCurrencyMap[selectedItemId] !=
                                                       val) {
                                                 var result = exchangeRatesController
                                                     .exchangeRatesList
@@ -400,7 +400,7 @@ class _ComboState extends State<Combo> {
                                                       (item) =>
                                                           item["currency"] ==
                                                           comboController
-                                                              .priceCurrency[selectedItemId],
+                                                              .priceCurrencyMap[selectedItemId],
                                                       orElse: () => null,
                                                     );
                                                 var divider = '1';
@@ -412,17 +412,17 @@ class _ComboState extends State<Combo> {
                                                 comboController
                                                         .unitPriceControllers[keys[i]]!
                                                         .text =
-                                                    '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                    '${double.parse('${(double.parse(comboController.itemUnitPriceMap[selectedItemId].toString()) / double.parse(divider))}')}';
                                               } else if (comboController
                                                           .selectedCurrencyName !=
                                                       'USD' &&
                                                   comboController
-                                                          .priceCurrency[selectedItemId] ==
+                                                          .priceCurrencyMap[selectedItemId] ==
                                                       'USD') {
                                                 comboController
                                                         .unitPriceControllers[keys[i]]!
                                                         .text =
-                                                    '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) * double.parse(comboController.exchangeRateForSelectedCurrency))}')}';
+                                                    '${double.parse('${(double.parse(comboController.itemUnitPriceMap[selectedItemId].toString()) * double.parse(comboController.exchangeRateForSelectedCurrency))}')}';
                                               } else {
                                                 var result = exchangeRatesController
                                                     .exchangeRatesList
@@ -430,7 +430,7 @@ class _ComboState extends State<Combo> {
                                                       (item) =>
                                                           item["currency"] ==
                                                           comboController
-                                                              .priceCurrency[selectedItemId],
+                                                              .priceCurrencyMap[selectedItemId],
                                                       orElse: () => null,
                                                     );
                                                 var divider = '1';
@@ -440,7 +440,7 @@ class _ComboState extends State<Combo> {
                                                           .toString();
                                                 }
                                                 var usdPrice =
-                                                    '${double.parse('${(double.parse(comboController.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                                                    '${double.parse('${(double.parse(comboController.itemUnitPriceMap[selectedItemId].toString()) / double.parse(divider))}')}';
                                                 comboController
                                                         .unitPriceControllers[keys[i]]!
                                                         .text =
@@ -736,76 +736,6 @@ class _ComboState extends State<Combo> {
 
                                       //++++++++++++++Save Discard+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                                       gapH10,
-
-                                      // Row(
-                                      //   mainAxisAlignment: MainAxisAlignment.end,
-                                      //   children: [
-                                      //     TextButton(
-                                      //       onPressed: () {
-                                      //         setState(() {
-                                      //           comboNameController.clear();
-                                      //           comboPriceController.clear();
-                                      //           comboMainDescriptionController.clear();
-                                      //           cont.resetCombo();
-                                      //         });
-                                      //       },
-                                      //       child: Text(
-                                      //         'discard'.tr,
-                                      //         style: TextStyle(
-                                      //           decoration: TextDecoration.underline,
-                                      //           color: Primary.primary,
-                                      //         ),
-                                      //       ),
-                                      //     ),
-                                      //     gapW24,
-                                      //     ReusableButtonWithColor(
-                                      //       btnText: 'save'.tr,
-                                      //       onTapFunction: () async {
-                                      //         var oldKeys =
-                                      //             comboController
-                                      //                 .rowsInListViewInCombo
-                                      //                 .keys
-                                      //                 .toList()
-                                      //               ..sort();
-                                      //         for (int i = 0; i < oldKeys.length; i++) {
-                                      //           comboController.newRowMap[i + 1] =
-                                      //               comboController
-                                      //                   .rowsInListViewInCombo[oldKeys[i]]!;
-                                      //         }
-
-                                      //         var companyid =
-                                      //             await getCompanyIdFromPref();
-                                      //         //in way box
-                                      //         // print("img------------------");
-                                      //         // print(
-                                      //         //   cont.image1.isNotEmpty
-                                      //         //       ? 'not empty'
-                                      //         //       : 'empty',
-                                      //         // );
-                                      //         // print(
-                                      //         //   cont.photosFilesList.isNotEmpty
-                                      //         //       ? 'not empty'
-                                      //         //       : 'empty',
-                                      //         // );
-                                      //         cont.storeComboInDataBase(
-                                      //           companyid,
-                                      //           comboNameController.text,
-                                      //           comboCodeController.text,
-                                      //           comboMainDescriptionController.text,
-                                      //           comboController.selectedCurrencyId,
-                                      //           comboPriceController.text,
-                                      //           '1',
-                                      //           brandController.text,
-                                      //           // cont.image1,in way box
-                                      //           cont.photosFilesList[0],
-                                      //           comboController.newRowMap,
-                                      //         );
-                                      //       },
-                                      //       width: 100,
-                                      //       height: 35,
-                                      //     ),
-                                      //   ],
-                                      // ),
                                     ],
                                   ),
                                 );
@@ -855,9 +785,7 @@ class _ComboState extends State<Combo> {
                                     //in way box
                                     // print("img------------------");
                                     // print(
-                                    //   cont.image1.isNotEmpty
-                                    //       ? 'not empty'
-                                    //       : 'empty',
+                                    //   cont.newRowMap
                                     // );
                                     // print(
                                     //   cont.photosFilesList.isNotEmpty
@@ -874,7 +802,7 @@ class _ComboState extends State<Combo> {
                                       '1',
                                       brandController.text,
                                       // cont.image1,in way box
-                                      cont.photosFilesList[0],
+                                      cont.photosFilesList.isNotEmpty?cont.photosFilesList[0]:null,
                                       comboController.newRowMap,
                                     );
                                   },
@@ -1074,44 +1002,42 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   controller: dropDownController,
                   onSelected: (String? value) {
                     dropDownController.text = value!;
-                    //++++++++++++++++++++Set Info In RawsInListViewInCombo+++++++++++++++++++++++++++++++++++++++++++
-
                     setState(() {
+                      selectedItemId='';
                       selectedItemId =
-                          '${cont.itemsIds[cont.itemsName.indexOf(value)]}';
+                          '${cont.itemsIds[cont.itemsCode.indexOf(value)]}';
                       qty =
-                          '${cont.items[cont.itemsName.indexOf(value)]['quantity']}';
+                          '${cont.items[cont.itemsCode.indexOf(value)]['quantity']}';
                       name = value;
                       discription =
-                          cont.items[cont.itemsName.indexOf(
+                          cont.items[cont.itemsCode.indexOf(
                             value,
                           )]['mainDescription'];
-
                       descritipnComboController.text =
-                          cont.items[cont.itemsName.indexOf(
+                          cont.items[cont.itemsCode.indexOf(
                             value,
                           )]['mainDescription'];
                       cont.setTypeInCombo(widget.index, '2');
                       // **************************Currency***********************************************************************************
-                      if (cont.priceCurrency[selectedItemId] ==
+                      if (cont.priceCurrencyMap[selectedItemId] ==
                           cont.selectedCurrencyName) {
                         price =
                             cont
-                                .items[cont.itemsName.indexOf(
+                                .items[cont.itemsCode.indexOf(
                                   value,
                                 )]['unitPrice']
                                 .toString();
-
                         cont.unitPriceControllers[widget.index]!.text =
-                            cont.itemUnitPrice[selectedItemId].toString();
+                            cont.itemUnitPriceMap[selectedItemId].toString();
+
                       } else if (cont.selectedCurrencyName == 'USD' &&
-                          cont.priceCurrency[selectedItemId] !=
+                          cont.priceCurrencyMap[selectedItemId] !=
                               cont.selectedCurrencyName) {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
                                   item["currency"] ==
-                                  cont.priceCurrency[selectedItemId],
+                                  cont.priceCurrencyMap[selectedItemId],
                               orElse: () => null,
                             );
 
@@ -1121,21 +1047,22 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                         }
 
                         price =
-                            '${double.parse('${(double.parse(cont.items[cont.itemsName.indexOf(value)]['unitPrice'].toString()) / double.parse(divider))}')}';
+                            '${double.parse('${(double.parse(cont.items[cont.itemsCode.indexOf(value)]['unitPrice'].toString()) / double.parse(divider))}')}';
                         price = price.toString();
 
                         cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                            '${double.parse('${(double.parse(cont.itemUnitPriceMap[selectedItemId].toString()) / double.parse(divider))}')}';
                       } else if (cont.selectedCurrencyName != 'USD' &&
-                          cont.priceCurrency[selectedItemId] == 'USD') {
+                          cont.priceCurrencyMap[selectedItemId] == 'USD') {
                         cont.unitPriceControllers[widget.index]!.text =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                      } else {
+                            '${double.parse('${(double.parse(cont.itemUnitPriceMap[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                      }
+                      else {
                         var result = exchangeRatesController.exchangeRatesList
                             .firstWhere(
                               (item) =>
                                   item["currency"] ==
-                                  cont.priceCurrency[selectedItemId],
+                                  cont.priceCurrencyMap[selectedItemId],
                               orElse: () => null,
                             );
                         var divider = '1';
@@ -1143,7 +1070,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                           divider = result["exchange_rate"].toString();
                         }
                         var usdPrice =
-                            '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+                            '${double.parse('${(double.parse(cont.itemUnitPriceMap[selectedItemId].toString()) / double.parse(divider))}')}';
                         cont.unitPriceControllers[widget.index]!.text =
                             '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
                       }
@@ -1243,135 +1170,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   focusNode: dropFocus,
                   nextFocusNode: quantityFocus,
                 ),
-
-                // DialogDropMenu(
-                //   controller: dropDownController,
-                //   optionsList: cont.itemsName,
-                //   text: '',
-                //   hint: 'item'.tr,
-                //   rowWidth: MediaQuery.of(context).size.width * 0.16,
-                //   textFieldWidth: MediaQuery.of(context).size.width * 0.16,
-                //   onSelected: (String? value) {
-                //     dropDownController.text = value!;
-                //     //++++++++++++++++++++Set Info In RawsInListViewInCombo+++++++++++++++++++++++++++++++++++++++++++
-
-                //     setState(() {
-                //       selectedItemId =
-                //           '${cont.itemsIds[cont.itemsName.indexOf(value)]}';
-                //       qty =
-                //           '${cont.items[cont.itemsName.indexOf(value)]['quantity']}';
-                //       name = value;
-                //       discription =
-                //           cont.items[cont.itemsName.indexOf(
-                //             value,
-                //           )]['mainDescription'];
-
-                //       descritipnComboController.text =
-                //           cont.items[cont.itemsName.indexOf(
-                //             value,
-                //           )]['mainDescription'];
-                //       cont.setTypeInCombo(widget.index, '2');
-                //       // **************************Currency***********************************************************************************
-                //       if (cont.priceCurrency[selectedItemId] ==
-                //           cont.selectedCurrencyName) {
-                //         price =
-                //             cont
-                //                 .items[cont.itemsName.indexOf(
-                //                   value,
-                //                 )]['unitPrice']
-                //                 .toString();
-
-                //         cont.unitPriceControllers[widget.index]!.text =
-                //             cont.itemUnitPrice[selectedItemId].toString();
-                //       } else if (cont.selectedCurrencyName == 'USD' &&
-                //           cont.priceCurrency[selectedItemId] !=
-                //               cont.selectedCurrencyName) {
-                //         var result = exchangeRatesController.exchangeRatesList
-                //             .firstWhere(
-                //               (item) =>
-                //                   item["currency"] ==
-                //                   cont.priceCurrency[selectedItemId],
-                //               orElse: () => null,
-                //             );
-
-                //         var divider = '1';
-                //         if (result != null) {
-                //           divider = result["exchange_rate"].toString();
-                //         }
-
-                //         price =
-                //             '${double.parse('${(double.parse(cont.items[cont.itemsName.indexOf(value)]['unitPrice'].toString()) / double.parse(divider))}')}';
-                //         price = price.toString();
-
-                //         cont.unitPriceControllers[widget.index]!.text =
-                //             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                //       } else if (cont.selectedCurrencyName != 'USD' &&
-                //           cont.priceCurrency[selectedItemId] == 'USD') {
-                //         cont.unitPriceControllers[widget.index]!.text =
-                //             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                //       } else {
-                //         var result = exchangeRatesController.exchangeRatesList
-                //             .firstWhere(
-                //               (item) =>
-                //                   item["currency"] ==
-                //                   cont.priceCurrency[selectedItemId],
-                //               orElse: () => null,
-                //             );
-                //         var divider = '1';
-                //         if (result != null) {
-                //           divider = result["exchange_rate"].toString();
-                //         }
-                //         var usdPrice =
-                //             '${double.parse('${(double.parse(cont.itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-                //         cont.unitPriceControllers[widget.index]!.text =
-                //             '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                //       }
-
-                //       quantityComboController.text = '1';
-                //       quantity = '1';
-
-                //       discountController.text = '0';
-                //       disc = '0';
-                //       cont
-                //           .unitPriceControllers[widget.index]!
-                //           .text = double.parse(
-                //         cont.unitPriceControllers[widget.index]!.text,
-                //       ).toStringAsFixed(2);
-                //       totalLine =
-                //           '${(int.parse(quantity) * double.parse(cont.unitPriceControllers[widget.index]!.text)) * (1 - double.parse(disc) / 100)}';
-
-                //       totalLine = totalLine.toString();
-                //       cont.setItemQuantityInListViewLengthInCombo(
-                //         widget.index,
-                //         quantity,
-                //       );
-
-                //       cont.setItemtotalInListViewLengthInCombo(
-                //         widget.index,
-                //         totalLine,
-                //       );
-                //       cont.getTotalItems();
-                //     });
-
-                //     cont.setEnteredUnitPriceInCombo(
-                //       widget.index,
-                //       cont.unitPriceControllers[widget.index]!.text,
-                //     );
-                //     cont.setItemIdInListViewLengthInCombo(
-                //       widget.index,
-                //       selectedItemId,
-                //     );
-                //     cont.setItemNameInListViewLengthInCombo(widget.index, name);
-                //     cont.setItemDescriptionInListViewLengthInCombo(
-                //       widget.index,
-                //       discription,
-                //     );
-                //     updateRowTotal();
-                //     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                //   },
-                // ),
                 screenWidth > 685 ? gapW12 : gapW6,
-
                 //description
                 SizedBox(
                   width:

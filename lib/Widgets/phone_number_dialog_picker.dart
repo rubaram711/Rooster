@@ -105,14 +105,14 @@ class PhoneDialogTextField2 extends StatelessWidget {
 }
 
 class PhoneDialog {
-  static Future<void> show(BuildContext context,TextEditingController Number,String phoneCode,String number) async {
+  static Future<void> show(BuildContext context,TextEditingController numberController,String phoneCode,String number) async {
     String completePhoneNumber='';
-    final GlobalKey<FormState> _formKey = GlobalKey();
+    final GlobalKey<FormState> formKey = GlobalKey();
     await showDialog(
       context: context,
       builder: (context) {
         return Form(
-          key: _formKey,
+          key: formKey,
           child: AlertDialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -145,8 +145,8 @@ class PhoneDialog {
               ),
               ElevatedButton(
                 onPressed:() {
-                  if(_formKey.currentState!.validate()){
-                  Number.text=completePhoneNumber;
+                  if(formKey.currentState!.validate()){
+                  numberController.text=completePhoneNumber;
                   Navigator.pop(context);
                 }},
                 child: const Text("Save"),

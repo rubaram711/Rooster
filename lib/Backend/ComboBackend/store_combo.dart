@@ -11,7 +11,7 @@ Future storeCombo(
   String price,
   String active,
   String brand,
-  List<int> featureimage,
+  List<int>? featureimage,
   Map items,
 ) async {
   String token = await getAccessTokenFromPref();
@@ -26,12 +26,13 @@ Future storeCombo(
     'brand': brand,
     // "image": MultipartFile.fromBytes(image, filename: "image.jpg"),
   });
+  if(featureimage!=null){
   formData.files.addAll([
     MapEntry(
       "image",
       MultipartFile.fromBytes(featureimage , filename: "featureimage.jpg"),
     ),
-  ]);
+  ]);}
   for (int i = 1; i < items.length + 1; i++) {
     formData.fields.addAll([
       //   MapEntry("back value",'front value')

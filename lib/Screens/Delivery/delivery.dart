@@ -85,18 +85,18 @@ class _CreateDeliveryState extends State<CreateDelivery> {
     });
   }
 
-  checkVatExempt() async {
-    var companySubjectToVat = await getCompanySubjectToVatFromPref();
-    if (companySubjectToVat == '1') {
-      vatExemptController.clear();
-      deliveryController.setIsVatExempted(false, false, false);
-      deliveryController.setIsVatExemptCheckBoxShouldAppear(true);
-    } else {
-      deliveryController.setIsVatExemptCheckBoxShouldAppear(false);
-      deliveryController.setIsVatExempted(false, false, true);
-      deliveryController.setIsVatExemptChecked(true);
-    }
-  }
+  // checkVatExempt() async {
+  //   var companySubjectToVat = await getCompanySubjectToVatFromPref();
+  //   if (companySubjectToVat == '1') {
+  //     vatExemptController.clear();
+  //     deliveryController.setIsVatExempted(false, false, false);
+  //     deliveryController.setIsVatExemptCheckBoxShouldAppear(true);
+  //   } else {
+  //     deliveryController.setIsVatExemptCheckBoxShouldAppear(false);
+  //     deliveryController.setIsVatExempted(false, false, true);
+  //     deliveryController.setIsVatExemptChecked(true);
+  //   }
+  // }
 
   Future<void> generatePdfFromImageUrl() async {
     String companyLogo = await getCompanyLogoFromPref();
@@ -114,8 +114,8 @@ class _CreateDeliveryState extends State<CreateDelivery> {
   @override
   void initState() {
     generatePdfFromImageUrl();
-    checkVatExempt();
-    deliveryController.isVatExemptChecked = false;
+    // checkVatExempt();
+    // deliveryController.isVatExemptChecked = false;
     deliveryController.itemsMultiPartList = [];
     deliveryController.salesPersonListNames = [];
     deliveryController.salesPersonListId = [];
@@ -461,9 +461,17 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                             senderUser: homeController.userName,
 
                                             clientPhoneNumber:
-                                                deliveryCont
-                                                    .phoneNumber[selectedCustomerIds] ??
+                                            deliveryCont
+                                                .phoneNumber[selectedCustomerIds] ??
                                                 '---',
+                                            clientMobileNumber:
+                                            deliveryCont
+                                                .mobileNumber[selectedCustomerIds] ??
+                                                '---',
+                                            clientAddress: '${deliveryCont
+                                                .city[selectedCustomerIds]!=''?'${deliveryCont
+                                                .city[selectedCustomerIds]} - ' :''} ${deliveryCont
+                                                .country[selectedCustomerIds]!=''?deliveryCont.country[selectedCustomerIds]:'---'}' ,
                                             clientName:
                                                 clientNameController.text,
                                             total: itemTotal.toString(),
@@ -1183,10 +1191,10 @@ class _CreateDeliveryState extends State<CreateDelivery> {
                                                   '${deliveryCont.customersPricesListsIds[index]}',
                                                 );
 
-                                                setState(() {
-                                                  deliveryCont
-                                                      .resetItemsAfterChangePriceList();
-                                                });
+                                                // setState(() {
+                                                //   deliveryCont
+                                                //       .resetItemsAfterChangePriceList();
+                                                // });
                                               }
                                             });
                                           },
@@ -2150,7 +2158,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   TextEditingController qtyController = TextEditingController();
   TextEditingController discountController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-  TextEditingController itemwarehouseController = TextEditingController();
+  TextEditingController itemWarehouseController = TextEditingController();
 
   final DeliveryController deliveryController = Get.find();
   // final ExchangeRatesController exchangeRatesController = Get.find();
@@ -2175,16 +2183,16 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
-    var inddd = deliveryController.warehouseIds.indexOf(
+    var warehouseIndex = deliveryController.warehouseIds.indexOf(
       deliveryController.rowsInListViewInDelivery[widget
           .index]['item_warehouseId'],
     );
 
-    itemwarehouseController.text =
+    itemWarehouseController.text =
         deliveryController.rowsInListViewInDelivery[widget
                     .index]['item_warehouseId'] !=
                 ''
-            ? deliveryController.warehousesNameList[inddd]
+            ? deliveryController.warehousesNameList[warehouseIndex]
             : deliveryController.rowsInListViewInDelivery[widget
                 .index]['item_warehouseId'];
     itemCodeController.text =
@@ -2472,7 +2480,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                       // width: MediaQuery.of(context).size.width * 0.16,
                       // requestFocusOnTap: false,
                       enableSearch: true,
-                      controller: itemwarehouseController,
+                      controller: itemWarehouseController,
                       hintText: 'deliver_warehouse'.tr,
                       inputDecorationTheme: InputDecorationTheme(
                         // filled: true,
@@ -2515,7 +2523,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                               .toList(),
                       enableFilter: true,
                       onSelected: (String? value) {
-                        itemwarehouseController.text = value!;
+                        itemWarehouseController.text = value!;
 
                         var index = cont.warehousesNameList.indexOf(value);
                         var val = '${cont.warehouseIds[index]}';
@@ -2608,19 +2616,18 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                                         widget.index.toString(),
                                       );
                                 });
-                                setState(() {
-                                  cont.totalItems = 0.0;
-                                  cont.globalDisc = "0.0";
-                                  cont.globalDiscountPercentageValue = "0.0";
-                                  cont.specialDisc = "0.0";
-                                  cont.specialDiscountPercentageValue = "0.0";
-                                  cont.vat11 = "0.0";
-                                  cont.vatInPrimaryCurrency = "0.0";
-                                  cont.totalDelivery = "0.0";
-                                });
-                                if (cont.rowsInListViewInDelivery != {}) {
-                                  cont.getTotalItems();
-                                }
+                                // setState(() {
+                                //   cont.totalItems = 0.0;
+                                //   cont.globalDiscountAmount.text = "";
+                                //   cont.globalDiscountPercentageValue = "0.0";
+                                //   cont.specialDiscountAmount.text = "";
+                                //   cont.specialDiscountPercentageValue = "0.0";
+                                //   cont.vatInDeliveryCurrency = 0;
+                                //   cont.totalDelivery = "0.0";
+                                // });
+                                // if (cont.rowsInListViewInDelivery != {}) {
+                                //   cont.getTotalItems();
+                                // }
                               },
                               child: Icon(
                                 Icons.delete_outline,
@@ -3147,19 +3154,19 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
-    var indd = deliveryController.warehouseIds.indexOf(
+    var warehouseIndex = deliveryController.warehouseIds.indexOf(
       deliveryController.rowsInListViewInDelivery[widget
           .index]['combo_warehouseId'],
     );
-    // var indx = deliveryController.warehousesNameList[indd];
+    // var index = deliveryController.warehousesNameList[warehouseIndex];
 
-    // print(deliveryController.warehousesNameList[indd]);
+    // print(deliveryController.warehousesNameList[warehouseIndex]);
 
     warehouseController.text =
         deliveryController.rowsInListViewInDelivery[widget
                     .index]['combo_warehouseId'] !=
                 ''
-            ? deliveryController.warehousesNameList[indd]
+            ? deliveryController.warehousesNameList[warehouseIndex]
             : deliveryController.rowsInListViewInDelivery[widget
                 .index]['combo_warehouseId'];
     comboCodeController.text =
@@ -3249,53 +3256,55 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                           comboName = cont.combosNamesList[ind];
                           descriptionController.text =
                               cont.combosDescriptionList[ind];
-
-                          if (cont.combosPricesCurrencies[selectedComboId] ==
-                              cont.selectedCurrencyName) {
-                            cont.combosPriceControllers[widget.index]!.text =
-                                cont.combosPricesList[ind].toString();
-                          } else if (cont.selectedCurrencyName == 'USD' &&
-                              cont.combosPricesCurrencies[selectedComboId] !=
-                                  cont.selectedCurrencyName) {
-                            var result = exchangeRatesController
-                                .exchangeRatesList
-                                .firstWhere(
-                                  (item) =>
-                                      item["currency"] ==
-                                      cont.combosPricesCurrencies[selectedComboId],
-                                  orElse: () => null,
-                                );
-                            var divider = '1';
-                            if (result != null) {
-                              divider = result["exchange_rate"].toString();
-                            }
-                            cont.combosPriceControllers[widget.index]!.text =
-                                '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                          } else if (cont.selectedCurrencyName != 'USD' &&
-                              cont.combosPricesCurrencies[selectedComboId] ==
-                                  'USD') {
-                            cont.combosPriceControllers[widget.index]!.text =
-                                '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                          } else {
-                            var result = exchangeRatesController
-                                .exchangeRatesList
-                                .firstWhere(
-                                  (item) =>
-                                      item["currency"] ==
-                                      cont.combosPricesCurrencies[selectedComboId],
-                                  orElse: () => null,
-                                );
-                            var divider = '1';
-                            if (result != null) {
-                              divider = result["exchange_rate"].toString();
-                            }
-                            var usdPrice =
-                                '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
-                            cont.combosPriceControllers[widget.index]!.text =
-                                '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
-                          }
                           cont.combosPriceControllers[widget.index]!.text =
-                              '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
+                              cont.combosPricesList[ind].toString();
+                          //
+                          // if (cont.combosPricesCurrencies[selectedComboId] ==
+                          //     cont.selectedCurrencyName) {
+                          //   cont.combosPriceControllers[widget.index]!.text =
+                          //       cont.combosPricesList[ind].toString();
+                          // } else if (cont.selectedCurrencyName == 'USD' &&
+                          //     cont.combosPricesCurrencies[selectedComboId] !=
+                          //         cont.selectedCurrencyName) {
+                          //   var result = exchangeRatesController
+                          //       .exchangeRatesList
+                          //       .firstWhere(
+                          //         (item) =>
+                          //             item["currency"] ==
+                          //             cont.combosPricesCurrencies[selectedComboId],
+                          //         orElse: () => null,
+                          //       );
+                          //   var divider = '1';
+                          //   if (result != null) {
+                          //     divider = result["exchange_rate"].toString();
+                          //   }
+                          //   cont.combosPriceControllers[widget.index]!.text =
+                          //       '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                          // } else if (cont.selectedCurrencyName != 'USD' &&
+                          //     cont.combosPricesCurrencies[selectedComboId] ==
+                          //         'USD') {
+                          //   cont.combosPriceControllers[widget.index]!.text =
+                          //       '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                          // } else {
+                          //   var result = exchangeRatesController
+                          //       .exchangeRatesList
+                          //       .firstWhere(
+                          //         (item) =>
+                          //             item["currency"] ==
+                          //             cont.combosPricesCurrencies[selectedComboId],
+                          //         orElse: () => null,
+                          //       );
+                          //   var divider = '1';
+                          //   if (result != null) {
+                          //     divider = result["exchange_rate"].toString();
+                          //   }
+                          //   var usdPrice =
+                          //       '${double.parse('${(double.parse(cont.combosPricesList[ind].toString()) / double.parse(divider))}')}';
+                          //   cont.combosPriceControllers[widget.index]!.text =
+                          //       '${double.parse('${(double.parse(usdPrice) * double.parse(cont.exchangeRateForSelectedCurrency))}')}';
+                          // }
+                          // cont.combosPriceControllers[widget.index]!.text =
+                          //     '${double.parse(cont.combosPriceControllers[widget.index]!.text) + taxValue}';
                           qtyController.text = '1';
                           quantity = '1';
                           discountController.text = '0';
@@ -3309,7 +3318,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                               '${(int.parse(quantity) * double.parse(cont.combosPriceControllers[widget.index]!.text)) * (1 - double.parse(discount) / 100)}';
                           cont.setEnteredQtyInDelivery(widget.index, quantity);
                           cont.setMainTotalInDelivery(widget.index, totalLine);
-                          cont.getTotalItems();
+                          // cont.getTotalItems();
                         });
                         cont.setEnteredUnitPriceInDelivery(
                           widget.index,
@@ -3500,7 +3509,7 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
 
                           cont.setEnteredQtyInDelivery(widget.index, val);
                           cont.setMainTotalInDelivery(widget.index, totalLine);
-                          cont.getTotalItems();
+                          // cont.getTotalItems();
                         },
                       ),
 
@@ -3674,19 +3683,18 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                                         widget.index.toString(),
                                       );
                                 });
-                                setState(() {
-                                  cont.totalItems = 0.0;
-                                  cont.globalDisc = "0.0";
-                                  cont.globalDiscountPercentageValue = "0.0";
-                                  cont.specialDisc = "0.0";
-                                  cont.specialDiscountPercentageValue = "0.0";
-                                  cont.vat11 = "0.0";
-                                  cont.vatInPrimaryCurrency = "0.0";
-                                  cont.totalDelivery = "0.0";
-                                });
-                                if (cont.rowsInListViewInDelivery != {}) {
-                                  cont.getTotalItems();
-                                }
+                                // setState(() {
+                                //   cont.totalItems = 0.0;
+                                //   cont.globalDiscountAmount.text = "";
+                                //   cont.globalDiscountPercentageValue = "0.0";
+                                //   cont.specialDiscountAmount.text = "";
+                                //   cont.specialDiscountPercentageValue = "0.0";
+                                //   cont.vatInDeliveryCurrency=0;
+                                //   cont.totalDelivery = "0.0";
+                                // });
+                                // if (cont.rowsInListViewInDelivery != {}) {
+                                //   cont.getTotalItems();
+                                // }
                               },
                               child: Icon(
                                 Icons.delete_outline,

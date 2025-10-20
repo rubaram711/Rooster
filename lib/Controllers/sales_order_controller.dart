@@ -9,93 +9,28 @@ import 'package:rooster_app/Backend/get_currencies.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/const/functions.dart';
 
-abstract class SalesOrderControllerAbstract extends GetxController {
-  getFieldsForCreateSalesOrderFromBack();
-  resetItemsAfterChangePriceList();
-  incrementListViewLengthInSalesOrder(double val);
-  decrementListViewLengthInSalesOrder(double val);
-  // addToOrderLinesInSalesOrderList(String index, Widget p);
-  // removeFromOrderLinesInSalesOrderList(String index);
-  setSelectedPriceListId(String value);
-  setIsVatExempted(
-    bool isPrintedAsVatExemptVal,
-    bool isPrint0Val,
-    bool isVatNoPrintedVal,
-  );
-  setSpecialDisc(String specialDiscountPercentage);
-  setGlobalDisc(String globalDiscountPercentage);
-  setSelectedCashingMethodId(String value);
-  setIsVatExemptCheckBoxShouldAppear(bool val);
-  addToUnitPriceControllers(int index);
-  addToCombosPricesControllers(int index);
-  setItemIdInSalesOrder(int index, String val);
-  setItemNameInSalesOrder(int index, String val);
-  setMainCodeInSalesOrder(int index, String val);
-  setTypeInSalesOrder(int index, String val);
-  setTitleInSalesOrder(int index, String val);
-  setNoteInSalesOrder(int index, String val);
-  setImageInSalesOrder(int index, Uint8List imageFile);
-  setMainDescriptionInSalesOrder(int index, String val);
-  setComboWareHouseInSalesOrder(int index, String val);
-  setEnteredQtyInSalesOrder(int index, String val);
-  setComboInSalesOrder(int index, String val);
-  setEnteredUnitPriceInSalesOrder(int index, String val);
-  setEnteredDiscInSalesOrder(int index, String val);
-  setMainTotalInSalesOrder(int index, String val);
-  setItemWareHouseInSalesOrder(int index, String val);
-  getTotalItems();
-  setStatus(String val);
-  setCompanyVat(double val);
-  setLatestRate(double val);
-  setVat11();
-  setTotalAllSalesOrder();
-  setIsVatExemptChecked(bool val);
-  setSelectedCurrency(String id, String name);
-  setSelectedCurrencySymbol(String val);
-  setExchangeRateForSelectedCurrency(String val);
-  changeBoolVar(bool val);
-  increaseImageSpace(double val);
-  setLogo(Uint8List val);
-  setIsBeforeVatPrices(bool val);
-  getAllTaxationGroupsFromBack();
-  resetSalesOrder();
-  clearList();
-  addToRowsInListViewInSalesOrder(int index, Map p);
-  removeFromRowsInListViewInSalesOrder(int index);
-  setSearchInSalesOrdersController(String value);
-  getAllSalesOrderFromBack();
-  getAllSalesOrderFromBackWithoutExcept();
-  getAllUsersSalesPersonFromBack();
-  setSalesOrders(List value);
-  setSelectedSalesOrder(Map map);
-  resetSalesOrderData();
-  clearRowsInListViewInSalesOrderData();
-  addToRowsInListViewInSalesOrderData(List p);
-  setIsSubmitAndPreviewClicked(bool val);
-}
-
-class SalesOrderController extends SalesOrderControllerAbstract {
-  String selectedPaymentTermId='';
+class SalesOrderController extends GetxController {
+  String selectedPaymentTermId = '';
   setSelectedPaymentTermId(String val) {
     selectedPaymentTermId = val;
     update();
   }
 
   int salesOrderCounter = 0;
-  setSalesOrderCounter(int val){
-    salesOrderCounter=val;
+  setSalesOrderCounter(int val) {
+    salesOrderCounter = val;
     update();
   }
 
   bool isSubmitAndPreviewClicked = false;
-  @override
+
   setIsSubmitAndPreviewClicked(bool val) {
     isSubmitAndPreviewClicked = val;
     update();
   }
 
   String status = '';
-  @override
+
   setStatus(String val) {
     status = val;
     update();
@@ -103,104 +38,88 @@ class SalesOrderController extends SalesOrderControllerAbstract {
 
   Map<int, TextEditingController> unitPriceControllers = {};
   Map<int, TextEditingController> combosPriceControllers = {};
-  @override
+
   addToUnitPriceControllers(int index) {
     unitPriceControllers[index] = TextEditingController();
     update();
   }
 
-  @override
   addToCombosPricesControllers(int index) {
     combosPriceControllers[index] = TextEditingController();
     update();
   }
 
-  @override
   setItemIdInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['item_id'] = val;
     update();
   }
 
-  @override
   setItemNameInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['itemName'] = val;
     update();
   }
 
-  @override
   setMainCodeInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['item_main_code'] = val;
     update();
   }
 
-  @override
   setTypeInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['line_type_id'] = val;
     update();
   }
 
-  @override
   setTitleInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['title'] = val;
     update();
   }
 
-  @override
   setNoteInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['note'] = val;
     update();
   }
 
-  @override
   setImageInSalesOrder(int index, Uint8List imageFile) {
     // print(imageFile);
     rowsInListViewInSalesOrder[index]['image'] = imageFile;
     update();
   }
 
-  @override
   setMainDescriptionInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['item_description'] = val;
     update();
   }
 
-  @override
   setComboWareHouseInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['combo_warehouseId'] = val;
     update();
   }
 
-  @override
   setItemWareHouseInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['item_warehouseId'] = val;
     update();
   }
 
-  @override
   setEnteredQtyInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['item_quantity'] = val;
     update();
   }
 
-  @override
   setComboInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['combo'] = val;
     update();
   }
 
-  @override
   setEnteredUnitPriceInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['item_unit_price'] = val;
     update();
   }
 
-  @override
   setEnteredDiscInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['item_discount'] = val;
     update();
   }
 
-  @override
   setMainTotalInSalesOrder(int index, String val) {
     rowsInListViewInSalesOrder[index]['item_total'] = val;
     update();
@@ -212,7 +131,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   double totalAfterGlobalDis = 0.0;
   double totalAfterGlobalSpecialDis = 0.0;
   bool updateItem = false;
-  @override
+
   getTotalItems() {
     if (rowsInListViewInSalesOrder != {}) {
       totalItems = rowsInListViewInSalesOrder.values
@@ -220,11 +139,18 @@ class SalesOrderController extends SalesOrderControllerAbstract {
           .reduce((a, b) => a + b);
     }
 
-    setVat11();
-    setTotalAllSalesOrder();
-    // setGlobalDisc(globalDiscountPercentageValue);
-    // setSpecialDisc(specialDiscountPercentageValue);
-
+    // setVat11();
+    setTotalSalesOrderAfterVat();
+    if (globalDiscountPercentageValue != '' ||
+        globalDiscountPercentageValue != '0') {
+      setGlobalDisc(globalDiscountPercentageValue);
+    }
+    if ((specialDiscountPercentageValue != '' ||
+            specialDiscountPercentageValue != '0') &&
+        (globalDiscountPercentageValue == '' ||
+            globalDiscountPercentageValue == '0')) {
+      setSpecialDisc(specialDiscountPercentageValue);
+    }
     update();
   }
 
@@ -232,20 +158,18 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   String selectedCurrencyId = '';
   String selectedCurrencySymbol = '';
   String selectedCurrencyName = 'USD';
-  @override
+
   setSelectedCurrency(String id, String name) {
     selectedCurrencyId = id;
     selectedCurrencyName = name;
     update();
   }
 
-  @override
   setSelectedCurrencySymbol(String val) {
     selectedCurrencySymbol = val;
     update();
   }
 
-  @override
   setExchangeRateForSelectedCurrency(String val) {
     exchangeRateForSelectedCurrency = val;
     update();
@@ -253,7 +177,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
 
   bool imageAvailable = false;
   double imageSpaceHeight = 90;
-  @override
+
   changeBoolVar(bool val) {
     imageAvailable = val;
     update();
@@ -262,33 +186,35 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   List<Widget> photosWidgetsList = [];
   List photosFilesList = [];
   double photosListWidth = 0;
-  @override
+
   increaseImageSpace(double val) {
     imageSpaceHeight = imageSpaceHeight + val;
     update();
   }
 
   Uint8List logoBytes = Uint8List(0);
-  @override
+
   setLogo(Uint8List val) {
     logoBytes = val;
     update();
   }
 
   bool isBeforeVatPrices = true;
-  @override
+
   setIsBeforeVatPrices(bool val) {
     isBeforeVatPrices = val;
     update();
   }
 
   double companyVat = 0.0;
+  double vatInSalesOrderCurrency = 0.0;
+
   List taxationGroupsList = [];
   bool isTaxationGroupsFetched = false;
   Map ratesInTaxationGroupList = {};
   // List ratesInTaxationGroupList= [];
   int selectedTaxationGroupIndex = 0;
-  @override
+
   getAllTaxationGroupsFromBack() async {
     taxationGroupsList = [];
     // taxationGroupsList = {};
@@ -314,7 +240,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   }
 
   // Map<String, Widget> orderLinesSalesOrderList = {};
-  @override
+
   resetSalesOrder() {
     cashingMethodsNamesList = [];
     cashingMethodsIdsList = [];
@@ -324,24 +250,21 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     itemsCode = [];
     itemsIds = [];
     isSalesOrderInfoFetched = false;
-
     totalItems = 0;
-    specialDisc = '0';
-    globalDisc = '0';
-    vatInPrimaryCurrency = '0';
-    vat11 = '0';
+    specialDiscAmount.text = '';
+    globalDiscountAmount.text = '';
+    vatInSalesOrderCurrency = 0;
     totalSalesOrder = '0.00';
     update();
   }
 
-  @override
   setSelectedPriceListId(String value) {
     selectedPriceListId = value;
     update();
   }
 
   bool isVatExemptCheckBoxShouldAppear = true;
-  @override
+
   setIsVatExemptCheckBoxShouldAppear(bool val) {
     isVatExemptCheckBoxShouldAppear = val;
     update();
@@ -350,7 +273,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   bool isPrintedAsVatExempt = false;
   bool isPrintedAs0 = false;
   bool isVatNoPrinted = false;
-  @override
+
   setIsVatExempted(
     bool isPrintedAsVatExemptVal,
     bool isPrint0Val,
@@ -363,121 +286,122 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   }
 
   String selectedCashingMethodId = '';
-  @override
+
   setSelectedCashingMethodId(String value) {
     selectedCashingMethodId = value;
     update();
   }
 
   double preGlobalDisc = 0.0; //GlobalDisc as double used in calc
-  String globalDisc = ''; // GlobalDisc as int to show it in ui
+  TextEditingController globalDiscountAmount =
+      TextEditingController(); // GlobalDisc as int to show it in ui
   String globalDiscountPercentageValue = '';
 
-  @override
   setGlobalDisc(String globalDiscountPercentage) {
-    globalDiscountPercentageValue = globalDiscountPercentage;
-    preGlobalDisc =
-        (totalItems) * double.parse(globalDiscountPercentageValue) / 100;
-    globalDisc = preGlobalDisc.toStringAsFixed(2);
+    if (globalDiscountPercentage != '0') {
+      globalDiscountPercentageValue = globalDiscountPercentage;
+      preGlobalDisc =
+          (totalItems) * double.parse(globalDiscountPercentageValue) / 100;
+      globalDiscountAmount.text = preGlobalDisc.toStringAsFixed(2);
 
-    totalAfterGlobalDis = totalItems - preGlobalDisc;
-    totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
-    setSpecialDisc(specialDiscountPercentageValue);
-    setVat11();
-    setTotalAllSalesOrder();
-    update();
+      totalAfterGlobalDis = totalItems - preGlobalDisc;
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      setSpecialDisc(specialDiscountPercentageValue);
+      setTotalSalesOrderAfterVat();
+      update();
+    }
+  }
+
+  setGlobalDiscPercentage(String globalDiscountAmount) {
+    if (globalDiscountAmount != '0') {
+      preGlobalDisc = double.parse(globalDiscountAmount);
+      globalDiscountPercentageValue =
+          ((double.parse(globalDiscountAmount) / totalItems) * 100)
+              .toStringAsFixed(2);
+      totalAfterGlobalDis = totalItems - preGlobalDisc;
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      setSpecialDisc(specialDiscountPercentageValue);
+      setTotalSalesOrderAfterVat();
+      update();
+    }
   }
 
   double preSpecialDisc = 0.0;
-  String specialDisc = '';
+  TextEditingController specialDiscAmount = TextEditingController();
   String specialDiscountPercentageValue = '0';
-  @override
+
   setSpecialDisc(String specialDiscountPercentage) {
-    specialDiscountPercentageValue = specialDiscountPercentage;
-    preSpecialDisc =
-        totalAfterGlobalDis *
-        double.parse(specialDiscountPercentageValue) /
-        100;
-    specialDisc = preSpecialDisc.toStringAsFixed(2);
-    totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
-    setVat11();
-    setTotalAllSalesOrder();
-    update();
+    if (specialDiscountPercentage != '0') {
+      specialDiscountPercentageValue = specialDiscountPercentage;
+      preSpecialDisc =
+          totalAfterGlobalDis *
+          double.parse(specialDiscountPercentageValue) /
+          100;
+      specialDiscAmount.text = preSpecialDisc.toStringAsFixed(2);
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      setTotalSalesOrderAfterVat();
+      update();
+    }
   }
 
-  double preVat = 0.0;
-  double preVatInPrimaryCurrency = 0.0;
-  String vat11 = '';
-  String vatInPrimaryCurrency = '';
-  double vat = 11;
-  double latestRate = 89500;
+  setSpecialDiscPercentage(String specialDiscountAmount) {
+    if (specialDiscountAmount != '0') {
+      preSpecialDisc = double.parse(specialDiscountAmount);
+      specialDiscountPercentageValue =
+          ((double.parse(specialDiscountAmount) / totalItems) * 100)
+              .toStringAsFixed(2);
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      setTotalSalesOrderAfterVat();
+      update();
+    }
+  }
+
+  double latestRate = 1;
   String companyPrimaryCurrency = 'USD';
   setCompanyPrimaryCurrency(String val) {
     companyPrimaryCurrency = val;
     update();
   }
 
-  @override
   setCompanyVat(double val) {
-    vat = val;
+    companyVat = val;
+    setTotalSalesOrderAfterVat(); //todo remove if it's not important
     update();
   }
 
-  @override
   setLatestRate(double val) {
     latestRate = val;
     update();
   }
 
-  @override
-  setVat11() {
-    if (isVatExemptChecked) {
-      preVat = 0;
-      vat11 = '0';
-      preVatInPrimaryCurrency = 0;
-      vatInPrimaryCurrency = '0';
-    } else {
-      preVat =
-          (totalItems - preGlobalDisc - preSpecialDisc) *
-          vat /
-          100; //all variables as double
-      vat11 = preVat.toStringAsFixed(2);
-      if (companyPrimaryCurrency == selectedCurrencyName) {
-        preVatInPrimaryCurrency = double.parse(vat11);
-      } else if (companyPrimaryCurrency == 'USD') {
-        preVatInPrimaryCurrency =
-            double.parse(vat11) / double.parse(exchangeRateForSelectedCurrency);
-      } else {
-        if (selectedCurrencyName == 'USD') {
-          preVatInPrimaryCurrency = double.parse(vat11) * latestRate;
-        } else {
-          var usdPreVat =
-              double.parse(vat11) /
-              double.parse(exchangeRateForSelectedCurrency);
-          preVatInPrimaryCurrency = usdPreVat * latestRate;
-        }
-      }
-      // preVat11LBP = double.parse(vat11)  * latestRate;
-      vatInPrimaryCurrency = preVatInPrimaryCurrency.toStringAsFixed(2);
-      update();
-    }
-  }
-
   double preTotalSalesOrder = 0;
   String totalSalesOrder = '';
-  @override
-  setTotalAllSalesOrder() {
-    preTotalSalesOrder = (totalItems - preGlobalDisc - preSpecialDisc) + preVat;
-    totalSalesOrder = preTotalSalesOrder.toStringAsFixed(2);
-    // setVat11();
+
+  setTotalSalesOrderAfterVat() {
+    // preTotalSalesOrder = (totalItems - preGlobalDisc - preSpecialDisc) + preVat;
+    // totalSalesOrder = preTotalSalesOrder.toStringAsFixed(2);
+    var valueBeforeVat = (totalItems - preGlobalDisc - preSpecialDisc);
+    if (companyVat == 0 ||
+        isPrintedAsVatExempt ||
+        isPrintedAs0 ||
+        isVatNoPrinted) {
+      companyVat = 0;
+      vatInSalesOrderCurrency = 0;
+      totalSalesOrder = valueBeforeVat.toStringAsFixed(2);
+    } else {
+      vatInSalesOrderCurrency = double.parse(
+        (valueBeforeVat * (companyVat / 100)).toStringAsFixed(2),
+      );
+      preTotalSalesOrder = valueBeforeVat + vatInSalesOrderCurrency;
+      totalSalesOrder = preTotalSalesOrder.toStringAsFixed(2);
+    }
+    update();
   }
 
   bool isVatExemptChecked = false;
-  @override
   setIsVatExemptChecked(bool val) {
     isVatExemptChecked = val;
-    setVat11();
-    setTotalAllSalesOrder();
+    setTotalSalesOrderAfterVat();
     update();
   }
 
@@ -488,6 +412,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   bool isSalesOrderInfoFetched = false;
   Map email = {};
   Map phoneNumber = {};
+  Map mobileNumber = {};
   Map clientNumber = {};
   Map name = {};
   Map country = {};
@@ -540,10 +465,10 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   List<String> warehousesName = [];
   List<String> warehousesForSplit = [];
   List<List<String>> warehousesMultiPartList = [];
-  Map<String,List<String>> allCodesForItem={};
-  List<String> allCodesForAllItems=[];
-  List items=[];
-  @override
+  Map<String, List<String>> allCodesForItem = {};
+  List<String> allCodesForAllItems = [];
+  List items = [];
+
   getFieldsForCreateSalesOrderFromBack() async {
     warehousesNameList = [];
     warehouseIds = [];
@@ -562,14 +487,6 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     combosForSplit = [];
     cashingMethodsNamesList = [];
     cashingMethodsIdsList = [];
-    // itemsDescription = {};
-    // itemsMap = {};
-    // itemsCodes = {};
-    // itemsNames = {};
-    // warehousesInfo = {};
-    // itemUnitPrice = {};
-    // itemsVats = {};
-    // itemsPricesCurrencies = {};
     salesOrderNumber = '';
     customersMap = {};
     customersPricesListsIds = [];
@@ -583,17 +500,10 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     priceListsIds = [];
     priceLists = [];
     selectedPriceListId = '';
-    // itemsCode = [];
-    // itemsIds = [];
-    // itemsMap = {};
-    // combosMap = {};
-    // itemsMultiPartList = [];
-    // itemsDes = [];
-    // itemsName = [];
-    // itemsTotalQuantity = [];
     customerForSplit = [];
     itemsForSplit = [];
     phoneNumber = {};
+    mobileNumber = {};
     email = {};
     clientNumber = {};
     country = {};
@@ -649,7 +559,10 @@ class SalesOrderController extends SalesOrderControllerAbstract {
       customerNameList.add('${client['name']}');
       customerNumberList.add('${client['client_number']}');
       customerIdsList.add('${client['id']}');
-      phoneNumber["${client['id']}"] = client['phone_number'] ?? '';
+      phoneNumber["${client['id']}"] =
+          '${client['phone_code'] ?? ''}-${client['phone_number'] ?? ''}';
+      mobileNumber["${client['id']}"] =
+          '${client['mobile_code'] ?? ''}-${client['mobile_number'] ?? ''}';
       email["${client['id']}"] = client['email'] ?? '';
       country["${client['id']}"] = client['country'] ?? '';
       city["${client['id']}"] = client['city'] ?? '';
@@ -707,15 +620,15 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
-  @override
+
   resetItemsAfterChangePriceList() async {
     itemsCode = [];
     itemsIds = [];
     itemsInfo = [];
     itemsMultiPartList = [];
-    allCodesForItem={};
-    allCodesForAllItems=[];
-    items=[];
+    allCodesForItem = {};
+    allCodesForAllItems = [];
+    items = [];
     itemsDes = [];
     itemsName = [];
     itemsTotalQuantity = [];
@@ -844,18 +757,16 @@ class SalesOrderController extends SalesOrderControllerAbstract {
 
   double listViewLengthInSalesOrder = 50;
   double increment = 60;
-  @override
+
   incrementListViewLengthInSalesOrder(double val) {
     listViewLengthInSalesOrder = listViewLengthInSalesOrder + val;
     update();
   }
 
-  @override
   decrementListViewLengthInSalesOrder(double val) {
     listViewLengthInSalesOrder = listViewLengthInSalesOrder - val;
     update();
   }
-
 
   List<int> orderedKeys = [];
   Map rowsInListViewInSalesOrder = {
@@ -869,21 +780,19 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     //    'total': '0',
     //  }
   };
-  @override
+
   clearList() {
     rowsInListViewInSalesOrder = {};
     orderedKeys = [];
     update();
   }
 
-  @override
   addToRowsInListViewInSalesOrder(int index, Map p) {
     rowsInListViewInSalesOrder[index] = p;
     orderedKeys.add(index);
     update();
   }
 
-  @override
   removeFromRowsInListViewInSalesOrder(int index) {
     rowsInListViewInSalesOrder.remove(index);
     orderedKeys.remove(index);
@@ -891,7 +800,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   }
 
   TextEditingController searchInSalesOrdersController = TextEditingController();
-  @override
+
   setSearchInSalesOrdersController(String value) {
     searchInSalesOrdersController.text = value;
     update();
@@ -899,7 +808,6 @@ class SalesOrderController extends SalesOrderControllerAbstract {
 
   List salesOrdersList = [];
   bool isSalesOrderFetched = false;
-  @override
   getAllSalesOrderFromBack() async {
     salesOrdersList = [];
     isSalesOrderFetched = false;
@@ -918,7 +826,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   List salesOrderListPending = [];
   List salesOrderListCC = [];
   List salesOrderListConfirmed = [];
-  @override
+
   getAllSalesOrderFromBackWithoutExcept() async {
     salesOrdersList = [];
     salesOrderListPending = [];
@@ -954,7 +862,9 @@ class SalesOrderController extends SalesOrderControllerAbstract {
       for (int i = 0; i < salesOrdersList.length; i++) {
         var cc = salesOrdersList[i];
 
-        if (cc['status'] == 'confirmed' || cc['status'] == 'pending' || cc['status'] == 'cancelled') {
+        if (cc['status'] == 'confirmed' ||
+            cc['status'] == 'pending' ||
+            cc['status'] == 'cancelled') {
           // Check if this item already exists in SalesOrdersListPending
           bool existsCC = salesOrderListCC.any(
             (element) => element['id'] == cc['id'],
@@ -991,7 +901,6 @@ class SalesOrderController extends SalesOrderControllerAbstract {
     update();
   }
 
-  @override
   setSalesOrders(List value) {
     salesOrdersList = value;
     update();
@@ -1002,7 +911,7 @@ class SalesOrderController extends SalesOrderControllerAbstract {
   List salesPersonListId = [];
   String salesPersonName = '';
   int salesPersonId = 0;
-  @override
+
   getAllUsersSalesPersonFromBack() async {
     salesOrdersList = [];
     isSalesOrderFetched = false;
@@ -1024,26 +933,22 @@ class SalesOrderController extends SalesOrderControllerAbstract {
 
   Map selectedSalesOrderData = {};
   List rowsInListViewInSalesOrderData = [];
-  @override
   setSelectedSalesOrder(Map map) {
     selectedSalesOrderData = map;
     update();
   }
 
-  @override
   resetSalesOrderData() {
     rowsInListViewInSalesOrderData = [];
     selectedSalesOrderData = {};
     update();
   }
 
-  @override
   clearRowsInListViewInSalesOrderData() {
     rowsInListViewInSalesOrderData = [];
     update();
   }
 
-  @override
   addToRowsInListViewInSalesOrderData(List p) {
     rowsInListViewInSalesOrderData = p;
     update();

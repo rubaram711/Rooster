@@ -642,7 +642,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                       widget.isDesktop
                           ? MediaQuery.of(context).size.width * 0.06
                           : 150,
-                )
+                ),
                 //     :
                 // ReusableStatusDropdown(
                 //   options: chanceLevels,
@@ -904,7 +904,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                 //           ? MediaQuery.of(context).size.width * 0.06
                 //           : 150,
                 // )
-                ,
+
                 // MouseRegion(
                 //   cursor: SystemMouseCursors.click,
                 //   child: GestureDetector(
@@ -1192,14 +1192,22 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                 totalPriceAfterDiscount =
                                     totalAllItems - discountOnAllItem;
                                 additionalSpecialDiscount =
-                                    totalPriceAfterDiscount *
-                                    double.parse(
-                                      widget.info['specialDiscount'] ?? '0',
-                                    ) /
-                                    100;
+                                    additionalSpecialDiscount = double.parse(
+                                      widget.info['specialDiscountAmount'] ??
+                                          '0',
+                                    );
                                 totalPriceAfterSpecialDiscount =
-                                    totalPriceAfterDiscount -
-                                    additionalSpecialDiscount;
+                                    double.parse(
+                                      widget.info['totalBeforeVat'] ?? '0',
+                                    ) -
+                                    double.parse(
+                                      widget.info['globalDiscountAmount'] ??
+                                          '0',
+                                    ) -
+                                    double.parse(
+                                      widget.info['specialDiscountAmount'] ??
+                                          '0',
+                                    );
                                 totalPriceAfterSpecialDiscountByQuotationCurrency =
                                     totalPriceAfterSpecialDiscount;
                                 vatByQuotationCurrency =
@@ -1210,16 +1218,20 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                                   await getCompanyVatFromPref(),
                                                 )) /
                                             100;
-                                finalPriceByQuotationCurrency =
-                                    totalPriceAfterSpecialDiscountByQuotationCurrency +
-                                    vatByQuotationCurrency;
+                                finalPriceByQuotationCurrency = double.parse(
+                                  '${widget.info['total'] ?? '0'}',
+                                );
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
                                       return PrintQuotationData(
-                                        termsAndConditions:   widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['terms_and_conditions']}' : '',
+                                        termsAndConditions:
+                                            widget.info['termsAndCondition'] !=
+                                                    null
+                                                ? '${widget.info['termsAndCondition']['terms_and_conditions']}'
+                                                : '',
                                         header: widget.info['companyHeader'],
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
@@ -1262,14 +1274,17 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                         globalDiscount:
                                             widget.info['globalDiscount'] ??
                                             '0.00',
-
+                                        globalDiscountAmount:
+                                            widget
+                                                .info['globalDiscountAmount'] ??
+                                            '0',
                                         totalPriceAfterDiscount:
                                             formatDoubleWithCommas(
                                               totalPriceAfterDiscount,
                                             ),
-                                        additionalSpecialDiscount:
-                                            additionalSpecialDiscount
-                                                .toStringAsFixed(2),
+                                        // additionalSpecialDiscount:
+                                        //     additionalSpecialDiscount
+                                        //         .toStringAsFixed(2),
                                         totalPriceAfterSpecialDiscount:
                                             formatDoubleWithCommas(
                                               totalPriceAfterSpecialDiscount,
@@ -1315,10 +1330,23 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                                 .info['currency']['latest_rate'] ??
                                             '',
                                         clientPhoneNumber:
-                                            widget.info['client'] != null
-                                                ? widget.info['client']['phoneNumber'] ??
-                                                    '---'
-                                                : "---",
+                                            widget.info['client'] == null
+                                                ? "---"
+                                                : widget.info['client']['phoneNumber'] ==
+                                                    null
+                                                ? '---'
+                                                : '${widget.info['client']['phoneCode']}-${widget.info['client']['phoneNumber']}',
+                                        clientMobileNumber:
+                                            widget.info['client'] == null
+                                                ? "---"
+                                                : widget.info['client']['mobileNumber'] ==
+                                                    null
+                                                ? '---'
+                                                : '${widget.info['client']['mobileCode']}-${widget.info['client']['mobileNumber']}',
+                                        clientAddress:widget.info['client'] == null
+                                            ? "---"
+                                            : '${widget.info['client']['city'] != null ? '${widget.info['client']['city']} - ' : ''} '
+                                                '${widget.info['client']['country'] ?? '---'}',
                                         clientName:
                                             widget.info['client']['name'] ?? '',
                                         termsAndConditionsNote:
@@ -1337,357 +1365,396 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               ),
                             ),
                           ),
-                          widget.info['status'] == "pending"?
-                          Tooltip(
-                            message: 'modify'.tr,
-                            child: InkWell(
-                              onTap: () async {
-                                showDialog<String>(
-                                  context: context,
-                                  builder:
-                                      (BuildContext context) => AlertDialog(
-                                        backgroundColor: Colors.white,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(9),
+                          widget.info['status'] == "pending"
+                              ? Tooltip(
+                                message: 'modify'.tr,
+                                child: InkWell(
+                                  onTap: () async {
+                                    showDialog<String>(
+                                      context: context,
+                                      builder:
+                                          (BuildContext context) => AlertDialog(
+                                            backgroundColor: Colors.white,
+                                            shape: const RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(9),
+                                              ),
+                                            ),
+                                            elevation: 0,
+                                            content: UpdateQuotationDialog(
+                                              index: widget.index,
+                                              info: deepCloneMap(widget.info),
+                                              fromPage: 'pendingDocs',
+                                            ),
+                                            // content: UpdateQuotationInPendingDocs(
+                                            //   index: widget.index,
+                                            //   info: widget.info,
+                                            // ),
                                           ),
-                                        ),
-                                        elevation: 0,
-                                        content: UpdateQuotationDialog(
-                                          index: widget.index,
-                                          info: deepCloneMap(widget.info),
-                                          fromPage: 'pendingDocs',
-                                        ),
-                                        // content: UpdateQuotationInPendingDocs(
-                                        //   index: widget.index,
-                                        //   info: widget.info,
-                                        // ),
-                                      ),
-                                );
-                              },
-                              child: Icon(
-                                Icons.edit,
-                                color: Primary.primary,
-                                size: 21.sp,
-                              ),
-                            ),
-                          ):SizedBox.shrink(),
-                          widget.info['status']=='confirmed'
-                              ?SizedBox.shrink()
-                              :
-                          Tooltip(
-                            message: 'confirm'.tr,
-                            child: InkWell(
-                              onTap: () async {
-                                //update from back
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.edit,
+                                    color: Primary.primary,
+                                    size: 21.sp,
+                                  ),
+                                ),
+                              )
+                              : SizedBox.shrink(),
+                          widget.info['status'] == 'confirmed'
+                              ? SizedBox.shrink()
+                              : Tooltip(
+                                message: 'confirm'.tr,
+                                child: InkWell(
+                                  onTap: () async {
+                                    //update from back
 
-                                Map<int, Map<String, dynamic>> orderLines1 = {};
-                                List<int> orderedKeys = [];
-                                Map<int, dynamic> orderLinesMap = {
-                                  for (
-                                    int i = 0;
-                                    i < widget.info['orderLines'].length;
-                                    i++
-                                  )
-                                    (i + 1): widget.info['orderLines'][i],
-                                };
+                                    Map<int, Map<String, dynamic>> orderLines1 =
+                                        {};
+                                    List<int> orderedKeys = [];
+                                    Map<int, dynamic> orderLinesMap = {
+                                      for (
+                                        int i = 0;
+                                        i < widget.info['orderLines'].length;
+                                        i++
+                                      )
+                                        (i + 1): widget.info['orderLines'][i],
+                                    };
 
-                                for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i + 1);
-                                  Map<String, dynamic> selectedOrderLine =
-                                      orderLinesMap[i + 1];
-                                  orderLines1[i + 1] = {};
-                                  if (selectedOrderLine['line_type_id'] == 1) {
-                                    // Map the fields you want to copy from selectedOrderLine to orderLines1
+                                    for (
+                                      int i = 0;
+                                      i < orderLinesMap.length;
+                                      i++
+                                    ) {
+                                      orderedKeys.add(i + 1);
+                                      Map<String, dynamic> selectedOrderLine =
+                                          orderLinesMap[i + 1];
+                                      orderLines1[i + 1] = {};
+                                      if (selectedOrderLine['line_type_id'] ==
+                                          1) {
+                                        // Map the fields you want to copy from selectedOrderLine to orderLines1
 
-                                    orderLines1[i + 1]!['line_type_id'] =
-                                        selectedOrderLine['line_type_id']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_id'] = '';
+                                        orderLines1[i + 1]!['line_type_id'] =
+                                            selectedOrderLine['line_type_id']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_id'] = '';
 
-                                    orderLines1[i + 1]!['itemName'] = '';
-                                    orderLines1[i + 1]!['item_main_code'] = '';
-                                    orderLines1[i + 1]!['item_discount'] = '0';
-                                    orderLines1[i + 1]!['item_description'] =
-                                        '';
-                                    orderLines1[i + 1]!['item_quantity'] = '0';
+                                        orderLines1[i + 1]!['itemName'] = '';
+                                        orderLines1[i + 1]!['item_main_code'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_discount'] =
+                                            '0';
+                                        orderLines1[i +
+                                                1]!['item_description'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_quantity'] =
+                                            '0';
 
-                                    orderLines1[i + 1]!['item_unit_price'] =
-                                        '0';
-                                    orderLines1[i + 1]!['item_total'] = '0';
-                                    orderLines1[i + 1]!['title'] =
-                                        selectedOrderLine['title'] ?? '';
-                                    orderLines1[i + 1]!['note'] = '';
-                                    orderLines1[i + 1]!['combo'] = '';
-                                    // Add more fields as needed
-                                  }
-                                  if (selectedOrderLine['line_type_id'] == 2) {
-                                    // Map the fields you want to copy from selectedOrderLine to orderLines1
+                                        orderLines1[i + 1]!['item_unit_price'] =
+                                            '0';
+                                        orderLines1[i + 1]!['item_total'] = '0';
+                                        orderLines1[i + 1]!['title'] =
+                                            selectedOrderLine['title'] ?? '';
+                                        orderLines1[i + 1]!['note'] = '';
+                                        orderLines1[i + 1]!['combo'] = '';
+                                        // Add more fields as needed
+                                      }
+                                      if (selectedOrderLine['line_type_id'] ==
+                                          2) {
+                                        // Map the fields you want to copy from selectedOrderLine to orderLines1
 
-                                    orderLines1[i + 1]!['line_type_id'] =
-                                        selectedOrderLine['line_type_id']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_id'] =
-                                        selectedOrderLine['item_id']
-                                            ?.toString() ??
-                                        '';
+                                        orderLines1[i + 1]!['line_type_id'] =
+                                            selectedOrderLine['line_type_id']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_id'] =
+                                            selectedOrderLine['item_id']
+                                                ?.toString() ??
+                                            '';
 
-                                    orderLines1[i + 1]!['itemName'] =
-                                        selectedOrderLine['item_name'] ?? '';
-                                    orderLines1[i + 1]!['item_main_code'] =
-                                        selectedOrderLine['item_main_code'] ??
-                                        '';
-                                    orderLines1[i + 1]!['item_discount'] =
-                                        selectedOrderLine['item_discount']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_description'] =
-                                        selectedOrderLine['item_description'] ??
-                                        '';
-                                    orderLines1[i + 1]!['item_quantity'] =
-                                        selectedOrderLine['item_quantity']
-                                            ?.toString() ??
-                                        '';
+                                        orderLines1[i + 1]!['itemName'] =
+                                            selectedOrderLine['item_name'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_main_code'] =
+                                            selectedOrderLine['item_main_code'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_discount'] =
+                                            selectedOrderLine['item_discount']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i +
+                                                1]!['item_description'] =
+                                            selectedOrderLine['item_description'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_quantity'] =
+                                            selectedOrderLine['item_quantity']
+                                                ?.toString() ??
+                                            '';
 
-                                    orderLines1[i + 1]!['item_unit_price'] =
-                                        selectedOrderLine['item_unit_price']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_total'] =
-                                        selectedOrderLine['item_total']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['title'] =
-                                        selectedOrderLine['title'] ?? '';
-                                    orderLines1[i + 1]!['note'] =
-                                        selectedOrderLine['note'] ?? '';
-                                    orderLines1[i + 1]!['combo'] = '';
-                                    // Add more fields as needed
-                                  }
-                                  if (selectedOrderLine['line_type_id'] == 3) {
-                                    // Map the fields you want to copy from selectedOrderLine to orderLines1
-                                    orderLines1[i + 1]!['line_type_id'] =
-                                        selectedOrderLine['line_type_id']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_id'] = '';
+                                        orderLines1[i + 1]!['item_unit_price'] =
+                                            selectedOrderLine['item_unit_price']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_total'] =
+                                            selectedOrderLine['item_total']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['title'] =
+                                            selectedOrderLine['title'] ?? '';
+                                        orderLines1[i + 1]!['note'] =
+                                            selectedOrderLine['note'] ?? '';
+                                        orderLines1[i + 1]!['combo'] = '';
+                                        // Add more fields as needed
+                                      }
+                                      if (selectedOrderLine['line_type_id'] ==
+                                          3) {
+                                        // Map the fields you want to copy from selectedOrderLine to orderLines1
+                                        orderLines1[i + 1]!['line_type_id'] =
+                                            selectedOrderLine['line_type_id']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_id'] = '';
 
-                                    orderLines1[i + 1]!['itemName'] =
-                                        selectedOrderLine['combo_name'] ?? '';
-                                    orderLines1[i + 1]!['item_main_code'] =
-                                        selectedOrderLine['combo_code'] ?? '';
-                                    orderLines1[i + 1]!['item_discount'] =
-                                        selectedOrderLine['combo_discount']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_description'] =
-                                        selectedOrderLine['combo_description'] ??
-                                        '';
-                                    orderLines1[i + 1]!['item_quantity'] =
-                                        selectedOrderLine['combo_quantity']
-                                            ?.toString() ??
-                                        '';
+                                        orderLines1[i + 1]!['itemName'] =
+                                            selectedOrderLine['combo_name'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_main_code'] =
+                                            selectedOrderLine['combo_code'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_discount'] =
+                                            selectedOrderLine['combo_discount']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i +
+                                                1]!['item_description'] =
+                                            selectedOrderLine['combo_description'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_quantity'] =
+                                            selectedOrderLine['combo_quantity']
+                                                ?.toString() ??
+                                            '';
 
-                                    orderLines1[i + 1]!['item_unit_price'] =
-                                        selectedOrderLine['combo_unit_price']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_total'] =
-                                        selectedOrderLine['combo_total']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['title'] =
-                                        selectedOrderLine['title'] ?? '';
-                                    orderLines1[i + 1]!['note'] =
-                                        selectedOrderLine['note'] ?? '';
-                                    orderLines1[i + 1]!['combo'] =
-                                        selectedOrderLine['combo_id']
-                                            ?.toString() ??
-                                        '';
-                                    // Add more fields as needed
-                                  }
-                                  if (selectedOrderLine['line_type_id'] == 4) {
-                                    // Map the fields you want to copy from selectedOrderLine to orderLines1
+                                        orderLines1[i + 1]!['item_unit_price'] =
+                                            selectedOrderLine['combo_unit_price']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_total'] =
+                                            selectedOrderLine['combo_total']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['title'] =
+                                            selectedOrderLine['title'] ?? '';
+                                        orderLines1[i + 1]!['note'] =
+                                            selectedOrderLine['note'] ?? '';
+                                        orderLines1[i + 1]!['combo'] =
+                                            selectedOrderLine['combo_id']
+                                                ?.toString() ??
+                                            '';
+                                        // Add more fields as needed
+                                      }
+                                      if (selectedOrderLine['line_type_id'] ==
+                                          4) {
+                                        // Map the fields you want to copy from selectedOrderLine to orderLines1
 
-                                    orderLines1[i + 1]!['line_type_id'] =
-                                        selectedOrderLine['line_type_id']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_id'] = '';
+                                        orderLines1[i + 1]!['line_type_id'] =
+                                            selectedOrderLine['line_type_id']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_id'] = '';
 
-                                    orderLines1[i + 1]!['itemName'] = '';
-                                    orderLines1[i + 1]!['item_main_code'] = '';
-                                    orderLines1[i + 1]!['item_discount'] = '0';
-                                    orderLines1[i + 1]!['item_description'] =
-                                        '';
-                                    orderLines1[i + 1]!['item_quantity'] = '0';
+                                        orderLines1[i + 1]!['itemName'] = '';
+                                        orderLines1[i + 1]!['item_main_code'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_discount'] =
+                                            '0';
+                                        orderLines1[i +
+                                                1]!['item_description'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_quantity'] =
+                                            '0';
 
-                                    orderLines1[i + 1]!['item_unit_price'] =
-                                        '0';
-                                    orderLines1[i + 1]!['item_total'] = '0';
-                                    orderLines1[i + 1]!['title'] = '';
-                                    orderLines1[i + 1]!['note'] = '';
-                                    if (selectedOrderLine['image'] != null &&
-                                        selectedOrderLine['image'].isNotEmpty) {
-                                      try {
-                                        final response = await http.get(
-                                          Uri.parse(
-                                            '$baseImage${selectedOrderLine['image']}',
-                                          ),
-                                        );
+                                        orderLines1[i + 1]!['item_unit_price'] =
+                                            '0';
+                                        orderLines1[i + 1]!['item_total'] = '0';
+                                        orderLines1[i + 1]!['title'] = '';
+                                        orderLines1[i + 1]!['note'] = '';
+                                        if (selectedOrderLine['image'] !=
+                                                null &&
+                                            selectedOrderLine['image']
+                                                .isNotEmpty) {
+                                          try {
+                                            final response = await http.get(
+                                              Uri.parse(
+                                                '$baseImage${selectedOrderLine['image']}',
+                                              ),
+                                            );
 
-                                        if (response.statusCode == 200) {
-                                          imageFile = response.bodyBytes;
+                                            if (response.statusCode == 200) {
+                                              imageFile = response.bodyBytes;
+                                            } else {
+                                              imageFile = Uint8List(
+                                                0,
+                                              ); // Set to empty if loading fails
+                                            }
+                                          } catch (e) {
+                                            imageFile = Uint8List(
+                                              0,
+                                            ); // Set to empty if loading fails
+                                          }
                                         } else {
                                           imageFile = Uint8List(
                                             0,
-                                          ); // Set to empty if loading fails
+                                          ); // Set to empty if no image URL
                                         }
-                                      } catch (e) {
-                                        imageFile = Uint8List(
-                                          0,
-                                        ); // Set to empty if loading fails
+                                        orderLines1[i + 1]!['image'] =
+                                            imageFile;
+                                        // Add more fields as needed
                                       }
-                                    } else {
-                                      imageFile = Uint8List(
-                                        0,
-                                      ); // Set to empty if no image URL
+                                      if (selectedOrderLine['line_type_id'] ==
+                                          5) {
+                                        // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                                        orderLines1[i + 1]!['line_type_id'] =
+                                            selectedOrderLine['line_type_id']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_id'] = '';
+
+                                        orderLines1[i + 1]!['itemName'] = '';
+                                        orderLines1[i + 1]!['item_main_code'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_discount'] =
+                                            '0';
+                                        orderLines1[i +
+                                                1]!['item_description'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_quantity'] =
+                                            '0';
+
+                                        orderLines1[i + 1]!['item_unit_price'] =
+                                            '0';
+                                        orderLines1[i + 1]!['item_total'] = '0';
+                                        orderLines1[i + 1]!['title'] = '';
+                                        orderLines1[i + 1]!['note'] =
+                                            selectedOrderLine['note'] ?? '';
+                                        orderLines1[i + 1]!['combo'] = '';
+                                        // Add more fields as needed
+                                      }
                                     }
-                                    orderLines1[i + 1]!['image'] = imageFile;
-                                    // Add more fields as needed
-                                  }
-                                  if (selectedOrderLine['line_type_id'] == 5) {
-                                    // Map the fields you want to copy from selectedOrderLine to orderLines1
 
-                                    orderLines1[i + 1]!['line_type_id'] =
-                                        selectedOrderLine['line_type_id']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_id'] = '';
+                                    String cashMethodId = '';
+                                    String clientId = '';
+                                    String pricelistId = '';
+                                    String salespersonId = ' ';
+                                    String commissionMethodId = '';
+                                    String currencyId = ' ';
 
-                                    orderLines1[i + 1]!['itemName'] = '';
-                                    orderLines1[i + 1]!['item_main_code'] = '';
-                                    orderLines1[i + 1]!['item_discount'] = '0';
-                                    orderLines1[i + 1]!['item_description'] =
-                                        '';
-                                    orderLines1[i + 1]!['item_quantity'] = '0';
+                                    if (widget.info['cashingMethod'] != null) {
+                                      cashMethodId =
+                                          '${widget.info['cashingMethod']['id']}';
+                                    }
+                                    if (widget.info['commissionMethod'] !=
+                                        null) {
+                                      commissionMethodId =
+                                          '${widget.info['commissionMethod']['id']}';
+                                    }
+                                    if (widget.info['currency'] != null) {
+                                      currencyId =
+                                          '${widget.info['currency']['id']}';
+                                    }
+                                    if (widget.info['client'] != null) {
+                                      clientId =
+                                          widget.info['client']['id']
+                                              .toString();
+                                    } else {}
+                                    if (widget.info['pricelist'] != null) {
+                                      pricelistId =
+                                          widget.info['pricelist']['id']
+                                              .toString();
+                                    }
+                                    if (widget.info['salesperson'] != null) {
+                                      salespersonId =
+                                          widget.info['salesperson']['id']
+                                              .toString();
+                                    }
 
-                                    orderLines1[i + 1]!['item_unit_price'] =
-                                        '0';
-                                    orderLines1[i + 1]!['item_total'] = '0';
-                                    orderLines1[i + 1]!['title'] = '';
-                                    orderLines1[i + 1]!['note'] =
-                                        selectedOrderLine['note'] ?? '';
-                                    orderLines1[i + 1]!['combo'] = '';
-                                    // Add more fields as needed
-                                  }
-                                }
+                                    var res = await updateQuotation(
+                                      '${widget.info['id']}',
+                                      // false,
+                                      '${widget.info['reference'] ?? ''}',
+                                      clientId,
 
-                                String cashMethodId = '';
-                                String clientId = '';
-                                String pricelistId = '';
-                                String salespersonId = ' ';
-                                String commissionMethodId = '';
-                                String currencyId = ' ';
+                                      '${widget.info['validity'] ?? ''}',
+                                      '${widget.info['inputDate'] ?? ''}',
+                                      widget.info['paymentTerm'] != null
+                                          ? '${widget.info['paymentTerm']['id']}'
+                                          : '',
+                                      pricelistId,
+                                      currencyId,
+                                      '${widget.info['termsAndConditions']}',
+                                      salespersonId,
+                                      commissionMethodId,
+                                      cashMethodId,
+                                      '${widget.info['commissionRate'] ?? ''}',
+                                      '${widget.info['commissionTotal'] ?? ''}',
+                                      '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                                      '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                                      '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                                      '${widget.info['globalDiscountAmount'] ?? ''}',
+                                      '${widget.info['globalDiscount'] ?? ''}',
+                                      '${widget.info['vat'] ?? ''}', //vat
+                                      '${widget.info['vatLebanese'] ?? ''}',
+                                      '${widget.info['total'] ?? ''}',
+                                      '${widget.info['vatExempt'] ?? ''}',
+                                      '${widget.info['notPrinted'] ?? ''}',
+                                      '${widget.info['printedAsVatExempt'] ?? ''}',
+                                      '${widget.info['printedAsPercentage'] ?? ''}',
+                                      '${widget.info['vatInclusivePrices'] ?? ''}',
+                                      '${widget.info['beforeVatPrices'] ?? ''}',
 
-                                if (widget.info['cashingMethod'] != null) {
-                                  cashMethodId =
-                                      '${widget.info['cashingMethod']['id']}';
-                                }
-                                if (widget.info['commissionMethod'] != null) {
-                                  commissionMethodId =
-                                      '${widget.info['commissionMethod']['id']}';
-                                }
-                                if (widget.info['currency'] != null) {
-                                  currencyId =
-                                      '${widget.info['currency']['id']}';
-                                }
-                                if (widget.info['client'] != null) {
-                                  clientId =
-                                      widget.info['client']['id'].toString();
-                                } else {}
-                                if (widget.info['pricelist'] != null) {
-                                  pricelistId =
-                                      widget.info['pricelist']['id'].toString();
-                                }
-                                if (widget.info['salesperson'] != null) {
-                                  salespersonId =
-                                      widget.info['salesperson']['id']
-                                          .toString();
-                                }
+                                      '${widget.info['code'] ?? ''}',
+                                      'confirmed', // status,
 
-                                var res = await updateQuotation(
-                                  '${widget.info['id']}',
-                                  // false,
-                                  '${widget.info['reference'] ?? ''}',
-                                  clientId,
-
-                                  '${widget.info['validity'] ?? ''}',
-                                  '${widget.info['inputDate'] ?? ''}',
-                                    widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
-                                  pricelistId,
-                                  currencyId,
-                                  '${widget.info['termsAndConditions']}',
-                                  salespersonId,
-                                  commissionMethodId,
-                                  cashMethodId,
-                                  '${widget.info['commissionRate'] ?? ''}',
-                                  '${widget.info['commissionTotal'] ?? ''}',
-                                  '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
-                                  '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
-                                  '${widget.info['specialDiscount'] ?? '0'}', // calculated
-                                  '${widget.info['globalDiscountAmount'] ?? ''}',
-                                  '${widget.info['globalDiscount'] ?? ''}',
-                                  '${widget.info['vat'] ?? ''}', //vat
-                                  '${widget.info['vatLebanese'] ?? ''}',
-                                  '${widget.info['total'] ?? ''}',
-                                  '${widget.info['vatExempt'] ?? ''}',
-                                  '${widget.info['notPrinted'] ?? ''}',
-                                  '${widget.info['printedAsVatExempt'] ?? ''}',
-                                  '${widget.info['printedAsPercentage'] ?? ''}',
-                                  '${widget.info['vatInclusivePrices'] ?? ''}',
-                                  '${widget.info['beforeVatPrices'] ?? ''}',
-
-                                  '${widget.info['code'] ?? ''}',
-                                  'confirmed', // status,
-
-                                  orderLines1,
-                                  orderedKeys,
-                                  '',
-                                    widget.info['deliveryTerm']!=null ?'${widget.info['deliveryTerm']['id']}' : '',
-                                  widget.info['chance'] ?? '',
-                                  widget.info['companyHeader'] != null ||
-                                          '${widget.info['companyHeader']}' !=
-                                              '[]'
-                                      ? '${widget.info['companyHeader']['id']}'
-                                      : '',
-                                    widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['id']}' : ''
-                                );
-                                if (res['success'] == true) {
-                                  quotationController
-                                      .getAllQuotationsFromBack();
-                                  homeController.selectedTab.value =
-                                      "to_sales_order";
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
-                                  );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
-                                }
-                              },
-                              child: Icon(
-                                Icons.check,
-                                color: Primary.primary,
-                                size: 21.sp,
+                                      orderLines1,
+                                      orderedKeys,
+                                      '',
+                                      widget.info['deliveryTerm'] != null
+                                          ? '${widget.info['deliveryTerm']['id']}'
+                                          : '',
+                                      widget.info['chance'] ?? '',
+                                      widget.info['companyHeader'] != null ||
+                                              '${widget.info['companyHeader']}' !=
+                                                  '[]'
+                                          ? '${widget.info['companyHeader']['id']}'
+                                          : '',
+                                      widget.info['termsAndCondition'] != null
+                                          ? '${widget.info['termsAndCondition']['id']}'
+                                          : '',
+                                    );
+                                    if (res['success'] == true) {
+                                      quotationController
+                                          .getAllQuotationsFromBack();
+                                      homeController.selectedTab.value =
+                                          "to_sales_order";
+                                      CommonWidgets.snackBar(
+                                        'Success',
+                                        res['message'],
+                                      );
+                                    } else {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        res['message'],
+                                      );
+                                    }
+                                  },
+                                  child: Icon(
+                                    Icons.check,
+                                    color: Primary.primary,
+                                    size: 21.sp,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
                           Tooltip(
                             message: 'send'.tr,
                             child: InkWell(
@@ -1906,7 +1973,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   '${widget.info['validity'] ?? ''}',
                                   '${widget.info['inputDate'] ?? ''}',
 
-                                    widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
+                                  widget.info['paymentTerm'] != null
+                                      ? '${widget.info['paymentTerm']['id']}'
+                                      : '',
                                   pricelistId,
                                   currencyId,
                                   '${widget.info['termsAndConditions']}',
@@ -1936,14 +2005,18 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   orderLines1,
                                   orderedKeys,
                                   '',
-                                  widget.info['deliveryTerm']!=null ?'${widget.info['deliveryTerm']['id']}' : '',
+                                  widget.info['deliveryTerm'] != null
+                                      ? '${widget.info['deliveryTerm']['id']}'
+                                      : '',
                                   widget.info['chance'] ?? '',
                                   widget.info['companyHeader'] != null ||
                                           '${widget.info['companyHeader']}' !=
                                               '[]'
                                       ? '${widget.info['companyHeader']['id']}'
                                       : '',
-                                  widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['id']}' : ''
+                                  widget.info['termsAndCondition'] != null
+                                      ? '${widget.info['termsAndCondition']['id']}'
+                                      : '',
                                 );
                                 if (res['success'] == true) {
                                   quotationController
@@ -2198,7 +2271,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                               '${widget.info['validity'] ?? ''}',
                                               '${widget.info['inputDate'] ?? ''}',
 
-                                              widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
+                                              widget.info['paymentTerm'] != null
+                                                  ? '${widget.info['paymentTerm']['id']}'
+                                                  : '',
                                               pricelistId,
                                               currencyId,
                                               '${widget.info['termsAndConditions']}',
@@ -2228,7 +2303,10 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                               orderLines1,
                                               orderedKeys,
                                               cancelledReason,
-                                              widget.info['deliveryTerm']!=null ?'${widget.info['deliveryTerm']['id']}' : '',
+                                              widget.info['deliveryTerm'] !=
+                                                      null
+                                                  ? '${widget.info['deliveryTerm']['id']}'
+                                                  : '',
                                               widget.info['chance'] ?? '',
                                               widget.info['companyHeader'] !=
                                                           null ||
@@ -2236,7 +2314,10 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                                           '[]'
                                                   ? '${widget.info['companyHeader']['id']}'
                                                   : '',
-                                             widget.info['termsAndCondition']!=null ?'${widget.info['termsAndCondition']['id']}' : ''
+                                              widget.info['termsAndCondition'] !=
+                                                      null
+                                                  ? '${widget.info['termsAndCondition']['id']}'
+                                                  : '',
                                             );
                                             if (res['success'] == true) {
                                               Get.back();
@@ -3250,7 +3331,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
                                       return PrintSalesOrder(
                                         fromPage: 'pendingDocs',
-                                        vat: salesOrderController.vat11,
+                                        vat: widget.info['vat'] ?? '',
                                         quotationNumber: quotNumber,
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
@@ -3288,14 +3369,17 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                         globalDiscount:
                                             widget.info['globalDiscount'] ??
                                             '0',
-
+                                        globalDiscountAmount:
+                                        widget
+                                            .info['globalDiscountAmount'] ??
+                                            '0',
                                         totalPriceAfterDiscount:
                                             formatDoubleWithCommas(
                                               totalPriceAfterDiscount,
                                             ),
-                                        additionalSpecialDiscount:
-                                            additionalSpecialDiscount
-                                                .toStringAsFixed(2),
+                                        // additionalSpecialDiscount:
+                                        //     additionalSpecialDiscount
+                                        //         .toStringAsFixed(2),
                                         totalPriceAfterSpecialDiscount:
                                             formatDoubleWithCommas(
                                               totalPriceAfterSpecialDiscount,
@@ -3341,10 +3425,23 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                                 .info['currency']['latest_rate'] ??
                                             '',
                                         clientPhoneNumber:
-                                            widget.info['client'] != null
-                                                ? widget.info['client']['phoneNumber'] ??
-                                                    '---'
-                                                : "---",
+                                        widget.info['client'] == null
+                                            ? "---"
+                                            : widget.info['client']['phoneNumber'] ==
+                                            null
+                                            ? '---'
+                                            : '${widget.info['client']['phoneCode']}-${widget.info['client']['phoneNumber']}',
+                                        clientMobileNumber:
+                                        widget.info['client'] == null
+                                            ? "---"
+                                            : widget.info['client']['mobileNumber'] ==
+                                            null
+                                            ? '---'
+                                            : '${widget.info['client']['mobileCode']}-${widget.info['client']['mobileNumber']}',
+                                        clientAddress:widget.info['client'] == null
+                                            ? "---"
+                                            : '${widget.info['client']['city'] != null ? '${widget.info['client']['city']} - ' : ''} '
+                                            '${widget.info['client']['country'] ?? '---'}',
                                         clientName:
                                             widget.info['client']['name'] ?? '',
                                         termsAndConditions:
@@ -3363,334 +3460,376 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               ),
                             ),
                           ),
-                          widget.info['status'] == "pending"?
-                          Tooltip(
-                            message: 'modify'.tr,
-                            child: InkWell(
-                              onTap: () async {
-                                showDialog<String>(
-                                  context: context,
-                                  builder:
-                                      (BuildContext context) => AlertDialog(
-                                        backgroundColor: Colors.white,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(9),
+                          widget.info['status'] == "pending"
+                              ? Tooltip(
+                                message: 'modify'.tr,
+                                child: InkWell(
+                                  onTap: () async {
+                                    showDialog<String>(
+                                      context: context,
+                                      builder:
+                                          (BuildContext context) => AlertDialog(
+                                            backgroundColor: Colors.white,
+                                            shape: const RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(9),
+                                              ),
+                                            ),
+                                            elevation: 0,
+                                            content: UpdateSalesOrderDialog(
+                                              index: widget.index,
+                                              info: deepCloneMap(widget.info),
+                                              fromPage: 'pendingDocs',
+                                            ),
+                                            // content: UpdateSalesOrderInPendingDocs(
+                                            //   index: widget.index,
+                                            //   info: widget.info,
+                                            // ),
                                           ),
-                                        ),
-                                        elevation: 0,
-                                        content: UpdateSalesOrderDialog(
-                                          index: widget.index,
-                                          info: deepCloneMap(widget.info),
-                                          fromPage: 'pendingDocs',
-                                        ),
-                                        // content: UpdateSalesOrderInPendingDocs(
-                                        //   index: widget.index,
-                                        //   info: widget.info,
-                                        // ),
-                                      ),
-                                );
-                              },
-                              child: Icon(
-                                Icons.edit,
-                                color: Primary.primary,
-                                size: 21.sp,
-                              ),
-                            ),
-                          ):SizedBox.shrink(),
-                          widget.info['status']=='confirmed'
-                              ?SizedBox.shrink()
-                              :
-                          Tooltip(
-                            message: 'confirm'.tr,
-                            child: InkWell(
-                              onTap: () async {
-                                Map<int, Map<String, dynamic>> orderLines1 = {};
-                                List<int> orderedKeys = [];
-                                Map<int, dynamic> orderLinesMap = {
-                                  for (
-                                    int i = 0;
-                                    i < widget.info['orderLines'].length;
-                                    i++
-                                  )
-                                    (i + 1): widget.info['orderLines'][i],
-                                };
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.edit,
+                                    color: Primary.primary,
+                                    size: 21.sp,
+                                  ),
+                                ),
+                              )
+                              : SizedBox.shrink(),
+                          widget.info['status'] == 'confirmed'
+                              ? SizedBox.shrink()
+                              : Tooltip(
+                                message: 'confirm'.tr,
+                                child: InkWell(
+                                  onTap: () async {
+                                    Map<int, Map<String, dynamic>> orderLines1 =
+                                        {};
+                                    List<int> orderedKeys = [];
+                                    Map<int, dynamic> orderLinesMap = {
+                                      for (
+                                        int i = 0;
+                                        i < widget.info['orderLines'].length;
+                                        i++
+                                      )
+                                        (i + 1): widget.info['orderLines'][i],
+                                    };
 
-                                for (int i = 0; i < orderLinesMap.length; i++) {
-                                  orderedKeys.add(i + 1);
-                                  Map<String, dynamic> selectedOrderLine =
-                                      orderLinesMap[i + 1];
-                                  orderLines1[i + 1] = {};
-                                  if (selectedOrderLine['line_type_id'] == 1) {
-                                    // Map the fields you want to copy from selectedOrderLine to orderLines1
+                                    for (
+                                      int i = 0;
+                                      i < orderLinesMap.length;
+                                      i++
+                                    ) {
+                                      orderedKeys.add(i + 1);
+                                      Map<String, dynamic> selectedOrderLine =
+                                          orderLinesMap[i + 1];
+                                      orderLines1[i + 1] = {};
+                                      if (selectedOrderLine['line_type_id'] ==
+                                          1) {
+                                        // Map the fields you want to copy from selectedOrderLine to orderLines1
 
-                                    orderLines1[i + 1]!['line_type_id'] =
-                                        selectedOrderLine['line_type_id']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_id'] = '';
+                                        orderLines1[i + 1]!['line_type_id'] =
+                                            selectedOrderLine['line_type_id']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_id'] = '';
 
-                                    orderLines1[i + 1]!['itemName'] = '';
-                                    orderLines1[i + 1]!['item_main_code'] = '';
-                                    orderLines1[i + 1]!['item_discount'] = '0';
-                                    orderLines1[i + 1]!['item_description'] =
-                                        '';
-                                    orderLines1[i + 1]!['item_quantity'] = '0';
-                                    orderLines1[i + 1]!['item_warehouseId'] =
-                                        '';
-                                    orderLines1[i + 1]!['combo_warehouseId'] =
-                                        '';
-                                    orderLines1[i + 1]!['item_unit_price'] =
-                                        '0';
-                                    orderLines1[i + 1]!['item_total'] = '0';
-                                    orderLines1[i + 1]!['title'] =
-                                        selectedOrderLine['title'] ?? '';
-                                    orderLines1[i + 1]!['note'] = '';
-                                    orderLines1[i + 1]!['combo'] = '';
-                                    // Add more fields as needed
-                                  }
-                                  if (selectedOrderLine['line_type_id'] == 2) {
-                                    // Map the fields you want to copy from selectedOrderLine to orderLines1
+                                        orderLines1[i + 1]!['itemName'] = '';
+                                        orderLines1[i + 1]!['item_main_code'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_discount'] =
+                                            '0';
+                                        orderLines1[i +
+                                                1]!['item_description'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_quantity'] =
+                                            '0';
+                                        orderLines1[i +
+                                                1]!['item_warehouseId'] =
+                                            '';
+                                        orderLines1[i +
+                                                1]!['combo_warehouseId'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_unit_price'] =
+                                            '0';
+                                        orderLines1[i + 1]!['item_total'] = '0';
+                                        orderLines1[i + 1]!['title'] =
+                                            selectedOrderLine['title'] ?? '';
+                                        orderLines1[i + 1]!['note'] = '';
+                                        orderLines1[i + 1]!['combo'] = '';
+                                        // Add more fields as needed
+                                      }
+                                      if (selectedOrderLine['line_type_id'] ==
+                                          2) {
+                                        // Map the fields you want to copy from selectedOrderLine to orderLines1
 
-                                    orderLines1[i + 1]!['line_type_id'] =
-                                        selectedOrderLine['line_type_id']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_id'] =
-                                        selectedOrderLine['item_id']
-                                            ?.toString() ??
-                                        '';
+                                        orderLines1[i + 1]!['line_type_id'] =
+                                            selectedOrderLine['line_type_id']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_id'] =
+                                            selectedOrderLine['item_id']
+                                                ?.toString() ??
+                                            '';
 
-                                    orderLines1[i + 1]!['itemName'] =
-                                        selectedOrderLine['item_name'] ?? '';
-                                    orderLines1[i + 1]!['item_main_code'] =
-                                        selectedOrderLine['item_main_code'] ??
-                                        '';
-                                    orderLines1[i + 1]!['item_discount'] =
-                                        selectedOrderLine['item_discount']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_description'] =
-                                        selectedOrderLine['item_description'] ??
-                                        '';
-                                    orderLines1[i + 1]!['item_quantity'] =
-                                        selectedOrderLine['item_quantity']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_warehouseId'] =
-                                        selectedOrderLine['item_warehouse_id']
-                                            ?.toString() ??
-                                        '10';
-                                    orderLines1[i + 1]!['combo_warehouseId'] =
-                                        '';
-                                    orderLines1[i + 1]!['item_unit_price'] =
-                                        selectedOrderLine['item_unit_price']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_total'] =
-                                        selectedOrderLine['item_total']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['title'] =
-                                        selectedOrderLine['title'] ?? '';
-                                    orderLines1[i + 1]!['note'] =
-                                        selectedOrderLine['note'] ?? '';
-                                    orderLines1[i + 1]!['combo'] = '';
-                                    // Add more fields as needed
-                                  }
-                                  if (selectedOrderLine['line_type_id'] == 3) {
-                                    // Map the fields you want to copy from selectedOrderLine to orderLines1
-                                    orderLines1[i + 1]!['line_type_id'] =
-                                        selectedOrderLine['line_type_id']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_id'] = '';
+                                        orderLines1[i + 1]!['itemName'] =
+                                            selectedOrderLine['item_name'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_main_code'] =
+                                            selectedOrderLine['item_main_code'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_discount'] =
+                                            selectedOrderLine['item_discount']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i +
+                                                1]!['item_description'] =
+                                            selectedOrderLine['item_description'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_quantity'] =
+                                            selectedOrderLine['item_quantity']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i +
+                                                1]!['item_warehouseId'] =
+                                            selectedOrderLine['item_warehouse_id']
+                                                ?.toString() ??
+                                            '10';
+                                        orderLines1[i +
+                                                1]!['combo_warehouseId'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_unit_price'] =
+                                            selectedOrderLine['item_unit_price']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_total'] =
+                                            selectedOrderLine['item_total']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['title'] =
+                                            selectedOrderLine['title'] ?? '';
+                                        orderLines1[i + 1]!['note'] =
+                                            selectedOrderLine['note'] ?? '';
+                                        orderLines1[i + 1]!['combo'] = '';
+                                        // Add more fields as needed
+                                      }
+                                      if (selectedOrderLine['line_type_id'] ==
+                                          3) {
+                                        // Map the fields you want to copy from selectedOrderLine to orderLines1
+                                        orderLines1[i + 1]!['line_type_id'] =
+                                            selectedOrderLine['line_type_id']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_id'] = '';
 
-                                    orderLines1[i + 1]!['itemName'] =
-                                        selectedOrderLine['combo_name'] ?? '';
-                                    orderLines1[i + 1]!['item_main_code'] =
-                                        selectedOrderLine['combo_code'] ?? '';
-                                    orderLines1[i + 1]!['item_discount'] =
-                                        selectedOrderLine['combo_discount']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_description'] =
-                                        selectedOrderLine['combo_description'] ??
-                                        '';
-                                    orderLines1[i + 1]!['item_quantity'] =
-                                        selectedOrderLine['combo_quantity']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_warehouseId'] =
-                                        '';
-                                    orderLines1[i + 1]!['combo_warehouseId'] =
-                                        selectedOrderLine['combo_warehouse_id']
-                                            ?.toString() ??
-                                        '10';
-                                    orderLines1[i + 1]!['item_unit_price'] =
-                                        selectedOrderLine['combo_unit_price']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_total'] =
-                                        selectedOrderLine['combo_total']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['title'] =
-                                        selectedOrderLine['title'] ?? '';
-                                    orderLines1[i + 1]!['note'] =
-                                        selectedOrderLine['note'] ?? '';
-                                    orderLines1[i + 1]!['combo'] =
-                                        selectedOrderLine['combo_id']
-                                            ?.toString() ??
-                                        '';
-                                    // Add more fields as needed
-                                  }
-                                  if (selectedOrderLine['line_type_id'] == 4) {
-                                    // Map the fields you want to copy from selectedOrderLine to orderLines1
+                                        orderLines1[i + 1]!['itemName'] =
+                                            selectedOrderLine['combo_name'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_main_code'] =
+                                            selectedOrderLine['combo_code'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_discount'] =
+                                            selectedOrderLine['combo_discount']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i +
+                                                1]!['item_description'] =
+                                            selectedOrderLine['combo_description'] ??
+                                            '';
+                                        orderLines1[i + 1]!['item_quantity'] =
+                                            selectedOrderLine['combo_quantity']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i +
+                                                1]!['item_warehouseId'] =
+                                            '';
+                                        orderLines1[i +
+                                                1]!['combo_warehouseId'] =
+                                            selectedOrderLine['combo_warehouse_id']
+                                                ?.toString() ??
+                                            '10';
+                                        orderLines1[i + 1]!['item_unit_price'] =
+                                            selectedOrderLine['combo_unit_price']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_total'] =
+                                            selectedOrderLine['combo_total']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['title'] =
+                                            selectedOrderLine['title'] ?? '';
+                                        orderLines1[i + 1]!['note'] =
+                                            selectedOrderLine['note'] ?? '';
+                                        orderLines1[i + 1]!['combo'] =
+                                            selectedOrderLine['combo_id']
+                                                ?.toString() ??
+                                            '';
+                                        // Add more fields as needed
+                                      }
+                                      if (selectedOrderLine['line_type_id'] ==
+                                          4) {
+                                        // Map the fields you want to copy from selectedOrderLine to orderLines1
 
-                                    orderLines1[i + 1]!['line_type_id'] =
-                                        selectedOrderLine['line_type_id']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_id'] = '';
+                                        orderLines1[i + 1]!['line_type_id'] =
+                                            selectedOrderLine['line_type_id']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_id'] = '';
 
-                                    orderLines1[i + 1]!['itemName'] = '';
-                                    orderLines1[i + 1]!['item_main_code'] = '';
-                                    orderLines1[i + 1]!['item_discount'] = '0';
-                                    orderLines1[i + 1]!['item_description'] =
-                                        '';
-                                    orderLines1[i + 1]!['item_quantity'] = '0';
-                                    orderLines1[i + 1]!['item_warehouseId'] =
-                                        '';
-                                    orderLines1[i + 1]!['combo_warehouseId'] =
-                                        '';
-                                    orderLines1[i + 1]!['item_unit_price'] =
-                                        '0';
-                                    orderLines1[i + 1]!['item_total'] = '0';
-                                    orderLines1[i + 1]!['title'] = '';
-                                    orderLines1[i + 1]!['note'] = '';
-                                    if (selectedOrderLine['image'] != null &&
-                                        selectedOrderLine['image'].isNotEmpty) {
-                                      try {
-                                        final response = await http.get(
-                                          Uri.parse(
-                                            '$baseImage${selectedOrderLine['image']}',
-                                          ),
-                                        );
+                                        orderLines1[i + 1]!['itemName'] = '';
+                                        orderLines1[i + 1]!['item_main_code'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_discount'] =
+                                            '0';
+                                        orderLines1[i +
+                                                1]!['item_description'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_quantity'] =
+                                            '0';
+                                        orderLines1[i +
+                                                1]!['item_warehouseId'] =
+                                            '';
+                                        orderLines1[i +
+                                                1]!['combo_warehouseId'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_unit_price'] =
+                                            '0';
+                                        orderLines1[i + 1]!['item_total'] = '0';
+                                        orderLines1[i + 1]!['title'] = '';
+                                        orderLines1[i + 1]!['note'] = '';
+                                        if (selectedOrderLine['image'] !=
+                                                null &&
+                                            selectedOrderLine['image']
+                                                .isNotEmpty) {
+                                          try {
+                                            final response = await http.get(
+                                              Uri.parse(
+                                                '$baseImage${selectedOrderLine['image']}',
+                                              ),
+                                            );
 
-                                        if (response.statusCode == 200) {
-                                          imageFile = response.bodyBytes;
+                                            if (response.statusCode == 200) {
+                                              imageFile = response.bodyBytes;
+                                            } else {
+                                              imageFile = Uint8List(
+                                                0,
+                                              ); // Set to empty if loading fails
+                                            }
+                                          } catch (e) {
+                                            imageFile = Uint8List(
+                                              0,
+                                            ); // Set to empty if loading fails
+                                          }
                                         } else {
                                           imageFile = Uint8List(
                                             0,
-                                          ); // Set to empty if loading fails
+                                          ); // Set to empty if no image URL
                                         }
-                                      } catch (e) {
-                                        imageFile = Uint8List(
-                                          0,
-                                        ); // Set to empty if loading fails
+                                        orderLines1[i + 1]!['image'] =
+                                            imageFile;
+                                        // Add more fields as needed
                                       }
-                                    } else {
-                                      imageFile = Uint8List(
-                                        0,
-                                      ); // Set to empty if no image URL
+                                      if (selectedOrderLine['line_type_id'] ==
+                                          5) {
+                                        // Map the fields you want to copy from selectedOrderLine to orderLines1
+
+                                        orderLines1[i + 1]!['line_type_id'] =
+                                            selectedOrderLine['line_type_id']
+                                                ?.toString() ??
+                                            '';
+                                        orderLines1[i + 1]!['item_id'] = '';
+
+                                        orderLines1[i + 1]!['itemName'] = '';
+                                        orderLines1[i + 1]!['item_main_code'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_discount'] =
+                                            '0';
+                                        orderLines1[i +
+                                                1]!['item_description'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_quantity'] =
+                                            '0';
+                                        orderLines1[i +
+                                                1]!['item_warehouseId'] =
+                                            '';
+                                        orderLines1[i +
+                                                1]!['combo_warehouseId'] =
+                                            '';
+                                        orderLines1[i + 1]!['item_unit_price'] =
+                                            '0';
+                                        orderLines1[i + 1]!['item_total'] = '0';
+                                        orderLines1[i + 1]!['title'] = '';
+                                        orderLines1[i + 1]!['note'] =
+                                            selectedOrderLine['note'] ?? '';
+                                        orderLines1[i + 1]!['combo'] = '';
+                                        // Add more fields as needed
+                                      }
                                     }
-                                    orderLines1[i + 1]!['image'] = imageFile;
-                                    // Add more fields as needed
-                                  }
-                                  if (selectedOrderLine['line_type_id'] == 5) {
-                                    // Map the fields you want to copy from selectedOrderLine to orderLines1
 
-                                    orderLines1[i + 1]!['line_type_id'] =
-                                        selectedOrderLine['line_type_id']
-                                            ?.toString() ??
-                                        '';
-                                    orderLines1[i + 1]!['item_id'] = '';
+                                    var res = await updateSalesOrder(
+                                      '${widget.info['id']}',
 
-                                    orderLines1[i + 1]!['itemName'] = '';
-                                    orderLines1[i + 1]!['item_main_code'] = '';
-                                    orderLines1[i + 1]!['item_discount'] = '0';
-                                    orderLines1[i + 1]!['item_description'] =
-                                        '';
-                                    orderLines1[i + 1]!['item_quantity'] = '0';
-                                    orderLines1[i + 1]!['item_warehouseId'] =
-                                        '';
-                                    orderLines1[i + 1]!['combo_warehouseId'] =
-                                        '';
-                                    orderLines1[i + 1]!['item_unit_price'] =
-                                        '0';
-                                    orderLines1[i + 1]!['item_total'] = '0';
-                                    orderLines1[i + 1]!['title'] = '';
-                                    orderLines1[i + 1]!['note'] =
-                                        selectedOrderLine['note'] ?? '';
-                                    orderLines1[i + 1]!['combo'] = '';
-                                    // Add more fields as needed
-                                  }
-                                }
+                                      '${widget.info['reference'] ?? ''}',
+                                      clientId,
 
-                                var res = await updateSalesOrder(
-                                  '${widget.info['id']}',
+                                      '${widget.info['validity'] ?? ''}',
+                                      '${widget.info['inputDate'] ?? ''}',
+                                      widget.info['paymentTerm'] != null
+                                          ? '${widget.info['paymentTerm']['id']}'
+                                          : '',
+                                      pricelistId,
+                                      currencyId,
+                                      '${widget.info['termsAndConditions']}',
+                                      salespersonId,
+                                      commissionMethodId,
+                                      cashMethodId,
+                                      '${widget.info['commissionRate'] ?? ''}',
+                                      '${widget.info['commissionTotal'] ?? ''}',
+                                      '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
+                                      '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
+                                      '${widget.info['specialDiscount'] ?? '0'}', // calculated
+                                      '${widget.info['globalDiscountAmount'] ?? ''}',
+                                      '${widget.info['globalDiscount'] ?? ''}',
+                                      '${widget.info['vat'] ?? ''}', //vat
+                                      '${widget.info['vatLebanese'] ?? ''}',
+                                      '${widget.info['total'] ?? ''}',
+                                      '${widget.info['vatExempt'] ?? ''}',
+                                      '${widget.info['notPrinted'] ?? ''}',
+                                      '${widget.info['printedAsVatExempt'] ?? ''}',
+                                      '${widget.info['printedAsPercentage'] ?? ''}',
+                                      '${widget.info['vatInclusivePrices'] ?? ''}',
+                                      '${widget.info['beforeVatPrices'] ?? ''}',
 
-                                  '${widget.info['reference'] ?? ''}',
-                                  clientId,
+                                      '${widget.info['code'] ?? ''}',
 
-                                  '${widget.info['validity'] ?? ''}',
-                                  '${widget.info['inputDate'] ?? ''}',
-                                  widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
-                                  pricelistId,
-                                  currencyId,
-                                  '${widget.info['termsAndConditions']}',
-                                  salespersonId,
-                                  commissionMethodId,
-                                  cashMethodId,
-                                  '${widget.info['commissionRate'] ?? ''}',
-                                  '${widget.info['commissionTotal'] ?? ''}',
-                                  '${widget.info['totalBeforeVat'] ?? '0.0'}', //total before vat
-                                  '${widget.info['specialDiscountAmount'] ?? '0'}', // inserted by user
-                                  '${widget.info['specialDiscount'] ?? '0'}', // calculated
-                                  '${widget.info['globalDiscountAmount'] ?? ''}',
-                                  '${widget.info['globalDiscount'] ?? ''}',
-                                  '${widget.info['vat'] ?? ''}', //vat
-                                  '${widget.info['vatLebanese'] ?? ''}',
-                                  '${widget.info['total'] ?? ''}',
-                                  '${widget.info['vatExempt'] ?? ''}',
-                                  '${widget.info['notPrinted'] ?? ''}',
-                                  '${widget.info['printedAsVatExempt'] ?? ''}',
-                                  '${widget.info['printedAsPercentage'] ?? ''}',
-                                  '${widget.info['vatInclusivePrices'] ?? ''}',
-                                  '${widget.info['beforeVatPrices'] ?? ''}',
+                                      'confirmed', // status,
 
-                                  '${widget.info['code'] ?? ''}',
-
-                                  'confirmed', // status,
-
-                                  orderLines1,
-                                  orderedKeys,
-                                );
-                                if (res['success'] == true) {
-                                  // pendingDocsController.getAllPendingDocs();
-                                  salesOrderController
-                                      .getAllSalesOrderFromBackWithoutExcept();
-                                  homeController.selectedTab.value =
-                                      "to_deliver";
-                                  CommonWidgets.snackBar(
-                                    'Success',
-                                    res['message'],
-                                  );
-                                } else {
-                                  CommonWidgets.snackBar(
-                                    'error',
-                                    res['message'],
-                                  );
-                                }
-                              },
-                              child: Icon(
-                                Icons.check,
-                                color: Primary.primary,
-                                size: 21.sp,
+                                      orderLines1,
+                                      orderedKeys,
+                                    );
+                                    if (res['success'] == true) {
+                                      // pendingDocsController.getAllPendingDocs();
+                                      salesOrderController
+                                          .getAllSalesOrderFromBackWithoutExcept();
+                                      homeController.selectedTab.value =
+                                          "to_deliver";
+                                      CommonWidgets.snackBar(
+                                        'Success',
+                                        res['message'],
+                                      );
+                                    } else {
+                                      CommonWidgets.snackBar(
+                                        'error',
+                                        res['message'],
+                                      );
+                                    }
+                                  },
+                                  child: Icon(
+                                    Icons.check,
+                                    color: Primary.primary,
+                                    size: 21.sp,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
 
                           Tooltip(
                             message: 'send'.tr,
@@ -3927,7 +4066,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                   '${widget.info['validity'] ?? ''}',
                                   '${widget.info['inputDate'] ?? ''}',
-                                  widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
+                                  widget.info['paymentTerm'] != null
+                                      ? '${widget.info['paymentTerm']['id']}'
+                                      : '',
                                   pricelistId,
                                   currencyId,
                                   '${widget.info['termsAndConditions']}',
@@ -4215,7 +4356,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                   '${widget.info['validity'] ?? ''}',
                                   '${widget.info['inputDate'] ?? ''}',
-                                  widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
+                                  widget.info['paymentTerm'] != null
+                                      ? '${widget.info['paymentTerm']['id']}'
+                                      : '',
                                   pricelistId,
                                   currencyId,
                                   '${widget.info['termsAndConditions']}',
@@ -4659,7 +4802,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                               widget
                                                   .info['salesOrder']['quotation']['quotationNumber'];
                                       return PrintSalesInvoice(
-                                        vat: salesInvoiceController.vat11,
+                                        header: widget.info['companyHeader'],
+                                        vat: widget.info['vat']??'',
+                                        // vat: salesInvoiceController.companyVat.toString(),
                                         fromPage: 'pendingDocs',
                                         quotationNumber: quotNumber,
                                         salesOrderNumber: salesOrderNumber,
@@ -4699,14 +4844,13 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                         globalDiscount:
                                             widget.info['globalDiscount'] ??
                                             '0',
-
+                                        globalDiscountAmount: widget
+                                            .info['globalDiscountAmount'] ??
+                                            '0',
                                         totalPriceAfterDiscount:
                                             formatDoubleWithCommas(
                                               totalPriceAfterDiscount,
                                             ),
-                                        additionalSpecialDiscount:
-                                            additionalSpecialDiscount
-                                                .toStringAsFixed(2),
                                         totalPriceAfterSpecialDiscount:
                                             formatDoubleWithCommas(
                                               totalPriceAfterSpecialDiscount,
@@ -4752,10 +4896,23 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                                 .info['currency']['latest_rate'] ??
                                             '',
                                         clientPhoneNumber:
-                                            widget.info['client'] != null
-                                                ? widget.info['client']['phoneNumber'] ??
-                                                    '---'
-                                                : "---",
+                                        widget.info['client'] == null
+                                            ? "---"
+                                            : widget.info['client']['phoneNumber'] ==
+                                            null
+                                            ? '---'
+                                            : '${widget.info['client']['phoneCode']}-${widget.info['client']['phoneNumber']}',
+                                        clientMobileNumber:
+                                        widget.info['client'] == null
+                                            ? "---"
+                                            : widget.info['client']['mobileNumber'] ==
+                                            null
+                                            ? '---'
+                                            : '${widget.info['client']['mobileCode']}-${widget.info['client']['mobileNumber']}',
+                                        clientAddress:widget.info['client'] == null
+                                            ? "---"
+                                            : '${widget.info['client']['city'] != null ? '${widget.info['client']['city']} - ' : ''} '
+                                            '${widget.info['client']['country'] ?? '---'}',
                                         clientName:
                                             widget.info['client']['name'] ?? '',
                                         termsAndConditions:
@@ -4774,41 +4931,42 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                               ),
                             ),
                           ),
-                          widget.info['status'] == "pending"?
-                          Tooltip(
-                            message: 'modify'.tr,
-                            child: InkWell(
-                              onTap: () async {
-                                showDialog<String>(
-                                  context: context,
-                                  builder:
-                                      (BuildContext context) => AlertDialog(
-                                        backgroundColor: Colors.white,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(9),
+                          widget.info['status'] == "pending"
+                              ? Tooltip(
+                                message: 'modify'.tr,
+                                child: InkWell(
+                                  onTap: () async {
+                                    showDialog<String>(
+                                      context: context,
+                                      builder:
+                                          (BuildContext context) => AlertDialog(
+                                            backgroundColor: Colors.white,
+                                            shape: const RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(9),
+                                              ),
+                                            ),
+                                            elevation: 0,
+                                            content: UpdateSalesInvoiceDialog(
+                                              index: widget.index,
+                                              info: deepCloneMap(widget.info),
+                                              fromPage: 'pendingDocs',
+                                            ),
+                                            // content: SalesInvoiceInPendingDocs(
+                                            //   index: widget.index,
+                                            //   info: widget.info,
+                                            // ),
                                           ),
-                                        ),
-                                        elevation: 0,
-                                        content: UpdateSalesInvoiceDialog(
-                                          index: widget.index,
-                                          info: deepCloneMap(widget.info),
-                                          fromPage: 'pendingDocs',
-                                        ),
-                                        // content: SalesInvoiceInPendingDocs(
-                                        //   index: widget.index,
-                                        //   info: widget.info,
-                                        // ),
-                                      ),
-                                );
-                              },
-                              child: Icon(
-                                Icons.edit,
-                                color: Primary.primary,
-                                size: 21.sp,
-                              ),
-                            ),
-                          ):SizedBox.shrink(),
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.edit,
+                                    color: Primary.primary,
+                                    size: 21.sp,
+                                  ),
+                                ),
+                              )
+                              : SizedBox.shrink(),
 
                           Tooltip(
                             message: 'send'.tr,
@@ -5031,7 +5189,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                   '${widget.info['valueDate'] ?? ''}',
                                   warehouseId,
-                                  widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
+                                  widget.info['paymentTerm'] != null
+                                      ? '${widget.info['paymentTerm']['id']}'
+                                      : '',
                                   pricelistId,
                                   currencyId,
                                   '${widget.info['termsAndConditions']}',
@@ -5312,7 +5472,9 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
 
                                   '${widget.info['valueDate'] ?? ''}',
                                   warehouseId,
-                                  widget.info['paymentTerm']!=null?'${widget.info['paymentTerm']['id']}':'',
+                                  widget.info['paymentTerm'] != null
+                                      ? '${widget.info['paymentTerm']['id']}'
+                                      : '',
                                   pricelistId,
                                   currencyId,
                                   '${widget.info['termsAndConditions']}',

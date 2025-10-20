@@ -2616,8 +2616,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           textFieldWidth:
                               MediaQuery.of(context).size.width * 0.2,
                           validationFunc: (String val) {
-                            if (val.isNotEmpty && val.length < 7) {
-                              return '7_digits'.tr;
+                            if (val.isNotEmpty && val.length < 6) {
+                              return '6_digits'.tr;
                             }
                             return null;
                           },
@@ -2722,8 +2722,8 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           textFieldWidth:
                               MediaQuery.of(context).size.width * 0.2,
                           validationFunc: (val) {
-                            if (val.isNotEmpty && val.length < 7) {
-                              return '7_digits'.tr;
+                            if (val.isNotEmpty && val.length < 6) {
+                              return '6_digits'.tr;
                             }
                             return null;
                           },

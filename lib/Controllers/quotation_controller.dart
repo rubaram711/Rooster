@@ -44,9 +44,10 @@ class QuotationController extends GetxController {
   }
 
   TextEditingController currencyController = TextEditingController();
-  setQuotationCurrency(Map header){
-    if( header['default_quotation_currency']!=null) {
-      exchangeRateForSelectedCurrency = header['default_quotation_currency']['latest_rate'];
+  setQuotationCurrency(Map header) {
+    if (header['default_quotation_currency'] != null) {
+      exchangeRateForSelectedCurrency =
+          header['default_quotation_currency']['latest_rate'];
       selectedCurrencyId = '${header['default_quotation_currency']['id']}';
       selectedCurrencySymbol = header['default_quotation_currency']['symbol'];
       selectedCurrencyName = header['default_quotation_currency']['name'];
@@ -89,8 +90,8 @@ class QuotationController extends GetxController {
   bool isVatExemptChecked = false;
   setIsVatExemptChecked(bool val) {
     isVatExemptChecked = val;
-    setVat11();
-    setTotalAllQuotation();
+    // setVat11();
+    setTotalQuotationAfterVat();
     update();
   }
 
@@ -194,18 +195,15 @@ class QuotationController extends GetxController {
   resetQuotation() {
     cashingMethodsNamesList = [];
     cashingMethodsIdsList = [];
-    // orderLinesQuotationList = {};
     rowsInListViewInQuotation = {};
-    // itemsList = [];
+    orderedKeys = [];
     itemsCode = [];
     itemsIds = [];
     isQuotationsInfoFetched = false;
-
     totalItems = 0;
-    specialDisc = '0';
-    globalDisc = '0';
-    vatInPrimaryCurrency = '0';
-    vat11 = '0';
+    specialDiscAmount.text = '';
+    globalDiscountAmount.text = '';
+    // vatInPrimaryCurrency = '0';
     totalQuotation = '0.00';
     update();
   }
@@ -240,6 +238,7 @@ class QuotationController extends GetxController {
   bool isQuotationsInfoFetched = false;
   Map email = {};
   Map phoneNumber = {};
+  Map mobileNumber = {};
   Map clientNumber = {};
   Map name = {};
   Map country = {};
@@ -286,8 +285,8 @@ class QuotationController extends GetxController {
   List<String> combosForSplit = [];
   Map combosPricesCurrencies = {};
   Map combosMap = {};
-  Map<String,List<String>> allCodesForItem={};
-  List<String> allCodesForAllItems=[];
+  Map<String, List<String>> allCodesForItem = {};
+  List<String> allCodesForAllItems = [];
   getFieldsForCreateQuotationFromBack() async {
     combosPricesCurrencies = {};
     combosPricesList = [];
@@ -332,6 +331,7 @@ class QuotationController extends GetxController {
     customerForSplit = [];
     itemsForSplit = [];
     phoneNumber = {};
+    mobileNumber = {};
     email = {};
     clientNumber = {};
     country = {};
@@ -340,8 +340,8 @@ class QuotationController extends GetxController {
     street = {};
     // warehousesInfo = {};
     isQuotationsInfoFetched = false;
-    allCodesForItem={};
-    allCodesForAllItems=[];
+    allCodesForItem = {};
+    allCodesForAllItems = [];
     var p = await getFieldsForCreateQuotation();
     //todo i remove this for test
     // for (var item in p['items']) {
@@ -374,7 +374,10 @@ class QuotationController extends GetxController {
       customerNameList.add('${client['name']}');
       customerNumberList.add('${client['client_number']}');
       customerIdsList.add('${client['id']}');
-      phoneNumber["${client['id']}"] = client['phone_number'] ?? '';
+      phoneNumber["${client['id']}"] =
+          '${client['phone_code'] ?? ''}-${client['phone_number'] ?? ''}';
+      mobileNumber["${client['id']}"] =
+          '${client['mobile_code'] ?? ''}-${client['mobile_number'] ?? ''}';
       email["${client['id']}"] = client['email'] ?? '';
       country["${client['id']}"] = client['country'] ?? '';
       city["${client['id']}"] = client['city'] ?? '';
@@ -415,7 +418,7 @@ class QuotationController extends GetxController {
     for (var header in p['companyHeaders'] ?? []) {
       headersList.add(header);
     }
-    if(headersList.isNotEmpty && headersList[0].isNotEmpty) {
+    if (headersList.isNotEmpty && headersList[0].isNotEmpty) {
       setQuotationCurrency(headersList[0]);
     }
 
@@ -443,9 +446,9 @@ class QuotationController extends GetxController {
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
-  List items=[];
+  List items = [];
   resetItemsAfterChangePriceList() async {
-    items=[];
+    items = [];
     itemsCode = [];
     itemsIds = [];
     itemsInfo = [];
@@ -462,7 +465,6 @@ class QuotationController extends GetxController {
     itemUnitPrice = {};
     itemsVats = {};
     itemsPricesCurrencies = {};
-    update();
     var res = await getPriceListItems(selectedPriceListId);
     if (res['success'] == true) {
       // print('+++++++++++++++res $res');
@@ -482,9 +484,13 @@ class QuotationController extends GetxController {
         itemsCodes["${item['id']}"] = item['mainCode'];
         itemUnitPrice["${item['id']}"] = item['unitPrice'];
         itemsPricesCurrencies["${item['id']}"] = item['priceCurrency']['name'];
-        List helper =item['taxationGroup'] !=null? item['taxationGroup']['tax_rates']:[];
+        List helper =
+            item['taxationGroup'] != null
+                ? item['taxationGroup']['tax_rates']
+                : [];
         helper = helper.reversed.toList();
-        itemsVats["${item['id']}"] = helper.isNotEmpty? helper[0]['tax_rate']:'1';
+        itemsVats["${item['id']}"] =
+            helper.isNotEmpty ? helper[0]['tax_rate'] : '1';
         warehousesInfo["${item['id']}"] = item['warehouses'];
         allCodesForItem["${item['id']}"] = [
           ...?item["barcodes"]?.map((e) => e["code"].toString()),
@@ -706,55 +712,92 @@ class QuotationController extends GetxController {
           .reduce((a, b) => a + b);
     }
 
-    setVat11();
-    setTotalAllQuotation();
-    // setGlobalDisc(globalDiscountPercentageValue);
-    // setSpecialDisc(specialDiscountPercentageValue);
-
+    setTotalQuotationAfterVat();
+    if (globalDiscountPercentageValue != '' ||
+        globalDiscountPercentageValue != '0') {
+      setGlobalDisc(globalDiscountPercentageValue);
+    }
+    if ((specialDiscountPercentageValue != '' ||
+            specialDiscountPercentageValue != '0') &&
+        (globalDiscountPercentageValue == '' ||
+            globalDiscountPercentageValue == '0')) {
+      setSpecialDisc(specialDiscountPercentageValue);
+    }
     update();
   }
 
   double preGlobalDisc = 0.0; //GlobalDisc as double used in calc
-  String globalDisc = ''; // GlobalDisc as int to show it in ui
+  TextEditingController globalDiscountAmount =
+      TextEditingController(); // GlobalDisc as int to show it in ui
   String globalDiscountPercentageValue = '';
 
   setGlobalDisc(String globalDiscountPercentage) {
-    globalDiscountPercentageValue = globalDiscountPercentage;
-    preGlobalDisc =
-        (totalItems) * double.parse(globalDiscountPercentageValue) / 100;
-    globalDisc = preGlobalDisc.toStringAsFixed(2);
+    if (globalDiscountPercentage != '0') {
+      globalDiscountPercentageValue = globalDiscountPercentage;
+      preGlobalDisc =
+          (totalItems) * double.parse(globalDiscountPercentageValue) / 100;
+      globalDiscountAmount.text = preGlobalDisc.toStringAsFixed(2);
 
-    totalAfterGlobalDis = totalItems - preGlobalDisc;
-    totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
-    setSpecialDisc(specialDiscountPercentageValue);
-    setVat11();
-    setTotalAllQuotation();
-    update();
+      totalAfterGlobalDis = totalItems - preGlobalDisc;
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      setSpecialDisc(specialDiscountPercentageValue);
+      // setVat11();
+      setTotalQuotationAfterVat();
+      update();
+    }
+  }
+
+  setGlobalDiscPercentage(String globalDiscountAmount) {
+    if (globalDiscountAmount != '0') {
+      preGlobalDisc = double.parse(globalDiscountAmount);
+      globalDiscountPercentageValue =
+          ((double.parse(globalDiscountAmount) / totalItems) * 100)
+              .toStringAsFixed(2);
+      // preGlobalDisc =
+      //     (totalItems) * double.parse(globalDiscountPercentageValue) / 100;
+      // globalDiscountAmount.text = preGlobalDisc.toStringAsFixed(2);
+
+      totalAfterGlobalDis = totalItems - preGlobalDisc;
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      setSpecialDisc(specialDiscountPercentageValue);
+      // setVat11();
+      setTotalQuotationAfterVat();
+      update();
+    }
   }
 
   double preSpecialDisc = 0.0;
-  String specialDisc = '';
+  TextEditingController specialDiscAmount = TextEditingController();
   String specialDiscountPercentageValue = '0';
 
   setSpecialDisc(String specialDiscountPercentage) {
-    specialDiscountPercentageValue = specialDiscountPercentage;
-    preSpecialDisc =
-        totalAfterGlobalDis *
-        double.parse(specialDiscountPercentageValue) /
-        100;
-    specialDisc = preSpecialDisc.toStringAsFixed(2);
-    totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
-    setVat11();
-    setTotalAllQuotation();
-    update();
+    if (specialDiscountPercentage != '0') {
+      specialDiscountPercentageValue = specialDiscountPercentage;
+      preSpecialDisc =
+          totalAfterGlobalDis *
+          double.parse(specialDiscountPercentageValue) /
+          100;
+      specialDiscAmount.text = preSpecialDisc.toStringAsFixed(2);
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      // setVat11();
+      setTotalQuotationAfterVat();
+      update();
+    }
   }
 
-  double preVat = 0.0;
-  double preVatInPrimaryCurrency = 0.0;
-  String vat11 = '';
-  String vatInPrimaryCurrency = '';
-  double vat = 11;
-  double latestRate = 89500;
+  setSpecialDiscPercentage(String specialDiscountAmount) {
+    if (specialDiscountAmount != '0') {
+      preSpecialDisc = double.parse(specialDiscountAmount);
+      specialDiscountPercentageValue =
+          ((double.parse(specialDiscountAmount) / totalItems) * 100)
+              .toStringAsFixed(2);
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      setTotalQuotationAfterVat();
+      update();
+    }
+  }
+
+  double latestRate = 1;
   String companyPrimaryCurrency = 'USD';
   setCompanyPrimaryCurrency(String val) {
     companyPrimaryCurrency = val;
@@ -762,8 +805,8 @@ class QuotationController extends GetxController {
   }
 
   setCompanyVat(double val) {
-    vat = val;
-
+    companyVat = val;
+    setTotalQuotationAfterVat();
     update();
   }
 
@@ -772,46 +815,26 @@ class QuotationController extends GetxController {
     update();
   }
 
-  setVat11() {
-    if (isVatExemptChecked) {
-      preVat = 0;
-      vat11 = '0';
-      preVatInPrimaryCurrency = 0;
-      vatInPrimaryCurrency = '0';
-    } else {
-      preVat =
-          (totalItems - preGlobalDisc - preSpecialDisc) *
-          vat /
-          100; //all variables as double
-      vat11 = preVat.toStringAsFixed(2);
-      if (companyPrimaryCurrency == selectedCurrencyName) {
-        preVatInPrimaryCurrency = double.parse(vat11);
-      } else if (companyPrimaryCurrency == 'USD') {
-        preVatInPrimaryCurrency =
-            double.parse(vat11) / double.parse(exchangeRateForSelectedCurrency);
-      } else {
-        if (selectedCurrencyName == 'USD') {
-          preVatInPrimaryCurrency = double.parse(vat11) * latestRate;
-        } else {
-          var usdPreVat =
-              double.parse(vat11) /
-              double.parse(exchangeRateForSelectedCurrency);
-          preVatInPrimaryCurrency = usdPreVat * latestRate;
-        }
-      }
-      // preVat11LBP = double.parse(vat11)  * latestRate;
-      vatInPrimaryCurrency = preVatInPrimaryCurrency.toStringAsFixed(2);
-      update();
-    }
-  }
-
   double preTotalQuotation = 0;
   String totalQuotation = '';
 
-  setTotalAllQuotation() {
-    preTotalQuotation = (totalItems - preGlobalDisc - preSpecialDisc) + preVat;
-    totalQuotation = preTotalQuotation.toStringAsFixed(2);
-    // setVat11();
+  setTotalQuotationAfterVat() {
+    var valueBeforeVat = (totalItems - preGlobalDisc - preSpecialDisc);
+    if (companyVat == 0 ||
+        isPrintedAsVatExempt ||
+        isPrintedAs0 ||
+        isVatNoPrinted) {
+      companyVat = 0;
+      vatInQuotationCurrency = 0;
+      totalQuotation = valueBeforeVat.toStringAsFixed(2);
+    } else {
+      vatInQuotationCurrency = double.parse(
+        (valueBeforeVat * (companyVat / 100)).toStringAsFixed(2),
+      );
+      preTotalQuotation = valueBeforeVat + vatInQuotationCurrency;
+      totalQuotation = preTotalQuotation.toStringAsFixed(2);
+    }
+    update();
   }
 
   double listViewLengthInQuotation = 50;
@@ -827,6 +850,7 @@ class QuotationController extends GetxController {
   }
 
   double companyVat = 0.0;
+  double vatInQuotationCurrency = 0.0;
   List taxationGroupsList = [];
   bool isTaxationGroupsFetched = false;
   Map ratesInTaxationGroupList = {};
@@ -918,7 +942,6 @@ class QuotationController extends GetxController {
     salesPersonListNames = [];
     salesPersonName = '';
     salesPersonId = 0;
-    update();
     var p = await getAllUsersSalesPerson();
     if ('$p' != '[]') {
       salesPersonList = p;
@@ -935,6 +958,17 @@ class QuotationController extends GetxController {
   List quotationsListPending = [];
   List quotationsListConfirmed = [];
   List quotationsListCC = [];
+  getSummary() async {
+    quotationsList = [];
+    isQuotationsFetched = false;
+    var p = await getAllQuotations(searchInQuotationsController.text);
+    if ('$p' != '[]') {
+      quotationsList = p;
+      quotationsList = quotationsList.reversed.toList();
+    }
+    isQuotationsFetched = true;
+    update();
+  }
 
   getAllQuotationsFromBack() async {
     quotationsListPending = [];
@@ -942,7 +976,6 @@ class QuotationController extends GetxController {
     quotationsListCC = [];
     quotationsList = [];
     isQuotationsFetched = false;
-    update();
     var p = await getAllQuotations(searchInQuotationsController.text);
     if ('$p' != '[]') {
       quotationsList = p;
@@ -951,7 +984,6 @@ class QuotationController extends GetxController {
       // isQuotationsFetched = true;
       for (int i = 0; i < quotationsList.length; i++) {
         var item = quotationsList[i];
-
         if (item['status'] == 'pending' || item['status'] == 'sent') {
           // Check if this item already exists in quotations List pending
           bool exists = quotationsListPending.any(
@@ -997,310 +1029,176 @@ class QuotationController extends GetxController {
           }
         }
       }
-
-      isQuotationsFetched = true;
-      update();
     }
+    isQuotationsFetched = true;
+    update();
   }
 
-
-  setPriceAsCurrency(String val){
-
-    var keys =
-  unitPriceControllers
-        .keys
-        .toList();
-    for (
-    int i = 0;
-    i < unitPriceControllers
-            .length;
-    i++
-    ) {
-      var selectedItemId =
-          '${rowsInListViewInQuotation[keys[i]]['item_id']}';
-      if (selectedItemId !=
-          '') {
-        if (itemsPricesCurrencies[selectedItemId] ==
-            val) {
-         unitPriceControllers[keys[i]]!
-              .text =
-              itemUnitPrice[selectedItemId]
-                  .toString();
-        } else if (selectedCurrencyName ==
-            'USD' &&
-            itemsPricesCurrencies[selectedItemId] !=
-                val) {
-          var matchedItems = exchangeRatesController
-              .exchangeRatesList
-              .where(
-                (item) =>
-            item["currency"] ==
-                itemsPricesCurrencies[selectedItemId],
+  setPriceAsCurrency(String val) {
+    var keys = unitPriceControllers.keys.toList();
+    for (int i = 0; i < unitPriceControllers.length; i++) {
+      var selectedItemId = '${rowsInListViewInQuotation[keys[i]]['item_id']}';
+      if (selectedItemId != '') {
+        if (itemsPricesCurrencies[selectedItemId] == val) {
+          unitPriceControllers[keys[i]]!.text =
+              itemUnitPrice[selectedItemId].toString();
+        } else if (selectedCurrencyName == 'USD' &&
+            itemsPricesCurrencies[selectedItemId] != val) {
+          var matchedItems = exchangeRatesController.exchangeRatesList.where(
+            (item) => item["currency"] == itemsPricesCurrencies[selectedItemId],
           );
           var result =
-          matchedItems
-              .isNotEmpty
-              ? matchedItems.reduce(
-                (
-                a,
-                b,
-                ) =>
-            DateTime.parse(
-              a["start_date"],
-            ).isAfter(
-              DateTime.parse(
-                b["start_date"],
-              ),
-            )
-                ? a
-                : b,
-          )
-              : null;
-          var divider =
-              '1';
-          if (result !=
-              null) {
-            divider =
-                result["exchange_rate"]
-                    .toString();
+              matchedItems.isNotEmpty
+                  ? matchedItems.reduce(
+                    (a, b) =>
+                        DateTime.parse(
+                              a["start_date"],
+                            ).isAfter(DateTime.parse(b["start_date"]))
+                            ? a
+                            : b,
+                  )
+                  : null;
+          var divider = '1';
+          if (result != null) {
+            divider = result["exchange_rate"].toString();
           }
-         unitPriceControllers[keys[i]]!
-              .text =
-          '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-        } else if (selectedCurrencyName !=
-            'USD' &&
-            itemsPricesCurrencies[selectedItemId] ==
-                'USD') {
-         unitPriceControllers[keys[i]]!
-              .text =
-          '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
+          unitPriceControllers[keys[i]]!.text =
+              '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
+        } else if (selectedCurrencyName != 'USD' &&
+            itemsPricesCurrencies[selectedItemId] == 'USD') {
+          unitPriceControllers[keys[i]]!.text =
+              '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
         } else {
-          var matchedItems = exchangeRatesController
-              .exchangeRatesList
-              .where(
-                (item) =>
-            item["currency"] ==
-                itemsPricesCurrencies[selectedItemId],
+          var matchedItems = exchangeRatesController.exchangeRatesList.where(
+            (item) => item["currency"] == itemsPricesCurrencies[selectedItemId],
           );
           var result =
-          matchedItems
-              .isNotEmpty
-              ? matchedItems.reduce(
-                (
-                a,
-                b,
-                ) =>
-            DateTime.parse(
-              a["start_date"],
-            ).isAfter(
-              DateTime.parse(
-                b["start_date"],
-              ),
-            )
-                ? a
-                : b,
-          )
-              : null;
-          var divider =
-              '1';
-          if (result !=
-              null) {
-            divider =
-                result["exchange_rate"]
-                    .toString();
+              matchedItems.isNotEmpty
+                  ? matchedItems.reduce(
+                    (a, b) =>
+                        DateTime.parse(
+                              a["start_date"],
+                            ).isAfter(DateTime.parse(b["start_date"]))
+                            ? a
+                            : b,
+                  )
+                  : null;
+          var divider = '1';
+          if (result != null) {
+            divider = result["exchange_rate"].toString();
           }
           var usdPrice =
               '${double.parse('${(double.parse(itemUnitPrice[selectedItemId].toString()) / double.parse(divider))}')}';
-         unitPriceControllers[keys[i]]!
-              .text =
-          '${double.parse('${(double.parse(usdPrice) * double.parse(exchangeRateForSelectedCurrency))}')}';
+          unitPriceControllers[keys[i]]!.text =
+              '${double.parse('${(double.parse(usdPrice) * double.parse(exchangeRateForSelectedCurrency))}')}';
         }
         if (!isBeforeVatPrices) {
-          var taxRate =
-              double.parse(
-                itemsVats[selectedItemId],
-              ) /
-                  100.0;
+          var taxRate = double.parse(itemsVats[selectedItemId]) / 100.0;
           var taxValue =
-              taxRate *
-                  double.parse(
-                    unitPriceControllers[keys[i]]!
-                        .text,
-                  );
+              taxRate * double.parse(unitPriceControllers[keys[i]]!.text);
 
-         unitPriceControllers[keys[i]]!
-              .text =
-          '${double.parse(unitPriceControllers[keys[i]]!.text) + taxValue}';
+          unitPriceControllers[keys[i]]!.text =
+              '${double.parse(unitPriceControllers[keys[i]]!.text) + taxValue}';
         }
-        unitPriceControllers[keys[i]]!
-            .text = double.parse(
-         unitPriceControllers[keys[i]]!
-              .text,
-        ).toStringAsFixed(
-          2,
-        );
+        unitPriceControllers[keys[i]]!.text = double.parse(
+          unitPriceControllers[keys[i]]!.text,
+        ).toStringAsFixed(2);
         var totalLine =
             '${(double.parse(rowsInListViewInQuotation[keys[i]]['item_quantity']) * double.parse(unitPriceControllers[keys[i]]!.text)) * (1 - double.parse(rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
 
         setEnteredUnitPriceInQuotation(
           keys[i],
-         unitPriceControllers[keys[i]]!
-              .text,
+          unitPriceControllers[keys[i]]!.text,
         );
-        setMainTotalInQuotation(
-          keys[i],
-          totalLine,
-        );
+        setMainTotalInQuotation(keys[i], totalLine);
         getTotalItems();
       }
     }
-    var comboKeys =
-    combosPriceControllers
-        .keys
-        .toList();
-    for (
-    int i = 0;
-    i <
-        combosPriceControllers
-            .length;
-    i++
-    ) {
+    var comboKeys = combosPriceControllers.keys.toList();
+    for (int i = 0; i < combosPriceControllers.length; i++) {
       var selectedComboId =
           '${rowsInListViewInQuotation[comboKeys[i]]['combo']}';
-      if (selectedComboId !=
-          '') {
-        var ind = combosIdsList
-            .indexOf(
-          selectedComboId,
-        );
-        if (combosPricesCurrencies[selectedComboId] ==
-            selectedCurrencyName) {
-         combosPriceControllers[comboKeys[i]]!
-              .text =
-             combosPricesList[ind]
-                  .toString();
-        } else if (selectedCurrencyName ==
-            'USD' &&
+      if (selectedComboId != '') {
+        var ind = combosIdsList.indexOf(selectedComboId);
+        if (combosPricesCurrencies[selectedComboId] == selectedCurrencyName) {
+          combosPriceControllers[comboKeys[i]]!.text =
+              combosPricesList[ind].toString();
+        } else if (selectedCurrencyName == 'USD' &&
             combosPricesCurrencies[selectedComboId] != selectedCurrencyName) {
-          var matchedItems = exchangeRatesController
-              .exchangeRatesList
-              .where(
-                (item) =>
-            item["currency"] ==
-                combosPricesCurrencies[selectedComboId],
+          var matchedItems = exchangeRatesController.exchangeRatesList.where(
+            (item) =>
+                item["currency"] == combosPricesCurrencies[selectedComboId],
           );
 
           var result =
-          matchedItems
-              .isNotEmpty
-              ? matchedItems.reduce(
-                (
-                a,
-                b,
-                ) =>
-            DateTime.parse(
-              a["start_date"],
-            ).isAfter(
-              DateTime.parse(
-                b["start_date"],
-              ),
-            )
-                ? a
-                : b,
-          )
-              : null;
-          var divider =
-              '1';
-          if (result !=
-              null) {
-            divider =
-                result["exchange_rate"]
-                    .toString();
+              matchedItems.isNotEmpty
+                  ? matchedItems.reduce(
+                    (a, b) =>
+                        DateTime.parse(
+                              a["start_date"],
+                            ).isAfter(DateTime.parse(b["start_date"]))
+                            ? a
+                            : b,
+                  )
+                  : null;
+          var divider = '1';
+          if (result != null) {
+            divider = result["exchange_rate"].toString();
           }
-         combosPriceControllers[comboKeys[i]]!
-              .text =
-          '${double.parse('${(double.parse(combosPricesList[ind].toString()) / double.parse(divider))}')}';
-        } else if (selectedCurrencyName !=
-            'USD' && combosPricesCurrencies[selectedComboId] ==
-                'USD') {
-         combosPriceControllers[comboKeys[i]]!
-              .text =
-          '${double.parse('${(double.parse(combosPricesList[ind].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
+          combosPriceControllers[comboKeys[i]]!.text =
+              '${double.parse('${(double.parse(combosPricesList[ind].toString()) / double.parse(divider))}')}';
+        } else if (selectedCurrencyName != 'USD' &&
+            combosPricesCurrencies[selectedComboId] == 'USD') {
+          combosPriceControllers[comboKeys[i]]!.text =
+              '${double.parse('${(double.parse(combosPricesList[ind].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
         } else {
-          var matchedItems = exchangeRatesController
-              .exchangeRatesList
-              .where(
-                (item) =>
-            item["currency"] ==
-                combosPricesCurrencies[selectedComboId],
+          var matchedItems = exchangeRatesController.exchangeRatesList.where(
+            (item) =>
+                item["currency"] == combosPricesCurrencies[selectedComboId],
           );
 
           var result =
-          matchedItems
-              .isNotEmpty
-              ? matchedItems.reduce(
-                (
-                a,
-                b,
-                ) =>
-            DateTime.parse(
-              a["start_date"],
-            ).isAfter(
-              DateTime.parse(
-                b["start_date"],
-              ),
-            )
-                ? a
-                : b,
-          )
-              : null;
-          var divider =
-              '1';
-          if (result !=
-              null) {
-            divider =
-                result["exchange_rate"]
-                    .toString();
+              matchedItems.isNotEmpty
+                  ? matchedItems.reduce(
+                    (a, b) =>
+                        DateTime.parse(
+                              a["start_date"],
+                            ).isAfter(DateTime.parse(b["start_date"]))
+                            ? a
+                            : b,
+                  )
+                  : null;
+          var divider = '1';
+          if (result != null) {
+            divider = result["exchange_rate"].toString();
           }
           var usdPrice =
               '${double.parse('${(double.parse(combosPricesList[ind].toString()) / double.parse(divider))}')}';
-         combosPriceControllers[comboKeys[i]]!
-              .text =
-          '${double.parse('${(double.parse(usdPrice) * double.parse(exchangeRateForSelectedCurrency))}')}';
+          combosPriceControllers[comboKeys[i]]!.text =
+              '${double.parse('${(double.parse(usdPrice) * double.parse(exchangeRateForSelectedCurrency))}')}';
         }
-        combosPriceControllers[comboKeys[i]]!
-            .text =
-        '${double.parse(combosPriceControllers[comboKeys[i]]!.text)}';
+        combosPriceControllers[comboKeys[i]]!.text =
+            '${double.parse(combosPriceControllers[comboKeys[i]]!.text)}';
 
-        combosPriceControllers[comboKeys[i]]!
-            .text = double.parse(combosPriceControllers[comboKeys[i]]!
-              .text,
-        ).toStringAsFixed(
-          2,
-        );
+        combosPriceControllers[comboKeys[i]]!.text = double.parse(
+          combosPriceControllers[comboKeys[i]]!.text,
+        ).toStringAsFixed(2);
         var totalLine =
-            '${(int.parse( rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
+            '${(int.parse(rowsInListViewInQuotation[comboKeys[i]]['item_quantity']) * double.parse(combosPriceControllers[comboKeys[i]]!.text)) * (1 - double.parse(rowsInListViewInQuotation[keys[i]]['item_discount']) / 100)}';
         setEnteredQtyInQuotation(
           comboKeys[i],
-           rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
+          rowsInListViewInQuotation[comboKeys[i]]['item_quantity'],
         );
-          setMainTotalInQuotation(
-          comboKeys[i],
-          totalLine,
-        );
+        setMainTotalInQuotation(comboKeys[i], totalLine);
         // cont.setMainTotalInQuotation(widget.index, cont.totalLine.toString() );
-         getTotalItems();
+        getTotalItems();
 
         setEnteredUnitPriceInQuotation(
           comboKeys[i],
-           combosPriceControllers[comboKeys[i]]!
-              .text,
+          combosPriceControllers[comboKeys[i]]!.text,
         );
-         setMainTotalInQuotation(
-          comboKeys[i],
-          totalLine,
-        );
-         getTotalItems();
+        setMainTotalInQuotation(comboKeys[i], totalLine);
+        getTotalItems();
       }
     }
   }

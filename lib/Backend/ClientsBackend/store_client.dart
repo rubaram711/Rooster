@@ -55,7 +55,6 @@ Future storeClient(
     List cars,
     ) async
 {
-  // print('object111');
   String token = await getAccessTokenFromPref();
   var body={
     "showOnPos": showOnPos,
@@ -65,8 +64,8 @@ Future storeClient(
     "name": name,
     "reference": reference,
     "clientNumber": clientNumber,
-    "country": country,
-    "city": city,
+    "country": country=='none'?null:country,
+    "city": city=='none'?null:city,
     "state": state,
     "zip": zip,
     "street": street,

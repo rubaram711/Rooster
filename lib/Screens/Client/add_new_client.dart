@@ -264,8 +264,8 @@ class _AddNewClientState extends State<AddNewClient> {
                                 rowWidth: middleRowWidth,
                                 textFieldWidth: middleTextFieldWidth,
                                 validationFunc: (String val) {
-                                  if (val.isNotEmpty && val.length < 7) {
-                                    return '7_digits'.tr;
+                                  if (val.isNotEmpty && val.length < 6) {
+                                    return '6_digits'.tr;
                                   }
                                   return null;
                                 },
@@ -353,7 +353,7 @@ class _AddNewClientState extends State<AddNewClient> {
                                               );
                                             },
                                           ).toList(),
-                                      enableFilter: true,
+                                      enableFilter: false,
                                       onSelected: (String? val) {
                                         setState(() {
                                           selectedTitle = val!;
@@ -369,8 +369,8 @@ class _AddNewClientState extends State<AddNewClient> {
                                 rowWidth: middleRowWidth,
                                 textFieldWidth: middleTextFieldWidth,
                                 validationFunc: (val) {
-                                  if (val.isNotEmpty && val.length < 9) {
-                                    return '7_digits'.tr;
+                                  if (val.isNotEmpty && val.length < 6) {
+                                    return '6_digits'.tr;
                                   }
                                   return null;
                                 },
@@ -490,10 +490,11 @@ class _AddNewClientState extends State<AddNewClient> {
                                                   String
                                                 >(value: option, label: option);
                                               }).toList(),
-                                          enableFilter: true,
+                                          enableFilter: false,
                                           onSelected: (String? val) {
                                             setState(() {
-                                              selectedCountry = val!;
+                                              countryController.text=val!;
+                                              selectedCountry = val;
                                               getCitiesFromBack(val);
                                             });
                                           },
@@ -601,10 +602,11 @@ class _AddNewClientState extends State<AddNewClient> {
                                                   String
                                                 >(value: option, label: option);
                                               }).toList(),
-                                          enableFilter: true,
+                                          enableFilter: false,
                                           onSelected: (String? val) {
                                             setState(() {
-                                              selectedCity = val!;
+                                              cityController.text=val!;
+                                              selectedCity = val;
                                             });
                                           },
                                         ),
@@ -1221,8 +1223,8 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                             rowWidth: middleRowWidth,
                             textFieldWidth: middleTextFieldWidth,
                             validationFunc: (String val) {
-                              if (val.isNotEmpty && val.length < 7) {
-                                return '7_digits'.tr;
+                              if (val.isNotEmpty && val.length < 6) {
+                                return '6_digits'.tr;
                               }
                               return null;
                             },
@@ -1316,7 +1318,7 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                                           label: option,
                                         );
                                       }).toList(),
-                                  enableFilter: true,
+                                  enableFilter: false,
                                   onSelected: (String? val) {
                                     setState(() {
                                       selectedContactsTitle = val!;
@@ -1334,8 +1336,8 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                             rowWidth: middleRowWidth,
                             textFieldWidth: middleTextFieldWidth,
                             validationFunc: (val) {
-                              if (val.isNotEmpty && val.length < 9) {
-                                return '7_digits'.tr;
+                              if (val.isNotEmpty && val.length < 6) {
+                                return '6_digits'.tr;
                               }
                               return null;
                             },
@@ -1845,7 +1847,7 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                                           label: option,
                                         );
                                       }).toList(),
-                                  enableFilter: true,
+                                  enableFilter: false,
                                   onSelected: (String? val) {
                                     cont.updateCarYear(widget.index, val!);
                                   },
@@ -1955,7 +1957,7 @@ class _ReusableCarSectionState extends State<ReusableCarSection> {
                                           );
                                         },
                                       ).toList(),
-                                  enableFilter: true,
+                                  enableFilter: false,
                                   onSelected: (String? val) {
                                     cont.updateCarRating(widget.index, val!);
                                   },
@@ -2337,7 +2339,7 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
                                   label: option,
                                 );
                               }).toList(),
-                          enableFilter: true,
+                          enableFilter: false,
                           onSelected: (String? val) {
                             setState(() {
                               selectedTitle = val!;
@@ -2378,8 +2380,8 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
                     rowWidth: MediaQuery.of(context).size.width * 0.9,
                     textFieldWidth: MediaQuery.of(context).size.width * 0.55,
                     validationFunc: (val) {
-                      if (val.isNotEmpty && val.length < 7) {
-                        return '7_digits'.tr;
+                      if (val.isNotEmpty && val.length < 6) {
+                        return '6_digits'.tr;
                       }
                       return null;
                     },
@@ -2402,8 +2404,8 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
                     rowWidth: MediaQuery.of(context).size.width * 0.9,
                     textFieldWidth: MediaQuery.of(context).size.width * 0.55,
                     validationFunc: (val) {
-                      if (val.isNotEmpty && val.length < 7) {
-                        return '7_digits'.tr;
+                      if (val.isNotEmpty && val.length < 6) {
+                        return '6_digits'.tr;
                       }
                       return null;
                     },
@@ -2522,7 +2524,7 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
                                         );
                                       })
                                       .toList(),
-                              enableFilter: true,
+                              enableFilter: false,
                               onSelected: (String? val) {
                                 setState(() {
                                   selectedCountry = val!;
@@ -2596,7 +2598,7 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
                                         );
                                       })
                                       .toList(),
-                              enableFilter: true,
+                              enableFilter: false,
                               onSelected: (String? val) {
                                 setState(() {
                                   selectedCity = val!;

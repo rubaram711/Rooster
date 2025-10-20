@@ -126,6 +126,13 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
       progressVar = 0;
       selectedCustomerIds = '';
       currencyController.text = '';
+      salesOrderController.globalDiscountAmount.text = '';
+      salesOrderController.specialDiscAmount.text = '';
+      salesOrderController.preSpecialDisc = 0.0;
+      salesOrderController.preGlobalDisc = 0.0;
+      salesOrderController.vatInSalesOrderCurrency = 0.0;
+      salesOrderController.specialDiscountPercentageValue = '0';
+      salesOrderController.globalDiscountPercentageValue = '0';
     });
   }
 
@@ -138,8 +145,12 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
     salesOrderController.selectedCurrencySymbol =
         exchangeRatesController.currenciesSymbolsList[index];
     salesOrderController.selectedCurrencyName = 'USD';
-    var vat = await getCompanyVatFromPref();
-    salesOrderController.setCompanyVat(double.parse(vat));
+    var companySubjectToVat = await getCompanySubjectToVatFromPref();
+    if(companySubjectToVat == '1'){
+      var vat = await getCompanyVatFromPref();
+      salesOrderController.setCompanyVat(double.parse(vat));}else{
+      salesOrderController.setCompanyVat(0);
+    }
     var companyCurrency = await getCompanyPrimaryCurrencyFromPref();
     var companyCurrencyLatestRate =
         await getPrimaryCurrencyLatestRateFromPref();
@@ -233,8 +244,10 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
 
   @override
   void initState() {
+    setVars();
     salesOrderController
         .rowsInListViewInSalesOrder={};
+    salesOrderController.unitPriceControllers={};
     salesOrderController.orderedKeys=[];
     _controller = QuillController(
       document: Document(),
@@ -250,7 +263,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
     priceConditionController.text = 'Prices are before vat';
     salesOrderController.getAllUsersSalesPersonFromBack();
     salesOrderController.getAllTaxationGroupsFromBack();
-    setVars();
     salesOrderController.getFieldsForCreateSalesOrderFromBack();
     getCurrency();
     salesOrderController.resetSalesOrder();
@@ -457,22 +469,22 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                               var itemTotal = double.parse(
                                                 '${item['item_total']}',
                                               );
-                                              var combosmap =
+                                              var combosMap =
                                                   salesOrderCont
                                                       .combosMap[item['combo']
                                                       .toString()];
                                               var comboImage =
-                                                  '${combosmap['image']}' !=
+                                                  '${combosMap['image']}' !=
                                                               '' &&
-                                                          combosmap['image'] !=
+                                                          combosMap['image'] !=
                                                               null &&
-                                                          combosmap['image']
+                                                          combosMap['image']
                                                               .isNotEmpty
-                                                      ? '${combosmap['image']}'
+                                                      ? '${combosMap['image']}'
                                                       : '';
 
-                                              var combobrand =
-                                                  combosmap['brand'] ?? '';
+                                              var comboBrand =
+                                                  combosMap['brand'] ?? '';
 
                                               itemTotal += double.parse(
                                                 '${item['item_total']}',
@@ -498,7 +510,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 'item_image': '',
                                                 'item_brand': '',
                                                 'combo_image': comboImage,
-                                                'combo_brand': combobrand,
+                                                'combo_brand': comboBrand,
                                                 'isImageList': true,
                                                 'title': '',
                                                 'image': '',
@@ -577,7 +589,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                           var quotNumber = '';
 
                                           return PrintSalesOrder(
-                                            vat: salesOrderController.vat11,
+                                            vat: salesOrderCont.companyVat.toString(),
                                             fromPage: 'createSo',
                                             quotationNumber: quotNumber,
                                             isPrintedAs0:
@@ -609,7 +621,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             globalDiscount:
                                                 globalDiscPercentController
                                                     .text,
-                                            //widget.info['globalDiscount'] ?? '0',
+                                            globalDiscountAmount: salesOrderCont.globalDiscountAmount.text.isEmpty?'0':salesOrderCont.globalDiscountAmount.text,
                                             totalPriceAfterDiscount:
                                                 salesOrderCont.preGlobalDisc ==
                                                         0.0
@@ -620,9 +632,9 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                       salesOrderCont
                                                           .totalAfterGlobalDis,
                                                     ),
-                                            additionalSpecialDiscount:
-                                                salesOrderCont.preSpecialDisc
-                                                    .toStringAsFixed(2),
+                                            // additionalSpecialDiscount:
+                                            //     salesOrderCont.preSpecialDisc
+                                            //         .toStringAsFixed(2),
                                             totalPriceAfterSpecialDiscount:
                                                 salesOrderCont.preSpecialDisc ==
                                                         0
@@ -646,9 +658,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
 
                                             vatBySalesOrderCurrency:
                                                 formatDoubleWithCommas(
-                                                  double.parse(
-                                                    salesOrderCont.vat11,
-                                                  ),
+                                                    salesOrderCont.vatInSalesOrderCurrency,
                                                 ),
                                             finalPriceBySalesOrderCurrency:
                                                 formatDoubleWithCommas(
@@ -662,7 +672,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 specialDiscPercentController
                                                     .text,
                                             specialDiscountAmount:
-                                                salesOrderCont.specialDisc,
+                                            salesOrderCont.specialDiscAmount.text.isEmpty?'0':salesOrderCont.specialDiscAmount.text,
                                             salesPerson: selectedSalesPerson,
                                             salesOrderCurrency:
                                                 salesOrderCont
@@ -677,6 +687,13 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 salesOrderCont
                                                     .phoneNumber[selectedCustomerIds] ??
                                                 '---',
+                                            clientMobileNumber: salesOrderCont
+                                                .mobileNumber[selectedCustomerIds] ??
+                                                '---',
+                                            clientAddress: '${salesOrderCont
+                                                .city[selectedCustomerIds]!=''?'${salesOrderCont
+                                                .city[selectedCustomerIds]} - ' :''} ${salesOrderCont
+                                                .country[selectedCustomerIds]!=''?salesOrderCont.country[selectedCustomerIds]:'---'}' ,
                                             clientName:
                                                 clientNameController.text,
                                             termsAndConditions:
@@ -794,13 +811,13 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                         specialDiscPercentController
                                             .text, // inserted by user
                                         salesOrderController
-                                            .specialDisc, // calculated
+                                            .specialDiscAmount.text.isEmpty?'0':salesOrderController.specialDiscAmount.text, // calculated
                                         globalDiscPercentController.text,
-                                        salesOrderController.globalDisc,
-                                        salesOrderController.vat11
+                                        salesOrderController.globalDiscountAmount.text.isEmpty?'0':salesOrderController.globalDiscountAmount.text,
+                                        salesOrderController.companyVat
                                             .toString(), //vat
                                         salesOrderController
-                                            .vatInPrimaryCurrency
+                                            .vatInSalesOrderCurrency
                                             .toString(),
                                         salesOrderController.totalSalesOrder, //
 
@@ -932,22 +949,22 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                   var itemTotal = double.parse(
                                                     '${item['item_total']}',
                                                   );
-                                                  var combosmap =
+                                                  var combosMap =
                                                       salesOrderCont
                                                           .combosMap[item['combo']
                                                           .toString()];
                                                   var comboImage =
-                                                      '${combosmap['image']}' !=
+                                                      '${combosMap['image']}' !=
                                                                   '' &&
-                                                              combosmap['image'] !=
+                                                              combosMap['image'] !=
                                                                   null &&
-                                                              combosmap['image']
+                                                              combosMap['image']
                                                                   .isNotEmpty
-                                                          ? '${combosmap['image']}'
+                                                          ? '${combosMap['image']}'
                                                           : '';
 
-                                                  var combobrand =
-                                                      combosmap['brand'] ?? '';
+                                                  var comboBrand =
+                                                      combosMap['brand'] ?? '';
                                                   itemTotal += itemTotal;
                                                   var quotationItemInfo = {
                                                     'line_type_id': '3',
@@ -970,7 +987,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                     'item_image': '',
                                                     'item_brand': '',
                                                     'combo_image': comboImage,
-                                                    'combo_brand': combobrand,
+                                                    'combo_brand': comboBrand,
                                                     'isImageList': true,
                                                     'title': '',
                                                     'image': '',
@@ -1050,7 +1067,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
 
                                               return PrintSalesOrder(
                                                 fromPage: 'createSo',
-                                                vat: salesOrderCont.vat11,
+                                                vat: salesOrderCont.companyVat.toString(),
                                                 quotationNumber: quotNumber,
                                                 isPrintedAs0:
                                                     salesOrderCont.isPrintedAs0,
@@ -1084,7 +1101,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                 globalDiscount:
                                                     globalDiscPercentController
                                                         .text,
-                                                //widget.info['globalDiscount'] ?? '0',
+                                                globalDiscountAmount: salesOrderCont.globalDiscountAmount.text.isEmpty?'0':salesOrderCont.globalDiscountAmount.text,
                                                 totalPriceAfterDiscount:
                                                     salesOrderCont
                                                                 .preGlobalDisc ==
@@ -1097,10 +1114,6 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                           salesOrderCont
                                                               .totalAfterGlobalDis,
                                                         ),
-                                                additionalSpecialDiscount:
-                                                    salesOrderCont
-                                                        .preSpecialDisc
-                                                        .toStringAsFixed(2),
                                                 totalPriceAfterSpecialDiscount:
                                                     salesOrderCont
                                                                 .preSpecialDisc ==
@@ -1128,9 +1141,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
 
                                                 vatBySalesOrderCurrency:
                                                     formatDoubleWithCommas(
-                                                      double.parse(
-                                                        salesOrderCont.vat11,
-                                                      ),
+                                                        salesOrderCont.vatInSalesOrderCurrency,
                                                     ),
                                                 finalPriceBySalesOrderCurrency:
                                                     formatDoubleWithCommas(
@@ -1145,7 +1156,7 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                     specialDiscPercentController
                                                         .text,
                                                 specialDiscountAmount:
-                                                    salesOrderCont.specialDisc,
+                                                salesOrderCont.specialDiscAmount.text.isEmpty?'0':salesOrderCont.specialDiscAmount.text,
                                                 salesPerson:
                                                     selectedSalesPerson,
                                                 salesOrderCurrency:
@@ -1161,6 +1172,13 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                     salesOrderCont
                                                         .phoneNumber[selectedCustomerIds] ??
                                                     '---',
+                                                clientMobileNumber: salesOrderCont
+                                                    .mobileNumber[selectedCustomerIds] ??
+                                                    '---',
+                                                clientAddress: '${salesOrderCont
+                                                    .city[selectedCustomerIds]!=''?'${salesOrderCont
+                                                    .city[selectedCustomerIds]} - ' :''} ${salesOrderCont
+                                                    .country[selectedCustomerIds]!=''?salesOrderCont.country[selectedCustomerIds]:'---'}' ,
                                                 clientName:
                                                     clientNameController.text,
                                                 termsAndConditions:
@@ -3318,39 +3336,76 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                         isCentered: true,
                                                         hint: '0',
                                                         onChangedFunc: (val) {
-                                                          setState(() {
-                                                            if (val == '') {
-                                                              globalDiscPercentController
-                                                                  .text = '0';
-                                                              globalDiscountPercentage =
-                                                                  '0';
-                                                            } else {
-                                                              globalDiscountPercentage =
-                                                                  val;
-                                                            }
-                                                          });
-                                                          salesOrderCont
-                                                              .setGlobalDisc(
-                                                                globalDiscountPercentage,
-                                                              );
+                                                          if(salesOrderCont.totalItems==0){
+                                                            globalDiscPercentController.text= '';
+                                                          }else {
+                                                            setState(() {
+                                                              if (val == '') {
+                                                                globalDiscPercentController
+                                                                    .text = '0';
+                                                                globalDiscountPercentage =
+                                                                '0';
+                                                              } else {
+                                                                globalDiscountPercentage =
+                                                                    val;
+                                                              }
+                                                            });
+                                                            salesOrderCont
+                                                                .setGlobalDisc(
+                                                              globalDiscountPercentage,
+                                                            );
+                                                          }
                                                         },
                                                         validationFunc:
                                                             (val) {},
                                                       ),
                                                     ),
                                                     gapW10,
-                                                    ReusableShowInfoCard(
-                                                      text: formatDoubleWithCommas(
-                                                        double.parse(
-                                                          salesOrderController
-                                                              .globalDisc,
-                                                        ),
-                                                      ),
+                                                    SizedBox(
                                                       width:
-                                                          MediaQuery.of(
-                                                            context,
-                                                          ).size.width *
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
                                                           0.1,
+                                                      child: ReusableNumberField(
+                                                        textEditingController:
+                                                        salesOrderCont.globalDiscountAmount,
+                                                        isPasswordField: false,
+                                                        isCentered: true,
+                                                        hint: '0.00',
+                                                        onChangedFunc: (val) {
+                                                          if(salesOrderCont.totalItems==0){
+                                                            salesOrderCont.globalDiscountAmount.text= '';
+                                                          }else {
+                                                            setState(() {
+                                                              if (val == '') {
+                                                                globalDiscPercentController
+                                                                    .text = '0';
+                                                                salesOrderCont
+                                                                    .globalDiscountAmount
+                                                                    .text = '0';
+                                                                globalDiscountPercentage =
+                                                                '0';
+                                                              } else {
+                                                                globalDiscountPercentage =
+                                                                    ((double.parse(
+                                                                        val) /
+                                                                        salesOrderCont
+                                                                            .totalItems) *
+                                                                        100).toStringAsFixed(2);
+                                                                globalDiscPercentController
+                                                                    .text =
+                                                                    globalDiscountPercentage;
+                                                              }
+                                                            });
+                                                            salesOrderCont
+                                                                .setGlobalDiscPercentage(
+                                                                val
+                                                            );
+                                                          }
+                                                        },
+                                                        validationFunc: (val) {},
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -3378,41 +3433,78 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                         isCentered: true,
                                                         hint: '0',
                                                         onChangedFunc: (val) {
-                                                          setState(() {
-                                                            if (val == '') {
-                                                              specialDiscPercentController
-                                                                  .text = '0';
-                                                              specialDiscountPercentage =
-                                                                  '0';
-                                                            } else {
-                                                              specialDiscountPercentage =
-                                                                  val;
-                                                            }
-                                                          });
-                                                          salesOrderCont
-                                                              .setSpecialDisc(
-                                                                specialDiscountPercentage,
-                                                              );
+                                                          if(salesOrderCont.totalItems==0){
+                                                            specialDiscPercentController.text= '';
+                                                          }else{
+                                                            setState(() {
+                                                              if (val == '') {
+                                                                specialDiscPercentController
+                                                                    .text = '0';
+                                                                specialDiscountPercentage =
+                                                                '0';
+                                                              } else {
+                                                                specialDiscountPercentage =
+                                                                    val;
+                                                              }
+                                                            });
+                                                            salesOrderCont
+                                                                .setSpecialDisc(
+                                                              specialDiscountPercentage,
+                                                            );
+                                                          }
                                                         },
                                                         validationFunc:
                                                             (val) {},
                                                       ),
                                                     ),
                                                     gapW10,
-                                                    ReusableShowInfoCard(
-                                                      text: formatDoubleWithCommas(
-                                                        double.parse(
-                                                          salesOrderController
-                                                              .specialDisc,
-                                                        ),
-                                                      ),
-
-                                                      // salesOrderCont.specialDisc,
+                                                    SizedBox(
                                                       width:
-                                                          MediaQuery.of(
-                                                            context,
-                                                          ).size.width *
+                                                      MediaQuery.of(
+                                                        context,
+                                                      ).size.width *
                                                           0.1,
+                                                      child: ReusableNumberField(
+                                                        textEditingController:
+                                                        salesOrderCont.specialDiscAmount,
+                                                        isPasswordField: false,
+                                                        isCentered: true,
+                                                        hint: '0.00',
+                                                        onChangedFunc: (val) {
+                                                          if(salesOrderCont.totalItems==0){
+                                                            salesOrderCont.specialDiscAmount.text= '';
+                                                          }else {
+                                                            setState(() {
+                                                              if (val == '') {
+                                                                salesOrderCont
+                                                                    .specialDiscAmount
+                                                                    .text = '0';
+                                                                specialDiscPercentController
+                                                                    .text = '0';
+                                                                specialDiscountPercentage =
+                                                                '0';
+                                                              } else {
+                                                                specialDiscountPercentage =
+                                                                    ((double.parse(
+                                                                        val) /
+                                                                        salesOrderCont
+                                                                            .totalItems) *
+                                                                        100)
+                                                                        .toStringAsFixed(
+                                                                        2);
+                                                                specialDiscPercentController
+                                                                    .text =
+                                                                    specialDiscountPercentage;
+                                                              }
+                                                            });
+                                                            salesOrderCont
+                                                                .setSpecialDiscPercentage(
+                                                              val,
+                                                            );
+                                                          }
+                                                        },
+                                                        validationFunc: (val) {},
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -3440,10 +3532,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                       children: [
                                                         ReusableShowInfoCard(
                                                           text: formatDoubleWithCommas(
-                                                            double.parse(
                                                               salesOrderCont
-                                                                  .vatInPrimaryCurrency,
-                                                            ),
+                                                                  .companyVat,
                                                           ),
                                                           width:
                                                               MediaQuery.of(
@@ -3455,10 +3545,8 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                                         ReusableShowInfoCard(
                                                           text:
                                                               formatDoubleWithCommas(
-                                                                double.parse(
                                                                   salesOrderCont
-                                                                      .vat11,
-                                                                ),
+                                                                      .vatInSalesOrderCurrency,
                                                               ),
                                                           width:
                                                               MediaQuery.of(
@@ -3619,13 +3707,13 @@ class _CreateNewClientOrderState extends State<CreateNewClientOrder> {
                                             specialDiscPercentController
                                                 .text, // inserted by user
                                             salesOrderController
-                                                .specialDisc, // calculated
+                                                .specialDiscAmount.text.isEmpty?'0':salesOrderController.specialDiscAmount.text, // calculated
                                             globalDiscPercentController.text,
-                                            salesOrderController.globalDisc,
-                                            salesOrderController.vat11
+                                            salesOrderController.globalDiscountAmount.text.isEmpty?'0':salesOrderController.globalDiscountAmount.text,
+                                            salesOrderController.companyVat
                                                 .toString(), //vat
                                             salesOrderController
-                                                .vatInPrimaryCurrency
+                                                .vatInSalesOrderCurrency
                                                 .toString(),
                                             salesOrderController
                                                 .totalSalesOrder, //
@@ -4079,7 +4167,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
   TextEditingController qtyController = TextEditingController();
   TextEditingController discountController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-  TextEditingController itemwarehouseController = TextEditingController();
+  TextEditingController itemWarehouseController = TextEditingController();
 
   final SalesOrderController salesOrderController = Get.find();
   final ExchangeRatesController exchangeRatesController = Get.find();
@@ -4109,16 +4197,16 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
     // qtyController.text = '0';
     // discount = '0';
     // quantity = '0';
-    var inddd = salesOrderController.warehouseIds.indexOf(
+    var warehouseIndex = salesOrderController.warehouseIds.indexOf(
       salesOrderController.rowsInListViewInSalesOrder[widget
           .index]['item_warehouseId'],
     );
 
-    itemwarehouseController.text =
+    itemWarehouseController.text =
         salesOrderController.rowsInListViewInSalesOrder[widget
                     .index]['item_warehouseId'] !=
                 ''
-            ? salesOrderController.warehousesNameList[inddd]
+            ? salesOrderController.warehousesNameList[warehouseIndex]
             : salesOrderController.rowsInListViewInSalesOrder[widget
                 .index]['item_warehouseId'];
     itemCodeController.text =
@@ -4473,7 +4561,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   width: MediaQuery.of(context).size.width * 0.10,
                   // requestFocusOnTap: false,
                   enableSearch: true,
-                  controller: itemwarehouseController,
+                  controller: itemWarehouseController,
                   hintText: 'deliver_warehouse'.tr,
                   inputDecorationTheme: InputDecorationTheme(
                     // filled: true,
@@ -4509,7 +4597,7 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                   enableFilter: true,
                   onSelected: (String? value) {
                     setState(() {
-                      itemwarehouseController.text = value!;
+                      itemWarehouseController.text = value!;
 
                       var index = cont.warehousesNameList.indexOf(value);
                       var val = '${cont.warehouseIds[index]}';
@@ -4776,12 +4864,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
                             });
                             setState(() {
                               cont.totalItems = 0.0;
-                              cont.globalDisc = "0.0";
+                              cont.globalDiscountAmount.text = "";
                               cont.globalDiscountPercentageValue = "0.0";
-                              cont.specialDisc = "0.0";
+                              cont.specialDiscAmount.text = "";
                               cont.specialDiscountPercentageValue = "0.0";
-                              cont.vat11 = "0.0";
-                              cont.vatInPrimaryCurrency = "0.0";
+                              cont.vatInSalesOrderCurrency= 0;
                               cont.totalSalesOrder = "0.0";
                             });
                             if (cont.rowsInListViewInSalesOrder != {}) {
@@ -5271,19 +5358,19 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
   final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
-    var indd = salesOrderController.warehouseIds.indexOf(
+    var warehouseIndex = salesOrderController.warehouseIds.indexOf(
       salesOrderController.rowsInListViewInSalesOrder[widget
           .index]['combo_warehouseId'],
     );
-    // var indx = salesOrderController.warehousesNameList[indd];
+    // var index = salesOrderController.warehousesNameList[warehouseIndex];
 
-    // print(salesOrderController.warehousesNameList[indd]);
+    // print(salesOrderController.warehousesNameList[warehouseIndex]);
 
     warehouseController.text =
         salesOrderController.rowsInListViewInSalesOrder[widget
                     .index]['combo_warehouseId'] !=
                 ''
-            ? salesOrderController.warehousesNameList[indd]
+            ? salesOrderController.warehousesNameList[warehouseIndex]
             : salesOrderController.rowsInListViewInSalesOrder[widget
                 .index]['combo_warehouseId'];
     comboCodeController.text =
@@ -5859,12 +5946,11 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                             });
                             setState(() {
                               cont.totalItems = 0.0;
-                              cont.globalDisc = "0.0";
+                              cont.globalDiscountAmount.text = "";
                               cont.globalDiscountPercentageValue = "0.0";
-                              cont.specialDisc = "0.0";
+                              cont.specialDiscAmount.text = "";
                               cont.specialDiscountPercentageValue = "0.0";
-                              cont.vat11 = "0.0";
-                              cont.vatInPrimaryCurrency = "0.0";
+                              cont.vatInSalesOrderCurrency = 0;
                               cont.totalSalesOrder = "0.0";
                             });
                             if (cont.rowsInListViewInSalesOrder != {}) {

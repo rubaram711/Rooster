@@ -396,16 +396,16 @@ class _QuotationDataState extends State<QuotationData> {
                                         quotationController
                                             .selectedQuotationData['globalDiscount'] ??
                                         '0',
-
+                                    globalDiscountAmount: quotationController.selectedQuotationData['globalDiscountAmount'] ?? '0',
                                     totalPriceAfterDiscount:
                                     // totalPriceAfterDiscount.toString() ,
                                     formatDoubleWithCommas(
                                       totalPriceAfterDiscount,
                                     ),
 
-                                    additionalSpecialDiscount:
-                                        additionalSpecialDiscount
-                                            .toStringAsFixed(2),
+                                    // additionalSpecialDiscount:
+                                    //     additionalSpecialDiscount
+                                    //         .toStringAsFixed(2),
                                     totalPriceAfterSpecialDiscount:
                                         formatDoubleWithCommas(
                                           totalPriceAfterSpecialDiscount,
@@ -450,10 +450,18 @@ class _QuotationDataState extends State<QuotationData> {
                                         quotationController
                                             .selectedQuotationData['currency']['latest_rate'] ??
                                         '',
-                                    clientPhoneNumber:
-                                        quotationController
-                                            .selectedQuotationData['client']['phoneNumber'] ??
-                                        '---',
+                                    clientPhoneNumber: quotationController
+                                        .selectedQuotationData['client']['phoneNumber']==null?'---':
+                                        '${quotationController.selectedQuotationData['client']['phoneCode']}-'
+                                            '${quotationController.selectedQuotationData['client']['phoneNumber']}',
+                                    clientMobileNumber:  quotationController
+                                        .selectedQuotationData['client']['mobileNumber']==null?'---':
+                                    '${quotationController.selectedQuotationData['client']['mobileCode']}-'
+                                        '${quotationController.selectedQuotationData['client']['mobileNumber']}',
+                                    clientAddress: '${quotationController
+                                        .selectedQuotationData['client']['city']!=null?'${quotationController
+                                        .selectedQuotationData['client']['city']} - ' :''} ${quotationController
+                                        .selectedQuotationData['client']['country'] ?? '---'}' ,
                                     clientName:
                                         quotationController
                                             .selectedQuotationData['client']['name'] ??

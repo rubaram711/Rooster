@@ -11,70 +11,8 @@ import 'package:rooster_app/Backend/get_currencies.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/const/functions.dart';
 
-abstract class SalesInvoiceControllerAbstract extends GetxController {
-  getFieldsForCreateSalesInvoiceFromBack();
-  resetItemsAfterChangePriceList();
-  incrementListViewLengthInSalesInvoice(double val);
-  decrementListViewLengthInSalesInvoice(double val);
-  setSelectedPriceListId(String value);
-  setIsVatExempted(
-    bool isPrintedAsVatExemptVal,
-    bool isPrint0Val,
-    bool isVatNoPrintedVal,
-  );
-  setSpecialDisc(String specialDiscountPercentage);
-  setGlobalDisc(String globalDiscountPercentage);
-  setSelectedCashingMethodId(String value);
-  setIsVatExemptCheckBoxShouldAppear(bool val);
-  addToUnitPriceControllers(int index);
-  addToCombosPricesControllers(int index);
-  setItemIdInSalesInvoice(int index, String val);
-  setItemNameInSalesInvoice(int index, String val);
-  setItemWareHouseInSalesInvoice(int index, String val);
-  setMainCodeInSalesInvoice(int index, String val);
-  setTypeInSalesInvoice(int index, String val);
-  setTitleInSalesInvoice(int index, String val);
-  setNoteInSalesInvoice(int index, String val);
-  setImageInSalesInvoice(int index, Uint8List imageFile);
-  setMainDescriptionInSalesInvoice(int index, String val);
-  setEnteredQtyInSalesInvoice(int index, String val);
-  setComboInSalesInvoice(int index, String val);
-  setEnteredUnitPriceInSalesInvoice(int index, String val);
-  setEnteredDiscInSalesInvoice(int index, String val);
-  setMainTotalInSalesInvoice(int index, String val);
-  getTotalItems();
-  setStatus(String val);
-  setCompanyVat(double val);
-  setLatestRate(double val);
-  setVat11();
-  setTotalAllSalesOrder();
-  setIsVatExemptChecked(bool val);
-  setSelectedCurrency(String id, String name);
-  setSelectedCurrencySymbol(String val);
-  setExchangeRateForSelectedCurrency(String val);
-  changeBoolVar(bool val);
-  increaseImageSpace(double val);
-  setLogo(Uint8List val);
-  setIsBeforeVatPrices(bool val);
-  getAllTaxationGroupsFromBack();
-  resetSalesInvoice();
-  clearList();
-  addToRowsInListViewInSalesInvoice(int index, Map p);
-  removeFromRowsInListViewInSalesInvoice(int index);
-  setSearchInSalesInvoicesController(String value);
-  getAllSalesInvoiceFromBack();
-  getAllSalesInvoiceFromBackWithoutExcept();
-  getAllUsersSalesPersonFromBack();
-  setSalesInvoices(List value);
-  setSelectedSalesInvoice(Map map);
-  resetSalesInvoiceData();
-  clearRowsInListViewInSalesInvoiceData();
-  addToRowsInListViewInSalesInvoiceData(List p);
-  setIsSubmitAndPreviewClicked(bool val);
-  setSelectedWarehouseId(String val);
-}
 
-class SalesInvoiceController extends SalesInvoiceControllerAbstract {
+class SalesInvoiceController extends GetxController {
   String selectedPaymentTermId = '';
   setSelectedPaymentTermId(String val) {
     selectedPaymentTermId = val;
@@ -114,21 +52,21 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
 
   TextEditingController warehouseMenuController = TextEditingController();
   String selectedWarehouseId = '';
-  @override
+
   setSelectedWarehouseId(String val) {
     selectedWarehouseId = val;
     update();
   }
 
   bool isSubmitAndPreviewClicked = false;
-  @override
+
   setIsSubmitAndPreviewClicked(bool val) {
     isSubmitAndPreviewClicked = val;
     update();
   }
 
   String status = '';
-  @override
+
   setStatus(String val) {
     status = val;
     update();
@@ -136,13 +74,13 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
 
   Map<int, TextEditingController> unitPriceControllers = {};
   Map<int, TextEditingController> combosPriceControllers = {};
-  @override
+
   addToUnitPriceControllers(int index) {
     unitPriceControllers[index] = TextEditingController();
     update();
   }
 
-  @override
+
   addToCombosPricesControllers(int index) {
     combosPriceControllers[index] = TextEditingController();
     update();
@@ -163,86 +101,86 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     //    'total': '0',
     //  }
   };
-  @override
+
   setItemIdInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['item_id'] = val;
     update();
   }
 
-  @override
+
   setItemNameInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['itemName'] = val;
     update();
   }
 
-  @override
+
   setItemWareHouseInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['item_WarehouseId'] = val;
     update();
   }
 
-  @override
+
   setMainCodeInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['item_main_code'] = val;
     update();
   }
 
-  @override
+
   setTypeInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['line_type_id'] = val;
     update();
   }
 
-  @override
+
   setTitleInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['title'] = val;
     update();
   }
 
-  @override
+
   setNoteInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['note'] = val;
     update();
   }
 
-  @override
+
   setImageInSalesInvoice(int index, Uint8List imageFile) {
     // print(imageFile);
     rowsInListViewInSalesInvoice[index]['image'] = imageFile;
     update();
   }
 
-  @override
+
   setMainDescriptionInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['item_description'] = val;
     update();
   }
 
-  @override
+
   setEnteredQtyInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['item_quantity'] = val;
     update();
   }
 
-  @override
+
   setComboInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['combo'] = val;
     update();
   }
 
-  @override
+
   setEnteredUnitPriceInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['item_unit_price'] = val;
     update();
   }
 
-  @override
+
   setEnteredDiscInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['item_discount'] = val;
     update();
   }
 
-  @override
+
   setMainTotalInSalesInvoice(int index, String val) {
     rowsInListViewInSalesInvoice[index]['item_total'] = val;
     update();
@@ -254,7 +192,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   double totalAfterGlobalDis = 0.0;
   double totalAfterGlobalSpecialDis = 0.0;
   bool updateItem = false;
-  @override
+
   getTotalItems() {
     if (rowsInListViewInSalesInvoice != {}) {
       totalItems = rowsInListViewInSalesInvoice.values
@@ -262,11 +200,15 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
           .reduce((a, b) => a + b);
     }
 
-    setVat11();
-    setTotalAllSalesOrder();
-    // setGlobalDisc(globalDiscountPercentageValue);
-    // setSpecialDisc(specialDiscountPercentageValue);
 
+    setTotalSalesInvoiceAfterVat();
+    if(globalDiscountPercentageValue != '' || globalDiscountPercentageValue != '0') {
+      setGlobalDisc(globalDiscountPercentageValue);
+    }
+    if((specialDiscountPercentageValue !='' || specialDiscountPercentageValue !='0') && (globalDiscountPercentageValue == ''||  globalDiscountPercentageValue == '0') )
+    {
+      setSpecialDisc(specialDiscountPercentageValue);
+    }
     update();
   }
 
@@ -274,20 +216,20 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   String selectedCurrencyId = '';
   String selectedCurrencySymbol = '';
   String selectedCurrencyName = 'USD';
-  @override
+
   setSelectedCurrency(String id, String name) {
     selectedCurrencyId = id;
     selectedCurrencyName = name;
     update();
   }
 
-  @override
+
   setSelectedCurrencySymbol(String val) {
     selectedCurrencySymbol = val;
     update();
   }
 
-  @override
+
   setExchangeRateForSelectedCurrency(String val) {
     exchangeRateForSelectedCurrency = val;
     update();
@@ -295,7 +237,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
 
   bool imageAvailable = false;
   double imageSpaceHeight = 90;
-  @override
+
   changeBoolVar(bool val) {
     imageAvailable = val;
     update();
@@ -304,21 +246,21 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   List<Widget> photosWidgetsList = [];
   List photosFilesList = [];
   double photosListWidth = 0;
-  @override
+
   increaseImageSpace(double val) {
     imageSpaceHeight = imageSpaceHeight + val;
     update();
   }
 
   Uint8List logoBytes = Uint8List(0);
-  @override
+
   setLogo(Uint8List val) {
     logoBytes = val;
     update();
   }
 
   bool isBeforeVatPrices = true;
-  @override
+
   setIsBeforeVatPrices(bool val) {
     isBeforeVatPrices = val;
     update();
@@ -330,7 +272,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   Map ratesInTaxationGroupList = {};
   // List ratesInTaxationGroupList= [];
   int selectedTaxationGroupIndex = 0;
-  @override
+
   getAllTaxationGroupsFromBack() async {
     taxationGroupsList = [];
     // taxationGroupsList = {};
@@ -355,7 +297,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     update();
   }
 
-  @override
+
   resetSalesInvoice() {
     cashingMethodsNamesList = [];
     cashingMethodsIdsList = [];
@@ -366,22 +308,22 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     isSalesInvoiceInfoFetched = false;
 
     totalItems = 0;
-    specialDisc = '0';
-    globalDisc = '0';
-    vatInPrimaryCurrency = '0';
-    vat11 = '0';
+    specialDiscAmount.text = '';
+    globalDiscountAmount.text = '';
+    // vatInPrimaryCurrency = '0';
+    // vat11 = '0';
     totalSalesInvoice = '0.00';
     update();
   }
 
-  @override
+
   setSelectedPriceListId(String value) {
     selectedPriceListId = value;
     update();
   }
 
   bool isVatExemptCheckBoxShouldAppear = true;
-  @override
+
   setIsVatExemptCheckBoxShouldAppear(bool val) {
     isVatExemptCheckBoxShouldAppear = val;
     update();
@@ -390,7 +332,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   bool isPrintedAsVatExempt = false;
   bool isPrintedAs0 = false;
   bool isVatNoPrinted = false;
-  @override
+
   setIsVatExempted(
     bool isPrintedAsVatExemptVal,
     bool isPrint0Val,
@@ -403,122 +345,131 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   }
 
   String selectedCashingMethodId = '';
-  @override
+
   setSelectedCashingMethodId(String value) {
     selectedCashingMethodId = value;
     update();
   }
 
   double preGlobalDisc = 0.0; //GlobalDisc as double used in calc
-  String globalDisc = ''; // GlobalDisc as int to show it in ui
+  TextEditingController globalDiscountAmount = TextEditingController(); // GlobalDisc as int to show it in ui
   String globalDiscountPercentageValue = '';
 
-  @override
-  setGlobalDisc(String globalDiscountPercentage) {
-    globalDiscountPercentageValue = globalDiscountPercentage;
-    preGlobalDisc =
-        (totalItems) * double.parse(globalDiscountPercentageValue) / 100;
-    globalDisc = preGlobalDisc.toStringAsFixed(2);
 
-    totalAfterGlobalDis = totalItems - preGlobalDisc;
-    totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
-    setSpecialDisc(specialDiscountPercentageValue);
-    setVat11();
-    setTotalAllSalesOrder();
-    update();
+  setGlobalDisc(String globalDiscountPercentage) {
+    if(globalDiscountPercentage!='0') {
+      globalDiscountPercentageValue = globalDiscountPercentage;
+      preGlobalDisc =
+          (totalItems) * double.parse(globalDiscountPercentageValue) / 100;
+      globalDiscountAmount.text = preGlobalDisc.toStringAsFixed(2);
+
+      totalAfterGlobalDis = totalItems - preGlobalDisc;
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      setSpecialDisc(specialDiscountPercentageValue);
+      setTotalSalesInvoiceAfterVat();
+      update();
+    }
+  }
+
+  setGlobalDiscPercentage(String globalDiscountAmount) {
+    if(globalDiscountAmount!='0') {
+      preGlobalDisc=double.parse(globalDiscountAmount);
+      globalDiscountPercentageValue =
+          ((double.parse(globalDiscountAmount) / totalItems) * 100)
+              .toStringAsFixed(2);
+      // preGlobalDisc =
+      //     (totalItems) * double.parse(globalDiscountPercentageValue) / 100;
+      // globalDiscountAmount.text = preGlobalDisc.toStringAsFixed(2);
+
+      totalAfterGlobalDis = totalItems - preGlobalDisc;
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      setSpecialDisc(specialDiscountPercentageValue);
+      // setVat11();
+      setTotalSalesInvoiceAfterVat();
+      update();
+    }
   }
 
   double preSpecialDisc = 0.0;
-  String specialDisc = '';
+  TextEditingController specialDiscAmount = TextEditingController();
   String specialDiscountPercentageValue = '0';
-  @override
+
   setSpecialDisc(String specialDiscountPercentage) {
-    specialDiscountPercentageValue = specialDiscountPercentage;
-    preSpecialDisc =
-        totalAfterGlobalDis *
-        double.parse(specialDiscountPercentageValue) /
-        100;
-    specialDisc = preSpecialDisc.toStringAsFixed(2);
-    totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
-    setVat11();
-    setTotalAllSalesOrder();
-    update();
+    if(specialDiscountPercentage!='0') {
+      specialDiscountPercentageValue = specialDiscountPercentage;
+      preSpecialDisc =
+          totalAfterGlobalDis *
+              double.parse(specialDiscountPercentageValue) /
+              100;
+      specialDiscAmount.text = preSpecialDisc.toStringAsFixed(2);
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+
+      setTotalSalesInvoiceAfterVat();
+      update();
+    }
+  }
+  setSpecialDiscPercentage(String specialDiscountAmount) {
+    if(specialDiscountAmount!='0') {
+      preSpecialDisc=double.parse(specialDiscountAmount);
+      specialDiscountPercentageValue =
+          ((double.parse(specialDiscountAmount) / totalItems) * 100)
+              .toStringAsFixed(2);
+      totalAfterGlobalSpecialDis = totalAfterGlobalDis - preSpecialDisc;
+      setTotalSalesInvoiceAfterVat();
+      update();
+    }
   }
 
-  double preVat = 0.0;
+
   double preVatInPrimaryCurrency = 0.0;
-  String vat11 = '';
-  String vatInPrimaryCurrency = '';
-  double vat = 11;
-  double latestRate = 89500;
+  double latestRate = 1;
   String companyPrimaryCurrency = 'USD';
   setCompanyPrimaryCurrency(String val) {
     companyPrimaryCurrency = val;
     update();
   }
 
-  @override
+
   setCompanyVat(double val) {
-    vat = val;
+    companyVat=val;
+    setTotalSalesInvoiceAfterVat();
     update();
   }
 
-  @override
+
   setLatestRate(double val) {
     latestRate = val;
     update();
   }
 
-  @override
-  setVat11() {
-    if (isVatExemptChecked) {
-      preVat = 0;
-      vat11 = '0';
-      preVatInPrimaryCurrency = 0;
-      vatInPrimaryCurrency = '0';
-    } else {
-      preVat =
-          (totalItems - preGlobalDisc - preSpecialDisc) *
-          vat /
-          100; //all variables as double
-      vat11 = preVat.toStringAsFixed(2);
-      if (companyPrimaryCurrency == selectedCurrencyName) {
-        preVatInPrimaryCurrency = double.parse(vat11);
-      } else if (companyPrimaryCurrency == 'USD') {
-        preVatInPrimaryCurrency =
-            double.parse(vat11) / double.parse(exchangeRateForSelectedCurrency);
-      } else {
-        if (selectedCurrencyName == 'USD') {
-          preVatInPrimaryCurrency = double.parse(vat11) * latestRate;
-        } else {
-          var usdPreVat =
-              double.parse(vat11) /
-              double.parse(exchangeRateForSelectedCurrency);
-          preVatInPrimaryCurrency = usdPreVat * latestRate;
-        }
-      }
-      // preVat11LBP = double.parse(vat11)  * latestRate;
-      vatInPrimaryCurrency = preVatInPrimaryCurrency.toStringAsFixed(2);
-      update();
-    }
-  }
+
 
   double preTotalSalesInvoice = 0;
   String totalSalesInvoice = '';
-  @override
-  setTotalAllSalesOrder() {
-    preTotalSalesInvoice =
-        (totalItems - preGlobalDisc - preSpecialDisc) + preVat;
-    totalSalesInvoice = preTotalSalesInvoice.toStringAsFixed(2);
-    // setVat11();
+  double vatInSalesInvoiceCurrency = 0.0;
+  setTotalSalesInvoiceAfterVat() {
+    // preTotalSalesInvoice =
+    //     (totalItems - preGlobalDisc - preSpecialDisc) + preVat;
+    // totalSalesInvoice = preTotalSalesInvoice.toStringAsFixed(2);
+    var valueBeforeVat=(totalItems - preGlobalDisc - preSpecialDisc);
+    if(companyVat==0 ||  isPrintedAsVatExempt
+        || isPrintedAs0
+        || isVatNoPrinted){
+      companyVat=0;
+      vatInSalesInvoiceCurrency=0;
+      totalSalesInvoice = valueBeforeVat.toStringAsFixed(2);
+    }else{
+      vatInSalesInvoiceCurrency=double.parse((valueBeforeVat * (companyVat/100)).toStringAsFixed(2));
+      preTotalSalesInvoice = valueBeforeVat + vatInSalesInvoiceCurrency;
+      totalSalesInvoice = preTotalSalesInvoice.toStringAsFixed(2);
+    }
   }
 
   bool isVatExemptChecked = false;
-  @override
+
   setIsVatExemptChecked(bool val) {
     isVatExemptChecked = val;
-    setVat11();
-    setTotalAllSalesOrder();
+    setTotalSalesInvoiceAfterVat();
     update();
   }
 
@@ -529,6 +480,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   bool isSalesInvoiceInfoFetched = false;
   Map email = {};
   Map phoneNumber = {};
+  Map mobileNumber = {};
   Map clientNumber = {};
   Map name = {};
   Map country = {};
@@ -576,7 +528,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   Map<String,List<String>> allCodesForItem={};
   List<String> allCodesForAllItems=[];
   List items=[];
-  @override
+
   getFieldsForCreateSalesInvoiceFromBack() async {
     headersList = [];
     combosPricesCurrencies = {};
@@ -621,6 +573,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     customerForSplit = [];
     itemsForSplit = [];
     phoneNumber = {};
+    mobileNumber = {};
     email = {};
     clientNumber = {};
     country = {};
@@ -659,7 +612,8 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
       customerNameList.add('${client['name']}');
       customerNumberList.add('${client['client_number']}');
       customerIdsList.add('${client['id']}');
-      phoneNumber["${client['id']}"] = client['phone_number'] ?? '';
+      phoneNumber["${client['id']}"] = '${client['phone_code'] ?? ''}-${client['phone_number'] ?? ''}';
+      mobileNumber["${client['id']}"] =  '${client['mobile_code'] ?? ''}-${client['mobile_number'] ?? ''}';
       email["${client['id']}"] = client['email'] ?? '';
       country["${client['id']}"] = client['country'] ?? '';
       city["${client['id']}"] = client['city'] ?? '';
@@ -725,7 +679,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
-  @override
+
   resetItemsAfterChangePriceList() async {
     itemsCode = [];
     itemsIds = [];
@@ -860,33 +814,33 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
 
   double listViewLengthInSalesInvoice = 50;
   double increment = 60;
-  @override
+
   incrementListViewLengthInSalesInvoice(double val) {
     listViewLengthInSalesInvoice = listViewLengthInSalesInvoice + val;
     update();
   }
 
-  @override
+
   decrementListViewLengthInSalesInvoice(double val) {
     listViewLengthInSalesInvoice = listViewLengthInSalesInvoice - val;
     update();
   }
 
-  @override
+
   clearList() {
     rowsInListViewInSalesInvoice = {};
     orderedKeys = [];
     update();
   }
 
-  @override
+
   addToRowsInListViewInSalesInvoice(int index, Map p) {
     rowsInListViewInSalesInvoice[index] = p;
     orderedKeys.add(index);
     update();
   }
 
-  @override
+
   removeFromRowsInListViewInSalesInvoice(int index) {
     rowsInListViewInSalesInvoice.remove(index);
     orderedKeys.remove(index);
@@ -895,7 +849,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
 
   TextEditingController searchInSalesInvoicesController =
       TextEditingController();
-  @override
+
   setSearchInSalesInvoicesController(String value) {
     searchInSalesInvoicesController.text = value;
     update();
@@ -903,7 +857,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
 
   List salesInvoicesList1 = [];
   bool isSalesInvoiceFetched = false;
-  @override
+
   getAllSalesInvoiceFromBack() async {
     salesInvoicesList1 = [];
     isSalesInvoiceFetched = false;
@@ -922,7 +876,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   List salesInvoicesList2 = [];
   List salesInvoiceListPending = [];
   List salesInvoicesListCC = [];
-  @override
+
   getAllSalesInvoiceFromBackWithoutExcept() async {
     salesInvoicesList2 = [];
     salesInvoiceListPending = [];
@@ -959,7 +913,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
         if (cc['status'] == 'confirmed' ||
             cc['status'] == 'cancelled' ||
             cc['status'] == 'pending') {
-          // Check if this item already exists in SalesOrders List pending
+          // Check if this item already exists in Sales Invoice List pending
           bool existsCC = salesInvoicesListCC.any(
             (element) => element['id'] == cc['id'],
           );
@@ -976,7 +930,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     update();
   }
 
-  @override
+
   setSalesInvoices(List value) {
     salesInvoicesList2 = value;
     update();
@@ -987,7 +941,7 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
   List salesPersonListId = [];
   String salesPersonName = '';
   int salesPersonId = 0;
-  @override
+
   getAllUsersSalesPersonFromBack() async {
     salesInvoicesList2 = [];
     isSalesInvoiceFetched = false;
@@ -1005,28 +959,27 @@ class SalesInvoiceController extends SalesInvoiceControllerAbstract {
     isSalesInvoiceFetched = true;
     update();
   }
-  //sales order in document
 
-  @override
+
+
   setSelectedSalesInvoice(Map map) {
     selectedSalesInvoiceData = map;
     update();
   }
 
-  @override
+
   resetSalesInvoiceData() {
     rowsInListViewInSalesInvoiceData = [];
     selectedSalesInvoiceData = {};
     update();
   }
 
-  @override
+
   clearRowsInListViewInSalesInvoiceData() {
     rowsInListViewInSalesInvoiceData = [];
     update();
   }
 
-  @override
   addToRowsInListViewInSalesInvoiceData(List p) {
     rowsInListViewInSalesInvoiceData = p;
     update();

@@ -1043,7 +1043,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                       // print('widget.info[ ${widget.info['termsAndConditions']}');
                                       return PrintSalesOrder(
                                         fromPage: 'toInvoiced',
-                                        vat: salesOrderController.vat11,
+                                        vat: widget.info['vat'] ?? '',
                                         quotationNumber: quotNumber,
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
@@ -1081,14 +1081,17 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                         globalDiscount:
                                             widget.info['globalDiscount'] ??
                                             '0.00',
-
+                                        globalDiscountAmount:
+                                        widget
+                                            .info['globalDiscountAmount'] ??
+                                            '0',
                                         totalPriceAfterDiscount:
                                             formatDoubleWithCommas(
                                               totalPriceAfterDiscount,
                                             ),
-                                        additionalSpecialDiscount:
-                                            additionalSpecialDiscount
-                                                .toStringAsFixed(2),
+                                        // additionalSpecialDiscount:
+                                        //     additionalSpecialDiscount
+                                        //         .toStringAsFixed(2),
                                         totalPriceAfterSpecialDiscount:
                                             formatDoubleWithCommas(
                                               totalPriceAfterSpecialDiscount,
@@ -1134,10 +1137,23 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                                 .info['currency']['latest_rate'] ??
                                             '',
                                         clientPhoneNumber:
-                                            widget.info['client'] != null
-                                                ? widget.info['client']['phoneNumber'] ??
-                                                    '---'
-                                                : "---",
+                                        widget.info['client'] == null
+                                            ? "---"
+                                            : widget.info['client']['phoneNumber'] ==
+                                            null
+                                            ? '---'
+                                            : '${widget.info['client']['phoneCode']}-${widget.info['client']['phoneNumber']}',
+                                        clientMobileNumber:
+                                        widget.info['client'] == null
+                                            ? "---"
+                                            : widget.info['client']['mobileNumber'] ==
+                                            null
+                                            ? '---'
+                                            : '${widget.info['client']['mobileCode']}-${widget.info['client']['mobileNumber']}',
+                                        clientAddress:widget.info['client'] == null
+                                            ? "---"
+                                            : '${widget.info['client']['city'] != null ? '${widget.info['client']['city']} - ' : ''} '
+                                            '${widget.info['client']['country'] ?? '---'}',
                                         clientName:
                                             widget.info['client']['name'] ?? '',
                                         termsAndConditions:
@@ -2447,7 +2463,7 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
 
                                       return PrintSalesOrder(
                                         fromPage: 'toInvoiced',
-                                        vat: salesOrderController.vat11,
+                                        vat: widget.info['vat'] ?? '',
                                         quotationNumber: quotNumber,
                                         isPrintedAs0:
                                             '${widget.info['printedAsPercentage']}' ==
@@ -2485,14 +2501,17 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                         globalDiscount:
                                             widget.info['globalDiscount'] ??
                                             '0',
-
+                                        globalDiscountAmount:
+                                        widget
+                                            .info['globalDiscountAmount'] ??
+                                            '0',
                                         totalPriceAfterDiscount:
                                             formatDoubleWithCommas(
                                               totalPriceAfterDiscount,
                                             ),
-                                        additionalSpecialDiscount:
-                                            additionalSpecialDiscount
-                                                .toStringAsFixed(2),
+                                        // additionalSpecialDiscount:
+                                        //     additionalSpecialDiscount
+                                        //         .toStringAsFixed(2),
                                         totalPriceAfterSpecialDiscount:
                                             formatDoubleWithCommas(
                                               totalPriceAfterSpecialDiscount,
@@ -2538,10 +2557,23 @@ class _SalesOrderAsRowInTableState extends State<SalesOrderAsRowInTable> {
                                                 .info['currency']['latest_rate'] ??
                                             '',
                                         clientPhoneNumber:
-                                            widget.info['client'] != null
-                                                ? widget.info['client']['phoneNumber'] ??
-                                                    '---'
-                                                : "---",
+                                        widget.info['client'] == null
+                                            ? "---"
+                                            : widget.info['client']['phoneNumber'] ==
+                                            null
+                                            ? '---'
+                                            : '${widget.info['client']['phoneCode']}-${widget.info['client']['phoneNumber']}',
+                                        clientMobileNumber:
+                                        widget.info['client'] == null
+                                            ? "---"
+                                            : widget.info['client']['mobileNumber'] ==
+                                            null
+                                            ? '---'
+                                            : '${widget.info['client']['mobileCode']}-${widget.info['client']['mobileNumber']}',
+                                        clientAddress:widget.info['client'] == null
+                                            ? "---"
+                                            : '${widget.info['client']['city'] != null ? '${widget.info['client']['city']} - ' : ''} '
+                                            '${widget.info['client']['country'] ?? '---'}',
                                         clientName:
                                             widget.info['client']['name'] ?? '',
                                         termsAndConditions:

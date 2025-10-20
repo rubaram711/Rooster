@@ -378,7 +378,7 @@ class _CreateGroupTabState extends State<CreateGroupTab> {
                     btnText: 'save'.tr,
                     onTapFunction: () async {
                       if (_formKey.currentState!.validate()) {
-                        var res = await storeGroup(
+                        var res = await oldStoreGroup(
                           groupNameController.text,
                           groupCodeController.text,
                           selectedGroupId,

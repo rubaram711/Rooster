@@ -129,8 +129,8 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
     salesOrderController.selectedCurrencyId =
         exchangeRatesController.currenciesIdsList[index];
     salesOrderController.selectedCurrencyName = selectedCurrency;
-    var vat = await getCompanyVatFromPref();
-    salesOrderController.setCompanyVat(double.parse(vat));
+    // var vat = await getCompanyVatFromPref();
+    // salesOrderController.setCompanyVat(double.parse(vat));
     var companyCurrency = await getCompanyPrimaryCurrencyFromPref();
     salesOrderController.setCompanyPrimaryCurrency(companyCurrency);
     var result = exchangeRatesController.exchangeRatesList.firstWhere(
@@ -168,6 +168,10 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
     }
     salesOrderController.isVatExemptChecked =
         '${widget.info['vatExempt'] ?? ''}' == '1' ? true : false;
+    salesOrderController.isPrintedAs0='${widget.info['printedAsPercentage']??'0'}'=='1';
+    salesOrderController.isPrintedAsVatExempt='${widget.info['printedAsVatExempt']??'0'}'=='1';
+    salesOrderController.isVatNoPrinted='${widget.info['notPrinted']??'0'}'=='1';
+    salesOrderController.isVatExemptChecked='${widget.info['vatExempt']??'0'}'=='1';
   }
 
   late QuillController _controller;
@@ -224,6 +228,7 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
     getCurrency();
     salesOrderController.orderedKeys = [];
     salesOrderController.rowsInListViewInSalesOrder = {};
+    salesOrderController.unitPriceControllers={};
     salesOrderController.salesOrderCounter = 0;
     setProgressVar();
 
@@ -293,29 +298,29 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
         widget.info['globalDiscount'] ?? '0.0'; // entered by user
     specialDiscPercentController.text =
         widget.info['specialDiscount'] ?? '0.0'; //entered by user
-    salesOrderController.globalDisc =
+    salesOrderController.globalDiscountAmount.text =
         widget.info['globalDiscountAmount'] ?? '0.0';
-    salesOrderController.specialDisc =
+    salesOrderController.specialDiscAmount.text =
         widget.info['specialDiscountAmount'] ?? '0.0';
     salesOrderController.totalItems = double.parse(
       '${widget.info['totalBeforeVat'] ?? '0.0'}',
     );
-    // print('isVatZero $isVatZero');
-    salesOrderController.vat11 =
+    salesOrderController.preGlobalDisc=double.parse( widget.info['globalDiscountAmount'] ?? '0.0');
+    salesOrderController.preSpecialDisc=double.parse( widget.info['specialDiscountAmount'] ?? '0.0');
+    salesOrderController.companyVat =
         salesOrderController.isVatExemptChecked
-            ? '0'
-            : '${widget.info['vat'] ?? ''}';
-    salesOrderController.vatInPrimaryCurrency =
+            ? 0
+            : double.parse('${widget.info['vat'] ?? ''}');
+    salesOrderController.vatInSalesOrderCurrency =
         salesOrderController.isVatExemptChecked
-            ? '0'
-            : '${widget.info['vatLebanese'] ?? ''}';
-
-    // quotationController.totalQuotation = '${widget.info['total'] ?? ''}';
-    salesOrderController.totalSalesOrder = ((salesOrderController.totalItems -
-                double.parse(salesOrderController.globalDisc) -
-                double.parse(salesOrderController.specialDisc)) +
-            double.parse(salesOrderController.vat11))
-        .toStringAsFixed(2);
+            ? 0
+            : double.parse('${widget.info['vatLebanese'] ?? ''}');
+      salesOrderController.totalSalesOrder = '${widget.info['total'] ?? '0'}';
+    // salesOrderController.totalSalesOrder = ((salesOrderController.totalItems -
+    //             double.parse(salesOrderController.globalDiscountAmount) -
+    //             double.parse(salesOrderController.specialDiscAmount)) +
+    //         double.parse(salesOrderController.vat11))
+    //     .toStringAsFixed(2);
     salesOrderController.city[selectedCustomerIds] =
         widget.info['client']['city'] ?? '';
     salesOrderController.country[selectedCustomerIds] =
@@ -658,18 +663,17 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                             .toString(), //total before vat
                                         specialDiscPercentController
                                             .text, // inserted by user
-                                        salesOrderController
-                                            .specialDisc, // calculated
+                                        salesOrderCont
+                                            .specialDiscAmount.text.isEmpty?'0':salesOrderCont.specialDiscAmount.text, // calculated
                                         globalDiscPercentController.text,
-                                        salesOrderController.globalDisc,
-                                        salesOrderController.vat11
+                                        salesOrderCont.globalDiscountAmount.text.isEmpty?'0':salesOrderCont.globalDiscountAmount.text,
+                                        salesOrderController.companyVat
                                             .toString(), //vat
                                         salesOrderController
-                                            .vatInPrimaryCurrency
+                                            .vatInSalesOrderCurrency
                                             .toString(),
                                         salesOrderController
-                                            .totalSalesOrder, // quotationController.totalQuotation
-
+                                            .totalSalesOrder,
                                         salesOrderCont.isVatExemptChecked
                                             ? '1'
                                             : '0',
@@ -826,15 +830,15 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                             .toString(), //total before vat
                                         specialDiscPercentController
                                             .text, // inserted by user
-                                        salesOrderController
-                                            .specialDisc, // calculated
-                                        globalDiscPercentController.text,
-                                        salesOrderController.globalDisc,
-                                        salesOrderController.vat11
-                                            .toString(), //vat
-                                        salesOrderController
-                                            .vatInPrimaryCurrency
-                                            .toString(),
+                                          salesOrderCont
+                                              .specialDiscAmount.text.isEmpty?'0':salesOrderCont.specialDiscAmount.text, // calculated
+                                          globalDiscPercentController.text,
+                                          salesOrderCont.globalDiscountAmount.text.isEmpty?'0':salesOrderCont.globalDiscountAmount.text,
+                                          salesOrderController.companyVat
+                                              .toString(), //vat
+                                          salesOrderController
+                                              .vatInSalesOrderCurrency
+                                              .toString(),
                                         salesOrderController
                                             .totalSalesOrder, // quotationController.totalQuotation
 
@@ -990,14 +994,14 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                             .toString(), //total before vat
                                         specialDiscPercentController
                                             .text, // inserted by user
-                                        salesOrderController
-                                            .specialDisc, // calculated
+                                        salesOrderCont
+                                            .specialDiscAmount.text.isEmpty?'0':salesOrderCont.specialDiscAmount.text, // calculated
                                         globalDiscPercentController.text,
-                                        salesOrderController.globalDisc,
-                                        salesOrderController.vat11
+                                        salesOrderCont.globalDiscountAmount.text.isEmpty?'0':salesOrderCont.globalDiscountAmount.text,
+                                        salesOrderController.companyVat
                                             .toString(), //vat
                                         salesOrderController
-                                            .vatInPrimaryCurrency
+                                            .vatInSalesOrderCurrency
                                             .toString(),
                                         salesOrderController
                                             .totalSalesOrder, // quotationController.totalQuotation
@@ -3438,37 +3442,73 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                                   isCentered: true,
                                                   hint: '0',
                                                   onChangedFunc: (val) {
-                                                    // totalAllItems =
-                                                    //     quotationController
-                                                    //         .totalItems ;
-
-                                                    setState(() {
-                                                      if (val == '') {
-                                                        globalDiscPercentController
-                                                            .text = '0';
-                                                        globalDiscountPercentage =
-                                                            '0';
-                                                      } else {
-                                                        globalDiscountPercentage =
-                                                            val;
-                                                      }
-                                                    });
-                                                    cont.setGlobalDisc(
-                                                      globalDiscountPercentage,
-                                                    );
-                                                    // cont.getTotalItems();
+                                                    if(cont.totalItems==0){
+                                                      globalDiscPercentController.text= '';
+                                                    }else {
+                                                      setState(() {
+                                                        if (val == '') {
+                                                          globalDiscPercentController
+                                                              .text = '0';
+                                                          globalDiscountPercentage =
+                                                          '0';
+                                                        } else {
+                                                          globalDiscountPercentage =
+                                                              val;
+                                                        }
+                                                      });
+                                                      cont.setGlobalDisc(
+                                                        globalDiscountPercentage,
+                                                      );
+                                                    }
                                                   },
                                                   validationFunc: (val) {},
                                                 ),
                                               ),
                                               gapW10,
-                                              ReusableShowInfoCard(
-                                                text: cont.globalDisc,
+                                              SizedBox(
                                                 width:
-                                                    MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
                                                     0.1,
+                                                child: ReusableNumberField(
+                                                  textEditingController:
+                                                  cont.globalDiscountAmount,
+                                                  isPasswordField: false,
+                                                  isCentered: true,
+                                                  hint: '0.00',
+                                                  onChangedFunc: (val) {
+                                                    if(cont.totalItems==0){
+                                                      cont.globalDiscountAmount.text= '';
+                                                    }else {
+                                                      setState(() {
+                                                        if (val == '') {
+                                                          globalDiscPercentController
+                                                              .text = '0';
+                                                          cont
+                                                              .globalDiscountAmount
+                                                              .text = '0';
+                                                          globalDiscountPercentage =
+                                                          '0';
+                                                        } else {
+                                                          globalDiscountPercentage =
+                                                              ((double.parse(val) /
+                                                                  cont
+                                                                      .totalItems) *
+                                                                  100).toStringAsFixed(2);
+                                                          globalDiscPercentController
+                                                              .text =
+                                                              globalDiscountPercentage;
+                                                        }
+                                                      });
+                                                     cont
+                                                          .setGlobalDiscPercentage(
+                                                          val
+                                                      );
+                                                    }
+                                                  },
+                                                  validationFunc: (val) {},
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -3495,32 +3535,72 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                                   isCentered: true,
                                                   hint: '0',
                                                   onChangedFunc: (val) {
-                                                    setState(() {
-                                                      if (val == '') {
-                                                        specialDiscPercentController
-                                                            .text = '0';
-                                                        specialDiscountPercentage =
-                                                            '0';
-                                                      } else {
-                                                        specialDiscountPercentage =
-                                                            val;
-                                                      }
-                                                    });
-                                                    cont.setSpecialDisc(
-                                                      specialDiscountPercentage,
-                                                    );
+                                                    if(cont.totalItems==0){
+                                                      specialDiscPercentController.text= '';
+                                                    }else{
+                                                      setState(() {
+                                                        if (val == '') {
+                                                          specialDiscPercentController
+                                                              .text = '0';
+                                                          specialDiscountPercentage =
+                                                          '0';
+                                                        } else {
+                                                          specialDiscountPercentage =
+                                                              val;
+                                                        }
+                                                      });
+                                                      cont.setSpecialDisc(
+                                                        specialDiscountPercentage,
+                                                      );
+                                                    }
                                                   },
                                                   validationFunc: (val) {},
                                                 ),
                                               ),
                                               gapW10,
-                                              ReusableShowInfoCard(
-                                                text: cont.specialDisc,
+                                              SizedBox(
                                                 width:
-                                                    MediaQuery.of(
-                                                      context,
-                                                    ).size.width *
+                                                MediaQuery.of(
+                                                  context,
+                                                ).size.width *
                                                     0.1,
+                                                child: ReusableNumberField(
+                                                  textEditingController:
+                                                  cont.specialDiscAmount,
+                                                  isPasswordField: false,
+                                                  isCentered: true,
+                                                  hint: '0.00',
+                                                  onChangedFunc: (val) {
+                                                    if(cont.totalItems==0){
+                                                      cont.specialDiscAmount.text= '';
+                                                    }else {
+                                                      setState(() {
+                                                        if (val == '') {
+                                                          cont.specialDiscAmount
+                                                              .text = '0';
+                                                          specialDiscPercentController
+                                                              .text = '0';
+                                                          specialDiscountPercentage =
+                                                          '0';
+                                                        } else {
+                                                          specialDiscountPercentage =
+                                                              ((double.parse(val) /
+                                                                  cont
+                                                                      .totalItems) *
+                                                                  100).toStringAsFixed(2);
+                                                          specialDiscPercentController
+                                                              .text =
+                                                              specialDiscountPercentage;
+                                                        }
+                                                      });
+                                                      cont
+                                                          .setSpecialDiscPercentage(
+                                                        val,
+                                                      );
+                                                    }
+                                                  },
+                                                  validationFunc: (val) {},
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -3538,8 +3618,7 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                                 children: [
                                                   ReusableShowInfoCard(
                                                     text:
-                                                        cont.vatInPrimaryCurrency,
-                                                    // .toString(),
+                                                        cont.companyVat.toString(),
                                                     width:
                                                         MediaQuery.of(
                                                           context,
@@ -3548,8 +3627,7 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                                   ),
                                                   gapW10,
                                                   ReusableShowInfoCard(
-                                                    text: cont.vat11,
-                                                    // .toString(),
+                                                    text: cont.vatInSalesOrderCurrency.toString(),
                                                     width:
                                                         MediaQuery.of(
                                                           context,
@@ -3805,12 +3883,14 @@ class _UpdateSalesOrderDialogState extends State<UpdateSalesOrderDialog> {
                                         .toString(), //total before vat
                                     specialDiscPercentController
                                         .text, // inserted by user
-                                    salesOrderController
-                                        .specialDisc, // calculated
+                                    salesOrderCont
+                                        .specialDiscAmount.text.isEmpty?'0':salesOrderCont.specialDiscAmount.text, // calculated
                                     globalDiscPercentController.text,
-                                    salesOrderController.globalDisc,
-                                    salesOrderController.vat11.toString(), //vat
-                                    salesOrderController.vatInPrimaryCurrency
+                                    salesOrderCont.globalDiscountAmount.text.isEmpty?'0':salesOrderCont.globalDiscountAmount.text,
+                                    salesOrderController.companyVat
+                                        .toString(), //vat
+                                    salesOrderController
+                                        .vatInSalesOrderCurrency
                                         .toString(),
                                     salesOrderController
                                         .totalSalesOrder, // quotationController.totalQuotation
@@ -4802,12 +4882,11 @@ class _ReusableItemRowState extends State<ReusableItemRow> {
 
                       setState(() {
                         cont.totalItems = 0.0;
-                        cont.globalDisc = "0.0";
+                        cont.globalDiscountAmount.text = "";
                         cont.globalDiscountPercentageValue = "0.0";
-                        cont.specialDisc = "0.0";
+                        cont.specialDiscAmount.text = "";
                         cont.specialDiscountPercentageValue = "0.0";
-                        cont.vat11 = "0.0";
-                        cont.vatInPrimaryCurrency = "0.0";
+                        cont.vatInSalesOrderCurrency = 0;
                         cont.totalSalesOrder = "0.0";
 
                         cont.getTotalItems();
@@ -5991,12 +6070,11 @@ class _ReusableComboRowState extends State<ReusableComboRow> {
                       );
                       setState(() {
                         cont.totalItems = 0.0;
-                        cont.globalDisc = "0.0";
+                        cont.globalDiscountAmount.text = "";
                         cont.globalDiscountPercentageValue = "0.0";
-                        cont.specialDisc = "0.0";
+                        cont.specialDiscAmount.text = "";
                         cont.specialDiscountPercentageValue = "0.0";
-                        cont.vat11 = "0.0";
-                        cont.vatInPrimaryCurrency = "0.0";
+                        cont.vatInSalesOrderCurrency =0;
                         cont.totalSalesOrder = "0.0";
 
                         cont.getTotalItems();
