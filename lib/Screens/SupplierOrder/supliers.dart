@@ -388,7 +388,7 @@ class _SuppliersState extends State<Suppliers> {
                         validationFunc: (String value) {
                           if (value.isNotEmpty &&
                               !RegExp(
-                                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+\.[a-zA-Z]+",
                               ).hasMatch(value)) {
                             return 'check_format';
                           }
@@ -526,7 +526,7 @@ class _SuppliersState extends State<Suppliers> {
                         // rowWidth: MediaQuery.of(context).size.width * 0.25,
                         // textFieldWidth: MediaQuery.of(context).size.width * 0.2,
                         validationFunc: (String value) {
-                          // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                          // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+\.[a-zA-Z]+")
                           //     .hasMatch(value)) {
                           //   return 'check_format'.tr ;
                           // }return null;

@@ -8,6 +8,7 @@ import 'package:rooster_app/Backend/SalesInvoiceBackend/get_sales_invoice_create
 
 import 'package:rooster_app/Backend/UsersBackend/get_user.dart';
 import 'package:rooster_app/Backend/get_currencies.dart';
+import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/const/functions.dart';
 
@@ -516,29 +517,29 @@ class SalesInvoiceController extends GetxController {
   Map itemUnitPrice = {};
   Map itemsVats = {};
   Map itemsPricesCurrencies = {};
-  List<String> combosCodesList = [];
-  List<String> combosNamesList = [];
-  List<String> combosDescriptionList = [];
-  List<String> combosPricesList = [];
-  List<String> combosIdsList = [];
-  List<List<String>> combosMultiPartList = [];
-  List<String> combosForSplit = [];
-  Map combosPricesCurrencies = {};
-  Map combosMap = {};
+  // List<String> combosCodesList = [];
+  // List<String> combosNamesList = [];
+  // List<String> combosDescriptionList = [];
+  // List<String> combosPricesList = [];
+  // List<String> combosIdsList = [];
+  // List<List<String>> combosMultiPartList = [];
+  // List<String> combosForSplit = [];
+  // Map combosPricesCurrencies = {};
+  // Map combosMap = {};
   Map<String,List<String>> allCodesForItem={};
   List<String> allCodesForAllItems=[];
   List items=[];
 
   getFieldsForCreateSalesInvoiceFromBack() async {
     headersList = [];
-    combosPricesCurrencies = {};
-    combosPricesList = [];
-    combosNamesList = [];
-    combosIdsList = [];
-    combosCodesList = [];
-    combosDescriptionList = [];
-    combosMultiPartList = [];
-    combosForSplit = [];
+    // combosPricesCurrencies = {};
+    // combosPricesList = [];
+    // combosNamesList = [];
+    // combosIdsList = [];
+    // combosCodesList = [];
+    // combosDescriptionList = [];
+    // combosMultiPartList = [];
+    // combosForSplit = [];
     cashingMethodsNamesList = [];
     cashingMethodsIdsList = [];
     itemsDescription = {};
@@ -565,7 +566,7 @@ class SalesInvoiceController extends GetxController {
     itemsCode = [];
     itemsIds = [];
     itemsMap = {};
-    combosMap = {};
+    // combosMap = {};
     // itemsMultiPartList = [];
     itemsDes = [];
     itemsName = [];
@@ -656,29 +657,31 @@ class SalesInvoiceController extends GetxController {
       cashingMethodsNamesList.add(priceList['title']);
       cashingMethodsIdsList.add('${priceList['id']}');
     }
-    for (var combo in p['combos']) {
-      combosMap["${combo['id']}"] = combo;
-      combosPricesCurrencies["${combo['id']}"] = combo['currency']['name'];
-      combosCodesList.add(combo['code'] ?? '');
-      combosNamesList.add(combo['name'] ?? '');
-      combosDescriptionList.add(combo['description'] ?? '');
-      combosPricesList.add('${combo['price']}');
-      combosIdsList.add('${combo['id']}');
-    }
-    for (int i = 0; i < combosCodesList.length; i++) {
-      combosForSplit.add(combosCodesList[i]);
-      combosForSplit.add(combosNamesList[i]);
-      combosForSplit.add(combosDescriptionList[i]);
-      combosForSplit.add(combosPricesList[i]);
-    }
-    combosMultiPartList = splitList(combosForSplit, 4);
+    // for (var combo in p['combos']) {
+    //   combosMap["${combo['id']}"] = combo;
+    //   combosPricesCurrencies["${combo['id']}"] = combo['currency']['name'];
+    //   combosCodesList.add(combo['code'] ?? '');
+    //   combosNamesList.add(combo['name'] ?? '');
+    //   combosDescriptionList.add(combo['description'] ?? '');
+    //   combosPricesList.add('${combo['price']}');
+    //   combosIdsList.add('${combo['id']}');
+    // }
+    // for (int i = 0; i < combosCodesList.length; i++) {
+    //   combosForSplit.add(combosCodesList[i]);
+    //   combosForSplit.add(combosNamesList[i]);
+    //   combosForSplit.add(combosDescriptionList[i]);
+    //   combosForSplit.add(combosPricesList[i]);
+    // }
+    // combosMultiPartList = splitList(combosForSplit, 4);
 
     isSalesInvoiceInfoFetched = true;
     update();
+    comboController.getCombosForQuotation();
     resetItemsAfterChangePriceList();
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
+  ComboController comboController = Get.find();
 
   resetItemsAfterChangePriceList() async {
     itemsCode = [];
@@ -1059,5 +1062,125 @@ class SalesInvoiceController extends GetxController {
         getTotalItems();
       }
     }
-  }
-}
+    var comboKeys =
+    combosPriceControllers
+        .keys
+        .toList();
+    for (
+    int i = 0;
+    i <
+        combosPriceControllers
+            .length;
+    i++
+    ) {
+      var selectedComboId =
+          '${rowsInListViewInSalesInvoice[comboKeys[i]]['combo']}';
+      if (selectedComboId != '') {
+        var ind = comboController
+            .combosIdsList
+            .indexOf(
+          selectedComboId,
+        );
+        if (comboController
+            .combosPricesCurrencies[selectedComboId] ==
+            selectedCurrencyName) {
+          combosPriceControllers[comboKeys[i]]!
+              .text = comboController
+              .combosPricesList[ind]
+              .toString();
+        } else if (selectedCurrencyName ==
+            'USD' &&
+            comboController.combosPricesCurrencies[selectedComboId] !=
+                selectedCurrencyName) {
+          var result = exchangeRatesController
+              .exchangeRatesList
+              .firstWhere(
+                (item) =>
+            item["currency"] ==
+                comboController
+                    .combosPricesCurrencies[selectedComboId],
+            orElse: () => null,
+          );
+          var divider = '1';
+          if (result != null) {
+            divider =
+                result["exchange_rate"]
+                    .toString();
+          }
+          combosPriceControllers[comboKeys[i]]!
+              .text =
+          '${double.parse('${(double.parse(
+              comboController.combosPricesList[ind].toString()) /
+              double.parse(divider))}')}';
+        } else if (selectedCurrencyName !=
+            'USD' &&
+            comboController.combosPricesCurrencies[selectedComboId] ==
+                'USD') {
+          combosPriceControllers[comboKeys[i]]!
+              .text =
+          '${double.parse('${(double.parse(
+              comboController.combosPricesList[ind].toString()) *
+              double.parse(exchangeRateForSelectedCurrency))}')}';
+        } else {
+          var result = exchangeRatesController
+              .exchangeRatesList
+              .firstWhere(
+                (item) =>
+            item["currency"] ==
+                comboController
+                    .combosPricesCurrencies[selectedComboId],
+            orElse: () => null,
+          );
+          var divider = '1';
+          if (result != null) {
+            divider =
+                result["exchange_rate"]
+                    .toString();
+          }
+          var usdPrice =
+              '${double.parse('${(double.parse(
+              comboController.combosPricesList[ind].toString()) /
+              double.parse(divider))}')}';
+          combosPriceControllers[comboKeys[i]]!
+              .text =
+          '${double.parse('${(double.parse(usdPrice) * double.parse(
+              comboController.exchangeRateForSelectedCurrency))}')}';
+        }
+        combosPriceControllers[comboKeys[i]]!
+            .text =
+        '${double.parse(combosPriceControllers[comboKeys[i]]!.text)}';
+
+        combosPriceControllers[comboKeys[i]]!
+            .text = double.parse(
+          combosPriceControllers[comboKeys[i]]!
+              .text,
+        ).toStringAsFixed(2);
+        var totalLine =
+            '${(int.parse(
+            rowsInListViewInSalesInvoice[comboKeys[i]]['item_quantity']) *
+            double.parse(combosPriceControllers[comboKeys[i]]!.text)) * (1 -
+            double.parse(
+                rowsInListViewInSalesInvoice[keys[i]]['item_discount']) /
+                100)}';
+        setEnteredQtyInSalesInvoice(
+          comboKeys[i],
+          rowsInListViewInSalesInvoice[comboKeys[i]]['item_quantity'],
+        );
+        setMainTotalInSalesInvoice(
+          comboKeys[i],
+          totalLine,
+        );
+        getTotalItems();
+
+        setEnteredUnitPriceInSalesInvoice(
+          comboKeys[i],
+          combosPriceControllers[comboKeys[i]]!
+              .text,
+        );
+        setMainTotalInSalesInvoice(
+          comboKeys[i],
+          totalLine,
+        );
+        getTotalItems();
+      }}
+}}

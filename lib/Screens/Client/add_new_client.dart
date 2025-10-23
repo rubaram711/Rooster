@@ -420,7 +420,7 @@ class _AddNewClientState extends State<AddNewClient> {
                                 validationFunc: (String value) {
                                   if (value.isNotEmpty &&
                                       !RegExp(
-                                        r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                        r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+\.[a-zA-Z]+",
                                       ).hasMatch(value)) {
                                     return 'check_format'.tr;
                                   }
@@ -531,7 +531,7 @@ class _AddNewClientState extends State<AddNewClient> {
                                 rowWidth: middleRowWidth,
                                 textFieldWidth: middleTextFieldWidth,
                                 validationFunc: (String value) {
-                                  // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                  // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+\.[a-zA-Z]+")
                                   //     .hasMatch(value)) {
                                   //   return 'check_format'.tr ;
                                   // }return null;
@@ -1397,7 +1397,7 @@ class _ReusableContactSectionState extends State<ReusableContactSection> {
                             validationFunc: (String value) {
                               if (value.isNotEmpty &&
                                   !RegExp(
-                                    r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                    r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+\.[a-zA-Z]+",
                                   ).hasMatch(value)) {
                                 return 'check_format'.tr;
                               }
@@ -2430,7 +2430,7 @@ class _MobileAddNewClientState extends State<MobileAddNewClient> {
                     validationFunc: (String value) {
                       if (value.isNotEmpty &&
                           !RegExp(
-                            r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                            r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+\.[a-zA-Z]+",
                           ).hasMatch(value)) {
                         return 'check_format'.tr;
                       }

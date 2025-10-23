@@ -2776,7 +2776,7 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           validationFunc: (String value) {
                             if (value.isNotEmpty &&
                                 !RegExp(
-                                  r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+                                  r"^[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+\.[a-zA-Z]+",
                                 ).hasMatch(value)) {
                               return 'check_format'.tr;
                             }
@@ -2888,7 +2888,7 @@ class _UpdateClientDialogState extends State<UpdateClientDialog> {
                           textFieldWidth:
                               MediaQuery.of(context).size.width * 0.2,
                           validationFunc: (String value) {
-                            // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                            // if(value.isNotEmpty && !RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9.a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]+\.[a-zA-Z]+")
                             //     .hasMatch(value)) {
                             //   return 'check_format'.tr ;
                             // }return null;

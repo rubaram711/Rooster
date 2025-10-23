@@ -1,6 +1,8 @@
+
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:get/get.dart';
 import '../Backend/GroupsBackend/get_groups.dart';
+import '../Backend/GroupsBackend/store_group.dart';
 import '../Models/Groups/groups_model.dart';
 import '../Screens/Configuration/categories_dialog.dart';
 
@@ -117,4 +119,83 @@ List<Group> roots=[];
   //   selectedSubGroups=newList;
   //   update();
   // }
+  RxList<Group> groups = <Group>[].obs;
+
+
+  void addGroup({Group? parent}) {
+    final newGroup = Group(
+      id: DateTime.now().millisecondsSinceEpoch,
+      code: '',
+      name: '',
+      children: [],
+    );
+
+    if (parent == null) {
+      groups.add(newGroup);
+    } else {
+      parent.children!.add(newGroup);
+      groups.refresh();
+    }
+  }
+
+  void deleteGroup(Group target, [List<Group>? list]) {
+    final currentList = list ?? groups;
+    currentList.removeWhere((g) {
+      if (g.id == target.id) return true;
+      if (g.children!.isNotEmpty) deleteGroup(target, g.children);
+      return false;
+    });
+    groups.refresh();
+  }
+
+  void updateField(Group group, {String? name, String? code}) {
+    if (name != null) group.name = name;
+    if (code != null) group.code = code;
+    // groups.refresh();
+  }
+
+  // --- Send all groups (with children) to backend
+  // Future sendToBackend() async {
+  //   final data = groups.map((e) => e.toJson()).toList();
+  //   print(data); // Here you can call Dio POST request
+  //   // await dio.post(kItemGroupsUrl, data: {'groups': data});
+  //   final uri = Uri.parse(kStoreGroupUrl);
+  //   String token = await getAccessTokenFromPref();
+  //   var response = await dio.post(uri, headers: {
+  //     "Accept": "application/json",
+  //     "Authorization": "Bearer $token"
+  //   }, body: {'groups': data});
+  //
+  //   var p = json.decode(response.body);
+  //   return p;
+  // }
+  Map<String, dynamic> flattenGroups(List<Group> groups, [String prefix = 'groups']) {
+    final Map<String, dynamic> result = {};
+    for (int i = 0; i < groups.length; i++) {
+      final group = groups[i];
+      final currentPrefix = '$prefix[$i]';
+
+      if (group.name != null) result['$currentPrefix[name]'] = group.name!;
+      if (group.code != null) result['$currentPrefix[code]'] = group.code!;
+
+      if (group.children != null && group.children!.isNotEmpty) {
+        result.addAll(flattenGroups(group.children!, '$currentPrefix[children]'));
+      }
+    }
+    return result;
+  }
+
+  Future sendToBackend() async {
+
+    try {
+      final data = flattenGroups(groups);
+      var res=await storeGroup(data);
+      return res;
+    } catch (e) {
+      // print(" Error sending groups: $e");
+      // print(s);
+      rethrow;
+    }
+  }
+
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
@@ -701,6 +702,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
+  ComboController comboController = Get.find();
 
   @override
   void initState() {
@@ -1216,10 +1218,10 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                 // cont
                                 //     .combosMap[item['combo_id']
                                 //     .toString()];
-                                var ind = cont.combosIdsList.indexOf(
+                                var ind = comboController.combosIdsList.indexOf(
                                   item['combo_id'].toString(),
                                 );
-                                var itemName = cont.combosNamesList[ind];
+                                var itemName = comboController.combosNamesList[ind];
                                 var itemPrice = double.parse(
                                   '${item['combo_price'] ?? 0.0}',
                                 );
@@ -1229,7 +1231,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   '${item['combo_total']}',
                                 );
                                 var combosmap =
-                                    cont.combosMap[item['combo_id'].toString()];
+                                comboController.combosMap[item['combo_id'].toString()];
                                 var comboImage =
                                     '${combosmap['image']}' != '' &&
                                             combosmap['image'] != null &&

@@ -192,7 +192,6 @@ if('${widget.info['image']}'!='https://theravenstyle.com/rooster-backend/public/
     setState(() {
       isLoading = true;
     });
-    print('objecthhhhhhhhhhhhh ${widget.info['image']}');
     if (widget.info['image'].isNotEmpty ) {
       try {
         // final response = await http.get(Uri.parse(widget.info['image']));

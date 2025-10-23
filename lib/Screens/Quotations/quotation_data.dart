@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/quotation_controller.dart';
 import 'package:rooster_app/Screens/Quotations/print_quotation.dart';
 import 'package:rooster_app/Widgets/dialog_drop_menu.dart';
@@ -67,6 +68,7 @@ class _QuotationDataState extends State<QuotationData> {
   bool isActiveVatChecked = false;
   bool isActiveDeliveredChecked = false;
   final QuotationController quotationController = Get.find();
+  final ComboController comboController = Get.find();
   final HomeController homeController = Get.find();
   String selectedCurrencyId = '';
 
@@ -208,10 +210,10 @@ class _QuotationDataState extends State<QuotationData> {
                                 // quotationController
                                 //     .combosMap[item['combo_id']
                                 //     .toString()];
-                                var ind = quotationController.combosIdsList
+                                var ind = comboController.combosIdsList
                                     .indexOf(item['combo_id'].toString());
                                 var itemName =
-                                    quotationController.combosNamesList[ind];
+                                comboController.combosNamesList[ind];
                                 var itemPrice = double.parse(
                                   '${item['combo_price'] ?? 0.0}',
                                 );

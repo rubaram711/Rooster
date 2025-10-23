@@ -418,6 +418,7 @@ class ComboController extends ComboControllerAbstract {
       CommonWidgets.snackBar('Success', res['message']);
       resultStorInDB = 'Success';
       getAllCombosFromBackWithSeach('');
+      getCombosForQuotation();
       if (isCombosPageIsLastPage) {
         homeController.selectedTab.value = 'combo_summary';
       } else {
@@ -505,5 +506,46 @@ class ComboController extends ComboControllerAbstract {
     } else {
       CommonWidgets.snackBar('error', p['message']);
     }
+  }
+
+  List<String> combosCodesList = [];
+  List<String> combosNamesList = [];
+  List<String> combosDescriptionList = [];
+  List<String> combosPricesList = [];
+  List<String> combosIdsList = [];
+  List<List<String>> combosMultiPartList = [];
+  List<String> combosForSplit = [];
+  Map combosPricesCurrencies = {};
+  Map combosMap = {};
+  getCombosForQuotation() async{
+    combosPricesCurrencies = {};
+    combosPricesList = [];
+    combosNamesList = [];
+    combosIdsList = [];
+    combosCodesList = [];
+    combosDescriptionList = [];
+    combosMultiPartList = [];
+    combosForSplit = [];
+    var p = await getAllCombosWithSearch('');
+    print('p is $p');
+    if ('$p' != '[]') {
+    for (var combo in p) {
+      combosMap["${combo['id']}"] = combo;
+      combosPricesCurrencies["${combo['id']}"] = combo['currency']['name'];
+      combosCodesList.add(combo['code'] ?? '');
+      combosNamesList.add(combo['name'] ?? '');
+      combosDescriptionList.add(combo['description'] ?? '');
+      combosPricesList.add('${combo['price']}');
+      combosIdsList.add('${combo['id']}');
+    }
+    for (int i = 0; i < combosCodesList.length; i++) {
+      combosForSplit.add(combosCodesList[i]);
+      combosForSplit.add(combosNamesList[i]);
+      combosForSplit.add(combosDescriptionList[i]);
+      combosForSplit.add(combosPricesList[i]);
+    }
+    combosMultiPartList = splitList(combosForSplit, 4);
+  }
+    update();
   }
 }

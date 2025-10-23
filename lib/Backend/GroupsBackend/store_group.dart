@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -25,3 +26,19 @@ Future oldStoreGroup(
 }
 
 
+Future storeGroup(data)async{
+  final dio = Dio();
+  String token = await getAccessTokenFromPref();
+  final response = await dio.post(
+    kStoreGroupUrl,
+    options: Options(
+      headers: {
+        "Accept": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    ),
+    data: FormData.fromMap(data),
+  );
+
+  return response.data;
+}

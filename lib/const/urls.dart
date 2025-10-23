@@ -147,5 +147,6 @@ const kUpdateCarModelsUrl = '$baseUrl/car-models/update';
 const kCarTechniciansTermsUrl = '$baseUrl/car-techs';
 const kUpdateCarTechniciansUrl = '$baseUrl/car-techs/update';
 const kGetAllCarsAttributesUrl = '$baseUrl/cars/create';
+const kItemGroupsUrl = '$baseUrl/itemGroups/';
 
 

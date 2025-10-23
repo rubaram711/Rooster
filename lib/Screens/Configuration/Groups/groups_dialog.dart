@@ -4,19 +4,20 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Backend/GroupsBackend/store_group.dart';
 import 'package:rooster_app/Backend/GroupsBackend/update_group.dart';
 import 'package:rooster_app/Widgets/reusable_btn.dart';
-import '../../../const/Sizes.dart';
-import '../../../const/colors.dart';
-import '../../Backend/GroupsBackend/delete_group.dart';
-import '../../Controllers/groups_controller.dart';
-import '../../Controllers/home_controller.dart';
-import '../../Models/Groups/groups_model.dart';
-import '../../Widgets/custom_snak_bar.dart';
-import '../../Widgets/dialog_title.dart';
-import '../../Widgets/reusable_text_field.dart';
+import '../../../../const/Sizes.dart';
+import '../../../../const/colors.dart';
+import '../../../Backend/GroupsBackend/delete_group.dart';
+import '../../../Controllers/groups_controller.dart';
+import '../../../Controllers/home_controller.dart';
+import '../../../Models/Groups/groups_model.dart';
+import '../../../Widgets/custom_snak_bar.dart';
+import '../../../Widgets/dialog_title.dart';
+import '../../../Widgets/reusable_text_field.dart';
+import 'create_group.dart';
 
 List tabsList = ['groups', 'create_group'];
 
-List tabsContent = [const GroupsView(), const CreateGroupTab()];
+List tabsContent = [const GroupsView(),  GroupFormView()];
 
 class GroupsDialogContent extends StatefulWidget {
   const GroupsDialogContent({super.key});
@@ -105,6 +106,7 @@ class _GroupsDialogContentState extends State<GroupsDialogContent> {
         return GestureDetector(
           onTap: () {
             setState(() {
+              cont.groups.value=[];
               cont.setSelectedTabIndex(index);
             });
           },

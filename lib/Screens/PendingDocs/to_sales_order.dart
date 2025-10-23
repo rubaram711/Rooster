@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:rooster_app/Backend/Quotations/update_quotation.dart';
+import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
 import 'package:rooster_app/Controllers/pending_docs_review_controller.dart';
@@ -708,6 +709,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
+  ComboController comboController = Get.find();
   String cashMethodId = '';
   String clientId = '';
   String pricelistId = '';
@@ -1304,10 +1306,10 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                               } else if ('${item['line_type_id']}' == '3') {
                                 var qty = item['combo_quantity'];
 
-                                var ind = cont.combosIdsList.indexOf(
+                                var ind = comboController.combosIdsList.indexOf(
                                   item['combo_id'].toString(),
                                 );
-                                var itemName = cont.combosNamesList[ind];
+                                var itemName = comboController.combosNamesList[ind];
                                 var itemPrice = double.parse(
                                   '${item['combo_price'] ?? 0.0}',
                                 );
@@ -1317,7 +1319,7 @@ class _QuotationAsRowInTableState extends State<QuotationAsRowInTable> {
                                   '${item['combo_total']}',
                                 );
                                 var combosmap =
-                                    cont.combosMap[item['combo_id'].toString()];
+                                comboController.combosMap[item['combo_id'].toString()];
                                 var comboImage =
                                     '${combosmap['image']}' != '' &&
                                             combosmap['image'] != null &&

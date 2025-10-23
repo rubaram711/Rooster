@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:rooster_app/Backend/Quotations/get_quotation_create_info.dart';
 import 'package:rooster_app/Backend/Quotations/get_quotations.dart';
 import 'package:rooster_app/Backend/get_currencies.dart';
+import 'package:rooster_app/Controllers/combo_controller.dart';
 
 import '../Backend/PriceListBackend/get_prices_list_items.dart';
 
@@ -276,26 +277,18 @@ class QuotationController extends GetxController {
   Map itemUnitPrice = {};
   Map itemsVats = {};
   Map itemsPricesCurrencies = {};
-  List<String> combosCodesList = [];
-  List<String> combosNamesList = [];
-  List<String> combosDescriptionList = [];
-  List<String> combosPricesList = [];
-  List<String> combosIdsList = [];
-  List<List<String>> combosMultiPartList = [];
-  List<String> combosForSplit = [];
-  Map combosPricesCurrencies = {};
-  Map combosMap = {};
+
   Map<String, List<String>> allCodesForItem = {};
   List<String> allCodesForAllItems = [];
   getFieldsForCreateQuotationFromBack() async {
-    combosPricesCurrencies = {};
-    combosPricesList = [];
-    combosNamesList = [];
-    combosIdsList = [];
-    combosCodesList = [];
-    combosDescriptionList = [];
-    combosMultiPartList = [];
-    combosForSplit = [];
+    // combosPricesCurrencies = {};
+    // combosPricesList = [];
+    // combosNamesList = [];
+    // combosIdsList = [];
+    // combosCodesList = [];
+    // combosDescriptionList = [];
+    // combosMultiPartList = [];
+    // combosForSplit = [];
     cashingMethodsNamesList = [];
     headersList = [];
     cashingMethodsIdsList = [];
@@ -422,27 +415,28 @@ class QuotationController extends GetxController {
       setQuotationCurrency(headersList[0]);
     }
 
-    for (var combo in p['combos']) {
-      combosMap["${combo['id']}"] = combo;
-      combosPricesCurrencies["${combo['id']}"] = combo['currency']['name'];
-      combosCodesList.add(combo['code'] ?? '');
-      combosNamesList.add(combo['name'] ?? '');
-      combosDescriptionList.add(combo['description'] ?? '');
-      combosPricesList.add('${combo['price']}');
-      combosIdsList.add('${combo['id']}');
-    }
-    for (int i = 0; i < combosCodesList.length; i++) {
-      combosForSplit.add(combosCodesList[i]);
-      combosForSplit.add(combosNamesList[i]);
-      combosForSplit.add(combosDescriptionList[i]);
-      combosForSplit.add(combosPricesList[i]);
-    }
-    combosMultiPartList = splitList(combosForSplit, 4);
+    // for (var combo in p['combos']) {
+    //   combosMap["${combo['id']}"] = combo;
+    //   combosPricesCurrencies["${combo['id']}"] = combo['currency']['name'];
+    //   combosCodesList.add(combo['code'] ?? '');
+    //   combosNamesList.add(combo['name'] ?? '');
+    //   combosDescriptionList.add(combo['description'] ?? '');
+    //   combosPricesList.add('${combo['price']}');
+    //   combosIdsList.add('${combo['id']}');
+    // }
+    // for (int i = 0; i < combosCodesList.length; i++) {
+    //   combosForSplit.add(combosCodesList[i]);
+    //   combosForSplit.add(combosNamesList[i]);
+    //   combosForSplit.add(combosDescriptionList[i]);
+    //   combosForSplit.add(combosPricesList[i]);
+    // }
+    // combosMultiPartList = splitList(combosForSplit, 4);
 
     isQuotationsInfoFetched = true;
     update();
     //todo i add this instead
     resetItemsAfterChangePriceList();
+    comboController.getCombosForQuotation();
   }
 
   ExchangeRatesController exchangeRatesController = Get.find();
@@ -1034,6 +1028,7 @@ class QuotationController extends GetxController {
     update();
   }
 
+  ComboController comboController=Get.find();
   setPriceAsCurrency(String val) {
     var keys = unitPriceControllers.keys.toList();
     for (int i = 0; i < unitPriceControllers.length; i++) {
@@ -1119,15 +1114,15 @@ class QuotationController extends GetxController {
       var selectedComboId =
           '${rowsInListViewInQuotation[comboKeys[i]]['combo']}';
       if (selectedComboId != '') {
-        var ind = combosIdsList.indexOf(selectedComboId);
-        if (combosPricesCurrencies[selectedComboId] == selectedCurrencyName) {
+        var ind = comboController.combosIdsList.indexOf(selectedComboId);
+        if (comboController.combosPricesCurrencies[selectedComboId] == selectedCurrencyName) {
           combosPriceControllers[comboKeys[i]]!.text =
-              combosPricesList[ind].toString();
+              comboController.combosPricesList[ind].toString();
         } else if (selectedCurrencyName == 'USD' &&
-            combosPricesCurrencies[selectedComboId] != selectedCurrencyName) {
+            comboController.combosPricesCurrencies[selectedComboId] != selectedCurrencyName) {
           var matchedItems = exchangeRatesController.exchangeRatesList.where(
             (item) =>
-                item["currency"] == combosPricesCurrencies[selectedComboId],
+                item["currency"] == comboController.combosPricesCurrencies[selectedComboId],
           );
 
           var result =
@@ -1146,15 +1141,15 @@ class QuotationController extends GetxController {
             divider = result["exchange_rate"].toString();
           }
           combosPriceControllers[comboKeys[i]]!.text =
-              '${double.parse('${(double.parse(combosPricesList[ind].toString()) / double.parse(divider))}')}';
+              '${double.parse('${(double.parse(comboController.combosPricesList[ind].toString()) / double.parse(divider))}')}';
         } else if (selectedCurrencyName != 'USD' &&
-            combosPricesCurrencies[selectedComboId] == 'USD') {
+            comboController.combosPricesCurrencies[selectedComboId] == 'USD') {
           combosPriceControllers[comboKeys[i]]!.text =
-              '${double.parse('${(double.parse(combosPricesList[ind].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
+              '${double.parse('${(double.parse(comboController.combosPricesList[ind].toString()) * double.parse(exchangeRateForSelectedCurrency))}')}';
         } else {
           var matchedItems = exchangeRatesController.exchangeRatesList.where(
             (item) =>
-                item["currency"] == combosPricesCurrencies[selectedComboId],
+                item["currency"] == comboController.combosPricesCurrencies[selectedComboId],
           );
 
           var result =
@@ -1173,7 +1168,7 @@ class QuotationController extends GetxController {
             divider = result["exchange_rate"].toString();
           }
           var usdPrice =
-              '${double.parse('${(double.parse(combosPricesList[ind].toString()) / double.parse(divider))}')}';
+              '${double.parse('${(double.parse(comboController.combosPricesList[ind].toString()) / double.parse(divider))}')}';
           combosPriceControllers[comboKeys[i]]!.text =
               '${double.parse('${(double.parse(usdPrice) * double.parse(exchangeRateForSelectedCurrency))}')}';
         }

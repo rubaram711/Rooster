@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:rooster_app/Backend/Quotations/update_quotation.dart';
 import 'package:rooster_app/Backend/SalesInvoiceBackend/update_sales_invoice.dart';
 import 'package:rooster_app/Backend/SalesOrderBackend/update_sales_order.dart';
+import 'package:rooster_app/Controllers/combo_controller.dart';
 import 'package:rooster_app/Controllers/exchange_rates_controller.dart';
 import 'package:rooster_app/Controllers/home_controller.dart';
 import 'package:rooster_app/Controllers/pending_docs_review_controller.dart';
@@ -483,6 +484,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
   final SalesOrderController salesOrderController = Get.find();
   final SalesInvoiceController salesInvoiceController = Get.find();
   final PendingDocsReviewController pendingDocsController = Get.find();
+  final ComboController comboController = Get.find();
   String diss = '0';
   double totalBeforeVatvValue = 0.0;
   double globalDiscountValue = 0.0;
@@ -1081,10 +1083,10 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   } else if ('${item['line_type_id']}' == '3') {
                                     var qty = item['combo_quantity'];
 
-                                    var ind = cont.combosIdsList.indexOf(
+                                    var ind = comboController.combosIdsList.indexOf(
                                       item['combo_id'].toString(),
                                     );
-                                    var itemName = cont.combosNamesList[ind];
+                                    var itemName = comboController.combosNamesList[ind];
                                     var itemPrice = double.parse(
                                       '${item['combo_price'] ?? 0.0}',
                                     );
@@ -1094,17 +1096,17 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                     var itemTotal = double.parse(
                                       '${item['combo_total']}',
                                     );
-                                    var combosmap =
-                                        cont.combosMap[item['combo_id']
+                                    var combosMap =
+                                    comboController.combosMap[item['combo_id']
                                             .toString()];
                                     var comboImage =
-                                        '${combosmap['image']}' != '' &&
-                                                combosmap['image'] != null &&
-                                                combosmap['image'].isNotEmpty
-                                            ? '${combosmap['image']}'
+                                        '${combosMap['image']}' != '' &&
+                                                combosMap['image'] != null &&
+                                                combosMap['image'].isNotEmpty
+                                            ? '${combosMap['image']}'
                                             : '';
 
-                                    var combobrand = combosmap['brand'] ?? '';
+                                    var comboBrand = combosMap['brand'] ?? '';
                                     totalAllItems += itemTotal;
                                     var quotationItemInfo = {
                                       'line_type_id': '3',
@@ -1123,7 +1125,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_image': '',
                                       'item_brand': '',
                                       'combo_image': comboImage,
-                                      'combo_brand': combobrand,
+                                      'combo_brand': comboBrand,
                                       'isImageList': false,
                                       'title': '',
                                       'image': '',
@@ -3163,17 +3165,17 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                     };
                                     itemsInfoPrint.add(salesOrderItemInfo);
                                   } else if ('${item['line_type_id']}' == '3') {
-                                    var combosmap =
+                                    var combosMap =
                                         cont.combosMap[item['combo_id']
                                             .toString()];
                                     var comboImage =
-                                        '${combosmap['image']}' != '' &&
-                                                combosmap['image'] != null &&
-                                                combosmap['image'].isNotEmpty
-                                            ? '${combosmap['image']}'
+                                        '${combosMap['image']}' != '' &&
+                                                combosMap['image'] != null &&
+                                                combosMap['image'].isNotEmpty
+                                            ? '${combosMap['image']}'
                                             : '';
 
-                                    var combobrand = combosmap['brand'] ?? '';
+                                    var combobrand = combosMap['brand'] ?? '';
                                     var qty = item['combo_quantity'];
 
                                     var ind = cont.combosIdsList.indexOf(
@@ -4648,10 +4650,10 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                   } else if ('${item['line_type_id']}' == '3') {
                                     var qty = item['combo_quantity'];
 
-                                    var ind = cont.combosIdsList.indexOf(
+                                    var ind = comboController.combosIdsList.indexOf(
                                       item['combo_id'].toString(),
                                     );
-                                    var itemName = cont.combosNamesList[ind];
+                                    var itemName = comboController.combosNamesList[ind];
                                     var itemPrice = double.parse(
                                       '${item['combo_unit_price'] ?? 0.0}',
                                     );
@@ -4661,17 +4663,17 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                     var itemTotal = double.parse(
                                       '${item['combo_total']}',
                                     );
-                                    var combosmap =
-                                        cont.combosMap[item['combo_id']
+                                    var combosMap =
+                                    comboController.combosMap[item['combo_id']
                                             .toString()];
                                     var comboImage =
-                                        '${combosmap['image']}' != '' &&
-                                                combosmap['image'] != null &&
-                                                combosmap['image'].isNotEmpty
-                                            ? '${combosmap['image']}'
+                                        '${combosMap['image']}' != '' &&
+                                                combosMap['image'] != null &&
+                                                combosMap['image'].isNotEmpty
+                                            ? '${combosMap['image']}'
                                             : '';
 
-                                    var combobrand = combosmap['brand'] ?? '';
+                                    var comboBrand = combosMap['brand'] ?? '';
                                     totalAllItems += itemTotal;
                                     var quotationItemInfo = {
                                       'line_type_id': '3',
@@ -4690,7 +4692,7 @@ class _PendingAsRowInTableState extends State<PendingAsRowInTable> {
                                       'item_image': '',
                                       'item_brand': '',
                                       'combo_image': comboImage,
-                                      'combo_brand': combobrand,
+                                      'combo_brand': comboBrand,
                                       'isImageList': false,
                                       'title': '',
                                       'image': '',

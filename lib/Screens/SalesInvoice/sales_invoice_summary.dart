@@ -9,6 +9,7 @@ import 'package:rooster_app/Controllers/pending_docs_review_controller.dart';
 import 'package:rooster_app/Controllers/sales_invoice_controller.dart';
 import 'package:rooster_app/Controllers/task_controller.dart';
 import 'package:rooster_app/Screens/SalesInvoice/print_sales_invoice.dart';
+import '../../Controllers/combo_controller.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Locale_Memory/save_user_info_locally.dart';
 import '../../Widgets/custom_snak_bar.dart';
@@ -543,6 +544,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
   bool isNewSalesOrder = true;
 
   ExchangeRatesController exchangeRatesController = Get.find();
+  ComboController comboController = Get.find();
 
   String cashMethodId = '';
   String clientId = '';
@@ -796,10 +798,10 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                               } else if ('${item['line_type_id']}' == '3') {
                                 var qty = item['combo_quantity'];
 
-                                var ind = cont.combosIdsList.indexOf(
+                                var ind = comboController.combosIdsList.indexOf(
                                   item['combo_id'].toString(),
                                 );
-                                var itemName = cont.combosNamesList[ind];
+                                var itemName = comboController.combosNamesList[ind];
                                 var itemPrice = double.parse(
                                   '${item['combo_unit_price'] ?? 0.0}',
                                 );
@@ -808,16 +810,16 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                 var itemTotal = double.parse(
                                   '${item['combo_total']}',
                                 );
-                                var combosmap =
-                                    cont.combosMap[item['combo_id'].toString()];
+                                var combosMap =
+                                comboController.combosMap[item['combo_id'].toString()];
                                 var comboImage =
-                                    '${combosmap['image']}' != '' &&
-                                            combosmap['image'] != null &&
-                                            combosmap['image'].isNotEmpty
-                                        ? '${combosmap['image']}'
+                                    '${combosMap['image']}' != '' &&
+                                            combosMap['image'] != null &&
+                                            combosMap['image'].isNotEmpty
+                                        ? '${combosMap['image']}'
                                         : '';
 
-                                var combobrand = combosmap['brand'] ?? '';
+                                var comboBrand = combosMap['brand'] ?? '';
                                 totalAllItems += itemTotal;
                                 var quotationItemInfo = {
                                   'line_type_id': '3',
@@ -836,7 +838,7 @@ class _SalesInvoiceAsRowInTableState extends State<SalesInvoiceAsRowInTable> {
                                   'item_image': '',
                                   'item_brand': '',
                                   'combo_image': comboImage,
-                                  'combo_brand': combobrand,
+                                  'combo_brand': comboBrand,
                                   'isImageList': false,
                                   'title': '',
                                   'image': '',

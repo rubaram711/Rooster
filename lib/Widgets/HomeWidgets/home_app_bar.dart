@@ -43,7 +43,7 @@ import '../../Screens/Configuration/cashing_method.dart';
 import '../../Screens/Configuration/categories_dialog.dart';
 import '../../Screens/Configuration/delivery_terms.dart';
 import '../../Screens/Configuration/discounts_dialog.dart';
-import '../../Screens/Configuration/groups_dialog.dart';
+import '../../Screens/Configuration/Groups/groups_dialog.dart';
 import '../../Screens/Configuration/payment_terms.dart';
 import '../../Screens/Configuration/price_lists_dialog.dart';
 import '../../Screens/Configuration/salesmen_dialog.dart';
